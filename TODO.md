@@ -1,7 +1,7 @@
 # TODO - /doh System Evolution
 
 **Last Updated**: 2025-08-27  
-**Next TODO ID**: T042
+**Next TODO ID**: T044
 
 ---
 
@@ -13,7 +13,8 @@
 - `#build` - Build system and architecture (T032, T022, T003)
 - `#testing` - Testing and quality assurance (T024, T019, T027)
 - `#features` - Core functionality and features (T020, T021, T017)
-- `#think` - Brainstorming and analysis tasks (T034)
+- `#think` - Brainstorming and analysis tasks (T034, T042)
+- `#security` - Security analysis and defensive measures (T042)
 
 ---
 
@@ -21,11 +22,13 @@
 
 **Order**: Top-down (most recently active first)
 
+- **T043** DOH Security Epic Planning & Implementation Roadmap (#security, #think)
+- **T042** DOH Security Analysis & Threat Modeling (#security, #think)
 - **T041** Remove Claude Code attribution comments from codebase - COMPLETED
 - **T040** Create /doh-sys:changelog command and factorize shared components - COMPLETED
 - **T039** Create /doh-sys:lint command with intelligent auto-fix capabilities - COMPLETED
 - **T038** Create DOH Pipeline Command for automated TODO/CHANGELOG/Version/Lint/Commit workflow - COMPLETED
-- **T037** Clean up old project references (MrTroove, mkplan) across documentation
+- **T037** Clean up old project references (MrTroove, mkplan) across documentation - COMPLETED
 - **T035** Documentation Navigation & Content Organization (T034 Phase 2) - COMPLETED
 - **T034** Documentation Health Check & Content Review - COMPLETED
 - **T032** Design DOH Runtime Build Process (active)
@@ -1527,6 +1530,260 @@ make DOH documentation excellent rather than just functional.
 - Documentation feels comprehensive and professional
 
 **Target Version**: 1.5.0 (enhancement phase after core 1.4.0 stabilizes)
+
+---
+
+### T042 - DOH Security Analysis & Threat Modeling 🔒
+
+**Status**: PROPOSED  
+**Priority**: High - Foundation for secure distribution  
+**Dependencies**: None (pure analysis/brainstorming task)  
+**Proposed Version**: 1.4.0 **Tags**: `#security` `#think` **Analysis**: Will create
+`analysis/T042-security-threat-model.md`
+
+Conduct comprehensive security analysis and threat modeling for the DOH system to identify vulnerabilities, attack
+vectors, and defensive measures before 1.4.0 release and distribution.
+
+**Impact**: DOH system handles sensitive development workflows (git operations, file system access, command execution,
+project data). A security analysis is critical before distribution to identify and mitigate potential risks, ensure
+secure defaults, and establish security best practices.
+
+**Threat Surface Analysis**:
+
+**File System Operations**:
+
+- DOH reads/writes `.doh/` directories with project data
+- Template deployment via `/doh:init` creates files in project directories
+- Bash scripts access file system with user permissions
+- Path traversal risks in file operations
+- Symlink attacks on `.doh/` directory access
+
+**Command Execution**:
+
+- Bash scripts execute with user privileges
+- Git operations (commit, rebase, push) with user credentials
+- Shell command injection risks in user inputs
+- Environment variable access and manipulation
+- Process execution and subprocess spawning
+
+**Data Handling**:
+
+- Project metadata storage in `.doh/project-index.json`
+- Task/Epic content with potentially sensitive information
+- Memory files storing project context and history
+- Git history access and manipulation
+- Configuration data processing
+
+**Network Operations**:
+
+- GitHub/GitLab API access with user tokens
+- Repository synchronization with remote systems
+- Webhook endpoints and external integrations
+- Man-in-the-middle attack vectors
+- API credential exposure risks
+
+**AI Integration**:
+
+- Claude API communication with project data
+- Prompt injection through user inputs
+- Data leakage through AI model interactions
+- Context contamination between projects
+- Sensitive information in AI requests
+
+**Tasks**:
+
+#### Phase 1: Threat Identification (2-3h)
+
+- [ ] **Attack Surface Mapping**: Catalog all DOH system entry points, data flows, and trust boundaries
+- [ ] **Threat Actor Analysis**: Identify potential attackers (malicious users, compromised systems, insider threats)
+- [ ] **Attack Vector Enumeration**: Document specific attack methods for each system component
+- [ ] **Asset Classification**: Identify sensitive data and critical system components requiring protection
+- [ ] **Trust Boundary Analysis**: Map data flows between trusted/untrusted contexts
+
+#### Phase 2: Vulnerability Assessment (2-3h)
+
+- [ ] **Code Security Review**: Analyze bash scripts for injection vulnerabilities, path traversal, privilege escalation
+- [ ] **Input Validation Analysis**: Examine all user input processing points for sanitization gaps
+- [ ] **File System Security**: Review file permissions, directory creation, symlink handling
+- [ ] **Credential Handling**: Analyze token storage, API key management, git credential access
+- [ ] **Configuration Security**: Review default configurations for security misconfigurations
+
+#### Phase 3: Risk Analysis & Prioritization (1-2h)
+
+- [ ] **Impact Assessment**: Evaluate potential damage from successful attacks
+- [ ] **Likelihood Analysis**: Assess probability of various attack scenarios
+- [ ] **Risk Matrix Creation**: Prioritize security issues by impact × likelihood
+- [ ] **Exploitability Analysis**: Evaluate ease of exploiting identified vulnerabilities
+- [ ] **Business Impact Evaluation**: Assess risks to user projects and organizational security
+
+#### Phase 4: Mitigation Strategy Design (2-3h)
+
+- [ ] **Defense in Depth Strategy**: Design layered security controls
+- [ ] **Secure Defaults**: Establish secure default configurations and behaviors
+- [ ] **Input Sanitization**: Design comprehensive input validation and sanitization
+- [ ] **Privilege Minimization**: Implement least-privilege principles
+- [ ] **Monitoring & Detection**: Design security monitoring and anomaly detection
+- [ ] **Incident Response**: Plan security incident response procedures
+
+#### Phase 5: Security Architecture Recommendations (1-2h)
+
+- [ ] **Security Controls Implementation**: Recommend specific security measures for each component
+- [ ] **Security Testing Strategy**: Design security testing approach (static analysis, penetration testing)
+- [ ] **Security Documentation**: Create security guidelines for users and developers
+- [ ] **Compliance Considerations**: Address regulatory and organizational security requirements
+- [ ] **Security Metrics**: Define security KPIs and monitoring metrics
+
+**Brainstorming Areas**:
+
+**Defensive Security Focus**:
+
+- Input validation and sanitization strategies
+- File system access controls and sandboxing
+- Secure credential storage and handling
+- API security and rate limiting
+- Audit logging and monitoring
+- Security configuration management
+- Error handling without information disclosure
+
+**Secure Development Practices**:
+
+- Security code review guidelines
+- Secure coding standards for bash scripts
+- Security testing integration (SAST/DAST)
+- Dependency security scanning
+- Security-focused documentation
+- Developer security training recommendations
+
+**Deployment Security**:
+
+- Secure distribution mechanisms
+- Package integrity verification
+- Installation security checks
+- Update mechanism security
+- Configuration security validation
+- User permission requirements
+
+**Operational Security**:
+
+- Runtime security monitoring
+- Anomaly detection for unusual behavior
+- Security incident response procedures
+- User security guidelines
+- Security maintenance procedures
+- Backup and recovery security
+
+**Success Criteria**:
+
+- Comprehensive threat model document created
+- All major attack vectors identified and analyzed
+- Risk-prioritized mitigation recommendations
+- Security implementation roadmap for development
+- Security testing strategy defined
+- User security guidelines established
+
+**Deliverable**: Complete security analysis document (`analysis/T042-security-threat-model.md`) with actionable security
+recommendations, threat model, risk assessment, and implementation roadmap for secure DOH system deployment.
+
+---
+
+### T043 - DOH Security Epic Planning & Implementation Roadmap 🔒
+
+**Status**: PROPOSED  
+**Priority**: High - Follow-up to T042 security analysis  
+**Dependencies**: T042 (security threat model complete)  
+**Epic**: Security & Hardening  
+**Proposed Version**: 1.4.1 **Tags**: `#security` `#think` **Analysis**: Will create
+`analysis/T043-security-epic-plan.md`
+
+Transform T042 security analysis into comprehensive epic planning with actionable implementation roadmap for DOH system
+security hardening and defensive measures implementation.
+
+**Impact**: T042 provides threat analysis and security recommendations. T043 converts this analysis into structured epic
+planning with prioritized implementation phases, specific tasks, and measurable security objectives for systematic
+security enhancement.
+
+**Epic Scope**: Create comprehensive security hardening epic encompassing:
+
+**Security Infrastructure Epic**:
+
+- Input validation and sanitization framework
+- Secure file system access controls
+- Credential management and storage security
+- API security and rate limiting implementation
+- Audit logging and security monitoring
+- Configuration security management
+
+**Security Integration Epic**:
+
+- Security testing framework (SAST/DAST integration)
+- Dependency security scanning automation
+- Security-focused pre-commit hooks
+- Developer security tooling
+- Security documentation and guidelines
+- Security training and awareness
+
+**Operational Security Epic**:
+
+- Runtime security monitoring and alerting
+- Anomaly detection and threat response
+- Security incident response procedures
+- Security maintenance and update procedures
+- Backup and recovery security measures
+- User security guidelines and best practices
+
+**Tasks**:
+
+#### Phase 1: Epic Architecture Design (2h)
+
+- [ ] **Analyze T042 Findings**: Extract actionable recommendations from threat model analysis
+- [ ] **Epic Decomposition**: Break down security work into logical epics with clear boundaries
+- [ ] **Dependency Mapping**: Identify dependencies between security implementation phases
+- [ ] **Priority Framework**: Establish risk-based prioritization for security improvements
+- [ ] **Resource Planning**: Estimate effort and timeline for security implementations
+
+#### Phase 2: Task Breakdown Structure (2-3h)
+
+- [ ] **Security Infrastructure Tasks**: Define specific tasks for core security controls
+- [ ] **Security Integration Tasks**: Plan security tooling and automation tasks
+- [ ] **Operational Security Tasks**: Design security monitoring and response tasks
+- [ ] **Testing & Validation Tasks**: Plan security testing and validation approach
+- [ ] **Documentation Tasks**: Outline security documentation requirements
+
+#### Phase 3: Implementation Planning (1-2h)
+
+- [ ] **Phase Sequencing**: Order security implementation phases for maximum impact
+- [ ] **Milestone Definition**: Define measurable security milestones and success criteria
+- [ ] **Risk Mitigation Timeline**: Plan timeline for addressing highest-risk vulnerabilities first
+- [ ] **Integration Strategy**: Plan integration with existing DOH development workflow
+- [ ] **Success Metrics**: Define KPIs for measuring security improvement effectiveness
+
+**Brainstorming Focus**:
+
+**Epic Structure Design**:
+
+- How to organize security work into manageable, logical epics
+- Dependencies and sequencing between security implementation phases
+- Resource allocation and timeline estimation for security work
+- Integration with existing DOH development priorities
+
+**Implementation Strategy**:
+
+- Minimum viable security (MVS) approach for rapid threat mitigation
+- Progressive security enhancement roadmap
+- Security testing integration with development workflow
+- User impact minimization during security improvements
+
+**Success Criteria**:
+
+- Comprehensive security epic plan created with clear implementation phases
+- Risk-prioritized task breakdown with effort estimates
+- Timeline and milestone plan for security implementation
+- Integration strategy with existing DOH development workflow
+- Measurable security objectives and success metrics defined
+
+**Deliverable**: Detailed security epic plan (`analysis/T043-security-epic-plan.md`) with structured implementation
+roadmap, prioritized task breakdown, timeline planning, and measurable security objectives for systematic DOH system
+hardening.
 
 ---
 

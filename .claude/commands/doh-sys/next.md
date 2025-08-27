@@ -142,7 +142,7 @@ Priority Score = Base Priority × Dependency Weight × Context Relevance × Impa
 
 ## Top Recommendation: T037 (Score: 8.5/10)
 
-**Task**: Clean up old project references (MrTroove, mkplan)
+**Task**: Clean up old project references (example projects)
 **Category**: Documentation (#doc)
 **Priority**: High 🚩
 
@@ -154,7 +154,7 @@ Priority Score = Base Priority × Dependency Weight × Context Relevance × Impa
 - 🏃 **Momentum**: Builds on completed T034, T030, T035 documentation work
 
 **Implementation Approach:**
-1. Scan all .md files for "MrTroove" and "mkplan" references
+1. Scan all .md files for outdated project references  
 2. Replace with current project context ("DOH", "quazardous/doh")
 3. Update examples and paths to reflect current structure
 4. Validate no broken links introduced
@@ -167,7 +167,7 @@ Priority Score = Base Priority × Dependency Weight × Context Relevance × Impa
 
 ## Step-by-Step Execution
 1. **Discovery Phase** (15min)
-   - Search codebase for "MrTroove", "mkplan", "/dev/projects/mkplan"
+   - Search codebase for outdated project references
    - Catalog all occurrences with context
 
 2. **Replacement Phase** (45min)
@@ -186,7 +186,7 @@ Priority Score = Base Priority × Dependency Weight × Context Relevance × Impa
 - Documentation-only changes reduce system risk
 
 ## Success Criteria
-- [ ] All "MrTroove"/"mkplan" references updated
+- [ ] All outdated project references updated
 - [ ] No broken links introduced
 - [ ] Documentation maintains coherence
 - [ ] Linting passes cleanly

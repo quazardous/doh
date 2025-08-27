@@ -95,7 +95,7 @@ et migrer ces tâches ? Cela améliorerait l'organisation."
 Use the DOH Project Agent to process express task creation with intelligent analysis.
 
 Task Description: "{user_input}"
-Project Context: MrTroove Symfony application with frontend JavaScript
+Project Context: Example web application with backend and frontend components
 Language: French for content, English for code identifiers
 
 Process Flow:

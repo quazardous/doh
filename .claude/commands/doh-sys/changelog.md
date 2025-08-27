@@ -46,6 +46,7 @@ This command executes the core DOH documentation pipeline:
 
 - **TODO Management**: Mark completed tasks, update timestamps, increment next ID
 - **CHANGELOG Updates**: Add completed tasks, update status, ensure formatting
+- **TODOARCHIVED Management**: Move old completed tasks from TODO.md to TODOARCHIVED.md (tasks completed yesterday or earlier)
 - **Version Tracking**: Update VERSION.md metadata and completion timestamps
 
 ### 2. Quality Assurance
@@ -55,6 +56,41 @@ This command executes the core DOH documentation pipeline:
 - **Ensures Consistency**: Standardizes formatting across TODO.md and CHANGELOG.md
 
 **Architecture**: This command provides the core pipeline that `/doh-sys:commit` builds upon.
+
+## TODOARCHIVED Management Workflow
+
+The changelog command automatically manages the TODOARCHIVED.md file to keep TODO.md focused on active tasks:
+
+### Archive Policy
+- **Today's completions**: Remain in TODO.md for immediate visibility
+- **Yesterday & older completions**: Automatically moved to TODOARCHIVED.md
+- **Preservation**: Full task content, completion dates, and metadata maintained
+
+### Automated Process
+1. **Scan TODO.md** for all COMPLETED tasks with completion timestamps
+2. **Date comparison** against current date (tasks completed yesterday or earlier)
+3. **Extract & format** tasks for TODOARCHIVED.md with full preservation:
+   - Task ID, title, priority, dependencies
+   - Original description and deliverables  
+   - Completion date and notes
+4. **Remove** archived tasks from TODO.md
+5. **Update** TODOARCHIVED.md with properly formatted entries
+6. **Maintain** chronological organization in archive
+
+### Archive Format
+Tasks moved to TODOARCHIVED.md maintain full context:
+```markdown
+### T037 - Clean up old project references ✅
+
+**Status**: COMPLETED ✅  
+**Priority**: High 🚩  
+**Dependencies**: T034 (COMPLETED)  
+**Version**: 1.4.0 **Completed**: 2025-08-27
+
+Original task description and deliverables preserved...
+
+**Completion Notes**: Successfully updated all documentation references...
+```
 
 ## Example Usage
 
@@ -97,6 +133,7 @@ Provides clear progress reporting:
 📝 DOH Documentation Updates: T039 Lint Command
 ├── ✅ TODO.md updated (T039 → COMPLETED)
 ├── ✅ CHANGELOG.md updated (T039 entry added)
+├── ✅ TODOARCHIVED.md updated (2 old completed tasks moved)
 ├── ✅ VERSION.md tracking updated
 ├── 🔧 Auto-fixed 2 documentation formatting issues
 └── ✅ Documentation updates complete
@@ -112,6 +149,7 @@ This command executes steps 1-3 of the commit pipeline:
 | --------------------- | ------------------ | --------------- |
 | TODO Management       | ✅                 | ✅              |
 | CHANGELOG Updates     | ✅                 | ✅              |
+| TODOARCHIVED Mgmt     | ✅                 | ✅              |
 | Version Tracking      | ✅                 | ✅              |
 | Documentation Linting | ✅                 | ✅              |
 | Git Staging           | ❌                 | ✅              |
