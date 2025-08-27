@@ -1,0 +1,8 @@
+# Epic Memory
+
+This directory stores epic-specific context and progress tracking:
+- epic-{ID}/ - Individual epic directories
+  - context.md - Epic background, goals, and strategic context
+  - decisions.md - Epic-specific implementation decisions
+  - progress.md - Detailed progress tracking and milestone analysis
+  - learnings.md - Insights and lessons learned during execution

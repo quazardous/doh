@@ -1,0 +1,7 @@
+# Analysis Reports Directory
+
+This directory will contain generated analysis reports:
+- codebase-analysis.md
+- epic-suggestions.md  
+- patterns-detected.md
+- team-insights.md

@@ -1,0 +1,7 @@
+# Project Memory
+
+This directory stores project-level context and decisions:
+- architectural-decisions.md - Key architectural choices and rationale
+- project-patterns.md - Established patterns and conventions
+- team-context.md - Team composition, roles, and working agreements
+- strategic-context.md - Business context, goals, and priorities

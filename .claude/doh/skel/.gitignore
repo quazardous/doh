@@ -1,0 +1,252 @@
+# DOH Project .gitignore
+# This file provides comprehensive .gitignore patterns for DOH-managed projects
+# Customize for your specific technology stack
+
+# =============================================================================
+# DOH System Files (NEVER commit these)
+# =============================================================================
+
+# DOH analysis cache and temporary files
+.doh/cache/
+.doh/tmp/
+.doh/logs/
+*.doh-cache
+
+# DOH build artifacts (if using DOH build system)
+.doh/build/
+.doh/dist/
+
+# DOH session data (contains potentially sensitive context)
+.doh/memory/agent-sessions/active/
+.doh/memory/agent-sessions/temp/
+
+# DOH sync state (managed automatically)
+.doh/sync/state.lock
+.doh/sync/conflict.tmp
+
+# =============================================================================
+# Development Environment
+# =============================================================================
+
+# Editor and IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+*.pid
+*.seed
+
+# =============================================================================
+# Language-Specific Patterns
+# =============================================================================
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+.pnp
+.pnp.js
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.env
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+target/
+.gradle/
+build/
+
+# C/C++
+*.o
+*.a
+*.so
+*.exe
+*.dll
+*.dylib
+*.out
+
+# Rust
+target/
+Cargo.lock
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+vendor/
+
+# =============================================================================
+# Build Systems & Package Managers
+# =============================================================================
+
+# General build outputs
+build/
+dist/
+out/
+bin/
+obj/
+
+# Package manager lockfiles (comment out if you want to commit them)
+# package-lock.json
+# yarn.lock
+# Pipfile.lock
+# poetry.lock
+# Cargo.lock
+
+# =============================================================================
+# Database & Data Files
+# =============================================================================
+
+# SQLite
+*.sqlite
+*.sqlite3
+*.db
+
+# Data directories
+data/
+*.csv
+*.json.bak
+*.xml.bak
+
+# =============================================================================
+# Logs & Runtime Files
+# =============================================================================
+
+# Application logs
+logs/
+*.log
+log/
+
+# Runtime files
+*.pid
+*.seed
+*.pid.lock
+
+# =============================================================================
+# Security & Secrets (CRITICAL - NEVER COMMIT)
+# =============================================================================
+
+# Environment variables and secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# API keys and tokens
+*.key
+*.pem
+*.p12
+*.pfx
+secrets/
+credentials/
+
+# Configuration files with secrets
+config.local.*
+*-secrets.json
+*-private.json
+
+# =============================================================================
+# Testing & Coverage
+# =============================================================================
+
+# Test outputs
+coverage/
+.nyc_output/
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+.nox/
+junit.xml
+test-results/
+
+# =============================================================================
+# Documentation Build Outputs
+# =============================================================================
+
+# Generated documentation
+docs/build/
+site/
+_site/
+.jekyll-cache/
+.bundle/
+
+# =============================================================================
+# Backup & Archive Files
+# =============================================================================
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+
+# Archive files
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+*.rar
+*.7z
+
+# =============================================================================
+# OS-Specific Files
+# =============================================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+
+# =============================================================================
+# Project-Specific Customization Area
+# =============================================================================
+# Add your project-specific ignore patterns below this line
+# Examples:
+# my-app/local-config.json
+# custom-build/
+# project-secrets/

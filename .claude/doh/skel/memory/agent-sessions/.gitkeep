@@ -1,0 +1,6 @@
+# Agent Session Memory
+
+This directory stores development session context and artifacts:
+- active/ - Currently active session data (excluded from git)
+- completed/ - Archived completed sessions
+- session-{timestamp}.md - Individual session logs with decisions and outcomes

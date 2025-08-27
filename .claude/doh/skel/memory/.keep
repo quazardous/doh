@@ -1,2 +1,0 @@
-# This file ensures the memory directory is created and tracked by git
-# Memory directories are essential for DOH agent context and session tracking
