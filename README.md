@@ -46,19 +46,28 @@ Like Homer's "Doh!" - the answer was there all along, you just needed the right 
     - Contains only what's needed for using /doh, not developing it
     - Optimized for fast loading and reference (2KB vs 15KB+)
     - **Referenced by `.claude/CLAUDE.md`** in projects using /doh
-    - **Version**: Runtime 1.2.0 (Stable)
+
+### For Users and Workflow
+
+- **[WORKFLOW.md](WORKFLOW.md)** - **Quick workflow guide** - Simple PRD → Epic → Feature → Task example
+- **[docs/workflow-patterns.md](docs/workflow-patterns.md)** - **Detailed workflow patterns** - Comprehensive patterns and
+  decision guides
+- **[docs/workflow-examples.md](docs/workflow-examples.md)** - **Real-world examples** - Complete scenarios for different
+  project types
 
 ### For /doh System Development
 
 - **[VERSION.md](VERSION.md)** - **Version management and release tracking**
 - **[CHANGELOG.md](CHANGELOG.md)** - **Complete history of features and releases**
-- **[TODO.md](../../TODO.md)** - **Development roadmap and progress tracking** (Dev 1.3.0) - _Now in project root_
+- **[TODO.md](../../TODO.md)** - **Development roadmap and progress tracking**
 - **[Architecture](docs/architecture.md)** - Structure, IDs, and file organization
 - **[Commands](docs/commands.md)** - All commands and natural language usage
 - **[Worktree Strategy](docs/worktree-strategy.md)** - Parallel development setup
 - **[Memory System](docs/memory-system.md)** - Persistent context and learning
 - **[Agent Context Protocol](docs/agent-context-protocol.md)** - How autonomous agents receive and use context
 - **[AI Context Rules](docs/ai-context-rules.md)** - Guidelines for AI development
+- **[DEVELOPMENT.md](DEVELOPMENT.md)** - **Internal development patterns and architecture**
+- **[CLAUDE.md](CLAUDE.md)** - **Claude-specific development configuration**
 
 ## Credits
 
