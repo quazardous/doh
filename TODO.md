@@ -1,7 +1,7 @@
 # TODO - /doh System Evolution
 
 **Last Updated**: 2025-08-27  
-**Next TODO ID**: T035
+**Next TODO ID**: T038
 
 ---
 
@@ -21,9 +21,11 @@
 
 **Order**: Top-down (most recently active first)
 
-- **T034** Documentation Health Check & Content Review (just created)
+- **T037** Clean up old project references (MrTroove, mkplan) across documentation
+- **T035** Documentation Navigation & Content Organization (T034 Phase 2) - COMPLETED
+- **T034** Documentation Health Check & Content Review - COMPLETED
 - **T032** Design DOH Runtime Build Process (active)
-- **T030** Fix Single Source of Truth violations in CLAUDE.md (linked with T034)
+- **T030** Fix Critical Architecture References (T034 Phase 1) - COMPLETED
 - **T027** Implement Markdown Linting System (recently discussed)
 - **T022** DOH System Self-Hosting Project (foundation work)
 - **T024** Comprehensive Testing Framework Implementation
@@ -1293,7 +1295,7 @@ tasks should be completed together for maximum effectiveness.
 
 **Tasks**:
 
-**Phase 1: Discovery & Analysis**
+#### Phase 1: Discovery & Analysis
 
 - [ ] **Audit all documentation files**: Create inventory with purpose, target audience, last update
 - [ ] **Architecture reference check**: Find all references to old structure (./skel/, controlled duplication, etc.)
@@ -1301,7 +1303,7 @@ tasks should be completed together for maximum effectiveness.
 - [ ] **Redundancy identification**: Map overlapping content across files
 - [ ] **Gap analysis**: Identify missing documentation for key workflows
 
-**Phase 2: Content Assessment**
+#### Phase 2: Content Assessment
 
 - [ ] **User journey mapping**: Trace new user → productive user → contributor paths through docs
 - [ ] **Developer workflow mapping**: Trace development setup → feature development → testing paths
@@ -1309,14 +1311,14 @@ tasks should be completed together for maximum effectiveness.
 - [ ] **Balance evaluation**: Assess technical depth vs accessibility for each audience
 - [ ] **Currency audit**: Flag outdated examples, commands, architecture references
 
-**Phase 3: Structural Brainstorming**
+#### Phase 3: Structural Brainstorming
 
 - [ ] **Consolidation opportunities**: Identify docs that should be merged
 - [ ] **Split candidates**: Find overly complex docs that need splitting
 - [ ] **Reorganization proposals**: Suggest better directory structure or file naming
 - [ ] **Navigation improvements**: Design better cross-linking and discovery
 
-**Phase 4: Actionable Recommendations**
+#### Phase 4: Actionable Recommendations
 
 - [ ] **Priority fixes**: Critical updates needed immediately
 - [ ] **Content improvements**: Rewrite/update recommendations with rationale
@@ -1410,6 +1412,23 @@ navigation.
 
 ---
 
+### T037 - Clean up old project references (MrTroove, mkplan) across documentation
+
+**Status**: PENDING  
+**Priority**: Medium - Documentation accuracy  
+**Dependencies**: None  
+**Version**: 1.4.0 **Tags**: `#doc`
+
+Clean up outdated project references (MrTroove, mkplan) across all documentation files and replace with appropriate
+generic examples.
+
+**Scope**:
+
+- [ ] Search all documentation for "MrTroove" and "mkplan" references
+- [ ] Replace with generic project names or current project examples
+- [ ] Update any related examples to use consistent naming
+- [ ] Verify all changes maintain documentation clarity
+
 ### T036 - Documentation Enhancement & Polish (T034 Phase 3)
 
 **Status**: PROPOSED  
@@ -1455,46 +1474,6 @@ make DOH documentation excellent rather than just functional.
 - Documentation feels comprehensive and professional
 
 **Target Version**: 1.5.0 (enhancement phase after core 1.4.0 stabilizes)
-
----
-
-### T037 - Clean up old project references (MrTroove, mkplan) across documentation
-
-**Status**: PROPOSED  
-**Priority**: Low - Cleanup and consistency  
-**Dependencies**: None (independent cleanup)  
-**Proposed Version**: 1.4.0 **Tags**: `#doc`
-
-Systematically clean up remaining old project references (MrTroove, mkplan) identified during T030 execution, while
-preserving historical context in analysis documents.
-
-**Impact**: Complete removal of old project-specific references improves documentation professionalism and prevents
-confusion for new users seeing outdated project names in examples.
-
-**Scope**: Clean up old project references while respecting document types:
-
-**References Found (T030)**:
-
-- docs/agent-context-protocol.md:31 - "name": "MrTroove" ✅ (partially fixed)
-- docs/config-design-analysis.md:54 - "project_name": "MrTroove" ✅ (partially fixed)  
-- .claude/commands/doh/quick.md:98 - "Project Context: MrTroove Symfony application"
-
-**Guidelines**:
-
-- **Living Documentation**: Update to generic examples (MyProject, ExampleApp)
-- **Analysis Documents**: **PRESERVE** as historical snapshots - these are like timestamps of decisions made
-- **Command Examples**: Update for current usability
-- **Template Files**: Update to generic placeholders
-
-**Tasks**:
-
-- [ ] Update .claude/commands/doh/quick.md project context example
-- [ ] Verify all template files use generic project names
-- [ ] Scan for any remaining MrTroove/mkplan references in living docs
-- [ ] **Explicitly preserve** analysis document references as historical context
-
-**Note**: Analysis documents (analysis/*.md) are historical snapshots and should NOT be modified to preserve the
-context of when decisions were made.
 
 ---
 

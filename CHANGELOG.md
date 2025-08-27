@@ -18,6 +18,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Completed in This Session (2025-08-27)
 
+- **T035** - Documentation Navigation & Content Organization (T034 Phase 2)
+    - **STATUS**: ✅ COMPLETED 2025-08-27
+    - **Components**: Enhanced README.md with comprehensive document map, improved navigation between workflow documents,
+    minimal cross-reference policy implementation
+    - **Impact**: Centralized navigation in README.md, reduced documentation complexity, improved user onboarding path
 - **T034** - Documentation Health Check & Content Review
     - **STATUS**: ✅ COMPLETED 2025-08-27
     - **Components**: Comprehensive audit of 52 documentation files across 5 directories, analysis of 89 outdated
@@ -25,6 +30,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
     - **Analysis**: `analysis/T034-documentation-health-report.md`
     - **Impact**: Identified critical 1.4.0 release blockers (architecture inconsistencies), established clear roadmap for
     documentation improvements, separated urgent fixes from enhancement work
+- **T030** - Fix Critical Architecture References (T034 Phase 1)
+    - **STATUS**: ✅ COMPLETED 2025-08-27
+    - **Components**: Fixed 89 outdated architecture references across CONTRIBUTING.md, docs/architecture.md, README.md,
+    WORKFLOW.md
+    - **Impact**: Resolved critical 1.4.0 release blockers, established consistent `.claude/doh/` architecture documentation
 - **T033** - Restore skel/ and templates/ to .claude/doh/ runtime directory
     - **STATUS**: ✅ COMPLETED 2025-08-27
     - **Components**: Single source of truth architecture implementation, cleanup of obsolete project root files
@@ -100,6 +110,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Planned for Next Phase (1.4.0)
 
+- **T037** - Clean up old project references (MrTroove, mkplan) across documentation
+    - **STATUS**: 📋 PENDING - Medium priority documentation accuracy
+    - **Purpose**: Replace outdated project references with generic examples
+    - **Dependencies**: None
 - **T022** - DOH System Self-Hosting Project ⚠️ UNBLOCKED
     - **STATUS**: 📋 CRITICAL PRIORITY - Foundation for distribution
     - **Purpose**: Create DOH as standalone project using DOH to manage its own development
