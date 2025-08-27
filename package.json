@@ -1,0 +1,43 @@
+{
+  "name": "doh-system",
+  "version": "1.4.0-dev",
+  "description": "DOH (DevOps Helper) - Task and project management system for Claude.ai",
+  "private": true,
+  "scripts": {
+    "dev:setup": "make dev-setup",
+    "lint:md": "markdownlint '*.md' 'docs/**/*.md' 'analysis/**/*.md'",
+    "lint:md:fix": "markdownlint --fix '*.md' 'docs/**/*.md' 'analysis/**/*.md'",
+    "lint": "npm run lint:md",
+    "lint:fix": "npm run lint:md:fix",
+    "test": "make test",
+    "build": "make build",
+    "clean": "make clean"
+  },
+  "devDependencies": {
+    "markdownlint-cli": "^0.37.0",
+    "prettier": "^3.6.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "keywords": [
+    "doh",
+    "devops",
+    "task-management",
+    "project-management",
+    "claude",
+    "ai",
+    "bash",
+    "cli"
+  ],
+  "author": "DOH System Contributors",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/user/doh"
+  },
+  "bugs": {
+    "url": "https://github.com/user/doh/issues"
+  },
+  "homepage": "https://github.com/user/doh#readme"
+}

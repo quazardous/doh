@@ -1,0 +1,62 @@
+#!/bin/bash
+
+# DOH Pre-commit hook - Quality checks before commit
+
+set -e
+
+echo "🔍 Running pre-commit checks..."
+
+# Check if we're in a DOH project
+if [[ ! -f "Makefile" ]] || [[ ! -d ".claude/doh" ]]; then
+    echo "⚠️  Not a DOH project, skipping checks"
+    exit 0
+fi
+
+# Get staged files
+staged_md_files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.md$' || true)
+staged_sh_files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.sh$' || true)
+
+if [[ -z "$staged_md_files" && -z "$staged_sh_files" ]]; then
+    echo "ℹ️  No markdown or shell files staged, skipping checks"
+    exit 0
+fi
+
+error_count=0
+
+# Check Markdown files
+if [[ -n "$staged_md_files" ]]; then
+    echo "📝 Checking Markdown files..."
+    if command -v npx >/dev/null 2>&1; then
+        if ! npx markdownlint --config dev-tools/linters/.markdownlint.json $staged_md_files; then
+            echo "❌ Markdown linting failed"
+            ((error_count++))
+        fi
+    else
+        echo "⚠️  markdownlint not available, skipping markdown checks"
+    fi
+fi
+
+# Check shell scripts
+if [[ -n "$staged_sh_files" ]]; then
+    echo "🐚 Checking shell scripts..."
+    if command -v shellcheck >/dev/null 2>&1; then
+        if ! shellcheck $staged_sh_files; then
+            echo "❌ Shell script check failed"
+            ((error_count++))
+        fi
+    else
+        echo "⚠️  shellcheck not available, skipping shell checks"
+    fi
+fi
+
+# Exit with error if any checks failed
+if [[ $error_count -gt 0 ]]; then
+    echo ""
+    echo "❌ Pre-commit checks failed!"
+    echo "💡 Fix markdown issues with: make lint-fix"
+    echo "💡 Or bypass with: git commit --no-verify"
+    exit 1
+fi
+
+echo "✅ Pre-commit checks passed!"
+exit 0

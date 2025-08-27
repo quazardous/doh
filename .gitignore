@@ -1,0 +1,49 @@
+# DOH Project .gitignore
+
+# Node.js dependencies (development only)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Development tools
+.nyc_output/
+coverage/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+.temp/
+
+# Logs
+*.log
+logs/
+
+# Backup files
+*.backup
+*.bak
+
+# DOH build artifacts (if any)
+# Note: .claude/doh/ runtime files are kept in git
+# Note: .doh/ project content is kept in git (versioned project state)
+
+# Test artifacts
+test-output/
+test-projects/
