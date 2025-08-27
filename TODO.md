@@ -1,7 +1,7 @@
 # TODO - /doh System Evolution
 
 **Last Updated**: 2025-08-27  
-**Next TODO ID**: T049
+**Next TODO ID**: T053
 
 ---
 
@@ -18,21 +18,20 @@
 
 ---
 
-## 📑 Active TODOs & Epics
+## 📑 Active TODOs
 
 **Order**: Top-down (most recently active first)
 
-### Active Epics
-
-- **E047** Natural Language & Performance Optimization (EPIC: T017, T020, T044, T045, T046)
-
-### Active TODOs
-
-- **T048** Audit & Enforce DOH Internal/Runtime Pattern Isolation (#doc, #architecture)
+- **T052** Codebase Analysis Integration & Reporting (#features) [Epic E020]
+- **T051** DOH Structure Generation from Analysis (#features) [Epic E020]
+- **T050** Git History Intelligence Mining (#features) [Epic E020]
+- **T049** Code Structure Analysis Core (#features) [Epic E020]
+- **T048** Audit & Enforce DOH Internal/Runtime Pattern Isolation (Chinese Wall) - COMPLETED
+- **E047** Natural Language & Performance Optimization 🛡️ EPIC (Components: T017, E020, T044, T045, T046)
 - **T046** Natural Language UX Integration & Deployment (#features, #optimization, #ux) [Epic E047]
-- **T045** Intelligent Routing System (Bash/Claude Hybrid Execution) (#features, #optimization, #performance) [Epic
-  E047]
+- **T045** Intelligent Routing System (Bash/Claude Hybrid Execution) (#features, #optimization, #performance) [Epic E047]
 - **T044** Natural Language DOH Command Interface & Script Optimization (#features, #think, #optimization) [Epic E047]
+- **E020** Codebase Analysis Engine 🛡️ EPIC (Components: T049, T050, T051, T052)
 - **T043** DOH Security Epic Planning & Implementation Roadmap (#security, #think)
 - **T042** DOH Security Analysis & Threat Modeling (#security, #think)
 - **T041** Remove Claude Code attribution comments from codebase - COMPLETED
@@ -611,42 +610,170 @@ configuration system, and UUID generation work together across different environ
 
 ---
 
-### T020 - Enhanced Codebase Analysis Engine 🚩 (EPIC Phase 1)
+## 🚀 EPIC E020: Codebase Analysis Engine
 
-**Status**: Proposed  
-**Priority**: High - Builds on T002 specification  
-**Dependencies**: T001 (skeleton), T018 (path resolution), T019 (integration tests), T028 (dev environment)  
-**Proposed Version**: 1.5.0  
-**Epic**: E047 Natural Language & Performance Optimization
+**Epic Status**: Active - Transformed from T020  
+**Priority**: High - Foundation for DOH adoption & E047 Phase 1  
+**Dependencies**: T001 (skeleton - pending), ✅T018 (path resolution - completed), T019 (integration tests), ✅T028 (dev environment - completed)  
+**Target Version**: 1.5.0  
+**Parent Epic**: E047 Natural Language & Performance Optimization  
+**Total Estimated Effort**: 10 hours
 
-Implement the `/doh:analyze` command with advanced codebase analysis capabilities beyond the original T002
-specification.
+Implement the `/doh:analyze` command with advanced codebase analysis capabilities, building on T002's original vision
+with enhanced pattern recognition for natural language epic generation.
 
-**Impact**: Enable teams to adopt DOH on existing codebases with intelligent epic/task structure suggestions based on
-code analysis, git history, and architectural patterns.
+**Impact**: Enables intelligent DOH adoption on existing codebases by analyzing code structure, git history, and 
+architectural patterns to suggest optimal epic/task organization. Critical for Epic E047 as it provides the 
+foundation for understanding codebases that will be managed through natural language commands.
+
+**Enhanced Scope for E047 Integration**:
+
+**Natural Language Synergy**:
+- Analysis output designed for NL command consumption
+- Pattern recognition that feeds T044's conversational understanding
+- Metadata extraction optimized for T045's routing decisions
+- Codebase context that enhances T046's UX intelligence
+
+**Epic Components**:
+
+- **T049**: Code Structure Analysis Core (3h)
+- **T050**: Git History Intelligence Mining (2h)
+- **T051**: DOH Structure Generation from Analysis (2.5h)
+- **T052**: Codebase Analysis Integration & Reporting (2.5h)
+
+### T049 - Code Structure Analysis Core 🚩
+
+**Status**: PROPOSED  
+**Priority**: High - Epic E020 Phase 1  
+**Dependencies**: T001 (skeleton)  
+**Target Version**: 1.5.0  
+**Epic**: E020 Codebase Analysis Engine  
+**Estimated Effort**: 3 hours
+
+Implement core code analysis engine for module detection, architecture recognition, and complexity metrics.
 
 **Tasks**:
+- [ ] **Module boundary detection** using import/dependency graphs
+- [ ] **Component identification** (services, controllers, models, utilities)
+- [ ] **Architectural pattern recognition** (MVC, microservices, layered, event-driven)
+- [ ] **Technology stack detection** with version and framework identification
+- [ ] **Code complexity metrics** (cyclomatic complexity, coupling, cohesion)
 
-- [ ] Implement static code analysis for module boundaries and dependencies
-- [ ] Add git log analysis for feature patterns and team workflows
-- [ ] Create technology stack detection (frameworks, languages, tools)
-- [ ] Build architectural pattern recognition (MVC, microservices, monolith)
-- [ ] Implement team collaboration pattern analysis (PR patterns, commit frequency)
-- [ ] Add complexity analysis (cyclomatic complexity, file sizes, coupling)
-- [ ] Create suggested epic structure generation based on analysis
-- [ ] Add safety checks and validation for existing .doh projects
-- [ ] Build interactive mode for refining suggestions
-- [ ] Create analysis reporting and visualization
+**Deliverable**: Core analysis engine that understands code structure and architecture patterns.
+
+---
+
+### T050 - Git History Intelligence Mining 🚩
+
+**Status**: PROPOSED  
+**Priority**: High - Epic E020 Phase 2  
+**Dependencies**: T049 (code analysis core)  
+**Target Version**: 1.5.0  
+**Epic**: E020 Codebase Analysis Engine  
+**Estimated Effort**: 2 hours
+
+Extract intelligence from git history to understand team patterns, feature evolution, and technical debt.
+
+**Tasks**:
+- [ ] **Feature evolution analysis** from commit patterns and PR history
+- [ ] **Team collaboration patterns** (who works on what, review patterns)
+- [ ] **Hotspot detection** (frequently changed files indicating instability)
+- [ ] **Release pattern analysis** (versioning strategy, release cadence)
+- [ ] **Technical debt indicators** from refactoring patterns
+
+**Deliverable**: Git history analyzer that provides insights into team dynamics and code evolution.
+
+---
+
+### T051 - DOH Structure Generation from Analysis 🚩
+
+**Status**: PROPOSED  
+**Priority**: High - Epic E020 Phase 3  
+**Dependencies**: T049, T050 (analysis components)  
+**Target Version**: 1.5.0  
+**Epic**: E020 Codebase Analysis Engine  
+**Estimated Effort**: 2.5 hours
+
+Generate intelligent DOH epic/task structure based on analysis results.
+
+**Tasks**:
+- [ ] **Intelligent epic suggestions** based on module boundaries and features
+- [ ] **Task breakdown recommendations** from code complexity analysis
+- [ ] **Priority inference** from hotspot and technical debt analysis
+- [ ] **Dependency mapping** between suggested epics/tasks
+- [ ] **Team assignment suggestions** based on git history
+
+**Deliverable**: Structure generator that creates meaningful DOH organization from analysis.
+
+---
+
+### T052 - Codebase Analysis Integration & Reporting 🚩
+
+**Status**: PROPOSED  
+**Priority**: High - Epic E020 Phase 4  
+**Dependencies**: T049, T050, T051 (all analysis components)  
+**Target Version**: 1.5.0  
+**Epic**: E020 Codebase Analysis Engine  
+**Estimated Effort**: 2.5 hours
+
+Integrate analysis components and create comprehensive reporting with natural language output.
+
+**Tasks**:
+- [ ] **Safety validation** for existing .doh projects (no overwrites)
+- [ ] **Interactive refinement mode** for adjusting suggestions
+- [ ] **Analysis report generation** in markdown and JSON formats
+- [ ] **Natural language summary** for T044 integration
+- [ ] **Performance optimization** for large codebases
+
+**Deliverable**: Complete `/doh:analyze` command with integrated analysis and reporting capabilities.
+
+**Analysis Output Structure** (for E047 integration):
+```json
+{
+  "codebase_summary": {
+    "natural_description": "E-commerce platform with React frontend and Node.js microservices",
+    "complexity_score": 7.5,
+    "team_size_estimate": 5,
+    "architecture_type": "microservices"
+  },
+  "suggested_epics": [
+    {
+      "title": "Authentication System Overhaul",
+      "rationale": "High change frequency, security critical, 3 contributors",
+      "estimated_effort": "3 weeks",
+      "priority": "high",
+      "components": ["auth-service", "user-model", "session-manager"]
+    }
+  ],
+  "natural_language_metadata": {
+    "common_terms": ["user", "product", "order", "payment"],
+    "domain_context": "e-commerce",
+    "team_vocabulary": ["sprint", "feature", "hotfix"]
+  }
+}
+
+```
 
 **Enhanced Features Beyond T002**:
 
-- **AI-Driven Insights**: Use pattern recognition for better epic suggestions
-- **Team Analytics**: Analyze collaboration patterns to suggest team structure
-- **Technical Debt Analysis**: Identify refactoring opportunities as potential epics
-- **Performance Analysis**: Identify performance bottlenecks as optimization epics
+- **AI-Driven Insights**: Pattern recognition for intelligent epic generation
+- **Natural Language Ready**: Output formatted for T044 consumption
+- **Team Analytics**: Collaboration patterns inform epic assignment
+- **Technical Debt Mapping**: Refactoring opportunities as structured epics
+- **Performance Hotspots**: Bottleneck analysis for optimization epics
+- **Domain Recognition**: Identifies common patterns (e-commerce, SaaS, CRM, etc.)
 
-**Deliverable**: Production-ready `/doh:analyze` command that provides intelligent codebase analysis and epic structure
-recommendations for seamless DOH adoption.
+**Success Criteria**:
+
+- Analyzes codebases up to 100K lines in <30 seconds
+- Generates meaningful epic suggestions with 80%+ acceptance rate
+- Outputs natural language metadata for T044 integration
+- Safely handles existing .doh projects without data loss
+- Provides actionable insights even for legacy codebases
+
+**Deliverable**: Production-ready `/doh:analyze` command that transforms existing codebases into well-structured DOH 
+projects with intelligent epic/task organization, providing the analysis foundation for Epic E047's natural language 
+capabilities and completing Phase 1 of the epic.
 
 ---
 
@@ -2086,19 +2213,19 @@ and seamless user experience that transforms project management interaction para
 
 ---
 
-### T048 - Audit & Enforce DOH Internal/Runtime Pattern Isolation 🚩
+### T048 - Audit & Enforce DOH Internal/Runtime Pattern Isolation (Chinese Wall) 🚩
 
-**Status**: PROPOSED  
+**Status**: COMPLETED ✅  
 **Priority**: High - Prevents cross-contamination and confusion  
 **Dependencies**: None  
 **Target Version**: 1.4.1  
 **Tags**: `#doc` `#architecture`
 
-Audit all DOH documentation and code to ensure clear separation between DOH system internal development patterns
-(TODO.md, Epic E047) and runtime `/doh` command patterns that users employ in their projects.
+Audit all DOH documentation and establish a "Chinese Wall" information barrier between DOH system internal development 
+patterns (TODO.md, Epic E047) and runtime `/doh` command patterns that users employ in their projects.
 
-**Impact**: Current documentation mixes internal DOH development concepts with user-facing `/doh` runtime patterns,
-creating confusion about which patterns apply where. This leads to incorrect assumptions and implementation mistakes.
+**Impact**: Previously, documentation mixed internal DOH development concepts with user-facing `/doh` runtime patterns,
+creating confusion about which patterns apply where. This led to incorrect assumptions and implementation mistakes.
 
 **Core Issues to Address**:
 
@@ -2151,9 +2278,17 @@ creating confusion about which patterns apply where. This leads to incorrect ass
 - Clear distinction between DOH system development and user project patterns
 - User-facing documentation focuses purely on runtime `/doh` usage
 - Internal development documentation clearly marked as DOH system specific
+- Chinese Wall policy documented and enforced
 
-**Deliverable**: Clean separation between DOH internal development patterns and user-facing `/doh` runtime patterns,
-with clear documentation boundaries and isolation guidelines.
+**Deliverables Completed**:
+- ✅ Fixed CONTRIBUTING.md (removed T024 reference)
+- ✅ Added "Documentation Pattern Boundaries" section to DEVELOPMENT.md
+- ✅ Created `docs/pattern-isolation-guide.md` with Chinese Wall policy
+- ✅ Added review checklist for future contributions
+- ✅ Validated all user-facing docs are clean of internal patterns
+
+**Result**: Complete "Chinese Wall" separation achieved between DOH internal development patterns and user-facing 
+runtime patterns, with enforcement guide and validation process in place.
 
 ---
 

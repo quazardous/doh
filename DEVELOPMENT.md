@@ -3,6 +3,55 @@
 **Target**: Patterns for developing the /doh system itself  
 **Audience**: Claude & developers working on /doh internals
 
+## Documentation Pattern Boundaries
+
+### Internal vs Runtime Documentation Separation
+
+**Critical**: Maintain clear separation between DOH internal development patterns and user-facing runtime documentation.
+
+#### Internal Development Documentation (CAN have T/E numbers, TODO.md refs)
+- **TODO.md** - DOH system development roadmap with T### task numbers
+- **DEVELOPMENT.md** - This file, internal DOH development guide
+- **TODOARCHIVED.md** - Completed DOH system tasks archive
+- **CHANGELOG.md** - DOH system release history with T### references
+- **VERSION.md** - DOH system version tracking
+- **analysis/*.md** - DOH system design and analysis documents
+
+#### User-Facing Documentation (NO internal patterns)
+- **README.md** - User introduction, how to install/use DOH
+- **WORKFLOW.md** - How to use /doh commands in projects
+- **docs/*.md** - DOH usage documentation for end users
+- **.claude/commands/doh/*.md** - Runtime command documentation
+- **.claude/doh/templates/*.md** - Templates for user projects
+
+#### Mixed-Purpose Documentation (Careful separation required)
+- **CONTRIBUTING.md** - For external contributors
+  - ✅ CAN mention TODO.md exists for tracking
+  - ❌ Should NOT reference specific T### numbers
+  - ✅ Should explain contribution workflow
+
+### Documentation Review Checklist
+
+When creating or reviewing documentation, verify:
+
+**For User-Facing Docs**:
+- [ ] No references to TODO.md task numbers (T###, E###)
+- [ ] No references to /doh-sys commands (internal use only)
+- [ ] No mentions of DOH system internal development workflows
+- [ ] Examples use `.doh/` structure, NOT `.claude/doh/` internals
+- [ ] Focus on runtime /doh commands that users actually run
+
+**For Internal Dev Docs**:
+- [ ] Clearly marked as internal development documentation
+- [ ] T### and E### references are acceptable
+- [ ] TODO.md workflow documentation is appropriate
+- [ ] /doh-sys commands can be documented
+
+**For Mixed-Purpose Docs**:
+- [ ] External contributors understand the scope
+- [ ] No specific internal task numbers exposed
+- [ ] General development process explained without internal details
+
 ## Core Development Patterns for /doh System
 
 ### 📖 Lexicon - Project Types
@@ -834,27 +883,44 @@ other projects. The TODO management system tracks all development work with prop
 
 ### ID Numbering Convention
 
-**Unified Sequence**: TODOs and Epics share the same numbering sequence:
+**Unified Sequence**: TODOs and Epics share the same numbering sequence.
 
-- **TODO Items**: T001, T002, T003, T044, T045, T046, T047, T048...
-- **Epic Items**: E047 (uses next available number in same sequence)
-- **Next Available**: T048 (continues after epic E047)
+**ID Formats**:
+- **TODO Items**: T{number} (e.g., T001, T044, T045)
+- **Epic Items**: E{number} (e.g., E047, E020)
 
-**Epic ID Format**: E{number} (e.g., E047)  
-**TODO ID Format**: T{number} (e.g., T044, T045, T046)
+**Epic Transformation Rule**: When a TODO becomes an epic, it keeps the same number:
+- T020 → E020 (transforms into epic, keeps ID 020)
+- New child TODOs get new IDs from the sequence
 
-Epic templates and command documentation should reflect this unified numbering pattern where epics use "E" prefix but
-consume IDs from the same sequence as TODO items.
+**Epic Identification**: 
+- Epics are marked with 🛡️ EPIC flag in the TODO list
+- Epics list their component TODOs in parentheses
+- Child TODOs reference their parent epic with [Epic E###]
+
+**Single List Management**: All items (TODOs and Epics) are maintained in a single "Active TODOs" list, 
+with epics identified by the 🛡️ flag rather than being in a separate section.
 
 ### TODO Lifecycle Rules
 
 - Update **Next TODO ID** in header when adding new TODO or Epic
-- Add to **Active TODOs** list with appropriate priority section
+- Add to **Active TODOs** list (single unified list for all items)
+- Mark epics with 🛡️ EPIC flag and list components
 - Keep descriptions concise and actionable
 - Use GitHub-like format for clean diffs
 - **Never move TODOs** when status changes (preserve diff history)
 - Mark completed TODOs in CHANGELOG.md, not here
 - Use proper version nomenclature (see Version Management below)
+
+### Epic Management Rules
+
+- **Creating Epics**: Can create new epic (E###) or transform existing TODO (T### → E###)
+- **Epic Transformation**: When T### becomes E###, keep same number
+- **Child TODOs**: Create new T### IDs for epic components
+- **Epic Tracking**: Use 🛡️ flag and (Components: T###, T###) format
+- **Child References**: Child TODOs use [Epic E###] to show parent
+- **Single List**: Keep epics and TODOs in same Active TODOs list
+- **Epic Completion**: Epic marked complete when all children complete
 
 ### Version Management for TODOs
 

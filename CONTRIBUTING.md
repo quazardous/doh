@@ -209,7 +209,7 @@ The project includes:
 
 ### Current Status
 
-- Testing framework (T024) is in development
+- Testing framework is in development
 - Basic linting and validation available now
 - Integration tests coming soon
 
