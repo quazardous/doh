@@ -92,7 +92,7 @@ This command provides the complete automation by composing existing commands:
   - Automatically references completed TODOs: "Complete T040 pipeline command implementation"
   - Includes version bump info: "bump to v1.4.1" when applicable
   - Uses semantic commit format based on change analysis
-  - Adds DOH traceability and Claude Code attribution
+  - Adds DOH traceability for development workflow
 - **Stage & Commit**:
   - Stages all pipeline-modified files
   - Commits with intelligent message

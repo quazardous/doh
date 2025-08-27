@@ -21,7 +21,7 @@
 
 **Order**: Top-down (most recently active first)
 
-- **T041** Remove Claude Code attribution comments from codebase - IN PROGRESS
+- **T041** Remove Claude Code attribution comments from codebase - COMPLETED
 - **T040** Create /doh-sys:changelog command and factorize shared components - COMPLETED
 - **T039** Create /doh-sys:lint command with intelligent auto-fix capabilities - COMPLETED
 - **T038** Create DOH Pipeline Command for automated TODO/CHANGELOG/Version/Lint/Commit workflow - COMPLETED
