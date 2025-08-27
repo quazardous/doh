@@ -56,11 +56,11 @@
 - **Epic folders**: Use descriptive names (e.g., `notification-system/`)
 - **Feature folders**: Nested under epic, descriptive names (e.g., `email-notifications/`)
 - **Files**: Always use local ID format (without ! in filename):
-  - `prd{id}.md` for PRDs (!4 → prd4.md)
-  - `epic{id}.md` for Epics (!0 → epic0.md, !2 → epic2.md)
-  - `feature{id}.md` for Features (!5 → feature5.md)
-  - `task{id}.md` for Tasks (!1 → task1.md, !3 → task3.md)
-  - **Single global counter**: Epic #0, Task #1, Epic #2, Task #3...
+    - `prd{id}.md` for PRDs (!4 → prd4.md)
+    - `epic{id}.md` for Epics (!0 → epic0.md, !2 → epic2.md)
+    - `feature{id}.md` for Features (!5 → feature5.md)
+    - `task{id}.md` for Tasks (!1 → task1.md, !3 → task3.md)
+    - **Single global counter**: Epic #0, Task #1, Epic #2, Task #3...
 
 ### MD Headers with Synchronization
 

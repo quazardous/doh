@@ -2,7 +2,7 @@
 
 ## Hierarchical Memory Organization
 
-```
+```text
 .doh/memory/                    # Project persistent memory (versioned)
 ├── active-session.json         # Current working context
 ├── project/                    # Global project memory
@@ -34,7 +34,7 @@
 
 **Hierarchy:**
 
-```
+```text
 Project Memory (global)
     ↓
 Epic Memory (scoped)

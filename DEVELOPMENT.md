@@ -44,7 +44,7 @@ system development
 
 #### Self-Hosting Pattern (Architecture Problem)
 
-```
+```text
 CURRENT: ./TODO.md → Manual tracking (Bootstrap phase)
 PROBLEM: .doh/ is for HOST PROJECT, not DOH SYSTEM development
          .doh/epics/doh-system-dev/ ← This mixes host project + meta-development
@@ -170,7 +170,7 @@ export_functions_for_agents() { ... }
 - Unit test scenarios
 - Integration test workflows
 
-````
+```text
 
 #### Memory Pattern Development
 ```bash
@@ -274,7 +274,7 @@ setup_doh_dev_worktree() {
   },
   "memory": {
     "development_patterns": {
-      "path": "./docs/doh-dev.md",
+      "path": "./DEVELOPMENT.md",
       "patterns": ["self-hosting", "meta-development", "claude-centric"]
     },
     "implementation_decisions": {
@@ -339,7 +339,7 @@ maintain_doc_coherence() {
 
 1. Document patterns as they emerge
 2. Capture decisions in VERSION.md and CHANGELOG.md
-3. Update doh-dev.md with new development patterns
+3. Update DEVELOPMENT.md with new development patterns
 4. Maintain examples of successful implementations
 5. Create templates for common development tasks
 ```
@@ -379,15 +379,15 @@ export_for_agents() {
 
 #### Three-Tier Documentation Strategy
 
-```
+```text
 1. inclaude.md     → Runtime usage (Claude/end-users)
 2. README.md       → General overview + navigation
-3. docs/           → Technical specifications + doh-dev.md
+3. docs/           → Technical specifications
 ```
 
 #### Version Documentation Pattern
 
-```
+```text
 - Runtime Version (inclaude.md): Stable features only
 - Dev Version (./TODO.md): Work in progress + roadmap
 - CHANGELOG.md: 1:1 mapping with TODO completions
@@ -398,7 +398,7 @@ export_for_agents() {
 
 #### Semantic Versioning Strategy
 
-```
+```text
 Runtime:     1.3.0 (Stable)
 Development: 1.4.0-dev (Current work)
 Next:        1.4.0 (When dev stabilizes)
@@ -406,7 +406,7 @@ Next:        1.4.0 (When dev stabilizes)
 
 #### Release Flow Pattern
 
-```
+```text
 Feature Development → ./TODO.md item
 Feature Completion → CHANGELOG.md entry
 Features Stabilized → Runtime version bump
@@ -431,7 +431,7 @@ Documentation Updated → inclaude.md refresh
 # 4. inclaude.md - Update header with new version
 **DOH Runtime Version**: 1.2.0 (Stable) → 1.3.0 (Stable)
 
-# 5. All doh-dev.md, docs/ files - Update version references
+# 5. All DEVELOPMENT.md, docs/ files - Update version references
 # Ensure consistency across all documentation
 
 # 6. Any skeleton templates - Update version in templates
@@ -455,7 +455,7 @@ Documentation Updated → inclaude.md refresh
 
 #### Separation of Concerns
 
-```
+```text
 .claude/doh/
 ├── inclaude.md           # Runtime reference (2KB, optimized)
 ├── README.md             # Navigation + overview
@@ -463,7 +463,7 @@ Documentation Updated → inclaude.md refresh
 ├── CHANGELOG.md          # Completed features
 ├── VERSION.md            # Version management
 └── docs/
-    ├── doh-dev.md        # This file - internal dev patterns
+    ├── DEVELOPMENT.md    # This file - internal dev patterns
     ├── architecture.md   # System architecture
     ├── commands.md       # Command specifications
     └── *.md             # Other technical specs
@@ -471,7 +471,7 @@ Documentation Updated → inclaude.md refresh
 
 #### Command Development Pattern
 
-```
+```text
 .claude/commands/doh/
 ├── agent.md              # Complete implementation with functions
 ├── quick.md              # Specification only
@@ -489,7 +489,7 @@ Pattern: Each command.md contains:
 
 #### Hierarchical Memory Architecture
 
-```
+```text
 .doh/memory/
 ├── project/              # Global project memory
 │   ├── conventions.md   # Coding standards discovered
@@ -522,7 +522,7 @@ update_project_memory() {
 
 #### Isolation Strategy
 
-```
+```text
 Main Project/
 ├── .claude/              # Shared Claude context
 ├── .doh/                 # Versioned DOH state
@@ -665,7 +665,7 @@ function_name() {
 
 #### Feature Development Lifecycle
 
-```
+```text
 1. Add TODO item with 🚩 NEXT flag
 2. Create implementation in appropriate file
 3. Test integration with existing systems
@@ -677,7 +677,7 @@ function_name() {
 
 #### Version Bump Pattern
 
-```
+```text
 Development Progress:
 - Features added → Keep dev version (1.3.0-dev)
 - Major milestone → Bump dev version (1.4.0-dev)
@@ -697,7 +697,7 @@ Development Progress:
 
 #### Development Session Pattern
 
-```
+```text
 1. Review ./TODO.md for 🚩 NEXT flagged items
 2. Focus on highest priority infrastructure items first
 3. Complete items in logical dependency order

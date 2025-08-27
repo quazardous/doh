@@ -8,7 +8,7 @@ Les worktrees Git nécessitent le contexte Claude Code (`.claude/`) pour que l'I
 
 ### Structure Cible
 
-```
+```text
 /home/david/Private/dev/projects/
 ├── mrtroove/                      # Projet principal
 │   ├── .claude/                   # Config Claude Code originale
@@ -114,7 +114,7 @@ diff -r .claude/ ../mrtroove/.claude/
 
 #### Multiple Worktrees Actifs
 
-```
+```text
 mrtroove/                 # Principal
 ├── .doh/                 # État DOH principal
 │

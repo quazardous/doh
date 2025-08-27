@@ -147,7 +147,7 @@ doh_find_project_root
 
 Output example:
 
-```
+```text
 🐛 DOH Path Resolution Debug Mode
 🐛 Found via Claude CWD: /home/user/dev/projects/my-project
 🐛 UUID validation: 550e8400-e29b-41d4-a716-446655440000
@@ -297,4 +297,6 @@ uuidgen > .doh/uuid
 
 ---
 
-_T018 Path Resolution System - Robust cross-environment DOH project detection_
+### T018 Path Resolution System
+
+Robust cross-environment DOH project detection
