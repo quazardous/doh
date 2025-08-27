@@ -6,21 +6,42 @@ priority-based repair strategies.
 ## Usage
 
 ```bash
-/doh-sys:lint [--check-only] [--format] [--files=pattern] [--verbose]
+/doh-sys:lint [--check-only] [--files=pattern] [--verbose]
 ```
 
 ## Parameters
 
-- `--check-only`: Report issues without making changes (overrides default auto-fix behavior)
-- `--format`: Run additional formatters (prettier, etc.) after auto-fixes
+- `--check-only`: Report issues without making changes (skips prettier and all auto-fixes)
 - `--files=pattern`: Lint specific files or patterns (e.g., `--files="docs/*.md"`)
-- `--verbose`: Show detailed fix information and progress
+- `--verbose`: Show detailed fix information including prettier step progress
 
-**Default Behavior**: Auto-fix is enabled by default. Use `--check-only` to disable fixes and only report issues.
+**Default Behavior**: Auto-fix is enabled by default with prettier ALWAYS running first. Use `--check-only` to disable
+all fixes and only report issues.
+
+## Prettier-First Workflow
+
+This command implements a **prettier-first approach** to ensure maximum consistency:
+
+1. **Step 1 - Baseline Formatting**: `prettier --write` runs on ALL supported files before any linting
+2. **Step 2 - Rule-Based Fixes**: Language-specific linters apply their fixes to the prettier-formatted files
+3. **Step 3 - DOH Intelligence**: Custom intelligent fixes for remaining issues
+
+**Why Prettier First?**
+
+- **Consistent foundation**: All files start with identical formatting baseline
+- **Reduces conflicts**: Fewer conflicts between prettier and rule-based linters
+- **Predictable results**: Same input always produces same output
+- **Faster processing**: Prettier handles bulk formatting, linters focus on logic/structure
 
 ## Auto-Fix Priority System
 
 The command applies fixes in this intelligent priority order:
+
+### Priority 0: Pre-Processing (ALWAYS FIRST)
+
+- **Prettier Auto-Fix**: ALWAYS runs first on all supported files (.md, .json, .yaml, .js, .ts, .css)
+- **Baseline Formatting**: Establishes consistent formatting foundation before rule-based fixes
+- **Critical Foundation**: Essential step that enables all subsequent priority levels to work correctly
 
 ### Priority 1: Critical (Blocks commits)
 
@@ -75,22 +96,28 @@ Unlike basic linting, `/doh-sys:lint` uses smart wrapping:
 
 ### Markdown Files (`*.md`)
 
-- **Linter**: `markdownlint-cli` with DOH configuration
-- **Formatter**: `prettier` with markdown-specific rules
-- **Auto-fixes**: Structure, spacing, links, code blocks
+1. **ALWAYS FIRST**: `prettier --write` (baseline formatting)
+2. **Then**: `markdownlint-cli --fix` (rule-based fixes)
+3. **Finally**: DOH-specific intelligent fixes
+
 - **Preservation**: Analysis documents remain semantically unchanged
 
 ### Configuration Files
 
-- **JSON**: `prettier` formatting, syntax validation
-- **YAML**: `yamllint` with auto-correction
-- **Package files**: Dependency sorting, format standardization
+1. **ALWAYS FIRST**: `prettier --write` for JSON/YAML files
+2. **Then**: Syntax validation and linting
+3. **Package files**: Dependency sorting, format standardization
 
 ### Code Files (when present)
 
-- **JavaScript/TypeScript**: ESLint with auto-fix
-- **CSS**: Stylelint with corrections
-- **Shell scripts**: ShellCheck with suggestions
+1. **ALWAYS FIRST**: `prettier --write` for JS/TS/CSS files
+2. **Then**: Language-specific linting:
+   - **JavaScript/TypeScript**: ESLint with auto-fix
+   - **CSS**: Stylelint with corrections
+   - **Shell scripts**: ShellCheck with suggestions
+
+**Critical Workflow**: Every file gets prettier formatting BEFORE any rule-based linting to establish a consistent
+baseline.
 
 ## Analysis Document Policy
 
@@ -115,24 +142,27 @@ When auto-fixes fail, the system:
 ## Example Usage
 
 ```bash
-# Standard auto-fix linting (default behavior)
+# Standard auto-fix linting (prettier ALWAYS runs first)
 /doh-sys:lint
+# → Step 1: prettier --write on all supported files
+# → Step 2: markdownlint --fix, eslint --fix, etc.
+# → Step 3: DOH-specific intelligent fixes
 
-# Check issues without fixing (report-only mode)
+# Check issues without fixing (report-only mode, NO prettier)
 /doh-sys:lint --check-only
 
-# Auto-fix specific file types
+# Auto-fix specific file types (prettier runs on matched files)
 /doh-sys:lint --files="docs/*.md"
 
-# Auto-fix with additional formatting
-/doh-sys:lint --format
-
-# Verbose auto-fix output
+# Verbose output showing prettier step
 /doh-sys:lint --verbose
 
-# Auto-fix TODO and CHANGELOG specifically
+# Auto-fix TODO and CHANGELOG (prettier then markdownlint)
 /doh-sys:lint --files="TODO.md CHANGELOG.md"
 ```
+
+**Note**: The `--format` parameter has been removed as prettier formatting is now ALWAYS the first step in auto-fix
+mode.
 
 ## Integration with /doh-sys:commit
 
@@ -150,13 +180,14 @@ Provides clear, actionable feedback:
 
 ```
 🔧 DOH System Linting with Auto-Fix
-├── 📝 Scanning 47 markdown files...
+├── 📝 Scanning 47 files (*.md, *.json, *.js, *.ts, *.css)...
+├── ✨ Priority 0: Prettier auto-fix applied to 42 files
 ├── ⚡ Priority 1: Fixed 3 critical syntax errors
 ├── ⚡ Priority 2: Fixed 8 structural issues
 ├── ⚡ Priority 3: Applied 12 consistency fixes
 ├── ⚡ Priority 4: Cleaned 5 style issues
 ├── ⚠️  2 manual fixes needed (see details below)
-└── ✅ Linting complete: 28 auto-fixes applied
+└── ✅ Linting complete: 70 total fixes (42 prettier + 28 rule-based)
 
 Manual fixes needed:
 • TODO.md:1520 - Table structure too complex for auto-fix
@@ -190,5 +221,82 @@ Uses DOH-optimized linting configuration:
 - **Caching**: Remembers successful fixes to speed up reruns
 - **File filtering**: Skips irrelevant files (node_modules, .git, etc.)
 
-This command provides the same intelligent, progressive auto-fix approach as the commit pipeline, but focused
-specifically on code quality and formatting.
+## AI-Driven Optimization Detection
+
+This command continuously learns and improves through auto-fix pattern analysis:
+
+### Auto-Detection Capabilities
+
+**Auto-Fix Success Pattern Analysis**:
+
+- **Repeated manual fixes**: When certain issue types consistently require manual intervention
+- **Priority order inefficiency**: When lower-priority fixes conflict with higher-priority ones
+- **File type gaps**: When new file types appear that aren't handled by current logic
+
+**Example Detection Scenarios**:
+
+```bash
+# After consistent manual fixes for table formatting issues
+🔍 Optimization Detected: Table auto-fix logic incomplete
+   Pattern: 7/10 recent runs required manual table formatting fixes
+   Missing: Complex table alignment, multi-row header detection
+
+   Proposed optimization: Enhanced table processing
+   - Add multi-pass table alignment algorithm
+   - Detect and preserve complex table structures
+   - Priority boost for table fixes (blocks other formatting)
+
+   Update /doh-sys:lint with this optimization? [Y/n]
+```
+
+**Progressive Fix Learning**:
+
+- **Fix conflict patterns**: When prettier conflicts with rule-based linters
+- **Retry success analysis**: When certain fixes succeed on second/third attempts
+- **File-specific patterns**: When certain files consistently need special handling
+
+### Smart Priority Reordering
+
+**Dynamic Priority Learning**:
+
+```bash
+# After detecting that line-length fixes often break code blocks
+🔍 Optimization Detected: Fix priority order causing conflicts
+   Pattern: Line length fixes breaking code block formatting (5 occurrences)
+   Conflict: Priority 3 (line length) interfering with Priority 2 (code blocks)
+
+   Proposed optimization: Smart dependency-aware priorities
+   - Defer line length fixes until after code block processing
+   - Add fix compatibility matrix
+   - Context-aware priority adjustment
+
+   Update /doh-sys:lint priority system with this optimization? [Y/n]
+```
+
+### Optimization Confirmation Workflow
+
+1. **Fix Pattern Monitoring**: Track success rates, manual intervention frequency, conflict patterns
+2. **Efficiency Analysis**: Identify bottlenecks and improvement opportunities
+3. **Logic Enhancement**: Design specific improvements for detected patterns
+4. **User Confirmation**: Request permission with clear benefit explanation
+5. **Optimization Logging**: Records optimization in `.claude/optimization/DOHSYSOPTIM.md`
+6. **Implementation**: Update auto-fix intelligence and apply immediately
+
+**Confirmation Format**:
+
+```
+🔍 Optimization Detected: [Auto-fix component] needs enhancement
+   Pattern: [Statistical observation from recent executions]
+   Issue: [Current limitation or inefficiency]
+
+   Proposed optimization: [Specific improvement]
+   - [Technical enhancement 1]
+   - [Technical enhancement 2]
+
+   Update /doh-sys:lint with this optimization? [Y/n]
+
+   [If confirmed, logs to DOHSYSOPTIM.md with success rate data and fix pattern analysis]
+```
+
+This command provides an intelligent, progressive auto-fix approach that continuously evolves through pattern
+recognition and optimization, ensuring maximum effectiveness across diverse codebases and file types.

@@ -3,6 +3,12 @@
 Executes the complete DOH system commit pipeline by calling `/doh-sys:changelog` for documentation updates, then
 performing git operations with intelligent commit message generation.
 
+## Description
+
+Fully automated DOH development workflow command that handles documentation updates, quality assurance, and git
+operations in a single pipeline. Implements intelligent commit message generation based on change analysis and TODO
+completion detection.
+
 ## Usage
 
 ```bash
@@ -195,4 +201,92 @@ Auto-fixes applied in this priority order:
 3. **Medium**: Formatting consistency (line length, spacing)
 4. **Low**: Style preferences (emphasis, trailing spaces)
 
-This command streamlines DOH development workflow while maintaining quality and consistency standards.
+## AI-Driven Optimization Detection
+
+This command continuously learns and improves through execution pattern analysis:
+
+### Auto-Detection Capabilities
+
+**Commit Message Pattern Analysis**:
+
+- **Manual edit frequency**: When auto-generated messages require frequent manual correction
+- **Context extraction misses**: When TODO/CHANGELOG parsing fails to extract proper context
+- **Version detection gaps**: When version bumps aren't properly detected and included
+
+**Example Detection Scenarios**:
+
+```bash
+# After 4/5 auto-generated messages required manual editing
+🔍 Optimization Detected: Commit message generation accuracy low
+   Pattern: 80% of auto-messages manually edited (last 5 executions)
+   Common issues: Missing T### references, version bump detection failed
+
+   Proposed optimization: Enhanced change analysis
+   - Improve TODO completion detection in CHANGELOG parsing
+   - Add VERSION.md change pattern recognition
+   - Better semantic commit type classification
+
+   Update /doh-sys:commit with this optimization? [Y/n]
+```
+
+**Pipeline Execution Learning**:
+
+- **Lint failure patterns**: When specific markdown issues consistently cause failures
+- **Git hook conflicts**: When pre-commit hooks repeatedly fail on similar issues
+- **File staging misses**: When important changed files aren't automatically staged
+
+### Optimization Confirmation Workflow
+
+1. **Execution Monitoring**: Track success rates and failure patterns across multiple runs
+2. **Pattern Analysis**: Identify recurring issues that could be prevented
+3. **Solution Design**: Develop specific improvements to address detected patterns
+4. **User Confirmation**: Request permission with clear improvement explanation
+5. **Logic Enhancement**: Update pipeline intelligence
+6. **Optimization Logging**: Records optimization in `.claude/optimization/DOHSYSOPTIM.md`
+7. **Immediate Application**: Apply improved logic to current execution
+
+**Confirmation Format**:
+
+```
+🔍 Optimization Detected: [Pipeline component] needs improvement
+   Pattern: [Statistical observation from recent executions]
+   Impact: [What currently fails or requires manual intervention]
+
+   Proposed optimization: [Specific enhancement]
+   - [Technical improvement 1]
+   - [Technical improvement 2]
+
+   Update /doh-sys:commit pipeline with this optimization? [Y/n]
+
+   [If confirmed, logs to DOHSYSOPTIM.md with execution statistics and improvement metrics]
+```
+
+This command streamlines DOH development workflow while maintaining quality and consistency standards, continuously
+improving through intelligent pattern recognition and optimization.
+
+## Implementation
+
+When this command is executed by Claude:
+
+1. **Parameter Processing**: Parse task description and flags (`--version-bump`, `--no-lint`, `--dry-run`)
+2. **Change Analysis**: Use git commands to analyze current status and detect modification patterns
+3. **Documentation Pipeline**: Execute `/doh-sys:changelog` AI logic with extracted or provided task information
+4. **Quality Assurance**: Run `/doh-sys:lint` AI logic with prettier-first auto-fix (unless `--no-lint`)
+5. **Commit Message Generation**: Create intelligent semantic commit message based on analysis
+6. **Git Operations**: Stage changes, commit with generated message, handle pre-commit hooks intelligently
+7. **Error Handling**: Progressive retry with Claude-driven auto-fixes, fallback to `--no-verify` if needed
+
+## AI-Driven Execution
+
+This command is executed entirely by Claude's AI logic:
+
+- **Smart Analysis**: Claude analyzes git changes and TODO completions
+- **Intelligent Fixes**: Claude applies prettier and linting fixes progressively
+- **Adaptive Messaging**: Claude generates semantic commit messages based on change context
+- **Error Recovery**: Claude handles pre-commit hook failures with intelligent retries
+
+## Integration with Other Commands
+
+- **Calls `/doh-sys:changelog`**: AI-driven documentation updates
+- **Calls `/doh-sys:lint`**: AI-driven quality assurance with prettier-first approach
+- **No bash scripts required**: Pure AI workflow execution

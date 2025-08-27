@@ -773,12 +773,13 @@ update_agent_session_memory() {
 
 ### 📄 Analysis Document Policy
 
-**Analysis documents (analysis/*.md) are historical snapshots**:
+**Analysis documents (analysis/\*.md) are historical snapshots**:
 
-✅ **Allowed**: Formatting/linting fixes (line lengths, spacing, markdown syntax)
-❌ **Forbidden**: Semantic content changes (project names, examples, conclusions)
+✅ **Allowed**: Formatting/linting fixes (line lengths, spacing, markdown syntax) ❌ **Forbidden**: Semantic content
+changes (project names, examples, conclusions)
 
-**Rationale**: Analysis documents preserve the context and thinking at the time decisions were made. They serve as an audit trail for understanding why architectural choices were made and what information was available when.
+**Rationale**: Analysis documents preserve the context and thinking at the time decisions were made. They serve as an
+audit trail for understanding why architectural choices were made and what information was available when.
 
 ### 📈 Development Metrics
 

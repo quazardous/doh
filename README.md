@@ -73,14 +73,14 @@ Like Homer's "Doh!" - the answer was there all along, you just needed the right 
 
 ### 📋 Quick Reference
 
-| I want to... | Go to... | Time needed |
-|--------------|----------|-------------|
-| **Learn DOH basics** | [WORKFLOW.md](WORKFLOW.md) | 5 min |
-| **Start using DOH** | `/doh:quick "my first task"` | 1 min |
-| **See all commands** | [docs/commands.md](docs/commands.md) | 10 min |
-| **Contribute code** | [CONTRIBUTING.md](CONTRIBUTING.md) | 5 min setup |
-| **Understand architecture** | [docs/architecture.md](docs/architecture.md) | 15 min |
-| **See what's planned** | [TODO.md](TODO.md) | Browse |
+| I want to...                | Go to...                                     | Time needed |
+| --------------------------- | -------------------------------------------- | ----------- |
+| **Learn DOH basics**        | [WORKFLOW.md](WORKFLOW.md)                   | 5 min       |
+| **Start using DOH**         | `/doh:quick "my first task"`                 | 1 min       |
+| **See all commands**        | [docs/commands.md](docs/commands.md)         | 10 min      |
+| **Contribute code**         | [CONTRIBUTING.md](CONTRIBUTING.md)           | 5 min setup |
+| **Understand architecture** | [docs/architecture.md](docs/architecture.md) | 15 min      |
+| **See what's planned**      | [TODO.md](TODO.md)                           | Browse      |
 
 ## Credits
 
