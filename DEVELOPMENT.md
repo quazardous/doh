@@ -771,6 +771,15 @@ update_agent_session_memory() {
 3. **Before TODO Completion**: Feature must be fully implemented and tested
 4. **Before Version Bump**: CHANGELOG must be updated with all changes
 
+### 📄 Analysis Document Policy
+
+**Analysis documents (analysis/*.md) are historical snapshots**:
+
+✅ **Allowed**: Formatting/linting fixes (line lengths, spacing, markdown syntax)
+❌ **Forbidden**: Semantic content changes (project names, examples, conclusions)
+
+**Rationale**: Analysis documents preserve the context and thinking at the time decisions were made. They serve as an audit trail for understanding why architectural choices were made and what information was available when.
+
 ### 📈 Development Metrics
 
 - **TODO Completion Rate**: Items marked ✅ per session

@@ -842,7 +842,7 @@ style guide and automated enforcement.
 
 ### T030 - Fix Single Source of Truth violations in CLAUDE.md after T026 completion
 
-**Status**: READY (T034 analysis completed - critical issues identified)  
+**Status**: ✅ COMPLETED  
 **Priority**: HIGH - Critical for 1.4.0 release consistency  
 **Dependencies**: T026 (restructuring completion ✅), T034 (analysis completed ✅)  
 **Version**: 1.4.0 **Tags**: `#doc` **Analysis**: Part of `analysis/T034-documentation-health-report.md`
@@ -1455,6 +1455,46 @@ make DOH documentation excellent rather than just functional.
 - Documentation feels comprehensive and professional
 
 **Target Version**: 1.5.0 (enhancement phase after core 1.4.0 stabilizes)
+
+---
+
+### T037 - Clean up old project references (MrTroove, mkplan) across documentation
+
+**Status**: PROPOSED  
+**Priority**: Low - Cleanup and consistency  
+**Dependencies**: None (independent cleanup)  
+**Proposed Version**: 1.4.0 **Tags**: `#doc`
+
+Systematically clean up remaining old project references (MrTroove, mkplan) identified during T030 execution, while
+preserving historical context in analysis documents.
+
+**Impact**: Complete removal of old project-specific references improves documentation professionalism and prevents
+confusion for new users seeing outdated project names in examples.
+
+**Scope**: Clean up old project references while respecting document types:
+
+**References Found (T030)**:
+
+- docs/agent-context-protocol.md:31 - "name": "MrTroove" ✅ (partially fixed)
+- docs/config-design-analysis.md:54 - "project_name": "MrTroove" ✅ (partially fixed)  
+- .claude/commands/doh/quick.md:98 - "Project Context: MrTroove Symfony application"
+
+**Guidelines**:
+
+- **Living Documentation**: Update to generic examples (MyProject, ExampleApp)
+- **Analysis Documents**: **PRESERVE** as historical snapshots - these are like timestamps of decisions made
+- **Command Examples**: Update for current usability
+- **Template Files**: Update to generic placeholders
+
+**Tasks**:
+
+- [ ] Update .claude/commands/doh/quick.md project context example
+- [ ] Verify all template files use generic project names
+- [ ] Scan for any remaining MrTroove/mkplan references in living docs
+- [ ] **Explicitly preserve** analysis document references as historical context
+
+**Note**: Analysis documents (analysis/*.md) are historical snapshots and should NOT be modified to preserve the
+context of when decisions were made.
 
 ---
 
