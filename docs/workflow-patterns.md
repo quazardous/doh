@@ -2,6 +2,8 @@
 
 Complete guide to DOH workflow patterns for different project types and development scenarios.
 
+**📖 New to DOH?** Start with [WORKFLOW.md](../WORKFLOW.md) for a simple step-by-step example first.
+
 ## Overview
 
 DOH supports multiple workflow patterns depending on project complexity, team size, and development approach. This guide

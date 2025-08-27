@@ -74,7 +74,13 @@ This guide shows how to use the complete DOH hierarchy for large projects requir
 
 ---
 
-**For quick tasks**: See README `/doh:quick` section  
-**For detailed workflows**: See [docs/workflow-patterns.md](./docs/workflow-patterns.md)  
-**For real examples**: See [docs/workflow-examples.md](./docs/workflow-examples.md)  
-**For technical details**: See [DEVELOPMENT.md](./DEVELOPMENT.md)
+## See Also
+
+**✅ Completed this guide?** Next steps:
+
+- **Practice with simple tasks**: Try `/doh:quick "your task here"`  
+- **Learn patterns**: [docs/workflow-patterns.md](./docs/workflow-patterns.md) - When to use each workflow  
+- **See real examples**: [docs/workflow-examples.md](./docs/workflow-examples.md) - Complete project scenarios  
+- **All commands**: [docs/commands.md](./docs/commands.md) - Complete command reference
+
+**🔧 For developers**: [DEVELOPMENT.md](./DEVELOPMENT.md) - Internal development patterns

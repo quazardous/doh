@@ -1,11 +1,12 @@
 # DOH Tests
 
 ## Overview
+
 This folder contains all test elements and validation for the /doh system.
 
 ## Structure
 
-```
+```bash
 tests/
 ├── README.md           # This documentation
 ├── test_data.json      # Automated test scenarios
@@ -19,14 +20,18 @@ tests/
 ## Files
 
 ### test_data.json
+
 Main test scenarios for validation:
+
 - Creating PRDs, Epics, Features, Tasks
-- Hierarchical workflows  
+- Hierarchical workflows
 - Natural language commands
 - Structure and traceability validation
 
 ### test_data.md
+
 Complete test documentation:
+
 - Scenario explanations
 - Validation criteria
 - Manual and automated usage
@@ -35,6 +40,7 @@ Complete test documentation:
 ## Usage
 
 ### Manual Tests
+
 ```bash
 # Execute individual scenarios
 /doh:prd
@@ -44,7 +50,8 @@ Complete test documentation:
 ```
 
 ### Automated Tests (Future)
-```bash  
+
+```bash
 # Complete validation
 /doh:test-all
 
@@ -57,10 +64,13 @@ Complete test documentation:
 ## Extension
 
 To add new tests:
+
 1. Add scenarios in `test_data.json`
-2. Document in `test_data.md` 
+2. Document in `test_data.md`
 3. Create specialized subfolders if necessary
 
 ---
 
-*Test folder maintained up-to-date with /doh system evolution*
+## Maintenance
+
+Test folder maintained up-to-date with /doh system evolution.

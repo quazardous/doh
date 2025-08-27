@@ -37,37 +37,50 @@ Like Homer's "Doh!" - the answer was there all along, you just needed the right 
 - **Autonomous Agents**: `/doh:agent #123` for hands-off development
 - **Epic #0 System**: Quick tasks without bureaucracy
 
-## Documentation Structure
+## Documentation Map
 
-### For Claude/AI Runtime Usage
+**📖 New to DOH?** Start here: [WORKFLOW.md](WORKFLOW.md) → [Commands](docs/commands.md) → Practice with `/doh:quick`
 
-- **[inclaude.md](inclaude.md)** - **RUNTIME REFERENCE** - Essential /doh usage guide for Claude
-    - This is the primary document Claude uses during project work
-    - Contains only what's needed for using /doh, not developing it
+### 🎯 For Users (Get Started)
+
+- **[WORKFLOW.md](WORKFLOW.md)** - **Start here!** Simple workflow example (5 min read)
+- **[docs/commands.md](docs/commands.md)** - **Essential reference** All commands and natural language usage
+- **[docs/workflow-patterns.md](docs/workflow-patterns.md)** - Advanced patterns and decision guides
+- **[docs/workflow-examples.md](docs/workflow-examples.md)** - Real-world examples for different project types
+
+### 🤖 For Claude/AI Runtime
+
+- **[.claude/doh/inclaude.md](.claude/doh/inclaude.md)** - **RUNTIME REFERENCE** Essential /doh guide for Claude
+    - Primary document Claude uses during project work
     - Optimized for fast loading and reference (2KB vs 15KB+)
-    - **Referenced by `.claude/CLAUDE.md`** in projects using /doh
+    - Referenced by `.claude/CLAUDE.md` in projects using /doh
 
-### For Users and Workflow
+### 👩‍💻 For Contributors (Development)
 
-- **[WORKFLOW.md](WORKFLOW.md)** - **Quick workflow guide** - Simple PRD → Epic → Feature → Task example
-- **[docs/workflow-patterns.md](docs/workflow-patterns.md)** - **Detailed workflow patterns** - Comprehensive patterns
-  and decision guides
-- **[docs/workflow-examples.md](docs/workflow-examples.md)** - **Real-world examples** - Complete scenarios for
-  different project types
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - **Development setup** Get started contributing in 5 minutes
+- **[DEVELOPMENT.md](DEVELOPMENT.md)** - **Internal patterns** Development guidelines and architecture
+- **[TODO.md](TODO.md)** - **Current roadmap** Active development tasks and progress
+- **[CHANGELOG.md](CHANGELOG.md)** - **Release history** Complete feature and release tracking
+- **[VERSION.md](VERSION.md)** - **Version management** Release tracking and version strategy
 
-### For /doh System Development
+### 🏗️ Architecture & Advanced Topics
 
-- **[VERSION.md](VERSION.md)** - **Version management and release tracking**
-- **[CHANGELOG.md](CHANGELOG.md)** - **Complete history of features and releases**
-- **[TODO.md](../../TODO.md)** - **Development roadmap and progress tracking**
-- **[Architecture](docs/architecture.md)** - Structure, IDs, and file organization
-- **[Commands](docs/commands.md)** - All commands and natural language usage
-- **[Worktree Strategy](docs/worktree-strategy.md)** - Parallel development setup
-- **[Memory System](docs/memory-system.md)** - Persistent context and learning
-- **[Agent Context Protocol](docs/agent-context-protocol.md)** - How autonomous agents receive and use context
-- **[AI Context Rules](docs/ai-context-rules.md)** - Guidelines for AI development
-- **[DEVELOPMENT.md](DEVELOPMENT.md)** - **Internal development patterns and architecture**
-- **[CLAUDE.md](CLAUDE.md)** - **Claude-specific development configuration**
+- **[docs/architecture.md](docs/architecture.md)** - **System structure** File organization, IDs, and data flow
+- **[docs/memory-system.md](docs/memory-system.md)** - **Persistent context** How DOH learns and remembers
+- **[docs/agent-context-protocol.md](docs/agent-context-protocol.md)** - **Autonomous agents** Context and integration
+- **[docs/worktree-strategy.md](docs/worktree-strategy.md)** - **Parallel development** Multiple feature strategy
+- **[docs/ai-context-rules.md](docs/ai-context-rules.md)** - **AI guidelines** Development with AI assistance
+
+### 📋 Quick Reference
+
+| I want to... | Go to... | Time needed |
+|--------------|----------|-------------|
+| **Learn DOH basics** | [WORKFLOW.md](WORKFLOW.md) | 5 min |
+| **Start using DOH** | `/doh:quick "my first task"` | 1 min |
+| **See all commands** | [docs/commands.md](docs/commands.md) | 10 min |
+| **Contribute code** | [CONTRIBUTING.md](CONTRIBUTING.md) | 5 min setup |
+| **Understand architecture** | [docs/architecture.md](docs/architecture.md) | 15 min |
+| **See what's planned** | [TODO.md](TODO.md) | Browse |
 
 ## Credits
 
