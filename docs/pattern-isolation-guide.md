@@ -1,26 +1,30 @@
 # DOH Pattern Isolation Guide - Chinese Wall Policy
 
-**Purpose**: Enforce a strict "Chinese Wall" separation between DOH internal development patterns and user-facing runtime patterns
+**Purpose**: Enforce a strict "Chinese Wall" separation between DOH internal development patterns and user-facing
+runtime patterns
 
 ## The Chinese Wall Principle
 
 This document establishes an information barrier (Chinese Wall) between:
+
 - **Internal Side**: How we build and develop the DOH system
 - **User Side**: How users interact with and use DOH in their projects
 
-**This separation must be absolute - no information leakage across the wall**
+### Information Barrier Requirement
+
+This separation must be absolute - no information leakage across the wall
 
 ## Quick Reference
 
 ### 🚫 Never Mix These Patterns
 
-| Internal Development | User Runtime |
-| -------------------- | ------------ |
-| TODO.md task tracking | .doh/ project structure |
-| T### task numbers | !### issue IDs |
-| E### epic numbers | Epic folders in .doh/epics/ |
-| /doh-sys commands | /doh commands |
-| .claude/doh/ internals | .doh/ user content |
+| Internal Development   | User Runtime                |
+| ---------------------- | --------------------------- |
+| TODO.md task tracking  | .doh/ project structure     |
+| T### task numbers      | !### issue IDs              |
+| E### epic numbers      | Epic folders in .doh/epics/ |
+| /doh-sys commands      | /doh commands               |
+| .claude/doh/ internals | .doh/ user content          |
 
 ## Documentation Categories
 
@@ -29,6 +33,7 @@ This document establishes an information barrier (Chinese Wall) between:
 **Can Include**: T###, E###, TODO.md references, /doh-sys commands
 
 **Files**:
+
 - `TODO.md` - DOH development roadmap
 - `DEVELOPMENT.md` - Internal development guide
 - `TODOARCHIVED.md` - Completed internal tasks
@@ -40,6 +45,7 @@ This document establishes an information barrier (Chinese Wall) between:
 **Must Exclude**: All internal development patterns
 
 **Files**:
+
 - `README.md` - User introduction
 - `WORKFLOW.md` - How to use /doh commands
 - `docs/*.md` - Usage documentation
@@ -51,40 +57,35 @@ This document establishes an information barrier (Chinese Wall) between:
 **Requires Care**: General concepts OK, specific internals NO
 
 **Files**:
+
 - `CONTRIBUTING.md` - External contributor guide
-  - ✅ "We use TODO.md for tracking"
-  - ❌ "See T048 for details"
+    - ✅ "We use TODO.md for tracking"
+    - ❌ "See T048 for details"
 
 ## Enforcement Rules
 
 ### Rule 1: Command Documentation
 
 ```markdown
-❌ WRONG (mixes internal and runtime):
-"The /doh:init command (similar to T001 skeleton) creates..."
+❌ WRONG (mixes internal and runtime): "The /doh:init command (similar to T001 skeleton) creates..."
 
-✅ CORRECT (clean separation):
-"The /doh:init command creates your project structure..."
+✅ CORRECT (clean separation): "The /doh:init command creates your project structure..."
 ```
 
 ### Rule 2: Example Projects
 
 ```markdown
-❌ WRONG (exposes internal structure):
-".claude/doh/skel/ contains the templates..."
+❌ WRONG (exposes internal structure): ".claude/doh/skel/ contains the templates..."
 
-✅ CORRECT (user perspective):
-"Your .doh/ folder will contain epics and tasks..."
+✅ CORRECT (user perspective): "Your .doh/ folder will contain epics and tasks..."
 ```
 
 ### Rule 3: Development References
 
 ```markdown
-❌ WRONG (specific internal task):
-"This feature (T044) enables natural language..."
+❌ WRONG (specific internal task): "This feature (T044) enables natural language..."
 
-✅ CORRECT (generic reference):
-"Natural language support is under development..."
+✅ CORRECT (generic reference): "Natural language support is under development..."
 ```
 
 ## Review Checklist
@@ -162,4 +163,4 @@ grep -rn "TODO\|T0[0-9]\|E0[0-9]\|doh-sys" \
 
 ---
 
-*This guide ensures DOH maintains professional separation between internal development and user-facing documentation.*
+_This guide ensures DOH maintains professional separation between internal development and user-facing documentation._

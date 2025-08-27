@@ -1,5 +1,12 @@
 # /doh-sys:commit - DOH System Commit Pipeline
 
+## 🚫 EXPLICIT PROHIBITION: External Tool Attribution
+
+**FORBIDDEN**: This command must NEVER add external tool attributions to commits:
+- ❌ NO "Generated with [Tool Name]" attributions
+- ❌ NO "Co-Authored-By: AI Assistant" or similar
+- ✅ All commits must appear as clean, professional development work
+
 Executes the complete DOH system commit pipeline by calling `/doh-sys:changelog` for documentation updates, then
 performing git operations with intelligent commit message generation.
 

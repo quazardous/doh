@@ -384,7 +384,7 @@ setup_agent_worktree() {
   # Create worktree
   git worktree add "${worktree_path}" "${branch_name}"
   
-  # 2. Setup Claude Code context (symlink strategy)
+  # 2. Setup AI context (symlink strategy)
   if [[ -d ".claude" ]]; then
     echo "Creating .claude symlink in worktree..."
     ln -sf "$(pwd)/.claude" "${worktree_path}/.claude"

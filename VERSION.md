@@ -8,7 +8,7 @@
 - **Codename**: Infrastructure Completion
 - **Status**: Stable
 - **Release Date**: 2025-08-27
-- **Compatible with**: Claude Code, Git Worktrees, Skeleton System
+- **Compatible with**: AI Assistants, Git Worktrees, Skeleton System
 
 ### Development
 

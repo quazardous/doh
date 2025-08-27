@@ -41,10 +41,10 @@ and 100% token savings for routine operations.
 **Version**: 1.4.0 ✅ **Completed**: 2025-08-27
 
 Design and implement robust PROJECT_ROOT detection strategy that handles symlinks, encrypted filesystems, bind mounts,
-and preserves Claude Code working directory preference while ensuring bash script compatibility.
+and preserves AI assistant working directory preference while ensuring bash script compatibility.
 
 **Impact**: Current path resolution causes issues with symlinks, encrypted filesystems (.private), bind mounts, and
-different working directories. DOH scripts must work seamlessly whether launched from Claude Code directory or bash
+different working directories. DOH scripts must work seamlessly whether launched from AI assistant directory or bash
 command line, with predictable behavior across all common filesystem scenarios.
 
 **Architecture Decision**: ✅ **Option B - Duplication Contrôlée**
@@ -132,7 +132,7 @@ DOH becomes its own standalone project.
 - ✅ `.claude/doh/CHANGELOG.md` → `./CHANGELOG.md` (MIGRATED ✅)
 - ✅ `.claude/doh/VERSION.md` → `./VERSION.md` (MIGRATED ✅)
 - 🔒 `.claude/doh/scripts/` - Runtime scripts (KEEP in .claude)
-- 🔒 `.claude/doh/inclaude.md` - Claude Code integration (KEEP in .claude)
+- 🔒 `.claude/doh/inclaude.md` - AI integration context (KEEP in .claude)
 
 **Benefits**:
 

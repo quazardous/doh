@@ -36,10 +36,10 @@ doh_find_project_root() {
     
     [[ "$debug_mode" == "1" ]] && echo "🐛 DOH Path Resolution Debug Mode" >&2
     
-    # 1. PRIORITY: Claude Code Working Directory (preserve user's choice)
+    # 1. PRIORITY: AI Assistant Working Directory (preserve user's choice)
     local claude_cwd="$PWD"  
     if doh_validate_project_path "$claude_cwd"; then
-        [[ "$debug_mode" == "1" ]] && echo "🐛 Found via Claude CWD: $claude_cwd" >&2
+        [[ "$debug_mode" == "1" ]] && echo "🐛 Found via AI CWD: $claude_cwd" >&2
         echo "$(cd "$claude_cwd" && pwd -P)"
         return 0
     fi

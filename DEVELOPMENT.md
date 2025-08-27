@@ -10,31 +10,35 @@
 **Critical**: Maintain clear separation between DOH internal development patterns and user-facing runtime documentation.
 
 #### Internal Development Documentation (CAN have T/E numbers, TODO.md refs)
+
 - **TODO.md** - DOH system development roadmap with T### task numbers
 - **DEVELOPMENT.md** - This file, internal DOH development guide
 - **TODOARCHIVED.md** - Completed DOH system tasks archive
 - **CHANGELOG.md** - DOH system release history with T### references
 - **VERSION.md** - DOH system version tracking
-- **analysis/*.md** - DOH system design and analysis documents
+- **analysis/\*.md** - DOH system design and analysis documents
 
 #### User-Facing Documentation (NO internal patterns)
+
 - **README.md** - User introduction, how to install/use DOH
 - **WORKFLOW.md** - How to use /doh commands in projects
-- **docs/*.md** - DOH usage documentation for end users
-- **.claude/commands/doh/*.md** - Runtime command documentation
-- **.claude/doh/templates/*.md** - Templates for user projects
+- **docs/\*.md** - DOH usage documentation for end users
+- **.claude/commands/doh/\*.md** - Runtime command documentation
+- **.claude/doh/templates/\*.md** - Templates for user projects
 
 #### Mixed-Purpose Documentation (Careful separation required)
+
 - **CONTRIBUTING.md** - For external contributors
-  - ✅ CAN mention TODO.md exists for tracking
-  - ❌ Should NOT reference specific T### numbers
-  - ✅ Should explain contribution workflow
+    - ✅ CAN mention TODO.md exists for tracking
+    - ❌ Should NOT reference specific T### numbers
+    - ✅ Should explain contribution workflow
 
 ### Documentation Review Checklist
 
 When creating or reviewing documentation, verify:
 
 **For User-Facing Docs**:
+
 - [ ] No references to TODO.md task numbers (T###, E###)
 - [ ] No references to /doh-sys commands (internal use only)
 - [ ] No mentions of DOH system internal development workflows
@@ -42,12 +46,14 @@ When creating or reviewing documentation, verify:
 - [ ] Focus on runtime /doh commands that users actually run
 
 **For Internal Dev Docs**:
+
 - [ ] Clearly marked as internal development documentation
 - [ ] T### and E### references are acceptable
 - [ ] TODO.md workflow documentation is appropriate
 - [ ] /doh-sys commands can be documented
 
 **For Mixed-Purpose Docs**:
+
 - [ ] External contributors understand the scope
 - [ ] No specific internal task numbers exposed
 - [ ] General development process explained without internal details
@@ -290,7 +296,7 @@ setup_doh_dev_worktree() {
   local agent_id="$2"            # Agent session ID
 
   # Create worktree: ../doh-worktree-feature-${feature_name}
-  # Symlink .claude for Claude Code access
+  # Symlink .claude for AI context access
   # Generate complete DOH context bundle
   # Initialize agent development environment
   # Create feature-specific memory context
@@ -333,7 +339,7 @@ setup_doh_dev_worktree() {
   },
   "codebase_context": {
     "tech_stack": ["Bash", "Markdown", "JSON"],
-    "development_tools": ["Claude Code", "Git Worktree"],
+    "development_tools": ["AI Assistant", "Git Worktree"],
     "target_systems": ["Claude", "Git", "Shell"]
   }
 }
@@ -589,7 +595,7 @@ Agent Worktree/
 ```bash
 # Complete worktree setup pattern
 1. Create git worktree with branch
-2. Symlink .claude for Claude Code access
+2. Symlink .claude for AI context access
 3. Generate agent context bundle (JSON)
 4. Initialize agent environment script
 5. Validate complete setup
@@ -886,20 +892,23 @@ other projects. The TODO management system tracks all development work with prop
 **Unified Sequence**: TODOs and Epics share the same numbering sequence.
 
 **ID Formats**:
+
 - **TODO Items**: T{number} (e.g., T001, T044, T045)
 - **Epic Items**: E{number} (e.g., E047, E020)
 
 **Epic Transformation Rule**: When a TODO becomes an epic, it keeps the same number:
+
 - T020 → E020 (transforms into epic, keeps ID 020)
 - New child TODOs get new IDs from the sequence
 
-**Epic Identification**: 
+**Epic Identification**:
+
 - Epics are marked with 🛡️ EPIC flag in the TODO list
 - Epics list their component TODOs in parentheses
 - Child TODOs reference their parent epic with [Epic E###]
 
-**Single List Management**: All items (TODOs and Epics) are maintained in a single "Active TODOs" list, 
-with epics identified by the 🛡️ flag rather than being in a separate section.
+**Single List Management**: All items (TODOs and Epics) are maintained in a single "Active TODOs" list, with epics
+identified by the 🛡️ flag rather than being in a separate section.
 
 ### TODO Lifecycle Rules
 

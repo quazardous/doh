@@ -1,8 +1,8 @@
-# Stratégie Worktree avec Claude Code
+# Stratégie Worktree avec IA
 
 ## Problématique
 
-Les worktrees Git nécessitent le contexte Claude Code (`.claude/`) pour que l'IA comprenne le projet et le système DOH.
+Les worktrees Git nécessitent le contexte IA (`.claude/`) pour que l'assistant comprenne le projet et le système DOH.
 
 ## Solution Architecture
 
@@ -11,7 +11,7 @@ Les worktrees Git nécessitent le contexte Claude Code (`.claude/`) pour que l'I
 ```text
 /home/david/Private/dev/projects/
 ├── mrtroove/                      # Projet principal
-│   ├── .claude/                   # Config Claude Code originale
+│   ├── .claude/                   # Config IA originale
 │   │   ├── doh/                   # Système DOH (specs)
 │   │   ├── commands/              # Commandes Claude
 │   │   └── agents/                # Agents DOH
@@ -65,9 +65,9 @@ echo "   DOH state: Déjà présent via Git (.doh/ versionné)"
 
 #### Copie de `.claude/`
 
-- ✅ **Contexte complet** : Claude Code a toutes les infos du projet
+- ✅ **Contexte complet** : L'IA a toutes les infos du projet
 - ✅ **Isolation** : Modifications locales possibles si nécessaire
-- ✅ **Compatibilité** : Fonctionne même si Claude Code ne suit pas les symlinks
+- ✅ **Compatibilité** : Fonctionne même si l'IA ne suit pas les symlinks
 - ✅ **CLAUDE.md présent** : Instructions projet disponibles
 
 #### Copie de `.doh/`
@@ -160,7 +160,7 @@ function createWorktreeForTask(taskId) {
 ## Bénéfices Finaux
 
 1. **Isolation Complète** : Chaque worktree peut diverger (code ET organisation DOH)
-2. **Contexte Préservé** : Claude Code fonctionne parfaitement
+2. **Contexte Préservé** : L'IA fonctionne parfaitement
 3. **Merge Standard** : Git gère les conflits sur `.doh/` comme sur le code
 4. **Parallélisation** : Multiple agents sur différents worktrees
 5. **Flexibilité** : Possibilité d'expérimenter avec la structure DOH

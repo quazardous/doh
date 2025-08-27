@@ -1,4 +1,17 @@
-# Claude Code Configuration
+# DOH Project Configuration for AI Development
+
+## 🚫 EXPLICIT PROHIBITION: External Tool Attribution
+
+**FORBIDDEN**: All external tool attribution is explicitly prohibited in this project:
+
+- ❌ NO "Generated with [Claude Code]" in any commits, documentation, or code
+- ❌ NO "Co-Authored-By: Claude" or similar external tool attributions
+- ❌ NO references to specific AI tools, IDEs, or development environments in code/commits
+- ✅ This project stands as independent professional software
+
+**Enforcement**: Any attribution to external tools must be removed immediately upon detection.
+
+## AI Development Configuration
 
 ## Project Overview
 

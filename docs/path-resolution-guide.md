@@ -18,7 +18,7 @@ across symlinks, encrypted filesystems, bind mounts, and different working direc
 
 The system follows this exact priority order:
 
-1. **Claude Code Working Directory** - Preserves user's preferred directory
+1. **AI Assistant Working Directory** - Preserves user's preferred directory
 2. **Explicit PROJECT_ROOT** - Environment variable override
 3. **Configuration preferred_path** - User's configured preference
 4. **Standard .doh detection** - Parent directory traversal

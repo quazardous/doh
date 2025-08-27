@@ -77,7 +77,7 @@ The system uses **2 optimized agents** (consolidation from 10 → 2 agents):
 **This document documents the SPECIFICATIONS of the /doh system.**
 
 - **📋 Specifications**: `./docs/` (this documentation)
-- **⚙️ Implementation**: `.claude/commands/doh/` (actual Claude Code commands)
+- **⚙️ Implementation**: `.claude/commands/doh/` (actual AI assistant commands)
 
 **⚠️ ACTION REQUIRED: The evolutions documented here must be implemented in `.claude/commands/doh/`** (see ./TODO.md for
 tracking)
@@ -86,7 +86,7 @@ tracking)
 
 1. **Specifications**: This doc = vision and planned evolutions
 2. **Implementation**: Commands described here must be coded in `.claude/commands/doh/*.md`
-3. **Testing**: Verify that commands actually work in Claude Code
+3. **Testing**: Verify that commands actually work with AI assistant
 4. **Maintenance**: Maintain consistency between specification and implementation
 
 ### Express Commands (In Development)

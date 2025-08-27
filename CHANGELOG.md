@@ -174,7 +174,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Fixed
 
 - Agent context loading - Now includes complete hierarchy and memory context
-- Worktree isolation - Proper symlink strategy for Claude Code integration
+- Worktree isolation - Proper symlink strategy for AI context integration
 - Documentation coherence - Separated runtime (inclaude.md) from dev docs
 
 ### Technical
@@ -243,7 +243,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Basic DOH command structure
 - Initial epic and task management
-- Claude Code integration framework
+- AI assistant integration framework
 - Git-based task tracking
 - Template system for PRD/Epic/Task creation
 

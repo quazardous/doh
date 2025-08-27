@@ -15,8 +15,8 @@ Like Homer's "Doh!" - the answer was there all along, you just needed the right 
 /doh:init
 ```
 
-> **Note**: `/doh:init` is separate from Claude Code's `/init` command. Claude Code's `/init` initializes general
-> project structure, while `/doh:init` specifically sets up the DOH task management system.
+> **Note**: `/doh:init` is a DOH-specific command that initializes the DOH task management system, distinct from other
+> AI assistant initialization commands.
 >
 > **Confirmation Required**: `/doh:init` will always prompt for confirmation before proceeding (unless `--no-confirm` is
 > used). This prevents accidental initialization and gives you control over when DOH is set up in your projects.

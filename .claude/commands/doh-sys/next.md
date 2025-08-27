@@ -124,7 +124,7 @@ Priority Score = Base Priority × Dependency Weight × Context Relevance × Impa
    ├── ⏱️  Estimated: 2-4 hours
    └── 🎯 Impact: Enables automated quality control for all docs
 
-3. **T041** - Remove Claude Code attribution comments (COMPLETED)
+3. **T041** - Remove attribution comments (COMPLETED)
    ├── ✅ Task completed successfully
    ├── ⏱️  Time taken: 45 minutes
    └── 🎯 Impact: Clean commit history, professional codebase presentation
