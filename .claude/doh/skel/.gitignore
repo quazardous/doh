@@ -1,0 +1,17 @@
+# DOH Project .gitignore
+# Only ignore DOH-specific temporary and sensitive files
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Agent session logs that may contain sensitive data
+memory/agent-sessions/*.log
+memory/agent-sessions/debug-*
+memory/agent-sessions/tmp-*
+memory/active-session.json
+
+# Backup files
+*.bak
+*.backup

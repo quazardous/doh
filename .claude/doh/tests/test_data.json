@@ -1,0 +1,52 @@
+{
+  "next_id": 1,
+  "items": {},
+  "test_scenarios": [
+    {
+      "name": "Basic PRD Creation",
+      "commands": [
+        "/doh:prd",
+        "Expected: Creates prd1.md with template structure"
+      ]
+    },
+    {
+      "name": "PRD to Epic Decomposition", 
+      "commands": [
+        "/doh:prd",
+        "/doh:prd-epics 1",
+        "Expected: Creates epic folders and files linked to PRD #1"
+      ]
+    },
+    {
+      "name": "Epic Direct Task Creation",
+      "commands": [
+        "/doh:epic-tasks 2",
+        "Expected: Creates task files directly under epic folder"
+      ]
+    },
+    {
+      "name": "Epic to Feature to Task Flow",
+      "commands": [
+        "/doh:epic-features 2", 
+        "/doh:feature-tasks 12",
+        "Expected: Creates nested feature folder with tasks"
+      ]
+    },
+    {
+      "name": "Natural Language Operations",
+      "commands": [
+        "create a PRD for user authentication system",
+        "show me all PRDs",
+        "list tasks for epic notification-system",
+        "Expected: Natural language processing works correctly"
+      ]
+    }
+  ],
+  "validation_checks": [
+    "File structure follows naming conventions",
+    "ID tracking is sequential and unique", 
+    "Parent-child relationships are maintained",
+    "Templates are properly populated",
+    "Traceability metadata is included"
+  ]
+}
