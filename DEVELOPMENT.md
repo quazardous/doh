@@ -832,9 +832,23 @@ other projects. The TODO management system tracks all development work with prop
 - **CHANGELOG.md**: Feature releases with TODO mappings
 - **VERSION.md**: Central version tracking
 
+### ID Numbering Convention
+
+**Unified Sequence**: TODOs and Epics share the same numbering sequence:
+
+- **TODO Items**: T001, T002, T003, T044, T045, T046, T047, T048...
+- **Epic Items**: E047 (uses next available number in same sequence)
+- **Next Available**: T048 (continues after epic E047)
+
+**Epic ID Format**: E{number} (e.g., E047)  
+**TODO ID Format**: T{number} (e.g., T044, T045, T046)
+
+Epic templates and command documentation should reflect this unified numbering pattern where epics use "E" prefix but
+consume IDs from the same sequence as TODO items.
+
 ### TODO Lifecycle Rules
 
-- Update **Next TODO ID** in header when adding new TODO
+- Update **Next TODO ID** in header when adding new TODO or Epic
 - Add to **Active TODOs** list with appropriate priority section
 - Keep descriptions concise and actionable
 - Use GitHub-like format for clean diffs

@@ -1,7 +1,7 @@
 # TODO - /doh System Evolution
 
 **Last Updated**: 2025-08-27  
-**Next TODO ID**: T044
+**Next TODO ID**: T049
 
 ---
 
@@ -18,10 +18,21 @@
 
 ---
 
-## 📑 Active TODOs
+## 📑 Active TODOs & Epics
 
 **Order**: Top-down (most recently active first)
 
+### Active Epics
+
+- **E047** Natural Language & Performance Optimization (EPIC: T017, T020, T044, T045, T046)
+
+### Active TODOs
+
+- **T048** Audit & Enforce DOH Internal/Runtime Pattern Isolation (#doc, #architecture)
+- **T046** Natural Language UX Integration & Deployment (#features, #optimization, #ux) [Epic E047]
+- **T045** Intelligent Routing System (Bash/Claude Hybrid Execution) (#features, #optimization, #performance) [Epic
+  E047]
+- **T044** Natural Language DOH Command Interface & Script Optimization (#features, #think, #optimization) [Epic E047]
 - **T043** DOH Security Epic Planning & Implementation Roadmap (#security, #think)
 - **T042** DOH Security Analysis & Threat Modeling (#security, #think)
 - **T041** Remove Claude Code attribution comments from codebase - COMPLETED
@@ -53,30 +64,123 @@
 
 ## TODOs
 
-### T001 - DOH Skeleton Implementation 🚩🚩
+### T001 - DOH Skeleton Implementation & Methodology Enforcement 🚩🚩
 
 **Status**: Ready to implement  
-**Priority**: CRITICAL - Blocks T002 development  
+**Priority**: CRITICAL - Blocks T002 development and methodology enforcement  
 **Dependencies**: None  
 **Target Version**: 1.4.0
 
-Create standardized `.doh/` skeleton structure for consistent project initialization. The skeleton provides a template
-that both `/doh:init` and `/doh:analyze` can use.
+Create standardized `.doh/` skeleton structure that enforces strict DOH project management methodology and enables
+memory context for all `/doh` commands. The skeleton serves as the foundation for methodology compliance and intelligent
+project context.
 
-**Impact**: Currently `/doh:init` and `/doh:analyze` lack standard templates, causing inconsistent .doh setups across
-projects.
+**Impact**: Currently `/doh:init` and `/doh:analyze` lack standard templates, causing inconsistent .doh setups and
+preventing proper DOH methodology enforcement. Without skeleton structure, `/doh` commands cannot maintain memory
+context or enforce disciplined project management workflow vs free-form Claude interactions.
+
+**Core Architecture Requirements**:
+
+**DOH Methodology Enforcement**:
+
+- **Structural Discipline**: Enforces PRD → Epic → Feature → Task hierarchy
+- **Process Compliance**: All `/doh` commands must follow DOH workflow standards
+- **Traceability Mandates**: Every work item connects to business objectives
+- **Memory Context**: Persistent project intelligence vs ephemeral Claude interactions
+- **Workflow Guidance**: Built-in methodology coaching and compliance checking
+
+**Memory Context Foundation**:
+
+- **Project Persistence**: Commands build on accumulated project knowledge
+- **Decision Tracking**: Memory system preserves rationale and context
+- **Session Continuity**: Command interactions maintain state across time
+- **Team Coordination**: Shared memory enables collaborative project management
 
 **Tasks**:
 
-- [ ] Create `.claude/doh/skel/` directory structure
-- [ ] Create `project-index.json` template with proper schema
-- [ ] Create `.gitignore` with sections for DOH components
-- [ ] Create empty `memory/` directories (project/, epics/, agent-sessions/)
-- [ ] Create `epics/quick/epic0.md` template for Epic #0
-- [ ] Update `/doh:init` command to use skeleton
-- [ ] Test skeleton deployment
+#### Phase 1: Core Skeleton Structure (1.5h)
 
-**Deliverable**: Complete skeleton structure ready for use by initialization commands.
+- [ ] **Create `.claude/doh/skel/` directory structure** with complete DOH hierarchy
+- [ ] **Design `project-index.json` schema** with methodology compliance fields
+    - Project metadata, epic tracking, methodology version, compliance flags
+- [ ] **Create structured `.gitignore`** with DOH-specific sections and methodology protection
+- [ ] **Establish memory architecture** with project/, epics/, agent-sessions/ foundations
+
+#### Phase 2: Methodology Templates (2h)
+
+- [ ] **Create Epic #0 template** (`epics/quick/epic0.md`) with DOH methodology guidance
+- [ ] **Design task templates** with mandatory traceability and status discipline
+- [ ] **Create feature templates** with epic connections and deliverable tracking
+- [ ] **Build methodology documentation** embedded in skeleton structure
+
+#### Phase 3: Memory & Context System (1.5h)
+
+- [ ] **Design memory initialization** for project context establishment
+- [ ] **Create context loading mechanisms** for `/doh` command execution
+- [ ] **Build memory update protocols** for maintaining project state
+- [ ] **Implement session continuity** for command interaction history
+
+#### Phase 4: Command Integration (2h)
+
+- [ ] **Update `/doh:init` command** to use skeleton with methodology enforcement
+- [ ] **Add methodology compliance validation** to skeleton deployment
+- [ ] **Create migration strategy** for existing `.doh/` projects
+- [ ] **Build methodology coaching features** into command responses
+
+#### Phase 5: Testing & Validation (1.5h)
+
+- [ ] **Test skeleton deployment** on new projects with methodology validation
+- [ ] **Validate memory context loading** across multiple command sessions
+- [ ] **Test methodology enforcement** with various command scenarios
+- [ ] **Verify backward compatibility** with existing DOH projects
+
+#### Phase 6: Documentation & Integration (1h)
+
+- [ ] **Update command documentation** to reflect methodology enforcement
+- [ ] **Create skeleton usage guide** with DOH workflow examples
+- [ ] **Document memory context architecture** for future development
+
+**Methodology Compliance Features**:
+
+**Structural Enforcement**:
+
+- All tasks MUST belong to an epic (Epic #0 or dedicated epic)
+- All epics MUST follow DOH template structure with proper documentation
+- All features MUST connect to epics and contain structured task breakdown
+- Project structure MUST maintain proper hierarchy and traceability
+
+**Process Enforcement**:
+
+- Status transitions MUST follow DOH workflow (PROPOSED → IN PROGRESS → COMPLETED)
+- Task completion MUST update epic progress and memory context
+- Epic graduation MUST be suggested when Epic #0 exceeds threshold
+- Memory context MUST be updated with every significant project decision
+
+**Quality Assurance**:
+
+- Templates MUST include methodology guidance and examples
+- Validation MUST check for proper DOH structure compliance
+- Memory system MUST preserve decision rationale and project evolution
+- Commands MUST provide methodology coaching when structure issues detected
+
+**Performance Targets**:
+
+- Skeleton deployment: <5 seconds for complete project initialization
+- Memory context loading: <200ms for typical project state
+- Methodology validation: <100ms for structure compliance checking
+- Command execution: Context-aware responses within standard performance limits
+
+**Success Criteria**:
+
+- All `/doh` commands enforce strict methodology compliance
+- Memory context provides persistent project intelligence across sessions
+- Skeleton enables consistent DOH project structure across all users
+- Methodology coaching guides users toward best practices automatically
+- Template structure scales from personal projects to team collaboration
+
+**Deliverable**: Complete DOH skeleton system with methodology enforcement, memory context architecture, and integrated
+command foundation that transforms `/doh` commands into disciplined project management workflow vs free-form
+interactions.
 
 ---
 
@@ -438,12 +542,13 @@ comprehensive testing and validation of real-world usage.
 
 ---
 
-### T017 - Bash Routine Expansion Analysis 🚩🚩
+### T017 - Bash Routine Expansion Analysis 🚩🚩 (EPIC Phase 1)
 
-**Status**: Not started  
+**Status**: COMPLETED  
 **Priority**: High - Capitalize on T013 POC success  
 **Dependencies**: T013 (bash scripts), T014 (data structure analysis)  
-**Proposed Version**: 1.5.0
+**Proposed Version**: 1.5.0  
+**Epic**: E047 Natural Language & Performance Optimization
 
 Analyze current DOH command usage patterns and identify next batch of bash routine candidates to maximize token savings
 and performance gains.
@@ -506,12 +611,13 @@ configuration system, and UUID generation work together across different environ
 
 ---
 
-### T020 - Enhanced Codebase Analysis Engine 🚩
+### T020 - Enhanced Codebase Analysis Engine 🚩 (EPIC Phase 1)
 
 **Status**: Proposed  
 **Priority**: High - Builds on T002 specification  
 **Dependencies**: T001 (skeleton), T018 (path resolution), T019 (integration tests), T028 (dev environment)  
-**Proposed Version**: 1.5.0
+**Proposed Version**: 1.5.0  
+**Epic**: E047 Natural Language & Performance Optimization
 
 Implement the `/doh:analyze` command with advanced codebase analysis capabilities beyond the original T002
 specification.
@@ -1797,6 +1903,421 @@ security enhancement.
 **Deliverable**: Detailed security epic plan (`analysis/T043-security-epic-plan.md`) with structured implementation
 roadmap, prioritized task breakdown, timeline planning, and measurable security objectives for systematic DOH system
 hardening.
+
+---
+
+## 🚀 EPIC E047: Natural Language & Performance Optimization
+
+**Epic Scope**: Transform DOH from technical command interface to conversational, intelligent system while maximizing
+performance through hybrid execution and script optimization strategies.
+
+**Strategic Vision**: Create seamless user experience where natural language commands leverage optimized bash scripts
+for performance and Claude AI for intelligence, making DOH accessible to all users while maintaining enterprise-grade
+performance.
+
+**Epic Components**: T017, T020, T044, T045, T046
+
+**Dependencies**: T001 (Skeleton - foundation), T013 (Bash optimization - completed)
+
+**Target Version**: 1.4.1 - 1.5.0 (multi-release epic)
+
+### Epic Batched Work Plan
+
+**Phase 1 - Analysis & Architecture (T017, T020)**: Foundation analysis for optimization **Phase 2 - Natural Language
+Design (T044)**: Conversational interface architecture  
+**Phase 3 - Hybrid Performance (T045)**: Intelligent bash/Claude routing system **Phase 4 - User Experience Integration
+(T046)**: Seamless natural language deployment
+
+### T045 - Intelligent Routing System (Bash/Claude Hybrid Execution) 🚩
+
+**Status**: PROPOSED  
+**Priority**: High - Epic Phase 3  
+**Dependencies**: T017 (bash routine patterns), T044 (natural language design)  
+**Target Version**: 1.5.0  
+**Tags**: `#features` `#optimization` `#performance`
+
+Implement hybrid execution system that intelligently routes DOH commands between optimized bash scripts and Claude
+processing based on operation type, complexity, and available optimization potential.
+
+**Impact**: Enable 100-500x performance improvements for data operations while maintaining Claude's natural language
+capabilities for complex reasoning. Creates seamless user experience where speed optimization is invisible but dramatic.
+
+**Core Architecture**:
+
+**Routing Intelligence**:
+
+- **Data Operations**: Route to bash (get-item, list-tasks, search, count, validate)
+- **Language Processing**: Route to Claude (analysis, planning, complex queries)
+- **Hybrid Operations**: Start with bash, escalate to Claude for complex cases
+- **Fallback Strategy**: Always graceful fallback from bash to Claude on errors
+
+**Performance Targets**:
+
+- **Bash Operations**: 5-50ms response time for data queries
+- **Claude Operations**: Normal API response time for reasoning tasks
+- **Hybrid Decisions**: <10ms routing decision time
+- **Fallback Latency**: <100ms additional overhead for bash→Claude fallback
+
+**Tasks**:
+
+#### Phase 1: Routing Engine Core (2h)
+
+- [ ] **Design command classification system** for bash vs Claude routing
+- [ ] **Implement routing decision logic** based on command patterns and complexity
+- [ ] **Create routing configuration** with per-command optimization settings
+- [ ] **Build routing metadata** for command capability mapping
+
+#### Phase 2: Bash Integration Layer (2h)
+
+- [ ] **Create bash script discovery system** for available optimizations
+- [ ] **Implement bash execution wrapper** with error handling and timing
+- [ ] **Build bash→Claude fallback triggers** for unsupported operations
+- [ ] **Add performance monitoring** for bash operation success rates
+
+#### Phase 3: Claude Integration Layer (1.5h)
+
+- [ ] **Design Claude execution pathway** for complex operations
+- [ ] **Implement context preservation** when falling back to Claude
+- [ ] **Create Claude response optimization** for hybrid operation workflows
+- [ ] **Build Claude performance tracking** for routing decision refinement
+
+#### Phase 4: Routing Logic Implementation (2h)
+
+- [ ] **Implement command parsing** for operation type detection
+- [ ] **Create complexity analysis** for routing decisions
+- [ ] **Build optimization opportunity detection** for bash routing
+- [ ] **Add dynamic routing adjustment** based on performance history
+
+#### Phase 5: Testing & Validation (1.5h)
+
+- [ ] **Test routing accuracy** across all DOH command types
+- [ ] **Validate fallback mechanisms** under various error conditions
+- [ ] **Test performance improvements** for bash-routed operations
+- [ ] **Verify seamless user experience** regardless of routing path
+
+**Success Criteria**:
+
+- 95%+ correct routing decisions for command classification
+- 100-500x performance improvement for bash-routable operations
+- <1% fallback failures requiring user intervention
+- Transparent user experience with invisible optimization benefits
+
+**Deliverable**: Production-ready hybrid routing system that maximizes performance while maintaining full DOH
+functionality and natural language capabilities.
+
+---
+
+### T046 - Natural Language UX Integration & Deployment 🚩
+
+**Status**: PROPOSED  
+**Priority**: High - Epic Phase 4  
+**Dependencies**: T044 (NL design), T045 (hybrid routing)  
+**Target Version**: 1.5.0  
+**Tags**: `#features` `#optimization` `#ux`
+
+Deploy integrated natural language interface with hybrid performance optimization, creating seamless conversational
+project management experience with invisible speed optimizations.
+
+**Impact**: Complete transformation of DOH user experience from technical command interface to conversational assistant.
+Users interact naturally while benefiting from dramatic performance improvements without technical complexity.
+
+**Core Architecture**:
+
+**User Experience Design**:
+
+- **Conversational Interface**: Natural language input processing with methodology guidance
+- **Invisible Optimization**: Performance benefits happen transparently without user awareness
+- **Methodology Coaching**: Built-in guidance toward DOH best practices through conversation
+- **Context Awareness**: Commands understand project state and user intent from conversation
+
+**Integration Capabilities**:
+
+- **Seamless Routing**: Users never know if bash or Claude handled their request
+- **Progressive Enhancement**: Simple queries get instant responses, complex analysis takes appropriate time
+- **Error Recovery**: Natural language explanations for any routing or execution failures
+- **Learning Integration**: System learns user patterns and optimizes routing decisions
+
+**Tasks**:
+
+#### Phase 1: Interface Integration (2.5h)
+
+- [ ] **Integrate NL parser** with hybrid routing system from T045
+- [ ] **Implement conversation flow management** for multi-step DOH operations
+- [ ] **Create context-aware command suggestions** based on project state and conversation
+- [ ] **Build natural language error handling** with helpful recovery suggestions
+
+#### Phase 2: User Experience Optimization (2h)
+
+- [ ] **Design response formatting** for conversational interface consistency
+- [ ] **Implement progress indication** for longer operations with transparent routing info
+- [ ] **Create intelligent command completion** for common DOH workflow patterns
+- [ ] **Build user preference learning** for personalized routing optimization
+
+#### Phase 3: Methodology Integration (1.5h)
+
+- [ ] **Integrate DOH methodology coaching** into conversational responses
+- [ ] **Implement structured workflow guidance** through natural language interaction
+- [ ] **Create compliance checking** with conversational feedback for methodology violations
+- [ ] **Build epic/task navigation** through conversational interface
+
+#### Phase 4: Performance Monitoring & Optimization (1.5h)
+
+- [ ] **Implement usage analytics** for routing decision refinement
+- [ ] **Create performance dashboards** for hybrid system monitoring
+- [ ] **Build optimization recommendations** based on user patterns and performance data
+- [ ] **Add A/B testing framework** for interface and routing improvements
+
+#### Phase 5: Documentation & Training (1h)
+
+- [ ] **Create user onboarding guide** for natural language DOH interface
+- [ ] **Document conversation patterns** and optimal user interaction approaches
+- [ ] **Build command reference** with natural language alternatives
+- [ ] **Create troubleshooting guide** for hybrid system issues
+
+**Success Criteria**:
+
+- Natural conversation flow for 95% of DOH operations
+- Invisible performance optimization with user satisfaction metrics
+- Successful methodology coaching through conversational interface
+- Seamless integration of technical optimization with natural language UX
+
+**Deliverable**: Complete natural language DOH interface with integrated performance optimization, methodology coaching,
+and seamless user experience that transforms project management interaction paradigm.
+
+---
+
+### T048 - Audit & Enforce DOH Internal/Runtime Pattern Isolation 🚩
+
+**Status**: PROPOSED  
+**Priority**: High - Prevents cross-contamination and confusion  
+**Dependencies**: None  
+**Target Version**: 1.4.1  
+**Tags**: `#doc` `#architecture`
+
+Audit all DOH documentation and code to ensure clear separation between DOH system internal development patterns
+(TODO.md, Epic E047) and runtime `/doh` command patterns that users employ in their projects.
+
+**Impact**: Current documentation mixes internal DOH development concepts with user-facing `/doh` runtime patterns,
+creating confusion about which patterns apply where. This leads to incorrect assumptions and implementation mistakes.
+
+**Core Issues to Address**:
+
+**Documentation Cross-Contamination**:
+
+- Internal DOH epic numbering (E047) appearing in `/doh` command documentation
+- TODO.md patterns being referenced in user-facing `/doh` guides
+- DOH system development workflows mixed with user project workflows
+- Template documentation containing internal development references
+
+**Pattern Isolation Requirements**:
+
+- **Internal DOH Development**: TODO.md, T/E numbering, /doh-sys commands, DOH system architecture
+- **Runtime /doh Commands**: .doh/ structure, user project epics/tasks, /doh command patterns
+- **Clear Boundaries**: No mixing of internal patterns with user-facing documentation
+
+**Tasks**:
+
+#### Phase 1: Documentation Audit (1.5h)
+
+- [ ] **Scan all `.claude/commands/doh/` files** for references to TODO.md, T/E numbering, or internal patterns
+- [ ] **Review all template files** for internal DOH development references
+- [ ] **Audit user-facing documentation** (README.md, WORKFLOW.md, docs/) for internal pattern leakage
+- [ ] **Check command examples** for mixing internal and runtime patterns
+
+#### Phase 2: Pattern Isolation Enforcement (2h)
+
+- [ ] **Remove internal references** from `/doh` command documentation
+- [ ] **Clean template files** of DOH system development concepts
+- [ ] **Update user guides** to focus purely on runtime `/doh` usage
+- [ ] **Create isolation guidelines** for future documentation
+
+#### Phase 3: Architecture Documentation (1h)
+
+- [ ] **Document pattern boundaries** clearly in DEVELOPMENT.md
+- [ ] **Create isolation checklist** for new documentation
+- [ ] **Add review guidelines** to prevent future cross-contamination
+- [ ] **Update contributor guidelines** with separation requirements
+
+#### Phase 4: Validation & Testing (1h)
+
+- [ ] **Test user workflow documentation** without internal references
+- [ ] **Validate command examples** work in real user projects
+- [ ] **Verify template consistency** across all `/doh` commands
+- [ ] **Check cross-reference accuracy** in all documentation
+
+**Success Criteria**:
+
+- Zero references to TODO.md, T/E numbering in `/doh` command documentation
+- Clear distinction between DOH system development and user project patterns
+- User-facing documentation focuses purely on runtime `/doh` usage
+- Internal development documentation clearly marked as DOH system specific
+
+**Deliverable**: Clean separation between DOH internal development patterns and user-facing `/doh` runtime patterns,
+with clear documentation boundaries and isolation guidelines.
+
+---
+
+### T044 - Natural Language DOH Command Interface & Script Optimization ⚡ (EPIC Phase 2)
+
+**Status**: PROPOSED  
+**Priority**: High - Critical for user experience and T001 enhancement  
+**Dependencies**: T001 (DOH Skeleton Implementation)  
+**Proposed Version**: 1.4.1  
+**Epic**: E047 Natural Language & Performance Optimization  
+**Tags**: `#features` `#think` `#optimization` **Analysis**: Will create
+`analysis/T044-natural-language-doh-interface.md`
+
+Design and implement natural language processing capabilities for `/doh` commands while maintaining optimal script
+performance through intelligent hybrid execution strategies.
+
+**Impact**: Current DOH commands require precise syntax and parameter knowledge, creating friction for users. T001
+skeleton implementation provides foundation, but T044 focuses on making DOH commands conversational and intuitive while
+preserving the performance benefits of bash script optimization where possible.
+
+**Natural Language Vision**:
+
+**Current Experience** (Technical):
+
+```bash
+/doh:task create --title "Fix login bug" --epic=3 --priority=high --type=bug
+/doh:epic create --title "Authentication System" --description="User auth overhaul"
+/doh:status update task 123 --status=completed
+```
+
+**Desired Experience** (Natural):
+
+```bash
+/doh "create a high priority bug task to fix the login issue in epic 3"
+/doh "make a new epic called Authentication System for user auth overhaul"
+/doh "mark task 123 as completed"
+/doh "what should I work on next that's ready to start?"
+/doh "show me all open bugs in the authentication epic"
+```
+
+**Technical Architecture Goals**:
+
+**Hybrid Processing Strategy**:
+
+- **Natural Language Parser**: Claude AI processes conversational input into structured commands
+- **Intent Recognition**: Identify command type (create, update, query, analyze)
+- **Parameter Extraction**: Extract entities (task names, priorities, epics, statuses)
+- **Script Optimization**: Use bash for data operations, Claude for language processing
+- **Fallback Graceful**: Maintain current syntax support for power users
+
+**Performance Optimization Opportunities**:
+
+- **Command Caching**: Cache frequently used natural language patterns → script mappings
+- **Batch Operations**: "create 3 tasks for the login system" → single optimized script execution
+- **Context Awareness**: Remember project context to reduce parsing overhead
+- **Smart Routing**: Simple commands → direct bash, complex queries → Claude processing
+
+**Tasks**:
+
+#### Phase 1: Natural Language Analysis & Design (3-4h)
+
+- [ ] **Current Command Audit**: Analyze existing `/doh` commands and usage patterns
+- [ ] **Natural Language Patterns**: Research common user expressions for project management
+- [ ] **Intent Classification**: Design taxonomy for DOH command intentions (create, update, query, analyze)
+- [ ] **Entity Recognition**: Define entities (tasks, epics, priorities, statuses, users) and extraction patterns
+- [ ] **Ambiguity Resolution**: Plan strategies for handling unclear or ambiguous natural language
+
+#### Phase 2: Hybrid Architecture Design (2-3h)
+
+- [ ] **Processing Pipeline**: Design NL input → intent → parameters → execution flow
+- [ ] **Performance Strategy**: Plan bash optimization points vs Claude processing requirements
+- [ ] **Caching Strategy**: Design pattern caching for common natural language expressions
+- [ ] **Context Management**: Plan project context awareness and session memory
+- [ ] **Error Handling**: Design graceful degradation when NL parsing fails
+
+#### Phase 3: Implementation Planning & Prototyping (2-3h)
+
+- [ ] **Command Router**: Design intelligent routing between NL processing and direct execution
+- [ ] **Parser Integration**: Plan Claude AI integration points for language understanding
+- [ ] **Script Interface**: Design clean interface between NL parser and existing bash scripts
+- [ ] **Performance Testing**: Plan benchmarking for NL vs direct command performance
+- [ ] **User Experience**: Design feedback mechanisms for improving NL understanding
+
+**Brainstorming Areas**:
+
+**Natural Language Processing**:
+
+- Intent recognition strategies for project management domain
+- Entity extraction techniques for technical project terminology
+- Context awareness across command sessions
+- Ambiguity resolution through clarifying questions
+- Learning from user corrections and patterns
+
+**Performance Optimization**:
+
+- When to use Claude AI processing vs bash scripts
+- Caching strategies for common language patterns
+- Batch operation optimization for multiple entity commands
+- Memory usage optimization for context retention
+- Response time minimization techniques
+
+**User Experience Design**:
+
+- Conversational flow design for complex multi-step operations
+- Feedback mechanisms for command understanding accuracy
+- Progressive disclosure for power users vs beginners
+- Error recovery and suggestion systems
+- Documentation and learning resources for natural language usage
+
+**Integration Architecture**:
+
+- Seamless integration with existing DOH command structure
+- Backward compatibility with current precise syntax
+- Extension points for future natural language capabilities
+- Testing strategies for natural language processing accuracy
+- Quality assurance for diverse language input patterns
+
+**Example Natural Language Capabilities**:
+
+**Task Management**:
+
+- "Create a bug task to fix the search functionality"
+- "Make this task high priority and assign it to the frontend epic"
+- "Show me all completed tasks from last week"
+- "What tasks are blocked and what's blocking them?"
+
+**Epic/Project Planning**:
+
+- "Start a new epic for the mobile app rewrite"
+- "How many tasks are left in the authentication epic?"
+- "What's the progress on the performance optimization work?"
+
+**Workflow Queries**:
+
+- "What should I work on next?"
+- "Show me quick wins I can finish today"
+- "What's ready to start that doesn't depend on other work?"
+- "Give me a summary of this week's progress"
+
+**Contextual Commands**:
+
+- "Add three tasks for user registration: validation, database, and email confirmation"
+- "Move all the CSS cleanup tasks to a new maintenance epic"
+- "Mark the authentication epic as complete and archive it"
+
+**Success Criteria**:
+
+- Natural language processing accurately interprets 90% of common project management expressions
+- Performance degradation <20% compared to direct command execution
+- Seamless fallback to existing syntax when natural language parsing fails
+- Context awareness improves command accuracy across conversation sessions
+- User satisfaction significantly higher with natural language interface
+
+**Performance Targets**:
+
+- Simple NL commands (create, update): <200ms processing time
+- Complex NL queries (analysis, reporting): <2s processing time
+- Context retention across 50+ command session
+- Cache hit rate >80% for common language patterns
+- Memory footprint <50MB for context and caching
+
+**Deliverable**: Comprehensive natural language interface design document
+(`analysis/T044-natural-language-doh-interface.md`) with technical architecture, performance optimization strategies,
+implementation roadmap, and user experience design for conversational DOH command interaction.
 
 ---
 

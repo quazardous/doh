@@ -58,9 +58,10 @@ DOH uses **markdownlint-cli** with custom configuration at `dev-tools/linters/.m
 
   ````
 
-  ```text
+  ````text
 
   ```text
+  ````
 
 ### Links
 
@@ -226,7 +227,7 @@ echo "no language"
 
 ## Good
 
-```bash
+````bash
 echo "has language"
 ```text
 
@@ -280,4 +281,4 @@ Linting applies to all markdown files:
 
 This style guide ensures DOH maintains professional, consistent documentation quality that reflects well on the
 system's overall quality and attention to detail.
-```
+````
