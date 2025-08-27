@@ -170,7 +170,7 @@ export_functions_for_agents() { ... }
 - Unit test scenarios
 - Integration test workflows
 
-```text
+````text
 
 #### Memory Pattern Development
 ```bash
@@ -777,6 +777,94 @@ update_agent_session_memory() {
 - **CHANGELOG Coverage**: 1:1 mapping with completed TODO items
 - **Integration Test Pass Rate**: All scenarios must pass
 - **Documentation Coverage**: User-facing features documented in inclaude.md
+
+## TODO Management for DOH Development
+
+This project uses traditional TODO.md (in project root) for development tasks rather than the /doh system it provides to
+other projects. The TODO management system tracks all development work with proper versioning and archival.
+
+### File Organization
+
+- **TODO.md** (project root): Active development tasks and roadmap
+- **TODOARCHIVED.md** (project root): Completed tasks from yesterday and earlier
+- **CHANGELOG.md**: Feature releases with TODO mappings
+- **VERSION.md**: Central version tracking
+
+### TODO Lifecycle Rules
+
+- Update **Next TODO ID** in header when adding new TODO
+- Add to **Active TODOs** list with appropriate priority section
+- Keep descriptions concise and actionable
+- Use GitHub-like format for clean diffs
+- **Never move TODOs** when status changes (preserve diff history)
+- Mark completed TODOs in CHANGELOG.md, not here
+- Use proper version nomenclature (see Version Management below)
+
+### Version Management for TODOs
+
+**Version Nomenclature** for TODO tasks follows task lifecycle:
+
+1. **Proposed Version**: `1.4.0` - Initial estimation by Claude/developer at task creation
+2. **Target Version**: `1.4.0` - Version confirmed when dependencies/planning are clearer
+3. **Version**: `1.4.0` - Final version when roadmap is locked OR task is active/completed
+
+**Task Lifecycle & Version Evolution**:
+
+```markdown
+# Initial estimation (Claude proposes)
+
+Status: Proposed + Proposed Version: 1.4.0
+
+# Validated for version (planning confirmed)
+
+Status: Proposed + Target Version: 1.4.0
+
+# Roadmap locked OR implementation starts
+
+Status: Ready + Version: 1.4.0
+
+# Active implementation
+
+Status: In Progress + Version: 1.4.0
+
+# Task completed
+
+Status: Completed + Version: 1.4.0 ✅
+```
+
+**Key Decision Points**:
+
+- **Proposed → Target**: When task is validated for specific version
+- **Target → Version**: When roadmap is finalized OR implementation begins
+- **Version stays fixed**: Once set, version doesn't change (tracks completion version)
+
+**Status + Version Combinations**:
+
+- `Status: Proposed` + `Target Version: X.Y.Z` = **Validated for this version** ✅
+- `Status: Ready` + `Version: X.Y.Z` = **Implementation ready, roadmap locked**
+- `Status: In Progress` + `Version: X.Y.Z` = **Currently being implemented**
+- `Status: Completed` + `Version: X.Y.Z ✅` = **Completed in this version**
+
+### Archive Management
+
+**TODOARCHIVED.md Rules**:
+
+- Move TODOs completed yesterday or earlier to TODOARCHIVED.md
+- Preserve complete TODO descriptions and implementation notes
+- Include completion date and final status
+- Maintain chronological order (newest completed first)
+- Reference related TODOs and dependencies
+- Keep deliverable and impact information for historical reference
+
+**Completion Workflow**:
+
+When a TODO is completed:
+
+1. **Update CHANGELOG.md**: Add entry with TODO reference and completion date
+2. **Update VERSION.md**: If TODO affects version, update runtime/dev versions
+3. **Remove from Active TODOs**: Remove completed TODO from priority sections
+4. **Archive TODO**: Move completed section to TODOARCHIVED.md, preserve TODO body for reference
+5. **Update dependencies**: Mark dependent TODOs as unblocked if applicable
 
 ---
 

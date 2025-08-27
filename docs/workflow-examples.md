@@ -80,7 +80,7 @@ Real-world examples showing how to apply DOH workflows to different types of sof
 # Team A: UI Components
 /doh:agent !21  # Post creation
 
-# Team B: Backend Integration  
+# Team B: Backend Integration
 /doh:agent !22  # Feed algorithm
 
 # Team C: Performance
@@ -335,7 +335,7 @@ Real-world examples showing how to apply DOH workflows to different types of sof
 /doh:epic-features !121
 /doh:agent !125  # Autonomous feature development
 
-# Team B owns Epic !122  
+# Team B owns Epic !122
 /doh:epic-tasks !122    # Direct task breakdown
 ```
 
@@ -446,7 +446,7 @@ Real-world examples showing how to apply DOH workflows to different types of sof
 # Commit messages: "[DOH !211] implement GitHub API sync"
 ```
 
-### Jira Integration  
+### Jira Integration
 
 ```bash
 /doh:prd "quarterly platform updates"

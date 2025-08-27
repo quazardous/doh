@@ -41,8 +41,8 @@ for universal compatibility and distribution.
 This project uses traditional TODO.md (in project root) for development tasks rather than the /doh system it provides to
 other projects.
 
-📋 **Version Management Rules**: See `TODO.md` section "TODO Management" for complete version nomenclature (Proposed
-Version / Target Version / Version)
+📋 **TODO Management**: See `DEVELOPMENT.md` for complete rules and workflow. Active tasks in `TODO.md`, completed tasks
+archived in `TODOARCHIVED.md`.
 
 ## Documentation References
 

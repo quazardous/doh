@@ -4,8 +4,8 @@ Complete guide to DOH workflow patterns for different project types and developm
 
 ## Overview
 
-DOH supports multiple workflow patterns depending on project complexity, team size, and development approach.
-This guide covers when and how to use each pattern effectively.
+DOH supports multiple workflow patterns depending on project complexity, team size, and development approach. This guide
+covers when and how to use each pattern effectively.
 
 ## Pattern Categories
 
@@ -119,13 +119,13 @@ This guide covers when and how to use each pattern effectively.
 
 ### Decision Matrix
 
-| Project Scope | Time Estimate | Team Size | Recommended Pattern |
-|---------------|---------------|-----------|-------------------|
-| Bug fix | < 4 hours | 1 | Quick Development |
-| Small feature | 1-2 days | 1 | Quick Development |
-| Medium feature | 3-10 days | 1-3 | Epic-Driven |
-| Complex feature | 1-3 weeks | 2-5 | Feature-First |
-| Product initiative | 1+ months | 5+ | PRD-Driven |
+| Project Scope      | Time Estimate | Team Size | Recommended Pattern |
+| ------------------ | ------------- | --------- | ------------------- |
+| Bug fix            | < 4 hours     | 1         | Quick Development   |
+| Small feature      | 1-2 days      | 1         | Quick Development   |
+| Medium feature     | 3-10 days     | 1-3       | Epic-Driven         |
+| Complex feature    | 1-3 weeks     | 2-5       | Feature-First       |
+| Product initiative | 1+ months     | 5+        | PRD-Driven          |
 
 ### Pattern Progression
 
@@ -153,7 +153,7 @@ Quick → Epic → Feature-First → PRD
 /doh:agent !5  # Autonomous frontend work
 
 # Epic B: Backend API
-/doh:epic "API optimization"  
+/doh:epic "API optimization"
 /doh:agent !6  # Autonomous backend work
 ```
 
@@ -361,23 +361,19 @@ Task !62 ↔ GitHub Issue #789
 
 ### 1. Over-Planning Anti-Pattern
 
-**Problem**: Creating PRDs for simple features
-**Solution**: Start with epic, graduate if needed
+**Problem**: Creating PRDs for simple features **Solution**: Start with epic, graduate if needed
 
 ### 2. Under-Planning Anti-Pattern
 
-**Problem**: Using quick tasks for complex features
-**Solution**: Recognize complexity early, create proper structure
+**Problem**: Using quick tasks for complex features **Solution**: Recognize complexity early, create proper structure
 
 ### 3. Stale Epic Anti-Pattern
 
-**Problem**: Epics that never get implemented
-**Solution**: Regular epic review and prioritization
+**Problem**: Epics that never get implemented **Solution**: Regular epic review and prioritization
 
 ### 4. Dependency Hell Anti-Pattern
 
-**Problem**: Too many cross-epic dependencies
-**Solution**: Refactor epic boundaries, consider architecture changes
+**Problem**: Too many cross-epic dependencies **Solution**: Refactor epic boundaries, consider architecture changes
 
 ## Best Practices
 

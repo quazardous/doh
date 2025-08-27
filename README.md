@@ -50,10 +50,10 @@ Like Homer's "Doh!" - the answer was there all along, you just needed the right 
 ### For Users and Workflow
 
 - **[WORKFLOW.md](WORKFLOW.md)** - **Quick workflow guide** - Simple PRD → Epic → Feature → Task example
-- **[docs/workflow-patterns.md](docs/workflow-patterns.md)** - **Detailed workflow patterns** - Comprehensive patterns and
-  decision guides
-- **[docs/workflow-examples.md](docs/workflow-examples.md)** - **Real-world examples** - Complete scenarios for different
-  project types
+- **[docs/workflow-patterns.md](docs/workflow-patterns.md)** - **Detailed workflow patterns** - Comprehensive patterns
+  and decision guides
+- **[docs/workflow-examples.md](docs/workflow-examples.md)** - **Real-world examples** - Complete scenarios for
+  different project types
 
 ### For /doh System Development
 
