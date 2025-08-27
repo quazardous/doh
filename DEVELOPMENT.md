@@ -742,12 +742,44 @@ update_agent_session_memory() {
 - **Testing**: Integration tests for critical workflows
 - **Traceability**: All changes reference DOH issues
 
+#### Markdown Linting Workflow
+
+**DOH uses automated markdown quality control** with markdownlint-cli:
+
+**Commands**:
+
+```bash
+# Check all markdown files for issues
+make lint
+
+# Auto-fix markdown formatting issues
+make lint-fix
+
+# Show issues requiring manual attention
+make lint-manual
+```
+
+**Development Workflow**:
+
+1. **Write/Edit**: Create or modify documentation
+2. **Auto-fix**: Run `make lint-fix` to correct formatting automatically
+3. **Manual fixes**: Run `make lint-manual` to see issues requiring manual attention:
+   - 📏 **Line length (MD013)**: Break long lines at 120 characters
+   - 🔢 **List numbering (MD029)**: Fix ordered list prefixes (1, 2, 3...)
+   - 📑 **Duplicate headings (MD024)**: Make headings unique in document
+   - 📝 **Code blocks (MD040)**: Add language specifications
+4. **Verify**: Run `make lint` to confirm all issues resolved
+5. **Commit**: Pre-commit hooks automatically validate markdown quality
+
+**Quality Standards**: See `docs/markdown-style-guide.md` for complete DOH markdown standards and configuration details.
+
 #### Review Checklist
 
 - [ ] Function serves single purpose
 - [ ] Parameters documented with types/descriptions
 - [ ] Error cases handled gracefully
 - [ ] Integration points tested
+- [ ] **Markdown quality**: `make lint` passes cleanly
 - [ ] Documentation updated (inclaude.md if user-facing)
 - [ ] CHANGELOG entry added with TODO reference
 - [ ] TODO item marked completed ✅
