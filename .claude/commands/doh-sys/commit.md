@@ -12,14 +12,14 @@ completion detection.
 ## Usage
 
 ```bash
-/doh-sys:commit [task-completion] [--version-bump] [--no-lint] [--dry-run] [--amend] [--force]
+/doh-sys:commit [task-completion] [--no-version-bump] [--no-lint] [--dry-run] [--amend] [--force]
 ```
 
 ## Parameters
 
 - `task-completion`: (Optional) Task ID or description of completed work (e.g., "T035", "fix documentation")
   - **If omitted**: Auto-generates commit label based on git changes and asks for confirmation
-- `--version-bump`: Automatically bump version if changes warrant it
+- `--no-version-bump`: Skip automatic version bumping (version bump is default behavior)
 - `--no-lint`: Skip linting and auto-fixes
 - `--dry-run`: Show what would be done without executing
 - `--amend`: Amend the previous commit instead of creating a new one
@@ -81,7 +81,7 @@ This command provides the complete automation by composing existing commands:
   - TODO management and CHANGELOG updates
   - Version tracking and metadata
   - Quality assurance via `/doh-sys:lint` auto-fix
-- **Inherits all parameters**: `--version-bump`, `--no-lint`, `--dry-run` passed through
+- **Inherits all parameters**: `--no-version-bump`, `--no-lint`, `--dry-run` passed through
 
 ### 2. Intelligent Git Operations
 
@@ -92,7 +92,7 @@ This command provides the complete automation by composing existing commands:
   - Files modified during the pipeline
 - **Generate Smart Commit Message**:
   - Automatically references completed TODOs: "Complete T040 pipeline command implementation"
-  - Includes version bump info: "bump to v1.4.1" when applicable
+  - **Version Bump Confirmation**: Prompts user before applying version changes
   - Uses semantic commit format based on change analysis
   - Adds DOH traceability for development workflow
 - **Stage & Commit**:
@@ -113,9 +113,10 @@ The commit command intelligently extracts information from the documentation pip
 
 ### Version Bump Intelligence
 
-- **Detects version changes**: Monitors VERSION.md modifications
+- **Detects version changes**: Monitors VERSION.md modifications and analyzes change impact
 - **Semantic versioning context**: Understands major/minor/patch implications
-- **Commit message integration**: Includes version info in commit messages
+- **User Confirmation**: Prompts before applying version bumps with impact analysis
+- **Commit message integration**: Includes version info in commit messages after confirmation
 - **Compatibility tracking**: Records version compatibility information
 
 ### Change Analysis
@@ -223,10 +224,16 @@ The pipeline includes intelligent auto-fixes for:
 # → Runs changelog pipeline with specific description
 # → Commits with provided context
 
-# Version bump with extraction
-/doh-sys:commit --version-bump
-# → Detects version changes in pipeline
-# → Includes version info in commit: "feat: Complete T040 (bump to v1.4.1)"
+# Version bump with confirmation (default behavior)
+/doh-sys:commit "T042 security analysis complete"
+# → Analyzes changes, detects version impact
+# → Prompts: "Version bump detected: 1.4.0 → 1.4.1 (minor features added). Confirm? [Y/n]"
+# → User confirms before applying version changes
+
+# Skip version bump when not needed
+/doh-sys:commit --no-version-bump
+# → Skips automatic version detection and bumping
+# → Focuses only on documentation and commit operations
 
 # Dry run shows full extraction
 /doh-sys:commit --dry-run
@@ -351,7 +358,7 @@ improving through intelligent pattern recognition and optimization.
 
 When this command is executed by Claude:
 
-1. **Parameter Processing**: Parse task description and flags (`--version-bump`, `--no-lint`, `--dry-run`, `--amend`, `--force`)
+1. **Parameter Processing**: Parse task description and flags (`--no-version-bump`, `--no-lint`, `--dry-run`, `--amend`, `--force`)
 2. **Amend Mode Detection**: If `--amend` flag detected:
    - Check for uncommitted changes in working directory
    - **CRITICAL SAFETY CHECK**: Abort with error if previous commit has been pushed to remote
@@ -359,14 +366,18 @@ When this command is executed by Claude:
    - Analyze both current changes and previous commit context
 3. **Change Analysis**: Use git commands to analyze current status and detect modification patterns
 4. **Documentation Pipeline**: Execute `/doh-sys:changelog` AI logic with extracted or provided task information
-5. **Quality Assurance**: Run `/doh-sys:lint` AI logic with prettier-first auto-fix (unless `--no-lint`)
-6. **Commit Message Generation**: Create intelligent semantic commit message based on analysis
+5. **Version Bump Confirmation**: If version changes detected (unless `--no-version-bump`):
+   - Analyze impact and determine appropriate version bump (major/minor/patch)
+   - Present version change with rationale: "Version 1.4.0 → 1.4.1 (feature additions)? [Y/n]"
+   - Wait for user confirmation before proceeding
+6. **Quality Assurance**: Run `/doh-sys:lint` AI logic with prettier-first auto-fix (unless `--no-lint`)
+7. **Commit Message Generation**: Create intelligent semantic commit message based on analysis
    - **Normal mode**: Generate new commit message
    - **Amend mode**: Update previous commit message while preserving structure
-7. **Git Operations**: Stage changes and execute git command
+8. **Git Operations**: Stage changes and execute git command
    - **Normal mode**: `git commit` with generated message
    - **Amend mode**: `git commit --amend` with updated message
-8. **Error Handling**: Progressive retry with Claude-driven auto-fixes, fallback to `--no-verify` if needed
+9. **Error Handling**: Progressive retry with Claude-driven auto-fixes, fallback to `--no-verify` if needed
 
 ## AI-Driven Execution
 

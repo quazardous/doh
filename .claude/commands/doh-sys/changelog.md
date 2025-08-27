@@ -7,14 +7,14 @@ operations.
 ## Usage
 
 ```bash
-/doh-sys:changelog [task-completion] [--version-bump] [--no-lint] [--dry-run]
+/doh-sys:changelog [task-completion] [--no-version-bump] [--no-lint] [--dry-run]
 ```
 
 ## Parameters
 
 - `task-completion`: (Optional) Task ID or description of completed work (e.g., "T035", "fix documentation")
   - **If omitted**: Auto-generates description based on git changes and asks for confirmation
-- `--version-bump`: Update version tracking if changes warrant it
+- `--no-version-bump`: Skip automatic version tracking (version bump is default behavior with confirmation)
 - `--no-lint`: Skip linting and auto-fixes on documentation files
 - `--dry-run`: Show what would be done without making changes
 
@@ -48,6 +48,9 @@ This command executes the core DOH documentation pipeline:
 - **CHANGELOG Updates**: Add completed tasks, update status, ensure formatting
 - **TODOARCHIVED Management**: Move old completed tasks from TODO.md to TODOARCHIVED.md (tasks completed yesterday or earlier)
 - **Version Tracking**: Update VERSION.md metadata and completion timestamps
+  - **Automatic Analysis**: Detects if changes warrant version bump based on impact
+  - **User Confirmation**: Prompts for approval before applying version changes
+  - **Impact Assessment**: Shows version change rationale (major/minor/patch)
 
 ### 2. Quality Assurance
 
@@ -105,14 +108,15 @@ Original task description and deliverables preserved...
 # Update with specific task description
 /doh-sys:changelog "T039 - Lint command implementation"
 
-# Update with version tracking
-/doh-sys:changelog "T040 - Feature complete" --version-bump
+# Version tracking with confirmation (default behavior)
+/doh-sys:changelog "T040 - Feature complete"
+# → Analyzes impact, prompts: "Version 1.4.0 → 1.4.1 (feature completion)? [Y/n]"
 
 # Check what would be updated
 /doh-sys:changelog --dry-run
 
-# Skip linting on documentation updates
-/doh-sys:changelog "analysis document updates" --no-lint
+# Skip version bump for minor updates
+/doh-sys:changelog "analysis document updates" --no-version-bump --no-lint
 ```
 
 ## Integration with Other Commands
@@ -138,7 +142,8 @@ Provides clear progress reporting:
 ├── ✅ TODO.md updated (T039 → COMPLETED)
 ├── ✅ CHANGELOG.md updated (T039 entry added)
 ├── ✅ TODOARCHIVED.md updated (2 old completed tasks moved)
-├── ✅ VERSION.md tracking updated
+├── 🔄 VERSION.md analysis: 1.4.0 → 1.4.1 (feature additions detected)
+├── ✅ Version bump confirmed and applied
 ├── 🔧 Auto-fixed 2 documentation formatting issues
 └── ✅ Documentation updates complete
 
