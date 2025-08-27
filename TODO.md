@@ -1439,18 +1439,18 @@ generic examples.
 **Dependencies**: None  
 **Version**: 1.4.0 **Tags**: `#tools` `#automation`
 
-Create `/doh-sys:commit` command to automate the complete DOH development pipeline: TODO management, CHANGELOG updates, 
+Create `/doh-sys:commit` command to automate the complete DOH development pipeline: TODO management, CHANGELOG updates,
 TODOARCHIVED maintenance, version bumping, linting with auto-fixes, and commit with proper messaging.
 
-**Impact**: Streamlines DOH development workflow, reduces manual errors, ensures consistent commit standards, and provides
-intelligent auto-fix capabilities for common markdown and formatting issues.
+**Impact**: Streamlines DOH development workflow, reduces manual errors, ensures consistent commit standards, and
+provides intelligent auto-fix capabilities for common markdown and formatting issues.
 
 **Components Implemented**:
 
 - [x] **Command Structure**: `/doh-sys:commit` with comprehensive parameter support
 - [x] **Pipeline Steps**: TODO → CHANGELOG → TODOARCHIVED → Version → Lint → Commit workflow
 - [x] **Auto-Fix Capabilities**: Intelligent markdown formatting, line length handling, structure fixes
-- [x] **Error Handling**: Progressive retry system with fallback strategies  
+- [x] **Error Handling**: Progressive retry system with fallback strategies
 - [x] **Integration**: Works with existing DOH version management and pre-commit hooks
 - [x] **Documentation**: Complete usage guide with examples and troubleshooting
 
@@ -1463,16 +1463,16 @@ intelligent auto-fix capabilities for common markdown and formatting issues.
 **Dependencies**: T038 (pipeline approach)  
 **Version**: 1.4.0 **Tags**: `#tools` `#automation` `#quality`
 
-Create `/doh-sys:lint` command with intelligent auto-fix capabilities using priority-based repair strategies, progressive error
-handling, and smart line length wrapping.
+Create `/doh-sys:lint` command with intelligent auto-fix capabilities using priority-based repair strategies,
+progressive error handling, and smart line length wrapping.
 
-**Impact**: Provides standalone linting with same intelligent auto-fix approach as commit pipeline, enables targeted quality
-improvements, reduces manual formatting work, and maintains analysis document preservation policy.
+**Impact**: Provides standalone linting with same intelligent auto-fix approach as commit pipeline, enables targeted
+quality improvements, reduces manual formatting work, and maintains analysis document preservation policy.
 
 **Components Implemented**:
 
 - [x] **Priority-based Auto-fix**: Critical → High → Medium → Low repair strategies
-- [x] **Smart Line Wrapping**: Preserves meaning while fixing length issues  
+- [x] **Smart Line Wrapping**: Preserves meaning while fixing length issues
 - [x] **Progressive Error Handling**: Individual fixes, continues on failure, reports unfixable issues
 - [x] **File Type Support**: Markdown, JSON, YAML, code files with specific linting rules
 - [x] **Analysis Document Policy**: Formatting fixes only, semantic content preserved

@@ -1,6 +1,8 @@
 # /doh-sys:changelog - DOH System Documentation Updates
 
-Executes DOH system documentation updates: TODO management, CHANGELOG updates, TODOARCHIVED maintenance, and version tracking without committing changes. Uses the same intelligent analysis as `/doh-sys:commit` but stops before git operations.
+Executes DOH system documentation updates: TODO management, CHANGELOG updates, TODOARCHIVED maintenance, and version
+tracking without committing changes. Uses the same intelligent analysis as `/doh-sys:commit` but stops before git
+operations.
 
 ## Usage
 
@@ -41,11 +43,13 @@ When called without a task description, uses the same intelligent analysis as `/
 This command executes the core DOH documentation pipeline:
 
 ### 1. Documentation Updates
+
 - **TODO Management**: Mark completed tasks, update timestamps, increment next ID
 - **CHANGELOG Updates**: Add completed tasks, update status, ensure formatting
 - **Version Tracking**: Update VERSION.md metadata and completion timestamps
 
 ### 2. Quality Assurance
+
 - **Calls `/doh-sys:lint`**: Applies intelligent auto-fix to all updated documentation
 - **Preserves Analysis Documents**: Maintains semantic content of historical snapshots
 - **Ensures Consistency**: Standardizes formatting across TODO.md and CHANGELOG.md
@@ -78,7 +82,7 @@ Works seamlessly with other `/doh-sys:` commands:
 ```bash
 # Typical workflow
 /doh-sys:lint                    # Clean up code quality
-/doh-sys:changelog "T039 done"   # Update documentation  
+/doh-sys:changelog "T039 done"   # Update documentation
 /doh-sys:commit                  # Commit with auto-generated message
 
 # Or use the full pipeline
@@ -104,14 +108,14 @@ Ready for commit. Next: /doh-sys:commit (will use same description)
 
 This command executes steps 1-3 of the commit pipeline:
 
-| Step | /doh-sys:changelog | /doh-sys:commit |
-|------|-------------------|-----------------|
-| TODO Management | ✅ | ✅ |
-| CHANGELOG Updates | ✅ | ✅ |
-| Version Tracking | ✅ | ✅ |
-| Documentation Linting | ✅ | ✅ |
-| Git Staging | ❌ | ✅ |
-| Git Commit | ❌ | ✅ |
+| Step                  | /doh-sys:changelog | /doh-sys:commit |
+| --------------------- | ------------------ | --------------- |
+| TODO Management       | ✅                 | ✅              |
+| CHANGELOG Updates     | ✅                 | ✅              |
+| Version Tracking      | ✅                 | ✅              |
+| Documentation Linting | ✅                 | ✅              |
+| Git Staging           | ❌                 | ✅              |
+| Git Commit            | ❌                 | ✅              |
 
 ## Use Cases
 
@@ -132,4 +136,5 @@ Uses the same progressive error handling as `/doh-sys:commit`:
 - **Missing information**: Prompts for required details
 - **Validation failures**: Reports issues with suggestions
 
-This command provides all the documentation intelligence of the commit pipeline while giving you control over when to actually commit the changes.
+This command provides all the documentation intelligence of the commit pipeline while giving you control over when to
+actually commit the changes.

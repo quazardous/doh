@@ -1,6 +1,7 @@
 # /doh-sys:lint - Intelligent DOH System Linting with Auto-Fix
 
-Executes comprehensive linting for DOH projects with intelligent auto-fix capabilities, progressive error handling, and priority-based repair strategies.
+Executes comprehensive linting for DOH projects with intelligent auto-fix capabilities, progressive error handling, and
+priority-based repair strategies.
 
 ## Usage
 
@@ -22,23 +23,27 @@ Executes comprehensive linting for DOH projects with intelligent auto-fix capabi
 The command applies fixes in this intelligent priority order:
 
 ### Priority 1: Critical (Blocks commits)
+
 - **Syntax errors**: Malformed markdown, broken code blocks
 - **Structure violations**: Missing headings hierarchy, broken lists
 - **File endings**: Missing final newlines, incorrect line endings
 
 ### Priority 2: High (Functional issues)
+
 - **Link validation**: Fix broken internal references
 - **Code block languages**: Add missing language specifications
 - **Heading structure**: Fix heading levels and hierarchy
 - **List formatting**: Correct indentation and spacing
 
 ### Priority 3: Medium (Consistency)
+
 - **Line length**: Intelligent text wrapping preserving meaning
 - **Spacing**: Standardize blank lines around elements
 - **Emphasis formatting**: Normalize bold/italic usage
 - **Table formatting**: Align columns and fix structure
 
 ### Priority 4: Low (Style preferences)
+
 - **Trailing whitespace**: Remove unnecessary spaces
 - **Quote consistency**: Standardize quote types
 - **Capitalization**: Fix heading capitalization patterns
@@ -49,14 +54,18 @@ Unlike basic linting, `/doh-sys:lint` uses smart wrapping:
 
 ```markdown
 # Before (132 chars - too long)
-- **Components**: Enhanced README.md with comprehensive document map, improved navigation between workflow documents, minimal cross-reference policy
+
+- **Components**: Enhanced README.md with comprehensive document map, improved navigation between workflow documents,
+  minimal cross-reference policy
 
 # After (intelligent wrapping)
+
 - **Components**: Enhanced README.md with comprehensive document map, improved navigation between workflow documents,
   minimal cross-reference policy
 ```
 
 **Smart wrapping rules**:
+
 - Preserves sentence structure and meaning
 - Maintains proper indentation for lists
 - Keeps code examples intact
@@ -65,17 +74,20 @@ Unlike basic linting, `/doh-sys:lint` uses smart wrapping:
 ## File Type Handling
 
 ### Markdown Files (`*.md`)
+
 - **Linter**: `markdownlint-cli` with DOH configuration
 - **Formatter**: `prettier` with markdown-specific rules
 - **Auto-fixes**: Structure, spacing, links, code blocks
 - **Preservation**: Analysis documents remain semantically unchanged
 
 ### Configuration Files
+
 - **JSON**: `prettier` formatting, syntax validation
 - **YAML**: `yamllint` with auto-correction
 - **Package files**: Dependency sorting, format standardization
 
 ### Code Files (when present)
+
 - **JavaScript/TypeScript**: ESLint with auto-fix
 - **CSS**: Stylelint with corrections
 - **Shell scripts**: ShellCheck with suggestions
@@ -140,7 +152,7 @@ Provides clear, actionable feedback:
 🔧 DOH System Linting with Auto-Fix
 ├── 📝 Scanning 47 markdown files...
 ├── ⚡ Priority 1: Fixed 3 critical syntax errors
-├── ⚡ Priority 2: Fixed 8 structural issues  
+├── ⚡ Priority 2: Fixed 8 structural issues
 ├── ⚡ Priority 3: Applied 12 consistency fixes
 ├── ⚡ Priority 4: Cleaned 5 style issues
 ├── ⚠️  2 manual fixes needed (see details below)
@@ -178,4 +190,5 @@ Uses DOH-optimized linting configuration:
 - **Caching**: Remembers successful fixes to speed up reruns
 - **File filtering**: Skips irrelevant files (node_modules, .git, etc.)
 
-This command provides the same intelligent, progressive auto-fix approach as the commit pipeline, but focused specifically on code quality and formatting.
+This command provides the same intelligent, progressive auto-fix approach as the commit pipeline, but focused
+specifically on code quality and formatting.
