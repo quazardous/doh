@@ -12,7 +12,7 @@ completion detection.
 ## Usage
 
 ```bash
-/doh-sys:commit [task-completion] [--version-bump] [--no-lint] [--dry-run]
+/doh-sys:commit [task-completion] [--version-bump] [--no-lint] [--dry-run] [--amend] [--force]
 ```
 
 ## Parameters
@@ -22,6 +22,8 @@ completion detection.
 - `--version-bump`: Automatically bump version if changes warrant it
 - `--no-lint`: Skip linting and auto-fixes
 - `--dry-run`: Show what would be done without executing
+- `--amend`: Amend the previous commit instead of creating a new one
+- `--force`: Override safety checks (⚠️ DANGEROUS - can break collaboration)
 
 ## Auto-Label Generation
 
@@ -125,6 +127,77 @@ The commit command intelligently extracts information from the documentation pip
 
 **Architecture**: `/doh-sys:commit` = `/doh-sys:changelog` + Intelligent Git Operations
 
+## Amend Functionality
+
+The `--amend` flag modifies the behavior to update the previous commit instead of creating a new one:
+
+### Amend Workflow
+
+1. **Change Detection**: Analyzes current working directory changes
+2. **Documentation Pipeline**: Runs `/doh-sys:changelog` to update documentation for new changes
+3. **Message Generation**: Creates new commit message based on combined changes (previous + current)
+4. **Git Amend**: Uses `git commit --amend` to update the previous commit
+5. **Timestamp Preservation**: Maintains original commit timestamp unless `--reset-author` is needed
+
+### Amend Use Cases
+
+**Perfect for**:
+- **Fixing typos** in documentation after committing
+- **Adding forgotten files** to the previous commit
+- **Updating commit messages** with better descriptions
+- **Including additional changes** that logically belong to the previous commit
+- **Pre-push cleanup** to create clean commit history
+
+**Example Scenarios**:
+
+```bash
+# Initial commit
+/doh-sys:commit "T042 security analysis task"
+
+# Realized you missed updating a file
+echo "additional content" >> missed-file.md
+/doh-sys:commit --amend
+# → Updates previous commit to include missed-file.md
+
+# Fix typo in previous commit's documentation
+vim TODO.md  # fix typo
+/doh-sys:commit --amend --no-lint
+# → Amends previous commit with typo fix
+```
+
+### Amend Safety Features
+
+- **Uncommitted Changes Check**: Ensures there are changes to amend
+- **🚨 CRITICAL PUSH DETECTION**: Automatically aborts if previous commit has been pushed to remote
+- **Message Preservation**: Preserves original commit structure while updating content
+- **Documentation Sync**: Ensures TODO.md and CHANGELOG.md stay synchronized
+
+### Amend Safety Enforcement
+
+**AUTOMATIC ABORT CONDITIONS**:
+- **Pushed commit detected**: `git branch -r --contains HEAD~1` shows remote tracking
+- **Remote branch ahead**: Previous commit exists on `origin/main` or other remotes  
+- **Collaboration risk**: Multiple contributors detected in recent commit history
+
+**Safety Check Output**:
+```bash
+❌ AMEND BLOCKED: Previous commit already pushed to origin/main
+   Commit: 95981a9 "feat: Add TODOARCHIVED management..."
+   Risk: Amending pushed commits breaks collaboration and git history
+   
+   Solutions:
+   1. Use regular commit: /doh-sys:commit (recommended)
+   2. Create fixup commit: git commit --fixup=HEAD~1
+   3. Force push WARNING: /doh-sys:commit --amend --force (dangerous!)
+```
+
+### Amend Limitations
+
+- **🚫 NEVER amend pushed commits**: Automatically blocked to prevent collaboration issues
+- **Local-only operation**: Only works with unpushed commits
+- **History rewriting**: Changes commit hash, affecting git history
+- **Single-user workflow**: Best for solo development or feature branches
+
 ## Auto-Fix Capabilities
 
 The pipeline includes intelligent auto-fixes for:
@@ -162,6 +235,16 @@ The pipeline includes intelligent auto-fixes for:
 # Skip redundant linting
 /doh-sys:commit --no-lint
 # → Passes --no-lint to changelog pipeline
+
+# Amend previous commit with new changes
+/doh-sys:commit --amend
+# → Runs changelog pipeline for new changes
+# → Amends previous commit instead of creating new one
+# → Preserves commit timestamp but updates message and content
+
+# Combine flags for complex workflows
+/doh-sys:commit "T041 cleanup" --amend --no-lint
+# → Amend with specific task description, skip linting
 ```
 
 ## Error Handling
@@ -268,13 +351,22 @@ improving through intelligent pattern recognition and optimization.
 
 When this command is executed by Claude:
 
-1. **Parameter Processing**: Parse task description and flags (`--version-bump`, `--no-lint`, `--dry-run`)
-2. **Change Analysis**: Use git commands to analyze current status and detect modification patterns
-3. **Documentation Pipeline**: Execute `/doh-sys:changelog` AI logic with extracted or provided task information
-4. **Quality Assurance**: Run `/doh-sys:lint` AI logic with prettier-first auto-fix (unless `--no-lint`)
-5. **Commit Message Generation**: Create intelligent semantic commit message based on analysis
-6. **Git Operations**: Stage changes, commit with generated message, handle pre-commit hooks intelligently
-7. **Error Handling**: Progressive retry with Claude-driven auto-fixes, fallback to `--no-verify` if needed
+1. **Parameter Processing**: Parse task description and flags (`--version-bump`, `--no-lint`, `--dry-run`, `--amend`, `--force`)
+2. **Amend Mode Detection**: If `--amend` flag detected:
+   - Check for uncommitted changes in working directory
+   - **CRITICAL SAFETY CHECK**: Abort with error if previous commit has been pushed to remote
+     - **Override with `--force`**: Skip safety check (requires explicit confirmation)
+   - Analyze both current changes and previous commit context
+3. **Change Analysis**: Use git commands to analyze current status and detect modification patterns
+4. **Documentation Pipeline**: Execute `/doh-sys:changelog` AI logic with extracted or provided task information
+5. **Quality Assurance**: Run `/doh-sys:lint` AI logic with prettier-first auto-fix (unless `--no-lint`)
+6. **Commit Message Generation**: Create intelligent semantic commit message based on analysis
+   - **Normal mode**: Generate new commit message
+   - **Amend mode**: Update previous commit message while preserving structure
+7. **Git Operations**: Stage changes and execute git command
+   - **Normal mode**: `git commit` with generated message
+   - **Amend mode**: `git commit --amend` with updated message
+8. **Error Handling**: Progressive retry with Claude-driven auto-fixes, fallback to `--no-verify` if needed
 
 ## AI-Driven Execution
 

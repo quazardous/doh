@@ -62,11 +62,13 @@ This command executes the core DOH documentation pipeline:
 The changelog command automatically manages the TODOARCHIVED.md file to keep TODO.md focused on active tasks:
 
 ### Archive Policy
+
 - **Today's completions**: Remain in TODO.md for immediate visibility
 - **Yesterday & older completions**: Automatically moved to TODOARCHIVED.md
 - **Preservation**: Full task content, completion dates, and metadata maintained
 
 ### Automated Process
+
 1. **Scan TODO.md** for all COMPLETED tasks with completion timestamps
 2. **Date comparison** against current date (tasks completed yesterday or earlier)
 3. **Extract & format** tasks for TODOARCHIVED.md with full preservation:
@@ -78,7 +80,9 @@ The changelog command automatically manages the TODOARCHIVED.md file to keep TOD
 6. **Maintain** chronological organization in archive
 
 ### Archive Format
+
 Tasks moved to TODOARCHIVED.md maintain full context:
+
 ```markdown
 ### T037 - Clean up old project references ✅
 
