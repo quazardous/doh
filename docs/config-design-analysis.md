@@ -51,7 +51,7 @@
 {
   "metadata": {
     "version": "1.0.0",
-    "project_name": "MrTroove",
+    "project_name": "MyProject",
     "created_at": "2025-08-27T00:00:00Z",
     "updated_at": "2025-08-27T00:00:00Z",
     "language": "fr",

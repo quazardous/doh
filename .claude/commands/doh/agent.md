@@ -1,27 +1,33 @@
 # /doh:agent Command
 
 ## Description
+
 Assign a task or epic to an autonomous agent for independent execution.
 
 ## Usage
-```
+
+```bash
 /doh:agent [task/epic description or #id]
 ```
 
 ## Parameters
+
 - `task/epic description or #id`: Description of the task/epic or ID of existing task/epic to assign to agent
 
 ## Examples
+
 - `/doh:agent fait la tâche #34` - Assign task #34 to autonomous agent
 - `/doh:agent implémente le système de notification` - Assign notification system implementation to agent
 - `/doh:agent #67` - Assign existing epic #67 to autonomous agent
 
 ## Implementation
+
 When this command is executed:
 
 1. **Parse Parameters**: Extract task/epic description or ID
 2. **Load Context**: If ID provided, load existing task/epic from `.doh/index.json`
 3. **Build Context Bundle**: Generate JSON context bundle with:
+
    ```bash
    # Generate agent session ID
    AGENT_ID="agent-$(date +%Y%m%d-%H%M%S)-${TASK_ID}"
@@ -51,6 +57,7 @@ When this command is executed:
    ```
 
 4. **Create Worktree & Setup Environment**: Use integrated setup function:
+
    ```bash
    # Parse task details for worktree naming
    TASK_NAME=$(echo "${DESCRIPTION}" | sed 's/[^a-zA-Z0-9]/-/g' | tr '[:upper:]' '[:lower:]' | sed 's/--*/-/g' | sed 's/^-\|-$//g')
@@ -66,6 +73,7 @@ When this command is executed:
    ```
 
 5. **Agent Launch**: Launch autonomous agent with complete context:
+
    ```bash
    # Save context bundle to worktree
    cp "/tmp/agent-context-${AGENT_ID}.json" "${WORKTREE_PATH}/.doh-agent-context.json"
@@ -115,6 +123,7 @@ When this command is executed:
 ## Context Loading Functions
 
 ### Hierarchy Context
+
 ```bash
 load_hierarchy_context() {
   if [[ -f ".doh/index.json" ]]; then
@@ -167,6 +176,7 @@ load_hierarchy_context() {
 ```
 
 ### Memory Context
+
 ```bash
 load_memory_context() {
   local memory_context='{"project_conventions": {}, "epic_decisions": {}, "patterns": {}}'
@@ -196,6 +206,7 @@ load_memory_context() {
 ```
 
 ### Codebase Context
+
 ```bash
 load_codebase_context() {
   local tech_stack='[]'
@@ -225,6 +236,7 @@ load_codebase_context() {
 ## Memory Updates Protocol
 
 ### Agent Memory Enrichment Interface
+
 ```bash
 # Function for agents to update project memory during execution
 update_project_memory() {
@@ -333,7 +345,9 @@ EOF
 ```
 
 ### Agent Environment Variables
+
 Agents have access to these memory update functions through environment:
+
 ```bash
 export -f update_project_memory
 export -f update_epic_memory  
@@ -345,6 +359,7 @@ export DOH_EPIC_NAME="${EPIC_NAME}"
 ## Worktree Context Setup Script
 
 ### Complete Worktree Initialization
+
 ```bash
 setup_agent_worktree() {
   local task_id="$1"
@@ -389,7 +404,7 @@ setup_agent_worktree() {
       cat > .doh/index.json << EOF
 {
   "metadata": {
-    "version": "1.0.0",
+    "version": "1.4.0",
     "project_name": "${project_name}",
     "language": "en",
     "created_at": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
@@ -485,6 +500,7 @@ EOF
 ```
 
 ### Worktree Validation
+
 ```bash
 validate_worktree_setup() {
   local worktree_path="$1"
@@ -532,6 +548,7 @@ validate_worktree_setup() {
 ### Test Scenarios: /doh:quick → /doh:agent Workflow
 
 #### Test 1: Simple Task → Agent Assignment
+
 ```bash
 # Scenario: User creates simple task via /doh:quick, then assigns to agent
 test_simple_task_to_agent() {
@@ -558,6 +575,7 @@ test_simple_task_to_agent() {
 ```
 
 #### Test 2: Complex Task → Questions → Agent Assignment
+
 ```bash
 # Scenario: Complex task triggers questions, then gets assigned to agent
 test_complex_task_workflow() {
@@ -584,6 +602,7 @@ test_complex_task_workflow() {
 ```
 
 #### Test 3: Epic #0 Graduation → Feature Agent
+
 ```bash
 # Scenario: Multiple related tasks in Epic #0 → graduation suggestion → feature agent
 test_epic_graduation_workflow() {
@@ -621,6 +640,7 @@ test_epic_graduation_workflow() {
 ```
 
 ### Integration Test Runner
+
 ```bash
 run_integration_tests() {
   echo "🧪 Running /doh:quick → /doh:agent Integration Tests"
@@ -672,7 +692,8 @@ export -f run_integration_tests
 ```
 
 ## Agent Workflow
-```
+
+```text
 Create autonomous agent environment for task/epic: {description_or_id}
 
 1. Create worktree with branch epic/{epic_name}
@@ -682,12 +703,15 @@ Create autonomous agent environment for task/epic: {description_or_id}
 ```
 
 ## Output Location
+
 - Autonomous agent works in separate worktree: `epic/{epic_name}` branch
 - Agent maintains /doh traceability standards
 - Independent commit history in agent branch
 
 ## Integration
+
 - Links to original task/epic for traceability
 - Maintains /doh standards for code comments and commits
 - Agent works independently without human intervention
 - Results can be merged back when complete
+

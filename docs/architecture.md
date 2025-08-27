@@ -27,13 +27,12 @@
     └── epics/                   # Epic-specific memory
         └── {epic-name}/         # Epic-specific context
 
-.claude/doh/                     # 📚 DOH SYSTEM (specs & templates)
-├── README.md                    # Main documentation
-├── TODO.md                      # System evolutions (moved to project root)
-├── docs/                        # Detailed documentation
-├── templates/                   # MD templates
-├── commands/README.md           # Commands documentation
-└── ai-context-rules.md          # AI context rules
+.claude/doh/                     # 📚 DOH SYSTEM (runtime only)
+├── inclaude.md                  # Runtime reference for Claude
+├── scripts/                     # Bash implementation scripts
+│   └── lib/                     # Core libraries (doh.sh, etc.)
+├── skel/                        # Project skeleton templates
+└── templates/                   # MD templates for DOH items
 
 .claude/commands/doh/            # ⚙️ IMPLEMENTATION (actual commands)
 ├── init.md                      # /doh:init
@@ -109,8 +108,8 @@ Replaces the old `.cache` + `.sync` system with a central file that manages:
 ```json
 {
   "metadata": {
-    "version": "1.0.0",
-    "project_name": "MrTroove",
+    "version": "1.4.0",
+    "project_name": "MyProject",
     "language": "fr"
   },
   "counters": {

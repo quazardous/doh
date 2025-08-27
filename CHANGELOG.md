@@ -18,6 +18,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Completed in This Session (2025-08-27)
 
+- **T034** - Documentation Health Check & Content Review
+    - **STATUS**: ✅ COMPLETED 2025-08-27
+    - **Components**: Comprehensive audit of 52 documentation files across 5 directories, analysis of 89 outdated
+    architecture references, prioritized action plan with 3 implementation phases
+    - **Analysis**: `analysis/T034-documentation-health-report.md`
+    - **Impact**: Identified critical 1.4.0 release blockers (architecture inconsistencies), established clear roadmap for
+    documentation improvements, separated urgent fixes from enhancement work
+- **T033** - Restore skel/ and templates/ to .claude/doh/ runtime directory
+    - **STATUS**: ✅ COMPLETED 2025-08-27
+    - **Components**: Single source of truth architecture implementation, cleanup of obsolete project root files
+    - **Impact**: DOH commands now have proper runtime access to skeleton and templates, eliminated controlled duplication
+    strategy
+
 - **T004** - File system structure validation
     - **STATUS**: ✅ COMPLETED 2025-08-27
 - **T012** - Memory structure implementation (.doh/memory/)

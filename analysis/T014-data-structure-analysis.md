@@ -36,7 +36,7 @@ JSON+Markdown hybrid approach provides excellent parsing opportunities while mai
 ```json
 {
   "metadata": {           # Project info - 6 simple string fields
-    "version": "1.0.0",
+    "version": "1.4.0",
     "project_name": "...",
     "created_at": "...",   # ISO timestamps - bash date compatible
     "updated_at": "...",

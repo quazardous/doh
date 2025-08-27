@@ -1,48 +1,44 @@
 # TODO - /doh System Evolution
 
 **Last Updated**: 2025-08-27  
-**Next TODO ID**: T034
+**Next TODO ID**: T035
+
+---
+
+## 🏷️ Tag Index
+
+**Essential tags for TODO management:**
+
+- `#doc` - Documentation tasks (T030)
+- `#build` - Build system and architecture (T032, T022, T003)
+- `#testing` - Testing and quality assurance (T024, T019, T027)
+- `#features` - Core functionality and features (T020, T021, T017)
+- `#think` - Brainstorming and analysis tasks (T034)
 
 ---
 
 ## 📑 Active TODOs
 
-### Critical Priority
+**Order**: Top-down (most recently active first)
 
-- **T022** 🚩🚩 DOH System Self-Hosting Project [PROPOSED - Foundation for everything]
-
-### High Priority
-
-- **T024** 🚩 Comprehensive Testing Framework Implementation [PROPOSED - Dual CI/CD + Local system]
-- **T019** 🚩 DOH System Integration Testing [PROPOSED - Foundation validation]
-- **T020** 🚩 Enhanced Codebase Analysis Engine [PROPOSED - Replaces T002 with advanced features]
-- **T003** 🚩 Complete Architecture & Distribution System
-- **T005** 🚩 Installation/Distribution Scripts
-- **T011** 🚩 GitHub/GitLab Synchronization Implementation
-- **T017** 🚩 Bash Routine Expansion Analysis [UNBLOCKED - T013 ready, T014 optional]
-
-### Future Enhancements
-
-- **T021** 🚩 Intelligent Template System [FUTURE - Context-aware templates for v2.0.0]
-
-### High Priority (Proposed)
-
-- **T022** 🚩 DOH System Self-Hosting Project [PROPOSED - Foundation for distribution and testing - UNBLOCKED]
-
-### Medium Priority
-
-- **T032** 🚩 Design DOH Runtime Build Process (.claude/doh/ as build directory) [ACTIVE - Build system architecture]
-- **T030** 🚩 Fix Single Source of Truth violations in CLAUDE.md after T026 completion [PROPOSED - Documentation
-  cleanup]
-- **T027** 🚩 Implement Markdown Linting System [PROPOSED - Code quality and consistency]
-- **T006** Intelligent Complexity Analysis
-- **T007** Automatic Epic #0 Graduation
-- **T008** CLAUDE.md Integration & Strategy Detection
-
-### Low Priority
-
-- **T009** Optimized Templates
+- **T034** Documentation Health Check & Content Review (just created)
+- **T032** Design DOH Runtime Build Process (active)
+- **T030** Fix Single Source of Truth violations in CLAUDE.md (linked with T034)
+- **T027** Implement Markdown Linting System (recently discussed)
+- **T022** DOH System Self-Hosting Project (foundation work)
+- **T024** Comprehensive Testing Framework Implementation
+- **T021** Intelligent Template System
+- **T020** Enhanced Codebase Analysis Engine
+- **T019** DOH System Integration Testing
+- **T017** Bash Routine Expansion Analysis
+- **T011** GitHub/GitLab Synchronization Implementation
 - **T010** Universal Command `/doh`
+- **T009** Optimized Templates
+- **T008** CLAUDE.md Integration & Strategy Detection
+- **T007** Automatic Epic #0 Graduation
+- **T006** Intelligent Complexity Analysis
+- **T005** Installation/Distribution Scripts
+- **T003** Complete Architecture & Distribution System
 
 ---
 
@@ -844,44 +840,60 @@ style guide and automated enforcement.
 
 ---
 
-### T030 - Fix Single Source of Truth violations in CLAUDE.md after T026 completion 🚩
+### T030 - Fix Single Source of Truth violations in CLAUDE.md after T026 completion
 
-**Status**: Proposed (Child task of T026)  
-**Priority**: Medium - Documentation cleanup and consistency  
-**Dependencies**: T026 (restructuring completion)  
-**Proposed Version**: 1.4.0
+**Status**: READY (T034 analysis completed - critical issues identified)  
+**Priority**: HIGH - Critical for 1.4.0 release consistency  
+**Dependencies**: T026 (restructuring completion ✅), T034 (analysis completed ✅)  
+**Version**: 1.4.0 **Tags**: `#doc` **Analysis**: Part of `analysis/T034-documentation-health-report.md`
 
-Fix Single Source of Truth violations in CLAUDE.md by removing outdated structure information and replacing with
-references to TODO.md after T026 restructuring is complete.
+Fix Single Source of Truth violations in CLAUDE.md and execute critical architecture reference cleanup identified by
+T034 comprehensive documentation audit. This is now a critical 1.4.0 blocker due to 89 outdated architecture references
+found.
 
-**Impact**: CLAUDE.md currently contains outdated DOH system structure information and duplicates restructuring plans
-that exist in TODO.md T026. This creates confusion and maintenance burden when information gets out of sync.
+**Impact**: T034 analysis revealed critical issues beyond CLAUDE.md - 89 outdated architecture references across 15
+files create user confusion and command failures. This expanded scope makes it a 1.4.0 release blocker.
 
-**Identified Violations**:
+**Critical Issues Identified by T034**:
 
-1. **DOH System Structure (CLAUDE.md lines 32-37)**:
-   - Lists old structure with `skel/`, `templates/` in `.claude/doh/`
-   - Reality: These folders already migrated to project root
-   - Conflicts with current state documented in T026
+1. **Architecture References (89 total across 15 files)**:
+   - "skel/" references: 47 occurrences
+   - "templates/" references: 31 occurrences
+   - "controlled duplication": 11 occurrences
+   - Files: CONTRIBUTING.md, docs/architecture.md, TODO.md, TODOARCHIVED.md, .claude/commands/doh/init.md, others
 
-2. **Restructuring Plan (CLAUDE.md lines 44-76)**:
-   - Presents "proposed plan" with status "Awaiting approval"
-   - Reality: Plan is confirmed in T026 with Target Version 1.4.0
-   - Duplicates detailed planning that belongs in TODO.md
+2. **Version Inconsistencies**:
+   - JSON examples using "version": "1.0.0" instead of "1.4.0"
+   - Mixed version references across documentation
+   - Files: docs/architecture.md:112, analysis/T014-data-structure-analysis.md:39, .claude/commands/doh/agent.md:392
 
-3. **Maintenance Burden**:
-   - Two places to update when structure changes
+3. **Most Critical Files (per T034)**:
+   - CONTRIBUTING.md:90 - Shows old project structure with `skel/`
+   - docs/architecture.md:30,34 - References `.claude/doh/templates/`
+   - .claude/commands/doh/init.md:216-217 - References old structure
+
+4. **Impact Assessment**:
+   - User confusion from inconsistent structure information
+   - Command failures from references to non-existent paths
+   - Maintenance burden from multiple sources of truth
    - Risk of information drift and inconsistency
 
-**Tasks**:
+**Tasks (T034 Phase 1 - Critical Architecture Cleanup)**:
 
-- [ ] **Remove outdated structure section**: Delete "DOH System Structure" section in CLAUDE.md
-- [ ] **Remove duplicated planning**: Delete entire "Pending Restructuring Plan" section
-- [ ] **Add reference to TODO.md**: Replace removed sections with brief reference to T026
-- [ ] **Update Task Management section**: Ensure references to TODO.md are current
-- [ ] **Verify no other duplications**: Scan CLAUDE.md for other potential Single Source of Truth violations
-- [ ] **Test documentation coherence**: Ensure CLAUDE.md flows properly after removals
-- [ ] **Add enforcement principle**: Document Single Source of Truth principle in CLAUDE.md
+**High Priority (1.4.0 Blockers)**:
+
+- [ ] **CONTRIBUTING.md:90** - Fix project structure section showing old `skel/` structure
+- [ ] **docs/architecture.md:30,34** - Remove references to `.claude/doh/templates/`
+- [ ] **CLAUDE.md** - Remove outdated DOH system structure and duplicated planning sections
+- [ ] **.claude/commands/doh/init.md:216-217** - Update structure references
+- [ ] **Version consistency** - Update JSON examples from "1.0.0" to "1.4.0" in 3 files
+
+**Medium Priority (Quality)**:
+
+- [ ] **TODO.md architecture sections** - Add deprecation notices to old strategy references
+- [ ] **TODOARCHIVED.md** - Add clear deprecation notices for controlled duplication strategy
+- [ ] **Cross-reference audit** - Scan remaining 10 files with architecture references
+- [ ] **Navigation improvements** - Add document map to README.md per T034 recommendations
 
 **Proposed CLAUDE.md Changes**:
 
@@ -919,7 +931,7 @@ for detailed information, ensuring no duplication of system structure or plannin
 
 ---
 
-### T032 - Design DOH Runtime Build Process (.claude/doh/ as build directory) 🚩
+### T032 - Design DOH Runtime Build Process (.claude/doh/ as build directory)
 
 **Status**: ACTIVE - Ready for implementation  
 **Priority**: Medium - Build system architecture  
@@ -1212,6 +1224,237 @@ and replaced with **single source of truth** approach. The project root `./skel/
 operations.
 
 ---
+
+### T034 - Documentation Health Check & Content Review
+
+**Status**: ✅ COMPLETED  
+**Priority**: Medium - Comprehensive documentation audit  
+**Dependencies**: None (can be done independently), T030 (cross-check coordination)  
+**Version**: 1.4.0 **Tags**: `#think` **Analysis**: `analysis/T034-documentation-health-report.md`
+
+Conduct comprehensive brainstorming and health check of all project documentation to ensure content is useful,
+well-balanced, up-to-date, and eliminates redundancy or outdated information after the recent architecture changes.
+
+**Impact**: Recent architectural changes (T026 restructuring, T033 single source strategy) may have created
+documentation inconsistencies, outdated references, or gaps. A systematic review ensures all documentation serves its
+purpose and guides users/developers effectively.
+
+**Cross-Check Coordination with T030**: This task works in coordination with T030 (CLAUDE.md cleanup) to ensure
+comprehensive documentation health. T034 provides the broader audit while T030 handles specific CLAUDE.md fixes. Both
+tasks should be completed together for maximum effectiveness.
+
+**Scope of Review**:
+
+**Project Root Documentation**:
+
+- `README.md` - Project overview and quick start
+- `CHANGELOG.md` - Feature tracking and version history
+- `VERSION.md` - Version management
+- `WORKFLOW.md` - User workflow guide
+- `CLAUDE.md` - AI/development configuration
+- `DEVELOPMENT.md` - Developer guidelines
+- `CONTRIBUTING.md` - Contribution guide
+
+**Documentation Directories**:
+
+- `docs/` - Technical documentation (12 files)
+- `analysis/` - Development analysis (2 files)
+- `.claude/doh/inclaude.md` - Runtime documentation
+
+**Brainstorming Questions**:
+
+**Content Usefulness**:
+
+- Which documents provide immediate value to users vs developers?
+- Are there documents that duplicate information?
+- What gaps exist for new contributors or users?
+- Which files are actually referenced/used vs ignored?
+
+**Balance Assessment**:
+
+- Is there too much technical detail in user-facing docs?
+- Are developer docs comprehensive enough?
+- Do we have the right mix of guides vs reference material?
+- Are examples practical and current?
+
+**Currency Check**:
+
+- Which documents reference old architecture (./skel/, ./templates/)?
+- Are all version references accurate (1.4.0 target)?
+- Do workflow examples match current command structure?
+- Are dependency lists current (Node.js versions, tool versions)?
+
+**Structural Review**:
+
+- Should some docs be merged or split?
+- Are docs in the right directories?
+- Do navigation and cross-references work?
+- Is the information hierarchy logical?
+
+**Tasks**:
+
+**Phase 1: Discovery & Analysis**
+
+- [ ] **Audit all documentation files**: Create inventory with purpose, target audience, last update
+- [ ] **Architecture reference check**: Find all references to old structure (./skel/, controlled duplication, etc.)
+- [ ] **Cross-reference validation**: Check all internal links and references between docs
+- [ ] **Redundancy identification**: Map overlapping content across files
+- [ ] **Gap analysis**: Identify missing documentation for key workflows
+
+**Phase 2: Content Assessment**
+
+- [ ] **User journey mapping**: Trace new user → productive user → contributor paths through docs
+- [ ] **Developer workflow mapping**: Trace development setup → feature development → testing paths
+- [ ] **Usefulness scoring**: Rate each document's value and usage frequency
+- [ ] **Balance evaluation**: Assess technical depth vs accessibility for each audience
+- [ ] **Currency audit**: Flag outdated examples, commands, architecture references
+
+**Phase 3: Structural Brainstorming**
+
+- [ ] **Consolidation opportunities**: Identify docs that should be merged
+- [ ] **Split candidates**: Find overly complex docs that need splitting
+- [ ] **Reorganization proposals**: Suggest better directory structure or file naming
+- [ ] **Navigation improvements**: Design better cross-linking and discovery
+
+**Phase 4: Actionable Recommendations**
+
+- [ ] **Priority fixes**: Critical updates needed immediately
+- [ ] **Content improvements**: Rewrite/update recommendations with rationale
+- [ ] **Structural changes**: Reorganization plan with migration strategy
+- [ ] **Maintenance strategy**: Process for keeping docs current going forward
+
+**Specific Focus Areas**:
+
+**Architecture Documentation**:
+
+- Remove all references to controlled duplication strategy
+- Update build process descriptions to match single-source approach
+- Verify all paths and commands match current structure
+
+**User Experience**:
+
+- Ensure WORKFLOW.md guides match actual DOH capabilities
+- Verify README quick start works with current system
+- Check that examples in docs/ are functional
+
+**Developer Experience**:
+
+- Ensure DEVELOPMENT.md covers current toolchain (make, npm, linting)
+- Verify CLAUDE.md matches current project structure
+- Check that analysis/ docs are still relevant
+
+**Version Consistency**:
+
+- Align all version references with current 1.4.0 development
+- Update tool version requirements
+- Ensure CHANGELOG.md properly tracks completed work
+
+**Quality Criteria**:
+
+- **Usefulness**: Each doc must serve a clear purpose for its audience
+- **Currency**: All examples and references must work with current system
+- **Balance**: Right level of detail for intended readers
+- **Discoverability**: Clear navigation and logical organization
+- **Maintainability**: Easy to keep updated as system evolves
+
+**Deliverable**: Comprehensive documentation health report with prioritized action plan for improving DOH project
+documentation quality, consistency, and user experience.
+
+---
+
+### T035 - Documentation Navigation & Content Organization (T034 Phase 2)
+
+**Status**: PROPOSED  
+**Priority**: Medium - User experience improvements  
+**Dependencies**: T030 (critical fixes first), T034 (analysis base)  
+**Proposed Version**: 1.4.0 **Tags**: `#doc` **Analysis**: Part of `analysis/T034-documentation-health-report.md`
+
+Execute T034 Phase 2 recommendations to improve documentation navigation, content organization, and user experience
+after critical architecture references are fixed by T030.
+
+**Impact**: T034 analysis identified navigation gaps and content organization issues that affect user onboarding and
+developer experience. These improvements will make the documentation more discoverable and maintainable.
+
+**Scope (T034 Phase 2 - 3 hours total)**:
+
+**Navigation Enhancement (1-2h)**:
+
+- [ ] **Add document map to README.md** - Central index of all documentation
+- [ ] **Improve cross-references** - Better linking between workflow docs
+- [ ] **Add "See also" sections** - Help users discover related information
+- [ ] **Create quick reference card** - Essential commands and workflows
+
+**Content Organization (1-2h)**:
+
+- [ ] **Consolidate workflow documentation** - Merge similar docs or clearly differentiate
+- [ ] **Archive old analysis files** - Move development analysis to separate directory
+- [ ] **Create single project structure source** - Eliminate multiple structure descriptions
+- [ ] **Consolidate configuration documentation** - Reduce redundancy in config docs
+
+**Quality Improvements**:
+
+- Better user journey from README → productive usage → contribution
+- Reduced maintenance burden through content consolidation
+- Clearer information hierarchy and logical organization
+- Improved discoverability of key workflows and commands
+
+**Success Metrics**:
+
+- New users can find relevant docs in <2 clicks from README
+- No duplicate information across workflow documents
+- Clear separation between user-facing and development documentation
+- Logical progression from basic to advanced usage patterns
+
+**Dependencies**: T030 must complete first to ensure all architecture references are consistent before improving
+navigation.
+
+---
+
+### T036 - Documentation Enhancement & Polish (T034 Phase 3)
+
+**Status**: PROPOSED  
+**Priority**: Low - Enhancement and polish  
+**Dependencies**: T030 (critical fixes), T035 (navigation improvements), T034 (analysis base)  
+**Proposed Version**: 1.5.0 **Tags**: `#doc` **Analysis**: Part of `analysis/T034-documentation-health-report.md`
+
+Execute T034 Phase 3 recommendations to add advanced documentation features, examples, and polish after core issues are
+resolved by T030 and T035.
+
+**Impact**: Final phase of T034 analysis focusing on user experience enhancements and comprehensive examples that will
+make DOH documentation excellent rather than just functional.
+
+**Scope (T034 Phase 3 - 4 hours total)**:
+
+**Examples and Guides (3-4h)**:
+
+- [ ] **Add real-world workflow examples** - Complete scenarios for different project types
+- [ ] **Create troubleshooting guide** - Common issues and solutions
+- [ ] **Expand command documentation** - More detailed examples in docs/commands.md
+- [ ] **Add video/GIF demonstrations** - Visual guides for key workflows
+- [ ] **Create getting started tutorial** - Step-by-step first-time user experience
+
+**Advanced Features**:
+
+- [ ] **Interactive examples** - Copy-paste ready commands with explanations
+- [ ] **Use case templates** - Pre-built examples for common scenarios
+- [ ] **Performance tips** - Optimization guidance for large projects
+- [ ] **Integration patterns** - How to use DOH with CI/CD, Git workflows, etc.
+
+**Quality Improvements**:
+
+- Rich, practical examples that work in real projects
+- Comprehensive troubleshooting reducing support burden
+- Professional polish matching production-ready system
+- Enhanced onboarding experience for new users
+
+**Success Metrics**:
+
+- Users can complete first DOH workflow without asking questions
+- Troubleshooting guide covers 90% of common issues
+- Examples work copy-paste in real environments
+- Documentation feels comprehensive and professional
+
+**Target Version**: 1.5.0 (enhancement phase after core 1.4.0 stabilizes)
 
 ---
 

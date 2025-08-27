@@ -87,10 +87,11 @@ doh/
 │       └── setup-dev-env.sh
 ├── docs/                   # Documentation
 ├── analysis/               # Development analysis
-├── skel/                   # Project skeleton templates
 ├── tests/                  # Test files
-├── .claude/doh/            # Runtime scripts only
-│   └── scripts/
+├── .claude/doh/            # DOH system runtime
+│   ├── skel/               # Project skeleton templates
+│   ├── templates/          # DOH templates
+│   └── scripts/            # Runtime scripts
 ├── Makefile                # Build automation
 ├── package.json            # Dev dependencies
 └── TODO.md                 # Development roadmap

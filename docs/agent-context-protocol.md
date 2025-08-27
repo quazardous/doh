@@ -28,7 +28,7 @@ When an agent is launched via `/doh:agent`, it receives a standardized context b
   },
   "hierarchy": {
     "project": {
-      "name": "MrTroove",
+      "name": "MyProject",
       "language": "fr",
       "working_directory": "/home/david/Private/dev/projects/mrtroove"
     },
