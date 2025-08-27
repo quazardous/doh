@@ -44,11 +44,19 @@ other projects.
 📋 **Version Management Rules**: See `TODO.md` section "TODO Management" for complete version nomenclature (Proposed
 Version / Target Version / Version)
 
-## Detailed Development Information
+## Documentation References
+
+### For Development
 
 For comprehensive development patterns, architecture, testing, and implementation details, see:
 
 **[DEVELOPMENT.md](./DEVELOPMENT.md)**
+
+### For Usage
+
+For DOH system usage, PRD/Epic/Feature/Task workflow, and practical examples, see:
+
+**[WORKFLOW.md](./WORKFLOW.md)**
 
 ## Markdown Quality Control
 
