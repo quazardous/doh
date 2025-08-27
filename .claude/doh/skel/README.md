@@ -4,12 +4,12 @@ This directory contains the DOH (DevOps Organization Helper) project structure f
 
 ## Directory Structure
 
-```
+```text
 .doh/
 ├── project-index.json          # Unified index and metadata
 ├── epics/quick/epic0.md        # Default Epic #0 for quick tasks
 ├── memory/                     # Persistent memory system
-│   ├── project/               # Project-level patterns and decisions  
+│   ├── project/               # Project-level patterns and decisions
 │   ├── epics/                 # Epic-specific context and memory
 │   └── agent-sessions/        # Agent session data
 ├── .gitignore                 # DOH-specific gitignore patterns
@@ -19,7 +19,7 @@ This directory contains the DOH (DevOps Organization Helper) project structure f
 ## Getting Started
 
 1. **Quick Task Creation**: Use `/doh:quick "task description"` to create tasks in Epic #0
-2. **Epic Management**: Use `/doh:epic` for epic creation and management  
+2. **Epic Management**: Use `/doh:epic` for epic creation and management
 3. **Agent Sessions**: Use `/doh:agent` for autonomous development workflows
 
 ## Key Concepts
@@ -37,4 +37,6 @@ This directory contains the DOH (DevOps Organization Helper) project structure f
 
 ---
 
-*This structure was created from the DOH skeleton template*
+## Creation Notes
+
+This structure was created from the DOH skeleton template

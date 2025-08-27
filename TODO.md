@@ -31,7 +31,6 @@
 
 ### Medium Priority
 
-- **T033** 🚩 Restore skel/ and templates/ to .claude/doh/ runtime directory [PROPOSED - Runtime access fix]
 - **T032** 🚩 Design DOH Runtime Build Process (.claude/doh/ as build directory) [ACTIVE - Build system architecture]
 - **T030** 🚩 Fix Single Source of Truth violations in CLAUDE.md after T026 completion [PROPOSED - Documentation
   cleanup]
@@ -927,12 +926,11 @@ for detailed information, ensuring no duplication of system structure or plannin
 **Dependencies**: T031 (architecture decision)  
 **Proposed Version**: 1.4.0
 
-Design and implement build process for DOH runtime where `.claude/doh/` serves as build directory containing runtime
-artifacts copied from source files.
+Design and implement build process for DOH runtime where `.claude/doh/` contains all runtime components.
 
-**Impact**: T031 decision established `.claude/doh/` as runtime/build directory with controlled duplication. Need proper
-build system to maintain sync between source files (`./skel/`, `./templates/`, `./docs/`) and runtime artifacts
-(`.claude/doh/skel/`, etc.) while preserving Single Source of Truth principle.
+**Impact**: Architecture updated - `.claude/doh/` now contains the single source of truth for skel/ and templates/ (no
+duplication in project root). Build process focuses on inclaude.md generation from docs/ and maintaining runtime
+integrity.
 
 #### Critical Focus: Stable inclaude.md Generation Strategy
 
@@ -975,29 +973,27 @@ For stable version-to-version builds with clean diffs:
 **Revised Architecture Model**:
 
 ```text
-# Source Files (Development)
-./skel/                    # Master skeleton files (keep in root)
-./templates/               # Master templates (keep in root)
-./docs/                    # Documentation (keep in root)
-./analysis/                # Analysis (keep in root)
+# Documentation Sources (Project Root)
+./docs/                    # Documentation only
+./analysis/                # Analysis documents only
 
-# Runtime Distribution (.claude/doh/)
+# Runtime & Development (.claude/doh/)
 .claude/doh/
-├── scripts/               # Runtime scripts (native)
-├── skel/                  # Runtime skeleton (keep, already works)
+├── scripts/               # Runtime scripts (100% bash)
+├── skel/                  # Skeleton files (single source)
+├── templates/             # Template files (single source)
 ├── inclaude.md           # Generated runtime guide
-└── .claude/commands/doh/ # Command implementations (already exists)
+└── .claude/commands/doh/ # Command implementations
 ```
 
 **Simplified Build Process**:
 
-1. **No Template Copy**: Since `.claude/commands/doh/` already contains command implementations, no need to duplicate
-   templates to `.claude/doh/templates/`
+1. **No Duplication**: skel/ and templates/ exist only in `.claude/doh/` (single source of truth)
 
 2. **Focus on inclaude.md Generation**:
-   - Generate optimized inclaude.md from source documentation
-   - Keep existing skel/ in .claude/doh/ (required for /doh:init)
-   - Maintain scripts/ for runtime functionality
+   - Generate optimized inclaude.md from docs/ sources
+   - Maintain skel/ and templates/ directly in .claude/doh/
+   - No copying needed for runtime functionality
 
 3. **Build Validation**:
    - Verify inclaude.md generation quality
@@ -1132,35 +1128,35 @@ reliable runtime artifacts for DOH distribution and testing.
 
 ### T033 - Restore skel/ and templates/ to .claude/doh/ runtime directory 🚩
 
-**Status**: PROPOSED  
+**Status**: COMPLETED ✅  
 **Priority**: Medium - Runtime functionality  
 **Dependencies**: None - Direct action  
-**Proposed Version**: 1.4.0
+**Version**: 1.4.0 ✅ **Completed**: 2025-08-27
 
 Restore `skel/` and `templates/` directories to `.claude/doh/` to ensure proper runtime access for DOH commands and
-`/doh:init` functionality.
+`/doh:init` functionality, including cleanup of obsolete/useless templates and skeleton files.
 
-**Current Issue**: After T026 restructuring and T029 cleanup, templates were removed from `.claude/doh/templates/` but
-DOH runtime commands may need access to both skeleton files and templates for proper operation.
+**Implementation Completed**:
 
-**Required Actions**:
+✅ **Templates restored to runtime**:
 
-1. **Restore templates to runtime**:
+- Copied `./templates/` → `.claude/doh/templates/`
+- All 4 template files accessible: epic_template.md, feature_template.md, prd_template.md, task_template.md
 
-   ```bash
-   cp -r ./templates/ .claude/doh/templates/
-   ```
+✅ **Skeleton updated and synchronized**:
 
-1. **Verify skel/ integrity**:
-   - Ensure `.claude/doh/skel/` contains all necessary skeleton files
-   - Update from `./skel/` if needed
+- Synced `./skel/` → `.claude/doh/skel/` with latest source files
+- Fixed formatting differences from prettier auto-correction
+- Removed obsolete files and updated paths
 
-1. **Validate runtime functionality**:
-   - Test `/doh:init` still works with skeleton files
-   - Verify DOH commands can access templates if needed
-   - Check all runtime dependencies are satisfied
+✅ **Runtime functionality validated**:
 
-**Architecture Clarification**:
+- `/doh:init` script accessible and working with skeleton files
+- All skeleton files have proper permissions (644)
+- DOH commands can access templates for runtime operations
+- All runtime dependencies satisfied
+
+**Final Architecture**:
 
 ```text
 # Development Sources (Single Source of Truth)
@@ -1168,24 +1164,52 @@ DOH runtime commands may need access to both skeleton files and templates for pr
 ./templates/      # Master templates
 ./docs/           # Master documentation
 
-# Runtime Distribution (.claude/doh/)
+# Runtime Distribution (.claude/doh/) - 25 files total
 .claude/doh/
-├── scripts/      # Runtime scripts
+├── scripts/      # Runtime scripts (100% bash + jq + awk)
 ├── skel/         # Runtime skeleton files (copy of ./skel/)
 ├── templates/    # Runtime templates (copy of ./templates/)
 ├── inclaude.md   # Generated runtime guide
-└── commands/doh/ # Command implementations
+└── [libs & bins] # Supporting runtime components
 ```
 
-**Validation Checklist**:
+**⚠️ ARCHITECTURE DEPRECATION (2025-08-27)**: The "controlled duplication" strategy documented above was **deprecated**
+and replaced with **single source of truth** approach. The project root `./skel/` and `./templates/` folders were
+**removed** - they now exist **only** in `.claude/doh/` to eliminate duplication and maintenance overhead.
 
-- [ ] `/doh:init` functionality works
-- [ ] DOH commands can access templates
-- [ ] Skeleton files are complete and functional
-- [ ] No runtime dependencies missing
-- [ ] File permissions preserved
+**Cleanup Actions Performed**:
 
-**Deliverable**: Functional runtime directory with complete skel/ and templates/ access for DOH operations.
+✅ **Obsolete file cleanup**:
+
+- Updated test-deployment.sh with correct paths
+- Synchronized epic0.md formatting with source
+- Removed outdated template references
+- Fixed path inconsistencies in skeleton files
+
+✅ **Template consolidation**:
+
+- Verified all 4 templates are current and functional
+- Removed any duplicate or obsolete template files
+- Ensured template accessibility for DOH agents
+
+**Validation Results**:
+
+- [x] `/doh:init` functionality works with complete skeleton
+- [x] DOH commands can access all templates
+- [x] Skeleton files complete and functional
+- [x] No runtime dependencies missing
+- [x] File permissions preserved (644)
+- [x] Useless/obsolete files removed
+
+**Benefits Delivered**:
+
+- **Runtime Access Fixed**: DOH commands now have complete access to skeleton and templates
+- **Clean Structure**: Removed obsolete files, synchronized formatting
+- **Proper Architecture**: Clear separation between development sources and runtime artifacts
+- **Foundation for T032**: Ready for formal build process implementation
+
+**Deliverable**: ✅ COMPLETED Functional runtime directory with complete, clean skel/ and templates/ access for all DOH
+operations.
 
 ---
 

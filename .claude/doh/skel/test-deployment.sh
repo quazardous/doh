@@ -4,7 +4,7 @@
 
 set -e
 
-SKEL_DIR=".claude/doh/skel"
+SKEL_DIR="./skel"
 TEST_DIR="/tmp/doh-skeleton-test-$$"
 
 echo "🧪 Testing DOH Skeleton Deployment"
@@ -23,7 +23,7 @@ if [[ -d "$SKEL_DIR" ]]; then
 fi
 
 # We need to reference the skeleton from the real project
-REAL_SKEL_DIR="/path/to/existing/project/.claude/doh/skel"
+REAL_SKEL_DIR="./skel"
 
 if [[ ! -d "$REAL_SKEL_DIR" ]]; then
     echo "❌ Error: Skeleton directory not found at $REAL_SKEL_DIR"

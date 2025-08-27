@@ -82,7 +82,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
     - **STATUS**: ✅ COMPLETED 2025-08-27
     - **Components**: Architecture decision for controlled duplication, analysis of 5 options
     (revert/duplicate/sideload/runtime/hybrid), confirmed /doh:init functionality works with existing setup
-    - **Impact**: Critical architecture decision resolved - maintain ./skel/ (source) and .claude/doh/skel/ (runtime),
+    - **Impact**: Critical architecture decision resolved - maintain .claude/doh/skel/ as single source (no duplication),
     leads to T032 build process design
 
 ### Planned for Next Phase (1.4.0)

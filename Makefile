@@ -82,11 +82,11 @@ lint-fix: deps-check ## Auto-fix linting issues where possible
 	@echo "🔧 Auto-fixing linting issues..."
 	@if [ -f package.json ] && npm list prettier >/dev/null 2>&1; then \
 		echo "📝 Formatting with prettier..."; \
-		npx prettier --write '*.md' 'docs/**/*.md' 'analysis/**/*.md' 'templates/**/*.md' 'skel/**/*.md' || true; \
+		npx prettier --write '*.md' 'docs/**/*.md' 'analysis/**/*.md' || true; \
 	fi
 	@if [ -f package.json ] && npm list markdownlint-cli >/dev/null 2>&1; then \
 		echo "📝 Auto-fixing Markdown files..."; \
-		npm run lint:md:fix 2>/dev/null || npx markdownlint --config dev-tools/linters/.markdownlint.json --fix *.md docs/ analysis/ templates/ skel/ || true; \
+		npm run lint:md:fix 2>/dev/null || npx markdownlint --config dev-tools/linters/.markdownlint.json --fix *.md docs/ analysis/ || true; \
 	fi
 	@echo "✅ Auto-fix complete"
 
