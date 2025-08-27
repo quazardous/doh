@@ -1,7 +1,7 @@
 # TODO - /doh System Evolution
 
 **Last Updated**: 2025-08-27  
-**Next TODO ID**: T053
+**Next TODO ID**: T057
 
 ---
 
@@ -22,6 +22,11 @@
 
 **Order**: Top-down (most recently active first)
 
+- **E001** DOH Version 1.4.0 Release 🛡️ EPIC (Components: T053, T054, T055, T056, T032, T022, T024, T019, T003, T005)
+- **T056** DOH Skeleton Testing & Validation (#testing, #build) [Epic E001]
+- **T055** DOH Skeleton Command Integration (#features, #build) [Epic E001]
+- **T054** DOH Skeleton Memory & Context System (#features, #build) [Epic E001]
+- **T053** DOH Skeleton Core Structure Implementation (#features, #build) [Epic E001]
 - **T052** Codebase Analysis Integration & Reporting (#features) [Epic E020]
 - **T051** DOH Structure Generation from Analysis (#features) [Epic E020]
 - **T050** Git History Intelligence Mining (#features) [Epic E020]
@@ -32,7 +37,6 @@
 - **T045** Intelligent Routing System (Bash/Claude Hybrid Execution) (#features, #optimization, #performance) [Epic
   E047]
 - **T044** Natural Language DOH Command Interface & Script Optimization (#features, #think, #optimization) [Epic E047]
-- **E020** Codebase Analysis Engine 🛡️ EPIC (Components: T049, T050, T051, T052)
 - **T043** DOH Security Epic Planning & Implementation Roadmap (#security, #think)
 - **T042** DOH Security Analysis & Threat Modeling (#security, #think)
 - **T041** Remove Claude Code attribution comments from codebase - COMPLETED
@@ -42,14 +46,14 @@
 - **T037** Clean up old project references (MrTroove, mkplan) across documentation - COMPLETED
 - **T035** Documentation Navigation & Content Organization (T034 Phase 2) - COMPLETED
 - **T034** Documentation Health Check & Content Review - COMPLETED
-- **T032** Design DOH Runtime Build Process (active)
+- **T032** Design DOH Runtime Build Process (active) [Epic E001]
 - **T030** Fix Critical Architecture References (T034 Phase 1) - COMPLETED
 - **T027** Implement Markdown Linting System - COMPLETED
-- **T022** DOH System Self-Hosting Project (foundation work)
-- **T024** Comprehensive Testing Framework Implementation
+- **T022** DOH System Self-Hosting Project (foundation work) [Epic E001]
+- **T024** Comprehensive Testing Framework Implementation [Epic E001]
 - **T021** Intelligent Template System
-- **T020** Enhanced Codebase Analysis Engine
-- **T019** DOH System Integration Testing
+- **E020** Codebase Analysis Engine 🛡️ EPIC (Components: T049, T050, T051, T052)
+- **T019** DOH System Integration Testing [Epic E001]
 - **T017** Bash Routine Expansion Analysis
 - **T011** GitHub/GitLab Synchronization Implementation
 - **T010** Universal Command `/doh`
@@ -57,19 +61,111 @@
 - **T008** CLAUDE.md Integration & Strategy Detection
 - **T007** Automatic Epic #0 Graduation
 - **T006** Intelligent Complexity Analysis
-- **T005** Installation/Distribution Scripts
-- **T003** Complete Architecture & Distribution System
+- **T005** Installation/Distribution Scripts [Epic E001]
+- **T003** Complete Architecture & Distribution System [Epic E001]
 
 ---
 
 ## TODOs
 
-### T001 - DOH Skeleton Implementation & Methodology Enforcement 🚩🚩
+### 🚀 EPIC E001: DOH Version 1.4.0 Release
+
+**Epic Status**: Active - Foundation Release  
+**Priority**: CRITICAL - Major version milestone  
+**Target Version**: 1.4.0  
+**Epic Components**: T053, T054, T055, T056, T032, T022, T024, T019, T003, T005  
+**Total Estimated Effort**: 35-45 hours
+
+Complete DOH system foundation with skeleton implementation, build process, testing framework, and distribution system
+for stable 1.4.0 release.
+
+**Impact**: Version 1.4.0 establishes DOH as a mature, production-ready system with methodology enforcement,
+comprehensive testing, and automated distribution. This release transforms DOH from development prototype to
+professional project management framework.
+
+**Strategic Vision**: Create robust foundation that enables future natural language features (Epic E047) and advanced
+analysis capabilities (Epic E020) while maintaining stability and professional standards.
+
+**Epic Phases**:
+
+### Phase 1: Foundation & Methodology (T053-T056) - 8.5h
+
+**Critical Path**: Must complete first - blocks other components
+
+- T053: Core skeleton structure with methodology enforcement
+- T054: Memory context system for persistent project intelligence
+- T055: Command integration with `/doh:init` deployment
+- T056: Methodology compliance validation and testing
+
+### Phase 2: Infrastructure & Build (T032, T003, T005) - 15-20h
+
+**Parallel Development**: Can work alongside Phase 1 completion
+
+- Runtime build process design and implementation
+- Complete architecture and distribution system
+- Installation and distribution scripts
+- Cross-platform compatibility
+
+### Phase 3: Quality Assurance (T024, T019) - 8-12h
+
+**Dependencies**: Requires Phase 1 completion for testing targets
+
+- Comprehensive testing framework implementation
+- DOH system integration testing
+- Quality gates and automated validation
+- Performance benchmarking
+
+### Phase 4: Self-Hosting & Integration (T022) - 3-5h
+
+**Final Phase**: Requires all previous phases
+
+- DOH system managing its own development
+- Integration validation with completed components
+- Release candidate preparation
+- Documentation finalization
+
+**Success Criteria**:
+
+✅ **Methodology Enforcement**: All `/doh` commands enforce strict project management discipline  
+✅ **Memory Context**: Persistent project intelligence across sessions  
+✅ **Build System**: Automated, reliable distribution process  
+✅ **Testing Coverage**: Comprehensive test suite with >90% coverage  
+✅ **Self-Hosting**: DOH manages its own development workflow  
+✅ **Professional Quality**: Production-ready stability and documentation  
+✅ **Cross-Platform**: Windows, macOS, Linux compatibility
+
+**Dependencies Resolved**:
+
+- ✅ T048 (Pattern Isolation) - Epic prerequisites complete
+- ✅ T027 (Markdown Linting) - Quality infrastructure ready
+- ✅ T041 (Attribution Cleanup) - Professional standards enforced
+
+**Post-1.4.0 Enablement**:
+
+- **Epic E047**: Natural language features can build on stable foundation
+- **Epic E020**: Codebase analysis can leverage skeleton and memory systems
+- **Future Epics**: Advanced features enabled by robust testing and distribution
+
+**Risk Mitigation**:
+
+- **T053-T056 Critical Path**: Start skeleton implementation immediately, highest priority
+- **Parallel Development**: T032, T003, T005 can proceed in parallel after T053-T054 completion
+- **Testing Integration**: T024, T019 validate work as it completes
+- **Incremental Releases**: 1.4.0-alpha, 1.4.0-beta, 1.4.0-rc for validation
+
+**Deliverable**: Production-ready DOH 1.4.0 with skeleton system, build process, comprehensive testing, and self-hosting
+capability - establishing the mature foundation for all future DOH development.
+
+---
+
+### T053 - DOH Skeleton Core Structure Implementation 🚩
 
 **Status**: Ready to implement  
-**Priority**: CRITICAL - Blocks T002 development and methodology enforcement  
+**Priority**: CRITICAL - Epic E001 Phase 1 foundation  
 **Dependencies**: None  
-**Target Version**: 1.4.0
+**Target Version**: 1.4.0  
+**Epic**: E001 DOH Version 1.4.0 Release  
+**Estimated Effort**: 1.5 hours
 
 Create standardized `.doh/` skeleton structure that enforces strict DOH project management methodology and enables
 memory context for all `/doh` commands. The skeleton serves as the foundation for methodology compliance and intelligent
