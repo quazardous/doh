@@ -29,9 +29,9 @@
 #### Mixed-Purpose Documentation (Careful separation required)
 
 - **CONTRIBUTING.md** - For external contributors
-    - ✅ CAN mention TODO.md exists for tracking
-    - ❌ Should NOT reference specific T### numbers
-    - ✅ Should explain contribution workflow
+  - ✅ CAN mention TODO.md exists for tracking
+  - ❌ Should NOT reference specific T### numbers
+  - ✅ Should explain contribution workflow
 
 ### Documentation Review Checklist
 
@@ -877,15 +877,26 @@ audit trail for understanding why architectural choices were made and what infor
 
 ## TODO Management for DOH Development
 
-This project uses traditional TODO.md (in project root) for development tasks rather than the /doh system it provides to
-other projects. The TODO management system tracks all development work with proper versioning and archival.
+📋 **TODO Management**: See `todo/README.md` for complete TODO system documentation, workflows, and guidelines.
+
+This project uses a structured file-based TODO system rather than the /doh system it provides to other projects. Each
+TODO and Epic is maintained as an individual file for better organization, version control, and collaboration.
 
 ### File Organization
 
-- **TODO.md** (project root): Active development tasks and roadmap
-- **TODOARCHIVED.md** (project root): Completed tasks from yesterday and earlier
+- **todo/README.md**: Complete TODO management documentation and guidelines
+- **todo/T###.md**: Individual TODO files (active and proposed)
+- **todo/E###.md**: Epic definition files
+- **todo/archive/T###.md**: Completed TODOs (archived)
 - **CHANGELOG.md**: Feature releases with TODO mappings
 - **VERSION.md**: Central version tracking
+
+### Benefits of Structured System
+
+- **Individual Files**: Each TODO/Epic in separate file for easy editing
+- **Better Version Control**: Reduced merge conflicts, clear history per TODO
+- **Enhanced Collaboration**: Multiple developers can work simultaneously
+- **Improved Navigation**: File-based search and organization
 
 ### ID Numbering Convention
 

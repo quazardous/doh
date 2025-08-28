@@ -1,8 +1,7 @@
 # /doh-sys:changelog - DOH System Documentation Updates
 
-Executes DOH system documentation updates: TODO management, CHANGELOG updates, TODOARCHIVED maintenance, and version
-tracking without committing changes. Uses the same intelligent analysis as `/doh-sys:commit` but stops before git
-operations.
+Executes DOH system documentation updates: structured TODO management, CHANGELOG updates, archive maintenance, and
+version tracking without committing changes. Works with the new structured todo/ folder system with individual files.
 
 ## Usage
 
@@ -44,9 +43,10 @@ This command executes the core DOH documentation pipeline:
 
 ### 1. Documentation Updates
 
-- **TODO Management**: Mark completed tasks, update timestamps, increment next ID
+- **Structured TODO Management**: Update individual TODO files, mark completed tasks, update timestamps
+- **Archive Management**: Move completed TODO files from todo/ to todo/archive/ (tasks completed yesterday or earlier)
 - **CHANGELOG Updates**: Add completed tasks, update status, ensure formatting
-- **TODOARCHIVED Management**: Move old completed tasks from TODO.md to TODOARCHIVED.md (tasks completed yesterday or earlier)
+- **ID Counter Management**: Update next available ID counter in todo/README.md
 - **Version Tracking**: Update VERSION.md metadata and completion timestamps
   - **Automatic Analysis**: Detects if changes warrant version bump based on impact
   - **User Confirmation**: Prompts for approval before applying version changes
@@ -60,44 +60,40 @@ This command executes the core DOH documentation pipeline:
 
 **Architecture**: This command provides the core pipeline that `/doh-sys:commit` builds upon.
 
-## TODOARCHIVED Management Workflow
+## Archive Management Workflow
 
-The changelog command automatically manages the TODOARCHIVED.md file to keep TODO.md focused on active tasks:
+The changelog command automatically manages the todo/archive/ folder to keep active TODOs organized:
 
 ### Archive Policy
 
-- **Today's completions**: Remain in TODO.md for immediate visibility
-- **Yesterday & older completions**: Automatically moved to TODOARCHIVED.md
-- **Preservation**: Full task content, completion dates, and metadata maintained
+- **Today's completions**: Remain in todo/ folder for immediate visibility
+- **Yesterday & older completions**: Automatically moved to todo/archive/
+- **File Preservation**: Individual TODO files moved intact with full history
 
 ### Automated Process
 
-1. **Scan TODO.md** for all COMPLETED tasks with completion timestamps
+1. **Scan todo/ folder** for all TODO files (T###.md) with COMPLETED status
 2. **Date comparison** against current date (tasks completed yesterday or earlier)
-3. **Extract & format** tasks for TODOARCHIVED.md with full preservation:
-   - Task ID, title, priority, dependencies
-   - Original description and deliverables  
-   - Completion date and notes
-4. **Remove** archived tasks from TODO.md
-5. **Update** TODOARCHIVED.md with properly formatted entries
-6. **Maintain** chronological organization in archive
+3. **Move files** from todo/ to todo/archive/ preserving:
+   - Complete file content and metadata
+   - Original filename (T###.md)
+   - All completion information and notes
+4. **Update todo/README.md** if next ID counter needs adjustment
+5. **Maintain** chronological organization in archive folder
 
-### Archive Format
+### Archive Structure
 
-Tasks moved to TODOARCHIVED.md maintain full context:
+Files moved to todo/archive/ maintain their complete original format:
 
-```markdown
-### T037 - Clean up old project references ✅
-
-**Status**: COMPLETED ✅  
-**Priority**: High 🚩  
-**Dependencies**: T034 (COMPLETED)  
-**Version**: 1.4.0 **Completed**: 2025-08-27
-
-Original task description and deliverables preserved...
-
-**Completion Notes**: Successfully updated all documentation references...
 ```
+todo/archive/
+├── T013.md    # Complete original TODO file
+├── T017.md    # Full metadata and content preserved
+├── T037.md    # All completion information intact
+└── ...
+```
+
+Each archived file retains its full structure including status, priority, dependencies, tasks, and completion details.
 
 ## Example Usage
 
@@ -139,9 +135,10 @@ Provides clear progress reporting:
 
 ```
 📝 DOH Documentation Updates: T039 Lint Command
-├── ✅ TODO.md updated (T039 → COMPLETED)
+├── ✅ todo/T039.md updated (marked COMPLETED)
 ├── ✅ CHANGELOG.md updated (T039 entry added)
-├── ✅ TODOARCHIVED.md updated (2 old completed tasks moved)
+├── ✅ Archive management: 2 completed TODOs moved to todo/archive/
+├── ✅ todo/README.md: Next ID counter updated
 ├── 🔄 VERSION.md analysis: 1.4.0 → 1.4.1 (feature additions detected)
 ├── ✅ Version bump confirmed and applied
 ├── 🔧 Auto-fixed 2 documentation formatting issues
@@ -156,9 +153,10 @@ This command executes steps 1-3 of the commit pipeline:
 
 | Step                  | /doh-sys:changelog | /doh-sys:commit |
 | --------------------- | ------------------ | --------------- |
-| TODO Management       | ✅                 | ✅              |
+| Structured TODO Mgmt  | ✅                 | ✅              |
 | CHANGELOG Updates     | ✅                 | ✅              |
-| TODOARCHIVED Mgmt     | ✅                 | ✅              |
+| Archive Management    | ✅                 | ✅              |
+| ID Counter Updates    | ✅                 | ✅              |
 | Version Tracking      | ✅                 | ✅              |
 | Documentation Linting | ✅                 | ✅              |
 | Git Staging           | ❌                 | ✅              |
