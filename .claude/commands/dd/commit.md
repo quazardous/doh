@@ -468,510 +468,124 @@ vim TODO.md  # fix typo
 - **History rewriting**: Changes commit hash, affecting git history
 - **Single-user workflow**: Best for solo development or feature branches
 
-## Strict Linting Enforcement (NEW - Architectural Fix)
+## Linting Enforcement (T087 Simplified Architecture)
 
-The command enforces professional documentation quality by default through the `/dd:changelog` pipeline, with explicit decision tree logic when linting errors are found.
+The command enforces documentation quality through git pre-commit hooks with strict enforcement.
 
-## Claude AI Linting Decision Protocol
+### 🚨 STRICT RULE: NO COMMIT IF LINTING FAILS
 
-**When `/dd:changelog` encounters linting failures**:
+**NEVER COMMIT IF LINTING FAILS** - unless `--force` is explicitly passed by the developer.
+
+### **Simple Architecture**
 
 ```
-IF linting_pipeline_fails THEN:
-  1. DISPLAY error classification (critical vs minor issues)
-  2. DISPLAY pattern analysis and optimization suggestions  
-  3. PRESENT user decision options:
-     - [1] Continue in lenient mode → SET git_no_verify=true
-     - [2] Abort pipeline → HALT execution, display retry instructions
-     - [3] Show fix suggestions → DISPLAY detailed help, AWAIT new choice
-     - [4] Apply config optimizations → Run optimization, retry linting
-  4. AWAIT user input
-  5. EXECUTE chosen option:
-     - IF option 1: CONTINUE with --no-verify flag for git operations
-     - IF option 2: HALT command execution  
-     - IF option 3: DISPLAY suggestions, RETURN to step 3
-     - IF option 4: APPLY optimizations, RETRY linting pipeline
-  6. PROCEED with configured git operation parameters
+/dd:commit → /dd:changelog (NO linting) → git commit (WITH pre-commit hooks)
+                                               ↓
+                                        [SINGLE ENFORCEMENT POINT]  
+                                               ↓
+                                      Pass → Commit succeeds
+                                      Fail → Commit blocked (period)
 ```
 
-### Fixed Architecture: Linting in Changelog Pipeline
+### **Only 2 Modes**
+
+1. **Default**: `git commit` (respects pre-commit hooks, blocks on failure)
+2. **Force**: `git commit --no-verify` (when `--force` flag passed explicitly)
+
+### **Enforcement Logic**
 
 ```bash
-/dd:commit "T070 complete"
+# Default behavior - STRICT ENFORCEMENT
+if linting_passes; then
+    git commit -m "message"
+    # → SUCCESS
+else
+    echo "❌ LINTING FAILED - COMMIT BLOCKED"
+    echo "Fix issues or use --force to override"
+    exit 1
+fi
 
-🔄 DOH Pipeline: T070 complete
-├── 📝 Running linting pipeline in /dd:changelog (STRICT mode)...
-│   ├── 🔧 Step 1: make lint-fix (fixed 8/12 issues)
-│   ├── 🤖 Step 2: AI analyzing remaining 4 issues...
-│   │   ├── ✅ Fixed MD047 (missing newlines)
-│   │   ├── ✅ Fixed MD032 (list spacing)
-│   │   ├── ⚠️  MD013 line 120 needs manual attention
-│   │   └── ⚠️  MD025 multiple H1s (structural issue)
-│   └── ❌ LINTING FAILED - 2 critical issues remain
-│
-├── 📊 Pattern tracking: Updated ./linting/feedback.md
-├── 💡 Auto-suggestion: Consider line-length increase to 130
-│
-└── ⚠️  PIPELINE BLOCKED - USER DECISION REQUIRED:
-    [1] Continue in lenient mode (uses --no-verify in git operations)
-    [2] Abort and fix manually
-    [3] Show detailed fix suggestions  
-    [4] Apply suggested config optimizations
-
-# User selects [1] - Continue in lenient mode
-├── ⚡ CONTINUING IN LENIENT MODE
-├── ✅ Documentation updates complete
-├── 📝 Intelligent commit message generated
-└── git commit --no-verify -m "T070 complete"  # Only uses --no-verify when bypassed
+# Force override - EXPLICIT DEVELOPER CHOICE
+if --force_flag_passed; then
+    git commit --no-verify -m "message"  
+    echo "⚠️  LINTING BYPASSED with --force"
+    # → SUCCESS (but with clear warning)
+fi
 ```
 
-**Key Architectural Changes**:
-- **Linting moved to `/dd:changelog`**: Quality checks happen BEFORE any git operations
-- **Pipeline blocking**: Entire workflow halts when linting fails in strict mode
-- **Smart `--no-verify` usage**: Only applied when user explicitly chooses lenient/skip mode
-- **AI-powered fixes**: Multi-layer automated correction system
-- **Pattern learning**: Feedback stored in `./linting/feedback.md` for optimization
-
-### Bypass Control Integration
-
-The bypass control is now handled in the `/dd:changelog` pipeline with intelligent options:
-
-#### **Interactive Decision Flow** (When Linting Fails)
+### **Usage Examples**
 
 ```bash
-⚠️  PIPELINE BLOCKED - USER DECISION REQUIRED:
+# Standard commit (linting enforced)
+/dd:commit "T087 implementation"
+# → Documentation updates → git commit → SUCCESS or BLOCKED
 
-📄 Problematic Files:
-├── todo/T070.md (3 issues remaining after AI fixes)
-│   ├── Line 45: MD047 Missing final newline (CRITICAL)
-│   ├── Line 120: MD013 Line too long [125/120] (minor)
-│   └── Line 89: MD032 List spacing (minor)
-└── docs/guide.md (1 issue)
-    └── Line 12: MD025 Multiple H1 headings (CRITICAL)
+# Force override (bypasses linting)
+/dd:commit "T087 implementation" --force
+# → Documentation updates → git commit --no-verify → SUCCESS
 
-🤖 AI Analysis: 2 critical issues require manual attention
-💡 Suggestions: Run 'make lint-manual' for detailed guidance
-
-DECISION OPTIONS:
-[1] Continue in lenient mode → Pipeline continues with --no-verify
-[2] Abort and fix manually → Halt pipeline, fix issues, retry
-[3] Show detailed fix suggestions → Display specific resolution help
-[4] Apply config optimizations → Update .markdownlint.json rules
-
-Choice [1/2/3/4]: 
+# Split mode (each commit enforced)
+/dd:commit --split "T087 implementation"
+# → Pass 1: git commit → linting enforced → success or block
+# → Pass 2: git commit → linting enforced → success or block
 ```
 
-#### **Smart Flag Integration**
+### **Clean User Experience**
 
-**Lenient Mode (`--lenient`)**:
-- **Pipeline behavior**: Shows errors as warnings, continues automatically
-- **Git operations**: Uses `git commit --no-verify` 
-- **No prompts**: Automatic bypass without user interaction
-- **Pattern tracking**: Still logs issues to `./linting/feedback.md`
-
+**✅ Success Path**:
 ```bash
-/dd:commit "T070 complete" --lenient
-
-🔄 DOH Pipeline: T070 complete (LENIENT mode)
-├── 📝 Linting checks: 5 issues found - continuing with warnings
-├── ✅ Documentation updates complete
-├── 📊 Issues logged to ./linting/feedback.md
-└── git commit --no-verify -m "T070 complete"
+/dd:commit "T087 fix"
+# → ✅ Documentation updated
+# → ✅ Commit successful (linting passed)
 ```
 
-**Complete Skip (`--no-lint`)**:
-- **Pipeline behavior**: Bypasses entire linting pipeline
-- **Git operations**: Uses `git commit --no-verify`
-- **Performance**: Fastest execution, no quality checks
-- **Clear warnings**: Explicit messaging about skipped validation
-
+**❌ Failure Path**:
 ```bash
-/dd:commit "T070 complete" --no-lint
+/dd:commit "T087 fix" 
+# → ✅ Documentation updated
+# → ❌ LINTING FAILED - COMMIT BLOCKED
+# → Fix issues or use --force to override
 
-🔄 DOH Pipeline: T070 complete (NO-LINT mode)
-├── ⚡ SKIPPING ALL LINTING - No quality checks performed
-├── ✅ Documentation updates complete
-└── git commit --no-verify -m "T070 complete"
+# Developer fixes issues
+make lint-fix
+/dd:commit "T087 fix"
+# → ✅ Success
+
+# OR developer forces override  
+/dd:commit "T087 fix" --force
+# → ⚠️  LINTING BYPASSED with --force
+# → ✅ Success (with warning)
 ```
 
-### Error Classification & AI Success Tracking
-
-The pipeline uses intelligent error categorization and tracks AI fix success rates:
-
-**Critical Errors** (Pipeline blocking):
-- **MD047**: Missing final newline → **AI Success: 100%**
-- **MD025**: Multiple H1 headings → **AI Success: 23%** (needs manual fix)
-- **MD002**: First heading not H1 → **AI Success: 45%**
-- **MD031**: Code block spacing → **AI Success: 90%**
-
-**Minor Errors** (Warning level in lenient mode):
-- **MD013**: Line length → **AI Success: 95%** (smart line breaking)
-- **MD032**: List spacing → **AI Success: 87%**
-- **MD009**: Trailing spaces → **AI Success: 100%**
-- **MD040**: Code block languages → **AI Success: 78%**
-
-### Feedback-Driven Optimization
-
-The system continuously learns and suggests improvements:
-
-```bash
-🔍 LINTING OPTIMIZATION AVAILABLE
-
-📊 Pattern Analysis (last 25 commits):
-├── MD013 (line length): 18 failures → 72% of all issues
-├── MD047 (missing newline): 8 failures → 32% of all issues  
-└── MD032 (list spacing): 5 failures → 20% of all issues
-
-💡 Recommended .markdownlint.json optimizations:
-{
-  "MD013": { "line_length": 130, "code_blocks": false },
-  "MD047": true,
-  "MD032": { "style": "consistent" }
-}
-
-📈 Impact: Would eliminate ~85% of recurring linting failures
-
-Apply these optimizations? [Y/n]
-```
-
-### Quality Assurance Benefits
-
-- **Professional Standards**: Ensures consistent, high-quality documentation
-- **Team Alignment**: Enforces shared quality standards across contributors
-- **Error Prevention**: Catches structural issues before they enter git history
-- **Developer Guidance**: Provides clear, actionable error explanations
-- **Flexible Control**: Multiple bypass mechanisms for different scenarios
-
-## Auto-Fix Capabilities
-
-The pipeline includes intelligent auto-fixes for:
-
-- **Line Length**: Smart text wrapping preserving meaning
-- **Blank Lines**: Add missing blank lines around headings/lists
-- **Code Blocks**: Add language specifications
-- **Emphasis Headers**: Convert to proper heading syntax
-- **Trailing Spaces**: Remove or normalize
-- **File Endings**: Ensure single trailing newline
-
-## Usage Examples & Smart Suggestions
-
-### 💡 Quick Start - Most Common Patterns
-
-```bash
-# 🚀 Most common: Auto-extract from recent changes
-/dd:commit
-# Smart analysis → suggests commit message → single focused commit
-
-# 📋 With specific task completion
-/dd:commit "T039 - Lint command with auto-fix"
-# Uses task description → updates changelog → creates commit
-
-# 👁️ Preview before committing (always safe)
-/dd:commit --dry-run
-# Shows exactly what would happen → no changes made
-```
-
-### 🔧 Advanced Flag Combinations
-
-```bash
-# 🎯 Focus mode: Large workspace with unrelated changes
-/dd:commit --split --staged-focused
-# Only processes staged files + obvious semantic matches
-# Ignores unrelated unstaged/untracked files
-
-# 🔍 Interactive control: Review each commit
-/dd:commit --split --interactive --staged-focused
-# Split sequence → review each → edit messages → full control
-
-# ⚡ Speed mode: Skip slow operations
-/dd:commit "T041 cleanup" --no-lint --no-version-bump
-# Fastest commit → skips linting & version analysis → immediate commit
-
-# 🎯 Quality mode: Allow minor linting issues
-/dd:commit "T041 cleanup" --lenient
-# Shows linting warnings → proceeds without confirmation → maintains quality awareness
-
-# 🛠️ Amendment with safety
-/dd:commit --amend --lenient
-# Add to previous commit → allow minor linting issues → safe for amendments
-
-# 🧪 Testing mode: See everything without doing anything
-/dd:commit --split --dry-run
-# Shows split plan → no commits created → perfect for testing
-```
-
-### 📊 Smart Context-Based Suggestions
-
-**When you have many files staged:**
-```bash
-/dd:commit --split
-# 💡 Suggested by Claude when 5+ files staged
-# Algorithm splits into semantic groups automatically
-```
-
-**When working directory is messy:**  
-```bash
-/dd:commit --split --staged-focused
-# 💡 Suggested when many unrelated unstaged files present
-# Focuses only on intentionally staged work
-```
-
-**When you want control over commits:**
-```bash
-/dd:commit --split --interactive
-# 💡 Suggested for complex changes requiring review
-# Full control over each commit in sequence
-```
-
-**When making quick fixes:**
-```bash
-/dd:commit "fix typo" --no-lint --no-version-bump
-# 💡 Suggested for minor changes
-# Skip time-consuming operations
-```
-
-**When unsure about changes:**
-```bash
-/dd:commit --dry-run
-# 💡 Always safe - shows what would happen
-# No actual changes made to git history
-```
-
-### 🔄 Common Workflow Patterns
-
-**Epic Task Completion:**
-```bash
-# 1. Complete epic work with splitting
-/dd:commit --split --interactive "T054 complete"
-# → Epic updates first → System changes → Documentation → Implementation
-
-# 2. Quick documentation fix
-/dd:commit "fix documentation" --no-version-bump --no-lint
-# → Skip version bump for docs-only changes
-```
-
-**Mixed Development Session:**
-```bash
-# 1. Stage intentional changes first
-git add todo/T065.md .claude/commands/doh-sys/commit.md
-
-# 2. Split with focus on staged files
-/dd:commit --split --staged-focused
-# → Process staged files + auto-detect related changes
-# → Ignore unrelated workspace modifications
-```
-
-**Amendment and Cleanup:**
-```bash
-# 1. Realize you forgot something in previous commit
-/dd:commit --amend --no-version-bump
-# → Add changes to previous commit without version bump
-
-# 2. Major changes require careful review
-/dd:commit --split --interactive --dry-run
-# → First: preview the split plan
-/dd:commit --split --interactive  
-# → Then: execute with full control
-```
-
-### ⚡ Flag Compatibility Matrix
-
-| Primary Flag | Compatible With | Recommended Combinations |
-|--------------|----------------|-------------------------|
-| `--split` | `--interactive`, `--staged-focused`, `--dry-run` | `--split --interactive` |
-| `--dry-run` | All flags | `--split --dry-run` (preview splits) |
-| `--amend` | `--no-version-bump`, `--no-lint` | `--amend --no-version-bump` |
-| `--interactive` | `--split` only | `--split --interactive --staged-focused` |
-| `--staged-focused` | `--split` only | `--split --staged-focused` |
-
-### 🚫 Flag Conflicts (Auto-Detected)
-
-```bash
-# ❌ These combinations are detected and prevented:
-/dd:commit --amend --split
-# Error: Cannot amend with splitting (creates multiple commits)
-
-/dd:commit --interactive
-# Error: --interactive requires --split flag
-
-/dd:commit --staged-focused  
-# Error: --staged-focused requires --split flag
-```
-# → Shows proposed commit sequence and file groupings
-# → Perfect for validation before committing
-
-# Split with other options
-/dd:commit "T064 implementation" --split --no-lint
-# → Split commits with specific task context, skip linting
-
-# Staged-focused splitting (ignore unrelated unstaged files)
-/dd:commit --split --staged-focused
-# → Split staged files + obvious semantic matches
-# → Don't prompt about unrelated unstaged files
-# → Perfect for partial commits when working directory has unrelated changes
-```
-
-## Split Algorithm Implementation
-
-### Semantic File Categorization
-
-The split algorithm uses priority-based pattern matching to group files logically:
-
-```javascript
-// Priority 1: Epic & TODO Updates (Highest)
-const epicFiles = stagedFiles.filter(file => 
-  /^todo\/.*\.md$|^todo\/NEXT\.md$/.test(file)
-);
-
-// Priority 2: DOH System Infrastructure  
-const dohSystemFiles = stagedFiles.filter(file =>
-  /^\.claude\/(doh|commands)\//.test(file)
-);
-
-// Priority 3: Project Documentation
-const docsFiles = stagedFiles.filter(file =>
-  /^(README|WORKFLOW|DEVELOPMENT)\.md$|^docs\//.test(file)
-);
-
-// Priority 4: Core Implementation
-const sourceFiles = stagedFiles.filter(file =>
-  /^src\/|^lib\/|^app\/|\.(js|py|ts|php)$/.test(file)
-);
-
-// Priority 5: Configuration & Support
-const configFiles = stagedFiles.filter(file =>
-  /^(package\.json|.*\.config\.|.*rc\.|.*\.lock)$|^tests?\//.test(file)
-);
-```
-
-### Content Analysis for Smart Messages
-
-Each commit message is generated based on actual file content analysis:
-
-```javascript
-// Epic/TODO commit message generation
-const generateEpicCommitMessage = (files) => {
-  const completedTasks = extractCompletedTasks(files);
-  const taskUpdates = extractTaskUpdates(files);
-  
-  if (completedTasks.length > 0) {
-    return `feat: Complete ${completedTasks.join(', ')} and update project roadmap`;
-  } else if (taskUpdates.length > 0) {
-    return `docs: Update ${taskUpdates.join(', ')} task documentation`;
-  }
-  return 'docs: Update project task management';
-};
-
-// DOH System commit message generation
-const generateSystemCommitMessage = (files) => {
-  const newCommands = detectNewCommands(files);
-  const enhancedComponents = detectEnhancements(files);
-  
-  if (newCommands.length > 0) {
-    return `feat: Add ${newCommands.join(', ')} commands to DOH system`;
-  } else if (enhancedComponents.length > 0) {
-    return `feat: Enhance DOH ${enhancedComponents.join(', ')}`;
-  }
-  return 'feat: Update DOH system components';
-};
-```
-
-### Interactive Split Flow
-
-The interactive mode provides fine-grained control over each commit:
-
-```javascript
-const executeInteractiveSplit = async (commitPlan) => {
-  for (let i = 0; i < commitPlan.length; i++) {
-    const commit = commitPlan[i];
-    
-    console.log(`Commit ${i+1}/${commitPlan.length}: "${commit.message}"`);
-    console.log(`Files: ${commit.files.join(', ')}`);
-    
-    const action = await prompt('Execute this commit? [Y/n/edit/skip]');
-    
-    switch (action.toLowerCase()) {
-      case 'y':
-      case '':
-        await executeCommit(commit);
-        console.log(`✅ Commit ${i+1} complete`);
-        break;
-        
-      case 'edit':
-        const newMessage = await prompt('Enter commit message:');
-        commit.message = newMessage;
-        await executeCommit(commit);
-        console.log(`✅ Commit ${i+1} complete (edited)`);
-        break;
-        
-      case 'skip':
-        console.log(`⏭️  Commit ${i+1} skipped`);
-        // Add files back to staging for potential later commits
-        await stageFiles(commit.files);
-        break;
-        
-      case 'n':
-        console.log('Split sequence cancelled');
-        return false;
-    }
-  }
-  return true;
-};
-```
-
-### Split Safety & Rollback
-
-The split system includes comprehensive safety features:
-
-```javascript
-const executeSplitCommits = async (commitPlan) => {
-  // Store original staging state for rollback
-  const originalStaging = await getCurrentStagingState();
-  const commitHashes = [];
-  
-  try {
-    for (const commit of commitPlan) {
-      // Reset staging and stage only files for this commit
-      await resetStaging();
-      await stageFiles(commit.files);
-      
-      // Execute commit with generated message
-      const hash = await executeGitCommit(commit.message);
-      commitHashes.push(hash);
-      
-      console.log(`✅ Commit created: ${hash.substring(0,7)} - ${commit.message}`);
-    }
-    
-    console.log(`\n🎉 Split complete! Created ${commitHashes.length} focused commits.`);
-    return true;
-    
-  } catch (error) {
-    console.log(`❌ Split failed: ${error.message}`);
-    
-    // Rollback: reset to before split and restore original staging
-    if (commitHashes.length > 0) {
-      const rollbackTo = commitHashes.length > 0 
-        ? `HEAD~${commitHashes.length}` 
-        : 'HEAD';
-      
-      console.log(`🔄 Rolling back ${commitHashes.length} commits...`);
-      await executeGitCommand(`git reset --soft ${rollbackTo}`);
-    }
-    
-    // Restore original staging
-    await restoreStagingState(originalStaging);
-    console.log('✅ Original staging state restored');
-    
-    return false;
-  }
-};
-```
+### **Flag Behavior**
+
+| Flag | Git Command | Linting | Description |
+|------|-------------|---------|-------------|
+| *(none)* | `git commit` | ✅ Enforced | Default strict behavior |
+| `--force` | `git commit --no-verify` | ❌ Bypassed | Explicit override |  
+| `--dry-run` | *(no git)* | ❌ Skipped | Preview only |
+
+### **Removed Complexity**
+
+**❌ No More**:
+- Complex decision trees with 4 options
+- AI-powered linting pipeline in `/dd:changelog`
+- Pattern learning and feedback systems  
+- Interactive prompts about linting failures
+- `--lenient` and `--no-lint` flags (confusing)
+- Dual linting systems causing coordination issues
+
+**✅ Benefits**:
+- **Predictable**: Linting fails → commit blocked (always)
+- **Simple**: Two modes only (strict or force)
+- **Fast**: No AI processing or complex decision trees
+- **Clear**: Obvious failure messages and solutions
 
 ## Error Handling
 
 - **Split Failures**: Automatic rollback to original staging state if any commit fails
-- **Linting Failures**: Apply progressive auto-fixes, retry up to 2 times
-- **Git Hook Failures**: Attempt additional fixes, use `--no-verify` as last resort
+- **Linting Failures**: Commit blocked, user must fix issues or use `--force` 
+- **Git Hook Failures**: Clear error messages with actionable solutions
 - **Version Conflicts**: Detect and resolve version inconsistencies
 - **File Lock Issues**: Retry operations with brief delays
 

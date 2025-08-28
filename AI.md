@@ -2,14 +2,14 @@
 
 **COMPILED GUIDE**: 2025-08-28  
 **Source Version**: CLAUDE.md v1.2  
-**Next Update**: When source documents change  
+**Next Update**: When source documents change
 
 ---
 
 ## ⚡ QUICK REFERENCE CARD ⚡
 
 - **Next Task ID**: **083** (ALWAYS check todo/README.md before creating tasks)
-- **Current Project Context**: DOH-DEV Internal vs DOH Runtime (use DOH-DEV only for /dd:* commands)  
+- **Current Project Context**: DOH-DEV Internal vs DOH Runtime (use DOH-DEV only for /dd:\* commands)
 - **Linting Mode**: Strict enforcement (T070 AI-powered 4-layer pipeline)
 - **Command Status**: /dd:commit, /dd:changelog, /dd:next, /dd:mkai active + optimized
 - **Language**: Full English for all content (universal compatibility)
@@ -28,7 +28,7 @@
 
 2. ✅ **CREATE T083.md** (use EXACT next number from README.md)
    - **Never use arbitrary numbers** (like T074 instead of T078)
-   - **Never skip numbers** in sequence  
+   - **Never skip numbers** in sequence
    - **Never reuse old numbers** from archive
 
 3. ✅ **UPDATE README.md** - Increment Next ID to 084
@@ -48,8 +48,9 @@
 ### External Tool Attribution - FORBIDDEN
 
 **FORBIDDEN** in all content:
+
 - ❌ NO "Generated with [Claude Code]" in commits, documentation, or code
-- ❌ NO "Co-Authored-By: Claude" or similar external tool attributions  
+- ❌ NO "Co-Authored-By: Claude" or similar external tool attributions
 - ❌ NO references to specific AI tools, IDEs, or development environments
 - ✅ This project stands as independent professional software
 
@@ -64,12 +65,14 @@
 **Claude Execution Sequence**:
 
 #### Pre-Execution Context Check
+
 - **Verify linting status**: T070 strict enforcement active (4-layer AI-powered pipeline)
 - **Identify command variant**: Standard vs --split vs --amend vs --interactive
 - **Parse user flags**: --lenient, --no-lint, --dry-run (inherit to downstream commands)
 - **Check git status**: Staged changes, conflicts, branch status
 
 #### Pipeline Execution Steps
+
 1. **Execute /dd:changelog** with complete flag inheritance
    - **AI-powered linting pipeline**: 4 layers (tooling → AI fixes → validation → user decision)
    - **Documentation updates**: TODO status, CHANGELOG entries, archive management
@@ -130,10 +133,11 @@
 **Execution Modes**:
 
 - **Standard**: `/dd:next` - General task recommendations based on project status
-- **Internal**: `/dd:next --internal` - DOH-DEV Internal task focus (for /dd:* command work)
+- **Internal**: `/dd:next --internal` - DOH-DEV Internal task focus (for /dd:\* command work)
 - **Specific**: `/dd:next [--context="description"]` - Context-aware recommendations
 
 **Analysis Process**:
+
 1. **Scan active TODOs**: Identify READY status tasks, dependency chains
 2. **Context Assessment**: Project state, recent completions, blockers
 3. **Priority Ranking**: Impact, effort, dependencies, current workflow
@@ -144,6 +148,7 @@
 **Purpose**: Comprehensive AI documentation management for maintaining and generating AI.md
 
 **Core Functions**:
+
 - `--brainstorm=topic`: Interactive AI documentation problem-solving
 - `--maintain`: Update compilation guide (docs/mk-ai.md) with source changes
 - `--compile`: Generate `./AI.md` from all source documents (PROJECT ROOT location)
@@ -151,6 +156,7 @@
 - `--full`: Execute maintain + compile + validate sequence
 
 **Key Features**:
+
 - **Visual Prominence System**: 🚨 alerts, 📋 protocols, ⚡ quick references
 - **Intelligent Compilation**: Resolves conflicts, deduplicates information
 - **Context Optimization**: Structures information for AI comprehension
@@ -163,19 +169,22 @@
 ### 🚨 CRITICAL DISTINCTION 🚨
 
 #### DOH-DEV Internal (dd-x.x.x versioning)
-- **Purpose**: Internal tooling, /dd:* commands, developer experience, Claude optimization
+
+- **Purpose**: Internal tooling, /dd:\* commands, developer experience, Claude optimization
 - **Task Header**: `**Project**: DOH-DEV Internal` (REQUIRED when applicable)
 - **Version Files**: `todo/dd-0.1.0.md`, `todo/dd-0.2.0.md` (internal releases)
 - **Examples**: T070 (linting), T078 (lint intelligence), T080 (command optimization), T081 (AI.md)
-- **When to Use**: ONLY when enhancing /dd:* commands or internal Claude/development tooling
+- **When to Use**: ONLY when enhancing /dd:\* commands or internal Claude/development tooling
 
 #### DOH Runtime (doh-x.x.x versioning) - DEFAULT
+
 - **Purpose**: End-user distribution, public API, runtime functionality, user-facing features
 - **Task Header**: `**Project**: DOH Runtime` (default, can be omitted)
 - **Version Files**: `todo/doh-1.4.0.md`, `todo/doh-1.5.0.md` (public releases)
-- **Examples**: Most tasks unless specifically enhancing internal /dd:* infrastructure
+- **Examples**: Most tasks unless specifically enhancing internal /dd:\* infrastructure
 
-**Decision Rule**: Use DOH-DEV Internal ONLY when work directly affects /dd:* command system or Claude development experience
+**Decision Rule**: Use DOH-DEV Internal ONLY when work directly affects /dd:\* command system or Claude development
+experience
 
 ---
 
@@ -184,13 +193,15 @@
 ### Markdown Quality Control
 
 **Commands**:
+
 - **`make lint`** - Run all linters (markdown + shell scripts)
 - **`make lint-fix`** - Auto-correct markdown formatting issues
 - **`make lint-manual`** - Show non-auto-fixable issues requiring manual correction
 
 **Workflow**:
+
 1. **Write/Edit** markdown content
-2. **Auto-fix** - Run `make lint-fix` to correct formatting automatically  
+2. **Auto-fix** - Run `make lint-fix` to correct formatting automatically
 3. **Manual fixes** - Address issues from `make lint-manual`:
    - 📏 **Line length (MD013)** - Break long lines at 120 characters
    - 🔢 **List numbering (MD029)** - Fix ordered list prefixes (1, 2, 3...)
@@ -231,7 +242,7 @@
 ### File Operations
 
 - **ALWAYS prefer editing existing files** to creating new ones
-- **NEVER proactively create documentation files** (*.md) unless explicitly requested
+- **NEVER proactively create documentation files** (\*.md) unless explicitly requested
 - **Read files first** before editing to understand context and conventions
 - **Use absolute paths** in all file operations
 - **Batch tool calls** when possible for optimal performance
@@ -246,12 +257,12 @@
 /home/david/Private/dev/projects/quazardous/doh/
 ├── AI.md                            # 🚨 THIS FILE - COMPILED GUIDE 🚨 (PROJECT ROOT)
 ├── .claude/                         # Claude configuration
-│   ├── CLAUDE.md                   # Source: Basic configuration  
+│   ├── CLAUDE.md                   # Source: Basic configuration
 │   ├── DEVELOPMENT.md              # Source: Development patterns
 │   ├── WORKFLOW.md                 # Source: DOH usage workflow
 │   └── commands/dd/                # DOH-DEV Internal commands
 │       ├── commit.md               # Complete commit pipeline
-│       ├── changelog.md            # Documentation update system  
+│       ├── changelog.md            # Documentation update system
 │       ├── next.md                 # Task recommendation engine
 │       ├── mkai.md                 # AI documentation management
 │       └── lint.md                 # AI-powered linting system
@@ -282,30 +293,34 @@
 ### Common Issues
 
 #### Task Creation Errors
+
 - **Symptom**: Wrong task numbers, skipped sequences, conflicts
 - **Root Cause**: Not checking todo/README.md Next ID before creation
 - **Solution**: ALWAYS verify Next ID, increment after creation, check for conflicts
 
 #### Linting Pipeline Failures
+
 - **Symptom**: /dd:changelog or /dd:commit blocked by linting errors
 - **Analysis**: T070 4-layer system detecting issues
-- **Options**: 
-  - Fix manually and retry
-  - Use --lenient flag for minor issues
-  - Use --no-lint for emergency bypass (discouraged)
+- **Options**:
+    - Fix manually and retry
+    - Use --lenient flag for minor issues
+    - Use --no-lint for emergency bypass (discouraged)
 
 #### Project Context Confusion
+
 - **Symptom**: Wrong versioning (dd vs doh), incorrect task categorization
-- **Solution**: Use DOH-DEV Internal ONLY for /dd:* command work, everything else is DOH Runtime
+- **Solution**: Use DOH-DEV Internal ONLY for /dd:\* command work, everything else is DOH Runtime
 
 #### Documentation Fragmentation
+
 - **Symptom**: Missing information, outdated context, conflicting instructions
 - **Solution**: This AI.md file contains compiled current state, refer to source files for details
 
 ### Recovery Procedures
 
 1. **For blocked pipelines**: Check linting output, apply fixes, use appropriate flags
-2. **For task conflicts**: Verify Next ID, resolve numbering, update README.md  
+2. **For task conflicts**: Verify Next ID, resolve numbering, update README.md
 3. **For git issues**: Use /dd:commit built-in conflict detection and resolution
 4. **For unclear context**: Consult this AI.md first, then source documents as needed
 
@@ -314,20 +329,24 @@
 ## 🎯 QUICK DECISION MATRIX 🎯
 
 ### "Should I create a TODO?"
+
 - **Simple task** (move 1 file, fix 1 function) → No TODO needed
 - **Complex task** (restructure system, multi-file changes) → CREATE TODO FIRST
 - **Uncertain** → Ask user if TODO should be created
 
 ### "Which project context?"
-- **Enhancing /dd:* commands** → DOH-DEV Internal (dd-x.x.x)
+
+- **Enhancing /dd:\* commands** → DOH-DEV Internal (dd-x.x.x)
 - **Everything else** → DOH Runtime (doh-x.x.x)
 
 ### "How to handle linting failures?"
+
 - **Development environment** → Fix manually, retry
 - **CI/CD pipeline** → Use --lenient if minor, --no-lint for emergency
 - **Strict quality requirement** → Fix all issues before proceeding
 
 ### "Which Next ID to use?"
+
 - **ALWAYS check todo/README.md first** → Current: 083
 - **Use exact number from README.md** → Don't guess or calculate
 - **Increment after creation** → Update README.md to 084
@@ -339,11 +358,13 @@
 This compiled guide draws from:
 
 ### Primary Sources
+
 - **CLAUDE.md** (~200 lines) - Basic configuration, rules, language requirements
 - **DEVELOPMENT.md** (~150 lines) - Development workflows, patterns, TODO management
 - **WORKFLOW.md** (~300 lines) - DOH usage, PRD/Epic/Task workflows
 
-### Command Documentation  
+### Command Documentation
+
 - **.claude/commands/dd/commit.md** (~1100 lines) - Complete pipeline implementation
 - **.claude/commands/dd/changelog.md** (~280 lines) - Documentation update system
 - **.claude/commands/dd/next.md** (~200 lines) - AI task recommendation engine
@@ -351,6 +372,7 @@ This compiled guide draws from:
 - **.claude/commands/dd/lint.md** (~324 lines) - AI-powered linting system
 
 ### Supporting Documentation
+
 - **todo/README.md** - Task numbering system (CRITICAL for Next ID)
 - **docs/mk-ai.md** - AI.md compilation guide and patterns
 - **docs/pattern-isolation-guide.md** - Project context isolation
@@ -358,11 +380,12 @@ This compiled guide draws from:
 - **linting/feedback.md** - AI linting intelligence and optimization
 
 ### Version Information
+
 - **Last Compiled**: 2025-08-28
 - **Source Status**: Current with latest task completions and system updates
 - **Next Update Trigger**: When source documents are modified or via /dd:mkai --compile
 
 ---
 
-🤖 **This compiled guide ensures Claude has complete context in one place. For detailed implementation specifics, refer to individual source documents listed in references section.**
-
+🤖 **This compiled guide ensures Claude has complete context in one place. For detailed implementation specifics, refer
+to individual source documents listed in references section.**
