@@ -29,9 +29,9 @@
 #### Mixed-Purpose Documentation (Careful separation required)
 
 - **CONTRIBUTING.md** - For external contributors
-  - ✅ CAN mention TODO.md exists for tracking
-  - ❌ Should NOT reference specific T### numbers
-  - ✅ Should explain contribution workflow
+    - ✅ CAN mention TODO.md exists for tracking
+    - ❌ Should NOT reference specific T### numbers
+    - ✅ Should explain contribution workflow
 
 ### Documentation Review Checklist
 
@@ -949,7 +949,7 @@ identified by the 🛡️ flag rather than being in a separate section.
 #### Version Field Definitions
 
 1. **Proposed Version**: `1.4.0` - Initial version suggestion at task creation
-   - Set when task is first created 
+   - Set when task is first created
    - Indicates earliest possible version for consideration
    - Can be tentative or aspirational
 
@@ -969,15 +969,19 @@ Tasks progress through version planning stages (only one version field at a time
 
 ```markdown
 # New task (Claude's initial estimation)
+
 Status: READY + Proposed Version: 1.4.0
 
 # Task is planned for specific version
+
 Status: READY + Target Version: 1.4.0
 
 # Roadmap is locked OR task becomes active
+
 Status: IN PROGRESS + Version: 1.4.0
 
 # Task completed
+
 Status: COMPLETED + Version: 1.4.0 ✅
 ```
 
@@ -985,15 +989,19 @@ Status: COMPLETED + Version: 1.4.0 ✅
 
 ```markdown
 # Normal evolution
+
 T001: Proposed Version: 1.4.0 → Target Version: 1.4.0 → Version: 1.4.0 ✅
 
-# Deferred task  
+# Deferred task
+
 T002: Proposed Version: 1.4.0 → Target Version: 1.5.0 → (still flexible)
 
 # Version constraint (external requirement)
+
 T003: Status: NOT PLANNED + Version: 1.5.0 (must be in this specific version)
 
 # Fast-tracked urgent task
+
 T004: Proposed Version: 1.4.1 → Version: 1.4.1 (directly to frozen)
 ```
 
