@@ -2,7 +2,7 @@
 
 **Last Updated**: 2025-08-27  
 **System Version**: 2.0 (Structured Files)  
-**Next ID**: 058 (shared counter for TODOs and Epics)
+**Next ID**: 078 (shared counter for TODOs and Epics)
 
 ## Overview
 
@@ -14,7 +14,7 @@ This directory contains the structured TODO management system for the DOH projec
 todo/
 ├── README.md                 # This file - management documentation
 ├── T002.md ... T057.md       # Individual TODO files (active and proposed)
-├── E001.md, E020.md, E047.md # Epic files
+├── E074.md, E075.md, E076.md, E077.md # Epic files
 └── archive/                  # Completed TODOs
     ├── T013.md
     ├── T017.md
@@ -38,7 +38,7 @@ todo/
 ### Epics
 
 - Place directly in `todo/` folder  
-- Format: `E###.md` (e.g., `E001.md`, `E020.md`)
+- Format: `E###.md` (e.g., `E074.md`, `E076.md`)
 - Track component TODOs and progress
 
 ## TODO Template
@@ -51,7 +51,7 @@ Use this lightweight template for creating new TODOs:
 **Status**: PROPOSED  
 **Priority**: MEDIUM  
 **Dependencies**: None  
-**Epic**: None
+**Epic**: None (see Epic Assignment Rules)
 
 [Brief description of what this TODO accomplishes]
 
@@ -115,23 +115,61 @@ Use this lightweight template for creating new Epics:
 - **MEDIUM**: Important but not blocking
 - **LOW**: Nice-to-have, future enhancements
 
+## Epic Assignment Rules
+
+When creating new TODOs, follow these rules for Epic assignment:
+
+### Default: Epic-less TODOs
+- **Most TODOs should be Epic-less** unless there's an obvious match
+- Use `**Epic**: None` by default
+- Don't force artificial Epic assignments
+
+### When to Assign an Epic
+Only assign a TODO to an Epic when:
+1. **Existing Epic matches**: There's a clear, existing Epic that obviously relates
+2. **Component relationship**: The TODO is clearly a component of an established Epic
+3. **Natural fit**: The assignment feels natural and adds organizational value
+
+### When NOT to Assign an Epic
+- **No existing Epic matches**: Don't create new Epics just to assign TODOs
+- **Unclear relationship**: If the connection to an Epic is vague or forced  
+- **Standalone work**: Independent TODOs that don't belong to larger initiatives
+- **Simple enhancements**: Minor improvements that don't need Epic-level organization
+
+### Examples
+```
+✅ Good Epic Assignment:
+T072 - Epic: E075 (clear component of existing DOH-DEV Internal System Epic)
+
+❌ Bad Epic Assignment: 
+T073 - Epic: E004 (E004 doesn't exist, forced assignment)
+
+✅ Good Epic-less TODO:
+T073 - Epic: None (standalone enhancement, no existing Epic matches)
+```
+
+### Shared Numbering
+- TODOs and Epics share the same sequence counter
+- Current sequence: T001-T073, E074-E077, next ID: 078
+- This prevents numbering conflicts and maintains chronological order
+
 ## Workflow
 
 ### Creating New TODOs
 
-1. Use next available number from shared counter (currently 058)
+1. Use next available number from shared counter (currently 078)
 2. Copy TODO template from this README
 3. Fill in all required metadata
-4. Save as `T058.md` in `todo/` folder
-5. Update "Next ID" counter in this README to 059
+4. Save as `T078.md` in `todo/` folder
+5. Update "Next ID" counter in this README to 079
 
 ### Creating New Epics
 
-1. Use next available number from shared counter (currently 058)
+1. Use next available number from shared counter (currently 078)
 2. Copy Epic template from this README (see below)
 3. Define component TODOs
-4. Save as `E058.md` in `todo/` folder
-5. Update "Next ID" counter in this README to 059
+4. Save as `E078.md` in `todo/` folder
+5. Update "Next ID" counter in this README to 079
 
 ### Completing TODOs
 
@@ -150,8 +188,8 @@ Use this lightweight template for creating new Epics:
 
 All TODO management is done manually by editing files directly:
 
-- **Create TODO**: Copy template from this README, create `T058.md` file (use next ID)
-- **Create Epic**: Copy epic template, create `E058.md` file (use next ID)
+- **Create TODO**: Copy template from this README, create `T078.md` file (use next ID)
+- **Create Epic**: Copy epic template, create `E078.md` file (use next ID)
 - **Update status**: Edit the file's Status line
 - **Archive completed**: Move file from `todo/` to `todo/archive/`
 - **Update counter**: Increment "Next ID" in this README after creating TODO/Epic
@@ -194,8 +232,8 @@ All TODO management is done manually by editing files directly:
 
 ### /doh-sys Commands
 
-- `/doh-sys:commit` - Will be updated to work with individual files
-- `/doh-sys:changelog` - Will generate from individual TODO files
+- `/dd:commit` - Will be updated to work with individual files
+- `/dd:changelog` - Will generate from individual TODO files
 - Archive management integrated with completion workflow
 
 ### Version Control
