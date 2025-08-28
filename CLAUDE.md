@@ -138,3 +138,4 @@ The pre-commit hook automatically runs markdown linting on staged files:
 - **Manual review**: Use `make lint-manual` for remaining issues
 - **Short lines**: Break at natural points (commas, conjunctions)
 - **Consistent structure**: Follow existing document patterns
+- when creating command for claude check the official claude.ai documentation

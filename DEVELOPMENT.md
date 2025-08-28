@@ -882,6 +882,18 @@ audit trail for understanding why architectural choices were made and what infor
 This project uses a structured file-based TODO system rather than the /doh system it provides to other projects. Each
 TODO and Epic is maintained as an individual file for better organization, version control, and collaboration.
 
+### Version Goal Management
+
+Each active version has a `version-X.Y.Z.md` file in `todo/` that captures:
+- **Philosophy**: One-line version strategy
+- **Goals**: Must-have and should-have objectives (synthetic, not detailed)
+- **Constraints**: Technical and design boundaries
+- **Key Decisions**: Important choices made during development
+
+Example: `todo/version-1.4.0.md` - Keep it concise, ~30 lines max.
+
+Old stable versions move to `todo/archive/` to reduce clutter.
+
 ### File Organization
 
 - **todo/README.md**: Complete TODO management documentation and guidelines
