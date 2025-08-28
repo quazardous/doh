@@ -1,8 +1,8 @@
 # DOH Task Intelligence Memory 🧠
 **Last Analysis**: 2025-08-28  
 **Version Context**: DOH 1.4.0 Development  
-**Epic Progress**: E001 Phase 1 (10% complete - T054✅)  
-**Total Tasks**: 34 active, 12 ready to start
+**Epic Progress**: E001 Phase 3 (18% complete - T054✅ T058✅ T059✅ T064✅)  
+**Total Tasks**: 37 active, 13 ready to start, T062 & T061 highest priority
 
 ## 🎯 Top Recommendations
 
@@ -16,15 +16,29 @@
 - **Impact**: Enterprise-grade /doh:commit, /doh:changelog, /doh:lint for all projects
 - **Delivered**: Optional linting, smart integration, project-configurable pipeline
 
+#### **T059** - Port AI Task Engine (4-5h) ✅ COMPLETED (2025-08-28)
+- **Impact**: AI-powered /doh:next with natural language queries now available to all projects
+- **Delivered**: Complete task intelligence system with memory-based recommendations
+
+#### **T064** - Enhance /doh-sys:commit with --split Flag (3-4h) ✅ COMPLETED (2025-08-28)
+- **Impact**: Intelligent semantic commit splitting with epic/TODO priority strategy
+- **Delivered**: Enhanced pipeline with automatic multi-commit creation for better history
+
 ### Immediate Priority (Next Session)
 
-#### 1. **T059** - Port AI Task Engine (4-5h) 🧠
-- **Score**: 8.2/10 - AI-powered intelligence
-- **Status**: 🟢 READY (T058✅ T054✅)
-- **Impact**: Brings /doh:next with natural language queries to all projects
-- **Why Now**: Dependencies completed, highest remaining strategic value
+#### 1. **T062** - Enhance /doh:init with Linting Intelligence (2-3h) 🔍
+- **Score**: 8.5/10 - User experience enhancement (boosted after T059 completion)
+- **Status**: 🟢 READY (T058✅ T059✅)
+- **Impact**: Seamless DOH project setup with intelligent linting detection
+- **Why Now**: Perfect follow-up to T058/T059, completes pipeline intelligence suite
 
-#### 2. **T037** - Cleanup Old References (1h) 📝
+#### 2. **T061** - Natural Language Router for /doh Commands (3-4h) 🗣️
+- **Score**: 8.2/10 - Enhanced user experience
+- **Status**: 🟢 READY (T002✅ T059✅)
+- **Impact**: Conversational interface for all DOH commands
+- **Why**: Natural complement to T059's AI engine, unified UX
+
+#### 3. **T037** - Cleanup Old References (1h) 📝
 - **Score**: 7.0/10 - Quick documentation polish
 - **Status**: 🟢 READY (no blockers)
 - **Impact**: Professional documentation quality
@@ -36,12 +50,14 @@
 Legend: 🟢 Ready | 🟡 Waiting | 🔴 Blocked | ✅ Complete
 
 ✅ T054 (Memory System)
-    └─→ 🟢 T058 (Pipeline Port)
-            └─→ 🟡 T059 (AI Task Engine)
-                    └─→ 🟡 T061 (NL Router)
+    └─→ ✅ T058 (Pipeline Port)
+            ├─→ ✅ T059 (AI Task Engine)
+            │       └─→ 🟢 T061 (NL Router)
+            └─→ 🟢 T062 (Init Linting Enhancement)
 
 🟢 T032 (Build Process)
-    ├─→ 🟢 T003 (Architecture)
+    ├─→ 🟢 T003 (Architecture)  
+    │       └─→ 🔴 T063 (V2.0 Arch Refactor)
     ├─→ 🟢 T005 (Installation)
     └─→ 🔴 T022 (Self-Hosting)
 
@@ -68,7 +84,7 @@ Legend: 🟢 Ready | 🟡 Waiting | 🔴 Blocked | ✅ Complete
 **Epic E001 Tasks** (25-35h total):
 - Phase 1: T054✅ (missing T055, T056)
 - Phase 2: T032🟢 T003🟢 T005🟢
-- Phase 3: T058🟢 T059🟡 T024🟢 T019🟢 T061🟡
+- Phase 3: T058✅ T059✅ T024🟢 T019🟢 T061🟢 T062🟢
 - Phase 4: T022🔴
 
 ### "documentation"
@@ -87,8 +103,8 @@ Legend: 🟢 Ready | 🟡 Waiting | 🔴 Blocked | ✅ Complete
 3. T005 - Installation Scripts
 
 ### "ready to start"
-12 tasks with no blockers:
-T058, T060, T037, T032, T002, T003, T005, T024, T019, T008, T006, T007
+13 tasks with no blockers:
+T062, T059, T037, T032, T002, T003, T005, T024, T019, T008, T006, T007
 
 ## 📈 Strategic Sequence
 
@@ -168,7 +184,7 @@ Day 5: T061 (4h) = NL Router
 
 ### Future Versions
 - **1.5.0**: E020 (Codebase Analysis)
-- **2.0.0**: E047 (Natural Language)
+- **2.0.0**: E047 (Natural Language), T063 (Architectural Refactor)
 
 ## 🔄 Auto-refresh Triggers
 
