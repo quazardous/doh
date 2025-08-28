@@ -86,11 +86,13 @@ The command performs comprehensive intelligent analysis with memory optimization
 
 ### 1. Dependency Mapping
 
-- **Parses todo/ folder** for individual task files and status
+- **Parses todo/ files** for individual task files and status (excludes todo/archive/ only)
+- **Includes COMPLETED tasks**: Maintains dependency context from finished work in active epics
 - **Identifies blockers**: Tasks marked as dependencies for others
 - **Maps ready tasks**: Tasks with all dependencies completed
 - **Calculates impact**: How many other tasks depend on this one
 - **Stores results**: Saves analysis in todo/NEXT.md for Claude's memory
+- **Archive Exclusion**: Ignores todo/archive/ directory for performance, keeps completed tasks in todo/ root
 
 ### 2. Context-Aware Filtering
 
@@ -566,6 +568,35 @@ This command is executed entirely by Claude's AI logic with smart memory:
 | Memory-Only | <100ms | Last update | Quick checks, rapid workflow, scripting |
 | Refresh | 3-5 seconds | Perfect | Major changes, memory reset, fresh start |
 | No-Cache | 2-4 seconds | Perfect | Testing, debugging, corrupted memory, clean analysis |
+
+### Archive Management & Analysis Scope
+
+**Analysis Scope Policy**:
+- **Analyzes**: All files in `todo/` root directory (includes COMPLETED tasks)
+- **Excludes**: `todo/archive/` directory entirely for performance
+- **Rationale**: COMPLETED tasks provide context for recommendations and dependencies
+
+**Smart Archive Management**:
+- **Keep in todo/**: COMPLETED tasks from active epics (remain accessible for analysis)
+- **Archive to todo/archive/**: Only tasks from fully COMPLETED epics  
+- **Never Archive**: Tasks belonging to active/in-progress epics
+- **Epic Status Check**: Before archiving, verify parent epic is COMPLETED
+
+**Archive Rules**:
+```bash
+# Keep in todo/ (analyzed by /doh-sys:next)
+T064.md (COMPLETED) - Epic E001 still active → Stay in todo/
+T070.md (COMPLETED) - Epic E001 still active → Stay in todo/
+
+# Archive to todo/archive/ (excluded from analysis)
+T027.md (COMPLETED) - Epic E003 COMPLETED → Move to archive/
+T018.md (COMPLETED) - Epic E002 COMPLETED → Move to archive/
+```
+
+**Benefits**:
+- **Context Preservation**: Completed tasks from active epics remain visible for dependency analysis
+- **Performance**: Archive exclusion reduces scan time without losing relevant context
+- **Epic Continuity**: All tasks related to active epics stay accessible
 
 ## AI-Driven Features
 
