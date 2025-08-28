@@ -59,7 +59,17 @@ suggest the optimal next tasks with natural language interaction support.
 
 ## Smart Memory System
 
-The command uses `todo/NEXT.md` as intelligent memory with version awareness and pre-computed queries:
+The command uses `todo/NEXT.md` as intelligent memory with version awareness and pre-computed queries.
+
+### Version Goal Awareness
+
+The command reads `todo/version-*.md` files to understand:
+- Current version philosophy and goals (Must Have/Should Have/Should NOT Have)
+- Version constraints that affect task selection  
+- Key strategic decisions that guide recommendations
+- Progress context (~XX% completion estimates)
+
+Version awareness ensures task recommendations align with strategic goals and respects version constraints like "Should NOT Have: External API dependencies" for v1.4.0.
 
 ### Memory Architecture
 
