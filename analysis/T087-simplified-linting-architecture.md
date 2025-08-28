@@ -28,7 +28,7 @@
 
 ### **Single Point of Enforcement**
 
-```
+```text
 /dd:commit → /dd:changelog (NO linting) → git commit (WITH pre-commit hooks)
                                                ↓
                                         [LINTING ENFORCEMENT POINT]
@@ -178,8 +178,6 @@ The command enforces documentation quality through git pre-commit hooks with str
 ````
 
 **No complex decision trees, no prompts, no bypass modes.**
-
-```
 
 ## Benefits of Simplified Architecture
 

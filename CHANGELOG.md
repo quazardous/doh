@@ -18,6 +18,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Completed in This Session (2025-08-28)
 
+- **T087** - Simplified Linting Architecture with STRICT Enforcement Rule (DOH-DEV Internal)
+    - **STATUS**: 🔄 ACTIVE 2025-08-28
+    - **Project**: DOH-DEV Internal (dd-x.x.x versioning)
+    - **Components**: Analysis of current dual-linting complexity, design for git-hook-only enforcement with STRICT
+    blocking rule, implementation of `--force` override mechanism for explicit developer control
+    - **Impact**: Removes overly complex linting decision trees from `/dd:commit` pipeline, establishes predictable
+    behavior (linting fails = commit blocked), simplifies developer workflow with clear override path
+    - **Architecture**: Single enforcement point through pre-commit hooks, elimination of AI-powered pipeline linting,
+    clean `--force` flag for bypass scenarios
 - **T054** - DOH Skeleton Memory & Context System
     - **STATUS**: ✅ COMPLETED 2025-08-28
     - **Components**: Designed memory persistence layer for `.doh/memory/` structure, created context storage schema for
