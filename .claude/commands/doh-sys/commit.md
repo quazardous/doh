@@ -19,7 +19,7 @@ completion detection.
 ## Usage
 
 ```bash
-/doh-sys:commit [task-completion] [--no-version-bump] [--no-lint] [--dry-run] [--amend] [--force] [--split] [--interactive] [--staged-focused]
+/doh-sys:commit [task-completion] [--no-version-bump] [--no-lint] [--lenient] [--dry-run] [--amend] [--force] [--split] [--interactive] [--staged-focused]
 ```
 
 ## Parameters
@@ -42,9 +42,14 @@ completion detection.
   - **Note**: Version analysis still runs, just skips the actual bump
 
 - `--no-lint`: Skip linting and auto-fixes on documentation
-  - **Default**: Intelligent linting with prettier-first approach
-  - **Use when**: Confident files are already properly formatted
-  - **Speeds up**: Commit process by ~30-60 seconds
+  - **Default**: Strict linting enforcement - blocks commits with errors
+  - **Use when**: Emergency commits or when linting is problematic
+  - **⚠️ Warning**: Bypasses all quality checks
+
+- `--lenient`: Allow commits with linting errors after showing warnings
+  - **Behavior**: Shows linting errors but proceeds without user confirmation
+  - **Use when**: Working with legacy files or minor formatting issues
+  - **Quality**: Still shows all issues but doesn't block commit
 
 ### Advanced Git Operations  
 - `--amend`: Amend the previous commit instead of creating a new one
@@ -391,6 +396,86 @@ vim TODO.md  # fix typo
 - **History rewriting**: Changes commit hash, affecting git history
 - **Single-user workflow**: Best for solo development or feature branches
 
+## Strict Linting Enforcement (NEW)
+
+The command now enforces professional documentation quality by default, blocking commits with linting errors.
+
+### Default Behavior: Quality Gate
+
+```
+🔍 Running pre-commit checks...
+📝 Checking Markdown files...
+❌ Markdown linting failed: 3 errors found
+
+Critical Issues (must fix):
+- todo/T070.md:45 MD047 Files should end with a single newline
+- todo/T070.md:23 MD032 Lists should be surrounded by blank lines
+
+Minor Issues:
+- todo/T070.md:120 MD013 Line length [Expected: 120; Actual: 125]
+
+❌ COMMIT BLOCKED: Linting errors must be resolved before committing.
+
+Options:
+1. Fix issues automatically: make lint-fix
+2. Allow errors this time: /doh-sys:commit "message" --lenient
+3. Skip all checks: /doh-sys:commit "message" --no-lint
+
+Run 'make lint-manual' for detailed explanations.
+```
+
+### Interactive Bypass (When Blocked)
+
+When linting fails, the command prompts for user confirmation:
+
+```
+❌ COMMIT BLOCKED: 5 linting errors found
+
+⚠️  BYPASS CONFIRMATION REQUIRED:
+Found 5 linting errors in staged files:
+- 2 critical issues (structure/syntax)  
+- 3 minor issues (formatting)
+
+This will create a commit with imperfect documentation quality.
+Bypass linting and commit anyway? [y/N]: 
+```
+
+### Intelligent Error Classification
+
+**Critical Errors** (Always require attention):
+- MD047: Missing final newline (breaks file parsing)
+- MD025: Multiple top-level headings (document structure)
+- MD031: Code blocks not surrounded by blank lines
+- MD002: First heading should be top-level
+
+**Minor Errors** (Formatting preferences):
+- MD013: Line length violations
+- MD012: Multiple consecutive blank lines
+- MD009: Trailing spaces
+- MD040: Missing code block language tags
+
+### Smart Bypass Options
+
+**Lenient Mode (`--lenient`)**:
+- Shows all linting errors as warnings
+- Proceeds without user confirmation
+- Still applies auto-fixes where possible
+- Use for legacy files or minor issues
+
+**Complete Skip (`--no-lint`)**:
+- Bypasses all quality checks entirely
+- Emergency override for urgent commits
+- Not recommended for normal workflow
+- Provides clear warning about skipped checks
+
+### Quality Assurance Benefits
+
+- **Professional Standards**: Ensures consistent, high-quality documentation
+- **Team Alignment**: Enforces shared quality standards across contributors
+- **Error Prevention**: Catches structural issues before they enter git history
+- **Developer Guidance**: Provides clear, actionable error explanations
+- **Flexible Control**: Multiple bypass mechanisms for different scenarios
+
 ## Auto-Fix Capabilities
 
 The pipeline includes intelligent auto-fixes for:
@@ -436,9 +521,13 @@ The pipeline includes intelligent auto-fixes for:
 /doh-sys:commit "T041 cleanup" --no-lint --no-version-bump
 # Fastest commit → skips linting & version analysis → immediate commit
 
+# 🎯 Quality mode: Allow minor linting issues
+/doh-sys:commit "T041 cleanup" --lenient
+# Shows linting warnings → proceeds without confirmation → maintains quality awareness
+
 # 🛠️ Amendment with safety
-/doh-sys:commit --amend --no-version-bump
-# Add to previous commit → don't bump version → safe for amendments
+/doh-sys:commit --amend --lenient
+# Add to previous commit → allow minor linting issues → safe for amendments
 
 # 🧪 Testing mode: See everything without doing anything
 /doh-sys:commit --split --dry-run
@@ -861,7 +950,7 @@ improving through intelligent pattern recognition and optimization.
 
 When this command is executed by Claude:
 
-1. **Parameter Processing**: Parse task description and flags (`--no-version-bump`, `--no-lint`, `--dry-run`, `--amend`, `--force`, `--split`, `--interactive`, `--staged-focused`)
+1. **Parameter Processing**: Parse task description and flags (`--no-version-bump`, `--no-lint`, `--lenient`, `--dry-run`, `--amend`, `--force`, `--split`, `--interactive`, `--staged-focused`)
 2. **Split Mode Detection**: If `--split` flag detected:
    - **Semantic Analysis**: Analyze staged files and categorize by logical grouping
      - Epic/TODO files: `todo/*.md`, `NEXT.md` (highest priority)
@@ -889,14 +978,19 @@ When this command is executed by Claude:
    - Analyze impact and determine appropriate version bump (major/minor/patch)
    - Present version change with rationale: "Version 1.4.0 → 1.4.1 (feature additions)? [Y/n]"
    - Wait for user confirmation before proceeding
-6. **Quality Assurance**: Run `/doh-sys:lint` AI logic with prettier-first auto-fix (unless `--no-lint`)
+6. **Quality Assurance**: Strict linting enforcement with intelligent bypass control
+   - **Default**: Block commits with any linting errors, prompt for confirmation
+   - **Lenient mode (`--lenient`)**: Show errors as warnings, proceed without confirmation  
+   - **Skip mode (`--no-lint`)**: Bypass all quality checks entirely
+   - **Error Classification**: Distinguish critical (structural) vs minor (formatting) issues
+   - **Smart Auto-fixes**: Apply prettier-first corrections where possible
 7. **Commit Message Generation**: Create intelligent semantic commit message based on analysis
    - **Normal mode**: Generate new commit message
    - **Amend mode**: Update previous commit message while preserving structure
 8. **Git Operations**: Stage changes and execute git command
    - **Normal mode**: `git commit` with generated message
    - **Amend mode**: `git commit --amend` with updated message
-9. **Error Handling**: Progressive retry with Claude-driven auto-fixes, fallback to `--no-verify` if needed
+9. **Error Handling**: Progressive retry with intelligent linting bypass, user confirmation prompts
 
 ## AI-Driven Execution
 
