@@ -3,20 +3,6 @@
 Intelligent task prioritization system that analyzes TODO dependencies, developer context, and project priorities to
 suggest the optimal next tasks with natural language interaction support.
 
-## Claude AI Execution Protocol
-
-**Primary Workflow Steps**:
-1. **Parse parameters and context** - Extract query, flags, and project context (--internal, --context, --format)
-2. **Select appropriate cache** - Choose todo/NEXT.md (runtime) or todo/NEXT-dd.md (internal) based on --internal flag
-3. **Check cache freshness** - Read Unix timestamp from cache file first line, compare with 3600 second threshold
-4. **Execute mode decision**:
-   - **IF cache fresh (<1hr) AND no --refresh**: Use cache-only mode for sub-100ms response
-   - **IF cache stale (>1hr) OR --refresh specified**: Perform fresh analysis and update cache
-   - **IF --no-cache specified**: Skip cache entirely, pure analysis mode
-5. **Process recommendations** - Parse cache content or perform live analysis of todo/ files
-6. **Apply filters and formatting** - Process --context, --limit, --format parameters for output
-7. **Return results** - Provide task recommendations with explanations and context
-
 ## Usage
 
 ```bash

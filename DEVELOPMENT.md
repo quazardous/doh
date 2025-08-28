@@ -879,12 +879,24 @@ audit trail for understanding why architectural choices were made and what infor
 
 📋 **TODO Management**: See `todo/README.md` for complete TODO system documentation, workflows, and guidelines.
 
+### 🚨 CRITICAL: Task Creation Protocol
+
+**MANDATORY PROCESS** - Before creating any T### task:
+
+1. ✅ **Read `todo/README.md` FIRST** - Get current Next ID (currently 082)
+2. ✅ **Use exact Next ID** - Create T082.md with the number from README.md
+3. ✅ **Update Next ID** - Increment to 083 in README.md after creating task
+4. ✅ **Verify no conflicts** - Ensure T082.md doesn't already exist
+
+**⚠️ Common Error**: Using arbitrary numbers instead of checking todo/README.md sequence
+
 This project uses a structured file-based TODO system rather than the /doh system it provides to other projects. Each
 TODO and Epic is maintained as an individual file for better organization, version control, and collaboration.
 
 ### Version Goal Management
 
 Each active version has a `version-X.Y.Z.md` file in `todo/` that captures:
+
 - **Philosophy**: One-line version strategy
 - **Goals**: Must-have and should-have objectives (synthetic, not detailed)
 - **Constraints**: Technical and design boundaries

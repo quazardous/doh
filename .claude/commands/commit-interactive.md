@@ -10,7 +10,7 @@ Quick access to interactive semantic commit splitting with full review control -
 
 ## Description
 
-This is a shortcut command for `/doh-sys:commit --split --interactive` optimized for developers who want full control over their commit sequence. Perfect when you have complex changes that need careful commit message crafting and sequence review.
+This is a shortcut command for `/dd:commit --split --interactive` optimized for developers who want full control over their commit sequence. Perfect when you have complex changes that need careful commit message crafting and sequence review.
 
 ## Parameters
 
@@ -114,7 +114,7 @@ Interactive review follows semantic priority:
 
 This command is equivalent to:
 ```bash
-/doh-sys:commit --split --interactive [same-parameters]
+/dd:commit --split --interactive [same-parameters]
 ```
 
 But provides:

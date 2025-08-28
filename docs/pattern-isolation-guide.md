@@ -23,14 +23,14 @@ This separation must be absolute - no information leakage across the wall
 | TODO.md task tracking  | .doh/ project structure     |
 | T### task numbers      | !### issue IDs              |
 | E### epic numbers      | Epic folders in .doh/epics/ |
-| /doh-sys commands      | /doh commands               |
+| /doh-dev commands      | /doh commands               |
 | .claude/doh/ internals | .doh/ user content          |
 
 ## Documentation Categories
 
 ### 1. Internal Development Docs 🔧
 
-**Can Include**: T###, E###, TODO.md references, /doh-sys commands
+**Can Include**: T###, E###, TODO.md references, /doh-dev commands
 
 **Files**:
 

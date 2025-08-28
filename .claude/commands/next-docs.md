@@ -10,7 +10,7 @@ Focused access to documentation and writing tasks - perfect for documentation sp
 
 ## Description
 
-This is a shortcut command for `/doh-sys:next --context=docs` optimized for documentation-focused work sessions. Shows tasks that improve project documentation, communication, and knowledge sharing - essential for project maintainability and team collaboration.
+This is a shortcut command for `/dd:next --context=docs` optimized for documentation-focused work sessions. Shows tasks that improve project documentation, communication, and knowledge sharing - essential for project maintainability and team collaboration.
 
 ## Parameters
 
@@ -155,7 +155,7 @@ Shows tasks that improve:
 
 This command is equivalent to:
 ```bash
-/doh-sys:next --context=docs [same-parameters]
+/dd:next --context=docs [same-parameters]
 ```
 
 But provides:

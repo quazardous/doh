@@ -12,29 +12,9 @@ performing git operations with intelligent commit message generation.
 
 ## Description
 
-Complete DOH development workflow command that orchestrates documentation updates, quality assurance, and git
-operations in a sequential pipeline. Uses intelligent commit message generation based on change analysis and TODO
+Fully automated DOH development workflow command that handles documentation updates, quality assurance, and git
+operations in a single pipeline. Implements intelligent commit message generation based on change analysis and TODO
 completion detection.
-
-## Claude AI Execution Protocol (Enhanced T083/T084)
-
-**Primary Workflow Steps**:
-1. **Parse parameters and detect mode** - Analyze flags (--split, --staged-focused, --staged-only, shortcuts)
-2. **Analyze staging area state** - Determine staged vs unstaged vs untracked files
-3. **Apply staging management strategy**:
-   - **DEFAULT MODE**: Execute `git add -A` to stage all modifications
-   - **--staged-focused MODE**: Keep staged files, smart-extend with related unstaged files, stage remaining
-   - **--staged-only MODE**: Process only currently staged files, ignore unstaged
-4. **IF --split mode detected**: Execute semantic splitting workflow:
-   - **Semantic analysis**: Group files by Epic/TODO → System → Docs → Implementation → Config
-   - **Smart relationships**: Detect test files, documentation, configuration dependencies
-   - **Priority handling**: Ensure staged files (in --staged-focused) get priority treatment
-   - **IF --interactive**: Present each commit for approval, allow message editing
-   - **IF --dry-run**: Display split plan without executing, show staging decisions
-5. **IF single commit mode**: Call `/dd:changelog` with inherited parameters
-6. **Execute git operations**: Create commits using configured parameters
-7. **Validate clean state**: Ensure working directory is clean (except for --staged-only mode)
-8. **Report completion**: Provide commit hashes, staging decisions, and working directory status
 
 ## Usage
 
@@ -82,60 +62,24 @@ completion detection.
   - **Use when**: Automated scripts or when you're absolutely certain
   - **Bypasses**: All interactive confirmations and safety validations
 
-### Semantic Splitting System (Enhanced with T083/T084)
-- `--split` or `-s`: Intelligently split changes into multiple semantic commits
-  - **Algorithm**: Epic/TODO updates → System changes → Documentation → Implementation → Config
-  - **Smart analysis**: Groups related files by semantic meaning with staging awareness
-  - **Default behavior**: "Clean Working Directory" - stages and commits ALL modifications
-  - **Use when**: Multiple logical units of work need separate commits
+### Semantic Splitting System (NEW)
+- `--split`: Intelligently split large staging area into multiple semantic commits
+  - **Algorithm**: Epic/TODO updates → System changes → Documentation → Implementation → Misc
+  - **Smart analysis**: Groups related files by semantic meaning
+  - **Use when**: Staging area contains multiple logical units of work
+  - **Example**: Mixed epic updates, DOH system changes, and code modifications
 
-#### Staging Management Modes (T084 Implementation)
-
-- **Default Mode**: "Clean Working Directory" (Recommended)
-  ```bash
-  /dd:commit --split "T084 complete"
-  # 1. Auto-stages ALL modified/deleted/new files (git add -A)
-  # 2. Groups everything into semantic commits
-  # 3. Result: Completely clean working directory
-  ```
-
-- `--staged-focused`: "Priority + Smart Extension" 
-  ```bash
-  /dd:commit --split --staged-focused "T084 complete"  
-  # 1. Staged files get priority treatment in semantic groups
-  # 2. Smart extension: auto-detect related unstaged files
-  # 3. Secondary commits: remaining modifications grouped semantically
-  # 4. Result: Clean working directory with staged files prioritized
-  ```
-
-- `--staged-only`: "Explicit Partial Commits" (New - Advanced Users)
-  ```bash
-  /dd:commit --split --staged-only "partial work"
-  # 1. ONLY processes currently staged files
-  # 2. Ignores all unstaged modifications
-  # 3. Result: Working directory may remain dirty (intentional)
-  # 4. Use case: Explicit partial commits for advanced workflows
-  ```
-
-#### Interactive and Preview Controls
-
-- `--interactive` or `-i`: Review and confirm each commit in the split sequence
-  - **Compatible with**: All staging modes (default, --staged-focused, --staged-only)
+- `--interactive`: Review and confirm each commit in the split sequence
+  - **Requires**: `--split` flag to be effective
   - **Process**: Shows each planned commit with files and message for approval
-  - **Control**: Edit messages, skip commits, abort sequence, or modify file groups
-  - **Enhanced**: Shows staging decisions and file relationship explanations
+  - **Control**: Can edit commit messages, skip commits, or abort sequence
+  - **Use when**: Want control over each commit in a split sequence
 
-- `--dry-run`: Preview the complete split plan without creating commits
-  - **Shows**: Staging decisions, semantic grouping, commit messages, file relationships
-  - **Safe**: No modifications to git history, staging area, or files
-  - **Enhanced**: Displays staging mode effects and smart extension decisions
-
-#### Convenience Shortcuts (T083 Consolidation)
-
-- `-si`: Shortcut for `--split --interactive` (most common pattern)
-- `-sf`: Shortcut for `--split --staged-focused` (priority staging with cleanup)  
-- `-so`: Shortcut for `--split --staged-only` (advanced partial commits)
-- `-sd`: Shortcut for `--split --dry-run` (safe preview)
+- `--staged-focused`: Process staged files + obvious semantic matches only
+  - **Requires**: `--split` flag to be effective  
+  - **Behavior**: Ignores unrelated unstaged/untracked files
+  - **Smart matching**: Auto-stages files that are obviously part of staged work
+  - **Use when**: Large workspace with many unrelated changes, want focused commits
 
 ## Auto-Label Generation
 
@@ -194,17 +138,7 @@ This command provides the complete automation by composing existing commands:
   - TODO management and CHANGELOG updates
   - Version tracking and metadata
   - Pattern learning and configuration optimization
-- **Parameter Inheritance Matrix**:
-
-| Input Flag | Action | Pass to /dd:changelog | Git Operation Effect |
-|-----------|--------|----------------------|---------------------|
-| --no-version-bump | ✅ Pass through | ✅ Skip version analysis | No version changes |
-| --no-lint | ✅ Pass through | ✅ Skip linting pipeline | Uses git --no-verify |
-| --lenient | ✅ Pass through | ✅ Enable linting bypass | Uses git --no-verify |
-| --dry-run | ✅ Pass through | ✅ Preview mode only | No git operations |
-| --amend | ❌ Handle locally | ❌ Not applicable | git commit --amend |
-| --force | ❌ Handle locally | ❌ Not applicable | git commit --force |
-| --split | ❌ Handle locally | ❌ Not applicable | Multiple git commits |
+- **Inherits all parameters**: `--no-version-bump`, `--no-lint`, `--lenient`, `--dry-run` passed through
 - **Quality Gate**: Pipeline blocked in `/dd:changelog` if linting fails (strict mode)
 
 ### 2. Intelligent Git Operations
@@ -466,29 +400,7 @@ vim TODO.md  # fix typo
 
 ## Strict Linting Enforcement (NEW - Architectural Fix)
 
-The command enforces professional documentation quality by default through the `/dd:changelog` pipeline, with explicit decision tree logic when linting errors are found.
-
-## Claude AI Linting Decision Protocol
-
-**When `/dd:changelog` encounters linting failures**:
-
-```
-IF linting_pipeline_fails THEN:
-  1. DISPLAY error classification (critical vs minor issues)
-  2. DISPLAY pattern analysis and optimization suggestions  
-  3. PRESENT user decision options:
-     - [1] Continue in lenient mode → SET git_no_verify=true
-     - [2] Abort pipeline → HALT execution, display retry instructions
-     - [3] Show fix suggestions → DISPLAY detailed help, AWAIT new choice
-     - [4] Apply config optimizations → Run optimization, retry linting
-  4. AWAIT user input
-  5. EXECUTE chosen option:
-     - IF option 1: CONTINUE with --no-verify flag for git operations
-     - IF option 2: HALT command execution  
-     - IF option 3: DISPLAY suggestions, RETURN to step 3
-     - IF option 4: APPLY optimizations, RETRY linting pipeline
-  6. PROCEED with configured git operation parameters
-```
+The command now enforces professional documentation quality by default through the `/dd:changelog` pipeline, blocking the entire workflow when linting errors are found.
 
 ### Fixed Architecture: Linting in Changelog Pipeline
 
@@ -1108,235 +1020,27 @@ This command continuously learns and improves through execution pattern analysis
 This command streamlines DOH development workflow while maintaining quality and consistency standards, continuously
 improving through intelligent pattern recognition and optimization.
 
-## Enhanced Staging Management (T083/T084 Integration)
-
-### Staging Modes: "Clean Working Directory" Philosophy
-
-The command now follows a "Clean Working Directory" principle by default - leaving users with completely clean working directories after commits. Three distinct modes provide flexibility:
-
-#### **Default Mode: "Clean Working Directory"**
-```bash
-/dd:commit "T084 fix"
-/dd:commit --split "T084 complete"
-
-# Behavior:
-# 1. Auto-stage ALL modified/deleted files (git add -A)
-# 2. Process everything in appropriate commits
-# 3. Result: Completely clean working directory
-# 4. Only untracked files remain (by design)
-```
-
-**Auto-Staging Strategy**:
-- **Comprehensive staging**: Automatically stages all modified and deleted files
-- **Semantic processing**: All changes processed through split algorithm
-- **Clean result**: Working directory becomes completely clean
-- **Predictable behavior**: Users know everything will be committed
-
-#### **--staged-focused Mode: "Priority + Smart Extension"**
-```bash
-/dd:commit --split --staged-focused "T084 complete"
-
-# Behavior:
-# 1. Primary focus: Process staged files as main semantic groups
-# 2. Smart extension: Auto-detect obviously related unstaged files
-# 3. Secondary commits: Group remaining modifications semantically
-# 4. Complete processing: Still commits everything, maintains clean directory
-```
-
-**Smart Extension Algorithm**:
-- **Related file detection**: Identifies unstaged files related to staged work
-- **Semantic relationships**: Test files, documentation, configuration dependencies
-- **Priority treatment**: Staged files get primary commit positions
-- **Complete cleanup**: All modifications still get committed
-
-**Extension Examples**:
-```bash
-# Smart extension scenarios:
-
-# Scenario 1: Test files
-# Staged: src/commit.js
-# Unstaged: tests/commit.test.js
-# → Extension: Include test file in same commit
-
-# Scenario 2: Documentation
-# Staged: .claude/commands/dd/commit.md
-# Unstaged: README.md (mentions commit command)
-# → Extension: Include related documentation
-
-# Scenario 3: Configuration
-# Staged: package.json (new dependency)
-# Unstaged: src/config.js (uses new dependency)
-# → Extension: Include configuration that uses dependency
-```
-
-#### **--staged-only Mode: "Explicit Partial Commits"** (New)
-```bash
-/dd:commit --split --staged-only "T084 partial"
-
-# Behavior:
-# 1. ONLY process currently staged files
-# 2. Ignore all unstaged modifications
-# 3. Partial result: Working directory may remain "dirty"
-# 4. Advanced use case: For users who explicitly want partial commits
-```
-
-**Explicit Partial Processing**:
-- **Limited scope**: Only processes currently staged files
-- **No auto-staging**: Completely ignores unstaged modifications
-- **Advanced control**: For power users needing partial commits
-- **Clear intent**: Explicitly leaves working directory in current state
-
-### Convenience Shortcuts (T083 Consolidation)
-
-Enhanced shortcuts combine common flag combinations for streamlined workflow:
-
-#### **Split Shortcuts**
-```bash
-# Quick interactive splitting (most common pattern)
-/dd:commit -si "T083 complete"    # --split --interactive
-
-# Staged-focused splitting (common for messy workspaces)
-/dd:commit -sf "T083 complete"    # --split --staged-focused
-
-# Staged-only splitting (explicit partial commits)
-/dd:commit -so "T083 partial"    # --split --staged-only
-
-# Preview splitting (safe exploration)
-/dd:commit -sd "T083 preview"    # --split --dry-run
-```
-
-#### **Combined Shortcuts**
-```bash
-# Interactive staged-focused (full control + priority)
-/dd:commit -sif "T083 complete"  # --split --interactive --staged-focused
-
-# Staged-only with preview (partial commit validation)
-/dd:commit -sod "T083 partial"   # --split --staged-only --dry-run
-```
-
-### Mode Comparison Matrix
-
-| Mode | Staged Files | Unstaged Files | Untracked Files | Result |
-|------|-------------|----------------|-----------------|---------|
-| **Default** | ✅ Auto-stage all | ✅ Auto-stage all | ✅ Auto-stage all | Clean directory |
-| **--staged-focused** | ✅ Priority treatment | ✅ Smart extension + secondary commits | ✅ Secondary commits | Clean directory |
-| **--staged-only** | ✅ Process only | ❌ Ignore | ❌ Ignore | May remain dirty |
-
-### User Experience Improvements
-
-#### **Before T083/T084 (Problematic)**
-```bash
-# Confusing dual interface:
-/dd:commit --split "T084"           # Full pipeline, complex
-/commit-split "T084"                # Quick, limited features, separate command
-
-# Incomplete staging behavior:
-/dd:commit --split --staged-focused "T084"
-# → Only processes staged files
-# → Leaves working directory dirty
-# → User confused about remaining modifications
-```
-
-#### **After T083/T084 (Enhanced)**
-```bash
-# Single, enhanced interface:
-/dd:commit --split "T084"           # Enhanced with convenience + clean directory
-/dd:commit -si "T084"               # Quick shortcut for --split --interactive
-
-# Predictable staging behavior:
-/dd:commit --split --staged-focused "T084"
-# → Staged files get priority treatment
-# → Related unstaged files smartly included
-# → All modifications still get committed
-# → Clean working directory result
-
-# Explicit control when needed:
-/dd:commit --split --staged-only "T084"
-# → ONLY staged files processed (explicit partial)
-# → Clear intent for advanced partial commits
-```
-
-### Smart Auto-Detection and Suggestions
-
-#### **Auto-Split Detection**
-```bash
-# When /dd:commit detects split-worthy staging:
-/dd:commit "mixed changes"
-
-🔍 Smart Detection: Staging area contains 4+ semantic groups
-📋 Epic/TODO files: 3 files
-🔧 System files: 2 files
-📖 Documentation: 1 file
-⚙️  Configuration: 2 files
-
-💡 Suggestion: Use --split for cleaner commit history
-   - Create focused commits per semantic group
-   - Better code review and history tracking
-   - Easier rollback granularity
-
-   Quick options:
-   /dd:commit -si    # Interactive splitting with review
-   /dd:commit -sf    # Staged-focused priority splitting
-   /dd:commit -sd    # Preview split plan first
-
-Apply splitting? [Y/n/preview]:
-```
-
-#### **Staging Mode Recommendations**
-```bash
-# When working directory has many unrelated changes:
-/dd:commit --split
-
-🔍 Workspace Analysis: 12 total modifications detected
-   📌 Staged: 4 files (intentionally selected)
-   📝 Unstaged: 8 files (mixed purposes)
-
-💡 Staging Mode Recommendation: --staged-focused
-   - Process your staged files with priority
-   - Smart extension for obviously related files
-   - Group remaining modifications appropriately
-   - Maintain clean working directory
-
-   Execute: /dd:commit --split --staged-focused
-   Quick:   /dd:commit -sf
-
-Use recommended staging mode? [Y/n/default]:
-```
-
 ## Implementation
 
 When this command is executed by Claude:
 
-1. **Parameter Processing**: Parse task description and flags (`--no-version-bump`, `--no-lint`, `--lenient`, `--dry-run`, `--amend`, `--force`, `--split`, `--interactive`, `--staged-focused`, `--staged-only`) and convenience shortcuts (`-si`, `-sf`, `-so`, `-sd`, `-sif`, `-sod`)
+1. **Parameter Processing**: Parse task description and flags (`--no-version-bump`, `--no-lint`, `--lenient`, `--dry-run`, `--amend`, `--force`, `--split`, `--interactive`, `--staged-focused`)
 
 2. **Split Mode Detection**: If `--split` flag detected:
-   - **Staging Management Strategy**: Apply T083/T084 staging mode logic
-     - **Default mode**: Auto-stage all modifications (`git add -A`) for clean working directory
-     - **--staged-focused mode**: Priority treatment for staged files + smart extension + complete cleanup
-     - **--staged-only mode**: Process only currently staged files (explicit partial commits)
-   - **Smart Extension Detection** (--staged-focused only): Analyze relationships between staged and unstaged files
-     - **Test file relationships**: `tests/*.test.js` related to `src/*.js`
-     - **Documentation relationships**: `README.md` changes related to feature files
-     - **Configuration relationships**: `package.json` changes related to implementation files
-     - **Same directory relationships**: Files in same directory as staged files
-   - **Semantic Analysis**: Analyze all files in scope and categorize by logical grouping
+   - **Semantic Analysis**: Analyze staged files and categorize by logical grouping
      - Epic/TODO files: `todo/*.md`, `NEXT.md` (highest priority)
      - DOH system files: `.claude/doh/*`, `.claude/commands/*`
      - Documentation files: `README.md`, `WORKFLOW.md`, `docs/*`
      - Implementation files: `src/*`, `lib/*`, application code
      - Configuration files: `package.json`, configs, tests
-   - **Priority-Aware Grouping**: Apply staging priority in semantic analysis
-     - **Primary commits**: Staged files + smart extensions (--staged-focused mode)
-     - **Secondary commits**: Remaining modifications grouped semantically
    - **Content Analysis**: Scan file changes for commit message context
      - Detect TODO completions and task IDs
      - Identify feature implementations and improvements
      - Analyze documentation focus areas
-     - Consider staging priority in message generation
-   - **Commit Sequence Planning**: Create logical commit order with staging-aware messages
-   - **Preview Mode**: If `--dry-run`, show planned sequence with staging decisions
-   - **Interactive Mode**: If `--interactive`, prompt for confirmation on each commit with staging context
-   - **Execute Split**: Create multiple commits following priority order and staging mode
+   - **Commit Sequence Planning**: Create logical commit order with generated messages
+   - **Preview Mode**: If `--dry-run`, show planned sequence without execution
+   - **Interactive Mode**: If `--interactive`, prompt for confirmation on each commit
+   - **Execute Split**: Create multiple commits following priority order
    - **Skip remaining steps**: Split mode handles its own pipeline
 
 3. **Amend Mode Detection**: If `--amend` flag detected (not compatible with `--split`):
@@ -1389,41 +1093,3 @@ This command is executed entirely by Claude's AI logic:
 - **Calls `/dd:changelog`**: AI-driven documentation updates
 - **Calls `/doh-sys:lint`**: AI-driven quality assurance with prettier-first approach
 - **No bash scripts required**: Pure AI workflow execution
-
-## T083 Integration: Command Consolidation
-
-**⚠️ DEPRECATION NOTICE**: The `/commit-split` command has been consolidated into `/dd:commit --split` for architectural consistency and enhanced functionality.
-
-### Migration from /commit-split
-
-| Old `/commit-split` Command | New `/dd:commit` Equivalent |
-|----------------------------|-----------------------------|
-| `/commit-split` | `/dd:commit --split` or `/dd:commit -s` |
-| `/commit-split --interactive` | `/dd:commit --split --interactive` or `/dd:commit -si` |
-| `/commit-split --staged-focused` | `/dd:commit --split --staged-focused` or `/dd:commit -sf` |
-| `/commit-split --dry-run` | `/dd:commit --split --dry-run` or `/dd:commit -sd` |
-| `/commit-split "T084 complete" --interactive --staged-focused` | `/dd:commit -sif "T084 complete"` |
-
-### Benefits of Consolidation
-
-- **Single Interface**: One command for all commit operations
-- **Enhanced Pipeline Integration**: Full /dd:changelog integration with split commits
-- **Better Flag Support**: All /dd:commit flags work with splitting
-- **Consistent Documentation**: Single source of truth for commit functionality
-- **Improved Maintenance**: Single codebase for all commit logic
-
-### Enhanced Features vs /commit-split
-
-**New capabilities in consolidated /dd:commit --split**:
-- ✅ **Enhanced staging management**: Three distinct staging modes
-- ✅ **Smart extension algorithm**: Related file detection in --staged-focused mode
-- ✅ **Convenience shortcuts**: `-si`, `-sf`, `-so`, `-sd` combinations
-- ✅ **Complete pipeline integration**: Linting, version bumps, changelog updates
-- ✅ **Auto-detection suggestions**: Smart recommendations for when to split
-- ✅ **Clean working directory**: Predictable "clean everything" behavior by default
-
-**Removed limitations from /commit-split**:
-- ❌ **No pipeline integration**: Now has full /dd:changelog integration
-- ❌ **Limited flag support**: Now supports all /dd:commit flags
-- ❌ **Incomplete staging**: Now provides complete staging management
-- ❌ **Separate maintenance**: Now single, unified implementation

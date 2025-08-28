@@ -10,7 +10,7 @@ Focused access to core functionality development tasks - perfect for implementat
 
 ## Description
 
-This is a shortcut command for `/doh-sys:next --context=features` optimized for feature development work sessions. Shows tasks that implement new functionality, enhance existing capabilities, or build the technical foundation for advanced features.
+This is a shortcut command for `/dd:next --context=features` optimized for feature development work sessions. Shows tasks that implement new functionality, enhance existing capabilities, or build the technical foundation for advanced features.
 
 ## Parameters
 
@@ -165,7 +165,7 @@ Prioritizes features that are:
 
 This command is equivalent to:
 ```bash
-/doh-sys:next --context=features [same-parameters]
+/dd:next --context=features [same-parameters]
 ```
 
 But provides:

@@ -3,20 +3,6 @@
 Intelligent task prioritization system that analyzes TODO dependencies, developer context, and project priorities to
 suggest the optimal next tasks with natural language interaction support.
 
-## Claude AI Execution Protocol
-
-**Primary Workflow Steps**:
-1. **Parse parameters and context** - Extract query, flags, and project context (--internal, --context, --format)
-2. **Select appropriate cache** - Choose todo/NEXT.md (runtime) or todo/NEXT-dd.md (internal) based on --internal flag
-3. **Check cache freshness** - Read Unix timestamp from cache file first line, compare with 3600 second threshold
-4. **Execute mode decision**:
-   - **IF cache fresh (<1hr) AND no --refresh**: Use cache-only mode for sub-100ms response
-   - **IF cache stale (>1hr) OR --refresh specified**: Perform fresh analysis and update cache
-   - **IF --no-cache specified**: Skip cache entirely, pure analysis mode
-5. **Process recommendations** - Parse cache content or perform live analysis of todo/ files
-6. **Apply filters and formatting** - Process --context, --limit, --format parameters for output
-7. **Return results** - Provide task recommendations with explanations and context
-
 ## Usage
 
 ```bash
@@ -66,49 +52,27 @@ suggest the optimal next tasks with natural language interaction support.
   - **Range**: 1-20 (automatically caps at available tasks)
   - **Smart limiting**: Prioritizes most relevant tasks
 
-### Performance Modes
-
-**Default Behavior - Hybrid Mode** (New):
-- **Automatic optimization**: Checks cache age and decides best approach
-- **Fresh cache (<1 hour)**: Uses cache-only mode for sub-100ms response
-- **Stale cache (>1 hour)**: Performs fresh analysis and updates cache
-- **Smart balance**: Speed when possible, accuracy when needed
-- **No flags required**: Optimal performance by default
-
-#### Explicit Performance Flags
-- `--cache-only`: Force ultra-fast mode using smart memory
-  - **Speed**: Sub-100ms response time guaranteed
-  - **Source**: Reads from todo/NEXT.md (default) or todo/NEXT-dd.md (with --internal)
-  - **Use when**: Speed critical, scripting, or rapid iterations
-  - **Note**: May use outdated data regardless of cache age
+### Performance Modes  
+- `--cache-only`: Ultra-fast mode using smart memory
+  - **Speed**: Sub-100ms response time
+  - **Source**: Reads directly from todo/NEXT.md memory file
+  - **Use when**: Quick checks, rapid workflow, scripting integration
+  - **Note**: Results may be slightly outdated if tasks recently changed
 
 - `--refresh`: Force complete re-analysis
-  - **Ignores**: Existing cache files (NEXT.md or NEXT-dd.md based on context)
+  - **Ignores**: Existing todo/NEXT.md cache
   - **Rebuilds**: Complete task analysis from current todo/ folder state
-  - **Use when**: Major task changes, ensure absolute accuracy
+  - **Use when**: Major task changes, memory corruption, or fresh perspective needed
   - **Slower**: Takes 3-5 seconds but guarantees current accuracy
 
 - `--no-cache`: Pure analysis without memory
-  - **Clean slate**: Ignores memory files entirely
-  - **No updates**: Doesn't update cache files with results
-  - **Use when**: Testing, debugging, or when memory files are problematic
+  - **Clean slate**: Ignores memory file entirely
+  - **No updates**: Doesn't update todo/NEXT.md with results
+  - **Use when**: Testing, debugging, or when memory file is problematic
 
 ## Smart Memory System
 
-The command uses dual cache files for project isolation and performance optimization.
-
-### Dual Cache Architecture
-
-- **todo/NEXT.md**: DOH Runtime cache (default) - doh-1.4.0 tasks, user features, distribution
-- **todo/NEXT-dd.md**: DOH-DEV Internal cache - dd-0.1.0 tasks, /dd:* commands, developer tools
-
-Cache selection is automatic based on context:
-- Default behavior uses `todo/NEXT.md` for runtime tasks
-- `--internal` flag uses `todo/NEXT-dd.md` for internal development tasks
-
-Cache file format:
-- **Line 1**: Unix timestamp (seconds since epoch) for cache generation time
-- **Rest of file**: Task recommendations and analysis in markdown format
+The command uses `todo/NEXT.md` as intelligent memory with version awareness and pre-computed queries.
 
 ### Version Goal Awareness
 
@@ -122,14 +86,13 @@ Version awareness ensures task recommendations align with strategic goals and re
 
 ### Memory Architecture
 
-- **Context isolation**: Separate caches prevent project cross-contamination
-- **Version awareness**: Each cache tracks its respective version (doh-1.4.0 vs dd-0.1.0)
+- **todo/NEXT.md**: Claude's memory file with pre-analyzed task data and smart query results
+- **Version awareness**: Tracks current version (1.4.0-dev) and version-specific tasks
 - **Project classification**: Pre-computed DOH-DEV vs DOH Runtime task categorization
 - **Pre-computed queries**: Common searches like "version 1.4", "quick wins", "high impact", "internal tasks" pre-calculated
 - **Smart context matching**: Natural language queries instantly mapped to stored results including `--internal` context
-- **Hybrid freshness check**: Auto-uses cache if <3600 seconds old, else refreshes (default behavior)
-- **Auto-update**: Memory refreshed when stale or with `--refresh` flag
-- **Extreme speed**: Sub-100ms responses when cache is fresh (<1 hour old)
+- **Auto-update**: Memory refreshed on every standard call to maintain current state
+- **Extreme speed**: `--cache-only` reads memory directly with zero re-computation overhead
 
 ## AI Analysis Engine
 
@@ -186,25 +149,21 @@ Priority Score = Base Priority × Dependency Weight × Context Relevance × Impa
 ### 💡 Quick Start - Most Common Patterns
 
 ```bash
-# 🚀 Most common: Get top recommendations (NEW HYBRID MODE)
+# 🚀 Most common: Get top recommendations
 /dd:next
-# Auto-optimized: Uses cache if <1hr old, else refreshes → Best speed/accuracy
+# Analyzes current project state → shows 3-5 best tasks
 
 # 🎯 Context-specific filtering  
 /dd:next --context=docs
-# Shows documentation tasks → README, WORKFLOW, TODO updates (hybrid mode)
+# Shows documentation tasks → README, WORKFLOW, TODO updates
 
 # 🔧 Internal development focus
 /dd:next --internal
-# Shows DOH-DEV internal tasks → uses NEXT-dd.md cache (hybrid mode)
+# Shows DOH-DEV internal tasks → command enhancements, dev workflow
 
-# ⚡ Force ultra-fast mode
+# ⚡ Ultra-fast mode from memory
 /dd:next --cache-only
-# Sub-100ms guaranteed → ignores cache age, always uses memory
-
-# 🔄 Force fresh analysis
-/dd:next --refresh
-# 3-5 seconds → always performs full analysis regardless of cache age
+# Sub-100ms response → uses smart memory cache
 ```
 
 ### 🗣️ Natural Language Query Examples
@@ -270,11 +229,10 @@ Priority Score = Base Priority × Dependency Weight × Context Relevance × Impa
 # Returns: T032, T054 with unlock explanations
 
 # Extreme speed with memory-only mode
-/dd:next --cache-only                    # Uses todo/NEXT.md for Runtime tasks
-/dd:next --cache-only --context=build    # Uses todo/NEXT.md for Runtime build tasks
-/dd:next --internal --cache-only         # Uses todo/NEXT-dd.md for DOH-DEV tasks
-/dd:next --cache-only "what next after t054"  # Runtime context from NEXT.md
-# All return sub-100ms responses from appropriate cache
+/dd:next --cache-only
+/dd:next --cache-only --context=build
+/dd:next --cache-only "what next after t054"
+# All return sub-100ms responses from smart memory
 
 # Fresh analysis without memory (testing/debugging)
 /dd:next --no-cache
@@ -381,11 +339,10 @@ Priority Score = Base Priority × Dependency Weight × Context Relevance × Impa
 
 | Scenario | Recommended Mode | Reason |
 |----------|------------------|--------|
-| Normal workflow | (default hybrid) | Auto-optimizes: fast if cache fresh, accurate if stale |
-| Rapid iterations | `--cache-only` | Force sub-100ms response regardless of cache age |
-| After major changes | `--refresh` | Force fresh analysis to capture all updates |  
-| Debugging/testing | `--no-cache` | Clean slate analysis without cache interference |
-| Scripting/automation | `--cache-only` | Predictable fast response for scripts |
+| Quick daily check | `--cache-only` | Sub-100ms response |
+| After completing tasks | `--refresh` | Ensure current accuracy |  
+| Debugging recommendations | `--no-cache` | Clean slate analysis |
+| Normal workflow | (default) | Balanced speed + accuracy |
 
 ### 🎯 Smart Query Interpretation Examples
 
@@ -635,36 +592,30 @@ This command is executed entirely by Claude's AI logic with smart memory:
 
 ### Execution Modes
 
-#### Hybrid Mode (Default - NEW)
+#### Standard Mode (Default)
 
-1. **Cache Selection**: Choose NEXT.md (default) or NEXT-dd.md (--internal flag)
-2. **Cache Age Check**: Read Unix timestamp from first line of cache file
-3. **Decision Point**:
-   - **Fresh cache (<1 hour from timestamp)**: Jump to step 7 (cache-only behavior)
-   - **Stale cache (>1 hour old)**: Continue to step 4 (full analysis)
-4. **Analyze Current State**: Scan todo/ folder for complete analysis
-5. **Project Filtering**: Apply DOH Runtime or DOH-DEV Internal context
-6. **Update Memory**: Refresh appropriate cache with current analysis (Unix timestamp on line 1)
-7. **Extract Recommendations**: Read from cache (fresh or just updated)
-8. **Return Results**: Provide recommendations with optimal speed/accuracy balance
+1. **Read Previous Memory**: Load existing todo/NEXT.md if available for context
+2. **Analyze Current State**: Scan todo/ folder for any changes since last run
+3. **Incremental Update**: Update analysis based on changes detected
+4. **Generate Recommendations**: Create prioritized task suggestions
+5. **Update Memory**: Refresh todo/NEXT.md with current analysis and recommendations
+6. **Return Results**: Provide recommendations to user with fresh insights
 
 #### Memory-Only Mode (`--cache-only`)
 
-1. **Cache Selection**: Choose NEXT.md (default) or NEXT-dd.md (--internal flag)
-2. **Direct Read**: Load appropriate cache file immediately
-3. **Extract Recommendations**: Parse top recommendations from stored memory
-4. **Format Output**: Apply requested format (brief/detailed/plan)
-5. **Instant Return**: Provide memory-based recommendations with zero re-computation
-6. **Skip Analysis**: No file scanning, no memory refresh, no analysis overhead
+1. **Direct Read**: Load todo/NEXT.md memory file immediately
+2. **Extract Recommendations**: Parse top recommendations from stored memory
+3. **Format Output**: Apply requested format (brief/detailed/plan)
+4. **Instant Return**: Provide memory-based recommendations with zero re-computation
+5. **Skip Analysis**: No file scanning, no memory refresh, no analysis overhead
 
 #### No-Cache Mode (`--no-cache`)
 
-1. **Skip Memory**: Completely ignore both cache files (don't read or update)
+1. **Skip Memory**: Completely ignore todo/NEXT.md file (don't read or update)
 2. **Fresh Analysis**: Scan todo/ folder and analyze all tasks from scratch
-3. **Project Filtering**: Apply DOH Runtime or DOH-DEV Internal context
-4. **Pure Computation**: Generate recommendations using only current file state
-5. **No Memory Updates**: Don't update any cache files with results
-6. **Clean State**: Useful for testing, debugging, or when memory is corrupted
+3. **Pure Computation**: Generate recommendations using only current file state
+4. **No Memory Updates**: Don't update todo/NEXT.md with results
+5. **Clean State**: Useful for testing, debugging, or when memory is corrupted
 
 ### Full Analysis (Memory Miss)
 
@@ -687,10 +638,10 @@ This command is executed entirely by Claude's AI logic with smart memory:
 
 | Mode | Response Time | Accuracy | Use Case |
 |------|---------------|----------|-----------|
-| **Hybrid (Default)** | <100ms or 1-3s | Optimal | Auto-decides based on cache age (1hr threshold) |
-| Cache-Only | <100ms | Last update | Force speed, scripting, rapid iterations |
-| Refresh | 3-5 seconds | Perfect | Force fresh analysis, major changes |
-| No-Cache | 2-4 seconds | Perfect | Testing, debugging, clean analysis |
+| Standard | 1-3 seconds | Current | Normal workflow, up-to-date recommendations |
+| Memory-Only | <100ms | Last update | Quick checks, rapid workflow, scripting |
+| Refresh | 3-5 seconds | Perfect | Major changes, memory reset, fresh start |
+| No-Cache | 2-4 seconds | Perfect | Testing, debugging, corrupted memory, clean analysis |
 
 ### Archive Management & Analysis Scope
 

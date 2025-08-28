@@ -1,5 +1,21 @@
 # DOH Project Configuration for AI Development
 
+**Version**: 1.2 (2025-08-28)
+
+## 🚨 CLAUDE: READ AI.md FIRST 🚨
+
+**PRIORITY DELEGATION**: Before reading this file or any other documentation:
+
+1. **ALWAYS READ `./AI.md` FIRST** - Complete compiled guide with all critical information
+2. **Check AI.md source version** - If shows "Source Version: CLAUDE.md v1.2", AI.md is current and sufficient
+3. **If AI.md shows older version**: Consult this file (CLAUDE.md) and other source documents for latest information
+4. **AI.md contains**: Next Task ID, task creation protocol, command execution workflows, project context
+
+**🎯 AI.md shows v1.2**: You're ready to work - all critical info compiled and current  
+**⚠️ AI.md shows older version**: Read additional documentation or run `/dd:mkai --compile` to refresh
+
+---
+
 ## 🚫 EXPLICIT PROHIBITION: External Tool Attribution
 
 **FORBIDDEN**: All external tool attribution is explicitly prohibited in this project:
@@ -42,6 +58,17 @@ for universal compatibility and distribution.
 - Maintain backward compatibility when updating DOH components
 - Test changes against sample projects before deployment
 - Security best practices for file system operations
+
+## 🚨 CRITICAL: Task Creation Protocol
+
+**MANDATORY PROCESS**: Before creating any T### task:
+
+1. ✅ **ALWAYS read `todo/README.md` first** - Get current Next ID
+2. ✅ **Create T[NextID].md** - Use EXACT next number from README.md
+3. ✅ **Update README.md** - Increment Next ID after creation
+4. ✅ **Verify uniqueness** - Ensure task doesn't exist already
+
+**⚠️ CRITICAL**: Always use the sequence in todo/README.md - never arbitrary numbers
 
 ## Dependencies Philosophy
 

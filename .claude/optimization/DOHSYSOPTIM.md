@@ -2,7 +2,7 @@
 
 **AI-Driven Command Evolution Tracking**
 
-This document tracks all optimizations applied to `/doh-sys` commands through pattern detection and user-confirmed
+This document tracks all optimizations applied to `/doh-dev` commands through pattern detection and user-confirmed
 improvements.
 
 ---
@@ -15,9 +15,9 @@ improvements.
 
 ### By Command
 
-- `/doh-sys:next` - 0 optimizations
-- `/doh-sys:commit` - 0 optimizations
-- `/doh-sys:lint` - 0 optimizations
+- `/dd:next` - 0 optimizations
+- `/dd:commit` - 0 optimizations
+- `/dd:lint` - 0 optimizations
 
 ---
 

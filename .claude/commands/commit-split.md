@@ -1,16 +1,50 @@
-# /commit-split - Smart Semantic Commit Splitting
+# /commit-split - DEPRECATED: Use /dd:commit --split
 
-Quick access to intelligent commit splitting functionality - automatically analyzes staging area and creates multiple focused commits grouped by semantic meaning.
+**⚠️ DEPRECATION NOTICE**: This command has been consolidated into `/dd:commit --split` for architectural consistency and enhanced functionality. Please migrate to the new unified interface.
 
-## Usage
+## Migration Guide
+
+**Old Command** → **New Equivalent**
+```bash
+/commit-split                           → /dd:commit --split  (or /dd:commit -s)
+/commit-split --interactive             → /dd:commit -si
+/commit-split --staged-focused          → /dd:commit -sf  
+/commit-split --dry-run                → /dd:commit -sd
+/commit-split "T084" --interactive      → /dd:commit -si "T084"
+```
+
+## Enhanced Features in /dd:commit --split
+
+The new unified command provides all /commit-split functionality plus:
+
+- ✅ **Enhanced staging management**: Three distinct modes (default, --staged-focused, --staged-only)
+- ✅ **Smart extension algorithm**: Related file detection in --staged-focused mode  
+- ✅ **Complete pipeline integration**: Linting, version bumps, changelog updates
+- ✅ **Convenience shortcuts**: `-si`, `-sf`, `-so`, `-sd` combinations
+- ✅ **"Clean working directory" philosophy**: Predictable behavior by default
+- ✅ **Auto-detection suggestions**: Smart recommendations for when to split
+
+**Please update your workflows to use `/dd:commit --split` instead of this deprecated command.**
+
+---
+
+## Legacy Documentation (For Reference Only)
+
+~~Quick access to intelligent commit splitting functionality - automatically analyzes staging area and creates multiple focused commits grouped by semantic meaning.~~
+
+## ~~Usage~~ (DEPRECATED)
 
 ```bash
-/commit-split [task-completion] [--interactive] [--staged-focused] [--dry-run]
+# DEPRECATED - Use these instead:
+/dd:commit --split [task-completion] [flags...]
+/dd:commit -si "task-completion"    # --split --interactive shortcut
+/dd:commit -sf "task-completion"    # --split --staged-focused shortcut  
+/dd:commit -sd "task-completion"    # --split --dry-run shortcut
 ```
 
 ## Description
 
-This is a shortcut command for `/doh-sys:commit --split` with enhanced usability for the most common semantic splitting scenarios. Perfect for when you have multiple logical units of work staged and want clean, focused commit history.
+This is a shortcut command for `/dd:commit --split` with enhanced usability for the most common semantic splitting scenarios. Perfect for when you have multiple logical units of work staged and want clean, focused commit history.
 
 ## Parameters
 
@@ -87,7 +121,7 @@ Prioritizes commits in this semantic order:
 
 This command is equivalent to:
 ```bash
-/doh-sys:commit --split [same-parameters]
+/dd:commit --split [same-parameters]
 ```
 
 But provides:
@@ -95,11 +129,34 @@ But provides:
 - **Focused documentation** on splitting-specific features
 - **Quick access** to the most powerful commit organization feature
 
-Perfect for developers who frequently work with complex staging areas and want clean, semantic commit history without the overhead of remembering the full `/doh-sys:commit` syntax.
+~~Perfect for developers who frequently work with complex staging areas and want clean, semantic commit history without the overhead of remembering the full `/dd:commit` syntax.~~
 
-## Success Criteria
+## ~~Success Criteria~~ (DEPRECATED)
 
-- Produces the same semantic commit splitting as `/doh-sys:commit --split`
-- Shorter, more memorable command for frequent use
-- Clear documentation focused specifically on splitting workflows
-- Maintains all safety and preview features of the parent command
+~~- Produces the same semantic commit splitting as `/dd:commit --split`~~  
+~~- Shorter, more memorable command for frequent use~~  
+~~- Clear documentation focused specifically on splitting workflows~~  
+~~- Maintains all safety and preview features of the parent command~~
+
+---
+
+## ⚠️ THIS COMMAND IS DEPRECATED
+
+**Please use `/dd:commit --split` instead.** The new unified command provides all the functionality of /commit-split plus enhanced features:
+
+- **Better staging management** with "Clean Working Directory" philosophy
+- **Smart extension algorithm** for related file detection
+- **Complete pipeline integration** with linting and version bumps
+- **Convenient shortcuts** like `-si`, `-sf`, `-so`, `-sd`
+- **Single, consistent interface** for all commit operations
+
+**Quick migration**:
+```bash
+# Instead of this deprecated command:
+/commit-split "T084 complete" --interactive
+
+# Use this enhanced equivalent:
+/dd:commit -si "T084 complete"
+```
+
+See `/dd:commit` documentation for complete details on the enhanced functionality.

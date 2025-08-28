@@ -10,7 +10,7 @@ Fast access to quick win tasks that can be completed in under 2 hours - perfect 
 
 ## Description
 
-This is a shortcut command for `/doh-sys:next --context=quick` optimized for rapid task selection and momentum building. Shows only tasks that can be completed quickly, helping you stay productive during short work sessions or when switching between larger projects.
+This is a shortcut command for `/dd:next --context=quick` optimized for rapid task selection and momentum building. Shows only tasks that can be completed quickly, helping you stay productive during short work sessions or when switching between larger projects.
 
 ## Parameters
 
@@ -145,7 +145,7 @@ Shows tasks that are:
 
 This command is equivalent to:
 ```bash
-/doh-sys:next --context=quick [same-parameters]
+/dd:next --context=quick [same-parameters]
 ```
 
 But provides:
