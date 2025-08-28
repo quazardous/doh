@@ -944,48 +944,66 @@ identified by the 🛡️ flag rather than being in a separate section.
 
 ### Version Management for TODOs
 
-**Version Nomenclature** for TODO tasks follows task lifecycle:
+**Three-Tier Version System** for TODO tasks (only one field present at a time):
 
-1. **Proposed Version**: `1.4.0` - Initial estimation by Claude/developer at task creation
-2. **Target Version**: `1.4.0` - Version confirmed when dependencies/planning are clearer
-3. **Version**: `1.4.0` - Final version when roadmap is locked OR task is active/completed
+#### Version Field Definitions
 
-**Task Lifecycle & Version Evolution**:
+1. **Proposed Version**: `1.4.0` - Initial version suggestion at task creation
+   - Set when task is first created 
+   - Indicates earliest possible version for consideration
+   - Can be tentative or aspirational
+
+2. **Target Version**: `1.4.0` - Mature planning commitment
+   - Set when task is actively planned
+   - Indicates intended delivery version
+   - Subject to change based on priorities
+
+3. **Version**: `1.4.0` - Frozen roadmap commitment
+   - Set when version is locked in roadmap
+   - Immutable once set (except for major replanning)
+   - Can be set even if Status is "NOT PLANNED" for constraints
+
+#### Task Lifecycle & Version Evolution
+
+Tasks progress through version planning stages (only one version field at a time):
 
 ```markdown
-# Initial estimation (Claude proposes)
+# New task (Claude's initial estimation)
+Status: READY + Proposed Version: 1.4.0
 
-Status: Proposed + Proposed Version: 1.4.0
+# Task is planned for specific version
+Status: READY + Target Version: 1.4.0
 
-# Validated for version (planning confirmed)
-
-Status: Proposed + Target Version: 1.4.0
-
-# Roadmap locked OR implementation starts
-
-Status: Ready + Version: 1.4.0
-
-# Active implementation
-
-Status: In Progress + Version: 1.4.0
+# Roadmap is locked OR task becomes active
+Status: IN PROGRESS + Version: 1.4.0
 
 # Task completed
-
-Status: Completed + Version: 1.4.0 ✅
+Status: COMPLETED + Version: 1.4.0 ✅
 ```
 
-**Key Decision Points**:
+#### Version Evolution Examples
 
-- **Proposed → Target**: When task is validated for specific version
-- **Target → Version**: When roadmap is finalized OR implementation begins
-- **Version stays fixed**: Once set, version doesn't change (tracks completion version)
+```markdown
+# Normal evolution
+T001: Proposed Version: 1.4.0 → Target Version: 1.4.0 → Version: 1.4.0 ✅
 
-**Status + Version Combinations**:
+# Deferred task  
+T002: Proposed Version: 1.4.0 → Target Version: 1.5.0 → (still flexible)
 
-- `Status: Proposed` + `Target Version: X.Y.Z` = **Validated for this version** ✅
-- `Status: Ready` + `Version: X.Y.Z` = **Implementation ready, roadmap locked**
-- `Status: In Progress` + `Version: X.Y.Z` = **Currently being implemented**
-- `Status: Completed` + `Version: X.Y.Z ✅` = **Completed in this version**
+# Version constraint (external requirement)
+T003: Status: NOT PLANNED + Version: 1.5.0 (must be in this specific version)
+
+# Fast-tracked urgent task
+T004: Proposed Version: 1.4.1 → Version: 1.4.1 (directly to frozen)
+```
+
+#### Version Field Rules
+
+- **Only one version field** per task at any time
+- **Proposed Version**: For new tasks, initial planning
+- **Target Version**: For planned tasks, can still change
+- **Version**: For locked roadmap or active/completed tasks, immutable
+- **Status independence**: Task can be NOT PLANNED but have frozen Version for constraints
 
 ### Archive Management
 

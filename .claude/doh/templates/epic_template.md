@@ -2,6 +2,7 @@
 
 **Issue ID**: #{ID} **Type**: Epic **Parent PRD**: #{Parent_ID} **Status**: {Status} **Epic Folder**:
 `{epic_folder_name}` **Created**: {Date} **Last Updated**: {Date}
+**{Version_Field}**: {Version_Value}
 
 ## Epic Overview
 
@@ -77,6 +78,12 @@
 
 {If epic will be implemented in phases}
 
+### Phase Version Mapping
+
+- **Phase 1**: Target Version {Phase1_Version}
+- **Phase 2**: Target Version {Phase2_Version}  
+- **Phase 3**: Target Version {Phase3_Version}
+
 ## Dependencies & Prerequisites
 
 ### Internal Dependencies
@@ -145,6 +152,29 @@
 ---
 
 _Epic Folder: `.claude/doh/epics/{epic_folder_name}/`_
+
+## Version Tracking
+
+### Epic Version Fields
+
+- **Proposed Version**: Initial version consideration for this epic
+- **Target Version**: Planning commitment for epic completion
+- **Version**: Frozen roadmap commitment (immutable once set)
+
+### Phase Version Strategy
+
+Epics can span multiple versions with phases:
+- **Single Version**: All phases in same version (focused epic)
+- **Multi-Version**: Phases spread across versions (large strategic epic)
+- **Constraint-Based**: Some phases must be in specific versions (external dependencies)
+
+### Version Planning Examples
+
+```
+Focused Epic:     Proposed 1.4.0 → Target 1.4.0 → Version 1.4.0 (all phases)
+Strategic Epic:   Proposed 1.4.0 → Phase 1: 1.4.0, Phase 2: 1.5.0, Phase 3: 1.6.0
+Constrained Epic: Phase 2 MUST be in 1.5.0 (external requirement)
+```
 
 ## Template Notes
 

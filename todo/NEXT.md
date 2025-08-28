@@ -1,143 +1,182 @@
-# NEXT.md - Claude Memory for /doh-sys:next
+# DOH Task Intelligence Memory 🧠
+**Last Analysis**: 2025-08-28  
+**Version Context**: DOH 1.4.0 Development  
+**Epic Progress**: E001 Phase 1 (10% complete - T054✅)  
+**Total Tasks**: 34 active, 12 ready to start
 
-**Updated**: 2025-08-28 | **Ready**: 12/34 | **High Priority**: 6 | **Version**: 1.4.0-dev
+## 🎯 Top Recommendations
+
+### Recent Completions ✅
+
+#### **T060** - Version Tracking Fields (1-2h) ✅ COMPLETED (2025-08-28)
+- **Impact**: Three-tier version system implemented in templates and docs
+- **Deliverable**: Enhanced roadmap planning capabilities for all tasks
+
+#### **T058** - Port Pipeline to Runtime (3-4h) ✅ COMPLETED (2025-08-28)
+- **Impact**: Enterprise-grade /doh:commit, /doh:changelog, /doh:lint for all projects
+- **Delivered**: Optional linting, smart integration, project-configurable pipeline
+
+### Immediate Priority (Next Session)
+
+#### 1. **T059** - Port AI Task Engine (4-5h) 🧠
+- **Score**: 8.2/10 - AI-powered intelligence
+- **Status**: 🟢 READY (T058✅ T054✅)
+- **Impact**: Brings /doh:next with natural language queries to all projects
+- **Why Now**: Dependencies completed, highest remaining strategic value
+
+#### 2. **T037** - Cleanup Old References (1h) 📝
+- **Score**: 7.0/10 - Quick documentation polish
+- **Status**: 🟢 READY (no blockers)
+- **Impact**: Professional documentation quality
+- **Why**: Quick win between major features
+
+## 📊 Task Dependency Graph
+
+```
+Legend: 🟢 Ready | 🟡 Waiting | 🔴 Blocked | ✅ Complete
+
+✅ T054 (Memory System)
+    └─→ 🟢 T058 (Pipeline Port)
+            └─→ 🟡 T059 (AI Task Engine)
+                    └─→ 🟡 T061 (NL Router)
+
+🟢 T032 (Build Process)
+    ├─→ 🟢 T003 (Architecture)
+    ├─→ 🟢 T005 (Installation)
+    └─→ 🔴 T022 (Self-Hosting)
+
+🟢 T002 (Core Commands)
+    └─→ 🟡 T061 (NL Router)
+
+🟢 T024 (Testing Framework)
+🟢 T019 (Integration Testing)
+```
+
+## 🔍 Pre-computed Queries
+
+### "high impact"
+1. T058 - Pipeline Port (unlocks T059)
+2. T032 - Build Process (unlocks T003, T005, T022)
+3. T002 - Core Commands (unlocks T061)
+
+### "quick wins"
+1. T060 - Version Tracking (1-2h)
+2. T037 - Documentation Cleanup (1h)
+3. T008 - CLAUDE.md Integration (2h)
+
+### "version 1.4"
+**Epic E001 Tasks** (25-35h total):
+- Phase 1: T054✅ (missing T055, T056)
+- Phase 2: T032🟢 T003🟢 T005🟢
+- Phase 3: T058🟢 T059🟡 T024🟢 T019🟢 T061🟡
+- Phase 4: T022🔴
+
+### "documentation"
+1. T037 - Cleanup old references
+2. T060 - Version tracking templates
+3. T008 - CLAUDE.md integration
+
+### "testing"
+1. T024 - Testing Framework (4-5h)
+2. T019 - Integration Testing (3-4h)
+3. T056 - Validation (missing file?)
+
+### "build system"
+1. T032 - Runtime Build Process
+2. T003 - Architecture & Distribution
+3. T005 - Installation Scripts
+
+### "ready to start"
+12 tasks with no blockers:
+T058, T060, T037, T032, T002, T003, T005, T024, T019, T008, T006, T007
+
+## 📈 Strategic Sequence
+
+### Week 1: Runtime Intelligence & Infrastructure
+```
+Day 1-2: T060 (2h) + T058 (4h) = Foundation
+Day 3-4: T059 (5h) = AI Engine
+Day 5: T037 (1h) + T008 (2h) = Documentation
+```
+
+### Week 2: Build & Distribution
+```
+Day 1-2: T032 (4h) = Build Process
+Day 3-4: T003 (6h) = Architecture
+Day 5: T005 (4h) = Installation
+```
+
+### Week 3: Quality & Polish
+```
+Day 1-2: T024 (5h) = Testing Framework
+Day 3-4: T019 (4h) = Integration Testing
+Day 5: T061 (4h) = NL Router
+```
+
+## 🚩 Critical Issues
+
+### Missing Files
+- **T055** - Referenced in NEXT.md but file doesn't exist
+- **T056** - Referenced in NEXT.md but file doesn't exist
+- **Action**: Clarify if completed/archived or need creation
+
+### Priority Misalignment
+- **T002** - Core Commands marked MEDIUM but blocks T061 HIGH
+- **Recommendation**: Elevate T002 to HIGH priority
+
+## 💡 Context Patterns
+
+### Recent Completions
+- T054 (Memory System) - Just completed today
+- T057 (TODO refactoring) - Recent system improvement
+- T053 (Skeleton enhancement) - Analysis capabilities
+
+### Development Momentum
+- Strong focus on runtime intelligence features
+- Pipeline automation maturity from /doh-sys
+- Moving from development to runtime capabilities
+
+### Team Preferences
+- Comprehensive analysis before coding
+- Structured task breakdowns
+- Clear dependency management
+
+## 🎯 Natural Language Mappings
+
+### Intent → Task Mappings
+- "work on pipeline" → T058
+- "quick task" → T060, T037
+- "testing work" → T024, T019
+- "build system" → T032, T003, T005
+- "ai features" → T059, T061
+- "documentation" → T037, T060, T008
+
+### Context Filters
+- `#features`: T058, T059, T061, T002
+- `#build`: T032, T003, T005
+- `#testing`: T024, T019
+- `#doc`: T037, T060, T008
+- `#runtime`: T058, T059, T061
+
+## 📊 Version Tracking
+
+### 1.4.0 Release (E001)
+- **Progress**: 10% (1/10 tasks)
+- **Critical Path**: T032 → T003 → T005 → T022
+- **High Value**: T058 → T059 → T061
+- **Timeline**: 25-35 hours total effort
+
+### Future Versions
+- **1.5.0**: E020 (Codebase Analysis)
+- **2.0.0**: E047 (Natural Language)
+
+## 🔄 Auto-refresh Triggers
+
+Memory should be refreshed when:
+- Any task status changes
+- New tasks created (T062+)
+- Epic phase transitions
+- Weekly planning sessions
 
 ---
-
-## 🎯 Top 5 Recommendations
-
-**T054** - Memory & Context System | HIGH | 2-3h | Epic E001 Phase 1 | Score: 8.5  
-**T055** - Command Integration | HIGH | 2-3h | Epic E001 Phase 1 | Score: 8.2  
-**T056** - Testing & Validation | HIGH | 1.5-2h | Epic E001 Phase 1 | Score: 7.8  
-**T032** - Runtime Build Process | HIGH | 3-4h | Epic E001 Phase 2 | Score: 7.5  
-**T002** - Core /doh Commands | MEDIUM | 4-6h | Core functionality | Score: 7.2
-
----
-
-## 📊 Quick Analysis
-
-**Ready (12)**: T054,T055,T056,T032,T003,T005,T002,T004,T006,T024,T019,T008,T037  
-**Blocked (8)**: T021→T020, T022→T032+T003, T049-T052→E020, T044-T046→E001  
-**Key Blockers**: T032→{T022,T003,T005}, T020→T021, T002→{multiple}
-
----
-
-## 🏷️ By Context
-
-**#features**: T002,T004,T054,T055 | **Best**: T054,T055 (E001)  
-**#build**: T032,T003,T005,T056 | **Path**: T032→T003→T005  
-**#testing**: T056,T024,T019 | **Quick**: T056  
-**#doc**: T008,T037 | **Quick**: T037
-
----
-
-## 🚀 Epic Status
-
-**E001** (ACTIVE): Phase1→T054,T055,T056✅ | Phase2→T032✅,T003🟡,T005🟡 | Phase3/4→🔴  
-**E020** (PROPOSED): T049-T052🔴 (needs definition)  
-**E047** (PROPOSED): T044-T046 ready, T017✅
-
----
-
-## 📈 Work Flows
-
-**E001-Phase1** (6-8h): T054→T055→T056 = Complete Phase1  
-**Build-Foundation** (7-10h): T032→T003 = Unlock distribution  
-**Mixed-Progress** (4-6h): T054→T037→T056 = Variety + wins
-
----
-
-## 🧠 Smart Memory Queries
-
-**version 1.4** → E001: T054,T055,T056 (Phase1) | T032,T003,T005 (Phase2) | T024,T019 (Phase3)  
-**quick wins** → T037 (1h doc), T056 (1.5h test), T008 (2h integration)  
-**high impact** → T032 (unlocks T003,T005,T022), T054 (enables T055,T056)  
-**build** → T032→T003→T005 sequence | T032 ready, others blocked  
-**testing** → T056 (skeleton), T024 (framework), T019 (integration)  
-**features** → T054,T055 (E001), T002 (core commands), T004 (command system)  
-**docs** → T037 (cleanup), T008 (CLAUDE.md), both ready  
-**ready now** → T054,T055,T056,T032,T003,T005,T002,T004,T006,T024,T019,T008,T037  
-**blocked** → T021→T020, T022→T032+T003, T049-T052→E020, T044-T046→E001  
-**epic progress** → E001 active (1/10), E020 proposed, E047 partial (T017✅)  
-**foundation work** → T032 (build), T002 (commands), T024 (testing)  
-**what next after t054** → T055 (command integration) then T056 (testing)  
-**phase 1 complete** → enables T032→T003→T005 Phase2 sequence  
-**what should i do next** → T054 (top priority), T037 (quick win), T032 (foundation)  
-**i have 1 hour** → T037 (cleanup refs), quick documentation tasks  
-**i have 2 hours** → T056 (testing), T008 (integration), documentation + small features  
-**i have 4+ hours** → T054 (memory system), T032 (build design), T002 (core commands)  
-**after documentation work** → T054 (technical), T056 (testing), variety from docs  
-**after technical work** → T037 (docs), T008 (integration), balance with documentation  
-**unblock most tasks** → T032 (unlocks T003,T005,T022), T020 (unlocks T021)  
-**complete epic e001** → Phase1: T054→T055→T056, Phase2: T032→T003→T005  
-**start epic e001** → T054 (memory system), foundation of Phase1  
-**testing work** → T056 (skeleton, 1.5h), T024 (framework, 4-5h), T019 (integration, 3-4h)  
-**build system** → T032 (design, ready), T003 (arch, needs T032), T005 (install, needs T003)  
-**core features** → T054,T055 (Epic E001), T002 (commands), T004 (system)  
-**dependencies** → T032→{T003,T005,T022}, T020→T021, T054→T055→T056  
-**priority high** → T054,T055,T056,T032 (all Epic E001)  
-**priority medium** → T002,T003,T005,T024,T019,T022 (mix of core+testing)  
-**tags features** → T002,T004,T054,T055  
-**tags build** → T032,T003,T005,T056  
-**tags testing** → T056,T024,T019  
-**tags doc** → T008,T037
-
-## 🎯 Version Tracking
-
-**v1.4.0-dev** | **Target**: Epic E001 completion  
-**Phase1**: T053✅ T054🟡 T055🟡 T056🟡 (25% → 100%)  
-**Phase2**: T032🟡 T003🔴 T005🔴 (0% → 33%)  
-**Critical**: T032 blocks Phase2, T054 unlocks Phase1  
-**Next Milestone**: Complete Phase1 = Major release progress
-
-## 🔄 Memory Info
-
-**Modes**: Standard | --cache-only (<100ms) | --refresh | --no-cache (fresh)  
-**Smart Queries**: Pre-computed for common searches above  
-**Benefits**: Version-aware, instant context matching, dependency tracking
-
-## 📋 Task Details Cache
-
-**T054** Memory & Context System | #features #build | Epic E001 Phase1 | Depends: T053✅ | Enables: T055,T056 | High impact skeleton foundation  
-**T055** Command Integration | #features #build | Epic E001 Phase1 | Depends: T053✅ | Enables: T056 | Core `/doh:init` integration  
-**T056** Testing & Validation | #testing #build | Epic E001 Phase1 | Depends: T053✅ | Quick 1.5h win | Completes Phase1  
-**T032** Runtime Build Process | #build #architecture | Epic E001 Phase2 | No deps | Unlocks: T003,T005,T022 | Critical path foundation  
-**T002** Core /doh Commands | #features | Independent | Medium effort 4-6h | Fundamental DOH capability  
-**T037** Cleanup Old References | #doc | Quick win 1h | No deps | Documentation quality improvement  
-**T008** CLAUDE.md Integration | #doc | 2h moderate | No deps | System documentation update  
-**T003** Architecture & Distribution | #build | Depends: T032 | Epic E001 Phase2 | 4-6h complex | Distribution foundation  
-**T005** Installation Scripts | #build | Depends: T003 | Epic E001 Phase2 | 3-4h | Cross-platform support  
-**T024** Testing Framework | #testing | Independent | 4-5h complex | Comprehensive quality system  
-**T019** Integration Testing | #testing | Independent | 3-4h | DOH system validation  
-**T022** Self-Hosting Project | #build | Depends: T032+T003 | Epic E001 Phase4 | 2-3h | DOH manages itself
-
-## 🎯 Contextual Strategies
-
-**After completing T054** → T055 (natural sequence) or T037 (variety break) or T056 (finish Phase1)  
-**After completing T037** → T054 (technical balance) or T008 (continue docs) or T056 (testing)  
-**After completing T032** → T003 (continue build sequence) or T054 (parallel Epic work)  
-**If blocked on build** → T054,T055,T056 (Epic Phase1) or T037,T008 (docs) or T024,T019 (testing)  
-**For Epic momentum** → T054→T055→T056 sequence (6-8h total, completes Phase1)  
-**For variety** → T054 (tech) → T037 (doc) → T056 (test) → T008 (integration)  
-**For foundation** → T032 (build) → T002 (commands) → T024 (testing) → establish systems
-
-## 📊 Advanced Metrics
-
-**Readiness Score**: 35% (12/34 tasks ready to start)  
-**Epic Progress**: E001 10% (1/10), E020 0% (needs definition), E047 14% (1/7)  
-**Critical Path**: T032→T003→T005→T022 (build system sequence)  
-**Parallel Paths**: E001 Phase1 (T054→T055→T056), Testing (T024,T019), Docs (T037,T008)  
-**Milestone Next**: Complete E001 Phase1 = 40% Epic progress, unlocks Phase2  
-**Version Goal**: E001 completion = DOH v1.4.0 release readiness
-
-## 🧠 Query Intelligence
-
-**Natural language mapping**: "what next" → T054, "quick" → T037, "build" → T032, "test" → T056  
-**Time-based**: 1h→T037, 2h→T056/T008, 3-4h→T032/T019, 4-6h→T054/T002/T003  
-**Context switching**: docs→tech (T054), tech→docs (T037), heavy→light (T056)  
-**Epic awareness**: "1.4" or "version" → E001 tasks, "phase 1" → T054,T055,T056  
-**Dependency intelligence**: "unblock" → T032/T020, "enable" → T054, "foundation" → T032/T002  
-
----
-
-*Claude's comprehensive memory - 397→890 words, version-aware, context-intelligent, query-optimized*
+*Memory Version: 1.0 | DOH Version: 1.4.0-dev | Analysis Engine: /doh-sys:next*
