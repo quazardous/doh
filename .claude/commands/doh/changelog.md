@@ -52,11 +52,13 @@ This command executes the core DOH documentation pipeline for .doh projects:
 ### 2. Project Structure Adaptation
 
 **Development** (/doh-sys):
+
 - Source: todo/*.md files → TODO management
 - Target: TODO.md, CHANGELOG.md in project root
 - Context: DOH system development
 
 **Runtime** (/doh):
+
 - Source: .doh/tasks/*.json → DOH task management  
 - Target: Project's CHANGELOG.md
 - Context: User's project using DOH

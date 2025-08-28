@@ -714,4 +714,3 @@ Create autonomous agent environment for task/epic: {description_or_id}
 - Maintains /doh standards for code comments and commits
 - Agent works independently without human intervention
 - Results can be merged back when complete
-

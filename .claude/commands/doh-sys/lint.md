@@ -11,12 +11,34 @@ priority-based repair strategies.
 
 ## Parameters
 
-- `--check-only`: Report issues without making changes (skips prettier and all auto-fixes)
-- `--files=pattern`: Lint specific files or patterns (e.g., `--files="docs/*.md"`)
-- `--verbose`: Show detailed fix information including prettier step progress
+### Mode Control
+- `--check-only`: Report-only mode - no modifications made to any files
+  - **Safe**: Shows all issues without making changes
+  - **Skips**: All prettier formatting and auto-fixes  
+  - **Use when**: Want to see issues before deciding to fix them
+  - **Perfect for**: CI/CD validation, pre-commit checks, issue assessment
 
-**Default Behavior**: Auto-fix is enabled by default with prettier ALWAYS running first. Use `--check-only` to disable
-all fixes and only report issues.
+### File Targeting  
+- `--files=pattern`: Lint specific files or patterns instead of entire project
+  - **Examples**: `--files="docs/*.md"`, `--files="TODO.md CHANGELOG.md"`, `--files="*.json"`
+  - **Supports**: Glob patterns, space-separated file lists, directory paths
+  - **Use when**: Working on specific files, want faster targeted linting
+  - **Combines with**: All other flags (--check-only, --verbose)
+
+### Output Control
+- `--verbose`: Show detailed progress and fix information
+  - **Default**: Concise summary of fixes applied
+  - **Detailed**: Shows prettier step progress, individual file processing, fix categories
+  - **Use when**: Debugging linting issues, understanding what changes are made
+  - **Helpful for**: Learning what auto-fixes are available
+
+### Default Behavior
+**Auto-fix enabled by default** with prettier-first approach:
+1. **Prettier formatting** ALWAYS runs first on all supported files
+2. **Rule-based linting** applies fixes to prettier-formatted files  
+3. **DOH intelligence** handles remaining issues with smart fixes
+
+**Override**: Use `--check-only` to disable all fixes and only report issues
 
 ## Prettier-First Workflow
 

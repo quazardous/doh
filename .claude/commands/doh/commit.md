@@ -24,7 +24,7 @@ When called without a task description, the command:
 1. **Analyzes git changes** using `git diff --name-only` and `git status`
 2. **Categorizes changes** by file patterns:
    - `.doh/`, `CHANGELOG.md` → "docs: Update DOH documentation"
-   - `docs/`, `README.md`, `*.md` → "docs: Update project documentation" 
+   - `docs/`, `README.md`, `*.md` → "docs: Update project documentation"
    - `src/`, `lib/`, main code → "feat: Update core functionality"
    - `tests/` → "test: Update test suite"
    - `package.json`, config files → "chore: Update project configuration"
@@ -198,7 +198,7 @@ Pipeline completed successfully!
 ### Smart Project Detection
 
 - **Node.js projects**: Updates package.json version, uses npm conventions
-- **Python projects**: Updates setup.py, __version__.py as appropriate
+- **Python projects**: Updates setup.py, **version**.py as appropriate
 - **Generic projects**: Uses .doh/version.txt or skips version management
 - **Existing linting**: Integrates with ESLint, Prettier, existing tools
 - **Git hooks**: Works with pre-commit hooks and project git workflow
@@ -230,16 +230,19 @@ git commit -m "fix: Documentation updates"
 ## Use Cases
 
 ### Daily Development Workflow
+
 - **Feature completion**: Complete work, run /doh:commit, automatic docs + version + commit
 - **Bug fixes**: Fix issue, /doh:commit with bug reference, proper tracking
 - **Maintenance**: Update dependencies, docs automatically stay current
 
 ### Team Collaboration  
+
 - **Consistent commits**: Team gets uniform commit messages with DOH references
 - **Traceability**: Every commit links back to DOH tasks and project planning
 - **Version coordination**: Automatic version bumps keep team synchronized
 
 ### Release Management
+
 - **Feature rollup**: Multiple DOH tasks completed, version bumps track progress
 - **Changelog automation**: Release notes generated from completed DOH tasks
 - **Quality gates**: Optional linting ensures release-ready documentation

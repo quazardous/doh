@@ -1,9 +1,11 @@
 # /doh:init - Système d'initialisation réentrant
 
 ## Description
+
 Initialise ou re-initialise intelligemment le système /doh dans un projet existant. Commande réentrante qui peut être exécutée plusieurs fois sans dégâts.
 
 ## Usage
+
 ```bash
 /doh:init              # Mode interactif avec questions si doute
 /doh:init --force      # Force la réinitialisation (optionnel)
@@ -15,6 +17,7 @@ Initialise ou re-initialise intelligemment le système /doh dans un projet exist
 ## Fonctionnalités
 
 ### 1. Health Check & Diagnostic
+
 - ✅ Vérifie la présence de `.claude/doh/` (système) ET `.doh/` (projet)
 - ✅ Contrôle l'intégrité de `.doh/project-index.json`
 - ✅ Détecte les fichiers MD orphelins (non indexés)
@@ -24,6 +27,7 @@ Initialise ou re-initialise intelligemment le système /doh dans un projet exist
 ### 2. Auto-Détection Intelligente
 
 #### Langue du Projet
+
 ```bash
 # Analyse automatique de la langue
 - Commentaires dans le code (// vs /**) 
@@ -34,6 +38,7 @@ Initialise ou re-initialise intelligemment le système /doh dans un projet exist
 ```
 
 #### Type de Projet
+
 ```bash
 # Détection du stack technique
 - package.json → Node.js/JavaScript
@@ -45,6 +50,7 @@ Initialise ou re-initialise intelligemment le système /doh dans un projet exist
 ```
 
 #### Git Remote & Sync
+
 ```bash
 # Configuration synchronisation
 - origin GitHub → Propose sync GitHub
@@ -56,6 +62,7 @@ Initialise ou re-initialise intelligemment le système /doh dans un projet exist
 ### 3. Scan & Réindexation
 
 #### Scan Filesystem
+
 ```bash
 # Recherche exhaustive dans .doh/
 .doh/epics/**/*.md    → Détecte epics non indexés
@@ -65,6 +72,7 @@ Initialise ou re-initialise intelligemment le système /doh dans un projet exist
 ```
 
 #### Réindexation Intelligente
+
 ```bash
 # Parsing headers MD pour récupérer métadonnées
 # Epic !45: Title...          → ID=45, type=epic
@@ -74,6 +82,7 @@ Initialise ou re-initialise intelligemment le système /doh dans un projet exist
 ```
 
 #### Résolution Hiérarchie
+
 ```bash
 # Reconstruction dependency graph
 - Parse parent/child relationships
@@ -85,6 +94,7 @@ Initialise ou re-initialise intelligemment le système /doh dans un projet exist
 ### 4. Configuration CLAUDE.md
 
 #### Intégration Intelligente
+
 ```bash
 # Niveaux d'intégration /doh
 Level 0: Mention disponibilité /doh
@@ -95,6 +105,7 @@ Level 4: Enterprise compliance + reporting
 ```
 
 #### Templates Adaptatifs
+
 ```bash
 # Génération section CLAUDE.md selon:
 - Langue détectée (français/anglais)
@@ -106,6 +117,7 @@ Level 4: Enterprise compliance + reporting
 ### 5. Migration & Upgrade
 
 #### Ancien Format → Nouveau Format
+
 ```bash
 # Migration .cache → project-index.json
 - Parse ancien .cache file
@@ -116,6 +128,7 @@ Level 4: Enterprise compliance + reporting
 ```
 
 #### Version System
+
 ```bash
 # Gestion versions /doh
 - Détecte version actuelle dans .doh/project-index.json
@@ -127,6 +140,7 @@ Level 4: Enterprise compliance + reporting
 ### 6. Context Setup
 
 #### Anti-Vibe Coding
+
 ```bash
 # Copie règles contexte obligatoire
 .claude/doh/anti-vibe-coding.md → .claude/context/anti-vibe-coding.md
@@ -134,6 +148,7 @@ Level 4: Enterprise compliance + reporting
 ```
 
 #### Templates & Schema
+
 ```bash
 # Installation templates
 - PRD templates (micro/standard/enterprise)
@@ -145,6 +160,7 @@ Level 4: Enterprise compliance + reporting
 ## Interface Interactive
 
 ### Mode Questions
+
 ```bash
 /doh:init
 
@@ -179,6 +195,7 @@ Continuer installation (Y/n)? [Y]:
 ```
 
 ### Mode Batch/Silent
+
 ```bash
 /doh:init --level=3 --lang=fr --sync=none --no-interactive
 → Installation silencieuse avec paramètres prédéfinis
@@ -187,6 +204,7 @@ Continuer installation (Y/n)? [Y]:
 ## Algorithme d'Exécution
 
 ### 1. Pre-flight Checks
+
 ```bash
 ✅ Vérifier que dans un projet Git
 ✅ Contrôler permissions filesystem  
@@ -195,6 +213,7 @@ Continuer installation (Y/n)? [Y]:
 ```
 
 ### 2. Analysis Phase
+
 ```bash
 🔍 Scan filesystem pour /doh existant
 📊 Analyse langue (comments + commits + docs)
@@ -204,6 +223,7 @@ Continuer installation (Y/n)? [Y]:
 ```
 
 ### 3. Configuration Phase  
+
 ```bash
 ❓ Mode interactif OU paramètres CLI
 ⚙️ Génération config selon détection + choix
@@ -212,6 +232,7 @@ Continuer installation (Y/n)? [Y]:
 ```
 
 ### 4. Installation Phase
+
 ```bash
 📁 Copie skeleton depuis .claude/doh/skel/ → .doh/
 📄 Installation templates + schemas dans .claude/doh/  
@@ -222,6 +243,7 @@ Continuer installation (Y/n)? [Y]:
 ```
 
 ### 5. Validation Phase
+
 ```bash
 ✅ Validation intégrité installation
 🧪 Test loading de .doh/project-index.json
@@ -232,6 +254,7 @@ Continuer installation (Y/n)? [Y]:
 ## Gestion d'Erreurs
 
 ### Réentrance Safe
+
 ```bash
 # Peut être exécuté N fois sans problème
 - Backup avant modifications importantes
@@ -241,6 +264,7 @@ Continuer installation (Y/n)? [Y]:
 ```
 
 ### Recovery Mode
+
 ```bash
 /doh:init --repair
 → Mode réparation pour installation corrompue
@@ -250,6 +274,7 @@ Continuer installation (Y/n)? [Y]:
 ```
 
 ### Rollback Capability
+
 ```bash
 /doh:init --rollback
 → Restaure dernière backup connue
@@ -260,6 +285,7 @@ Continuer installation (Y/n)? [Y]:
 ## Outputs & Reporting
 
 ### Rapport d'Installation
+
 ```bash
 🎉 Installation /doh complète!
 
@@ -296,6 +322,7 @@ Continuer installation (Y/n)? [Y]:
 ```
 
 ### Debug Mode
+
 ```bash
 /doh:init --verbose
 → Logs détaillés de chaque étape
@@ -307,6 +334,7 @@ Continuer installation (Y/n)? [Y]:
 ## Spécialisation par Framework
 
 ### Symfony (Détecté)
+
 ```bash
 # Templates adaptés Symfony
 - Entity modification templates
@@ -316,6 +344,7 @@ Continuer installation (Y/n)? [Y]:
 ```
 
 ### Node.js/JavaScript
+
 ```bash
 # Templates pour projets JS
 - Component creation templates  
@@ -325,6 +354,7 @@ Continuer installation (Y/n)? [Y]:
 ```
 
 ### Générique
+
 ```bash
 # Templates universels
 - Basic PRD/Epic/Task structure
@@ -336,6 +366,7 @@ Continuer installation (Y/n)? [Y]:
 ## Maintenance & Evolution
 
 ### Self-Update Capability
+
 ```bash
 # Mise à jour système /doh
 /doh:init --update-system
@@ -345,6 +376,7 @@ Continuer installation (Y/n)? [Y]:
 ```
 
 ### Health Monitoring
+
 ```bash
 # Diagnostic périodique
 /doh:init --health-check

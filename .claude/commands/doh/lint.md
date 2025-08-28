@@ -22,6 +22,7 @@ This command integrates intelligently with existing project linting:
 ### 1. Auto-Detection Mode (Default)
 
 **Configuration Check**:
+
 ```bash
 # Checks .doh/config.ini for lint_enabled setting
 [pipeline]
@@ -31,6 +32,7 @@ lint_enabled = false   # DOH linting disabled
 ```
 
 **Project Detection**:
+
 - **Existing Linting**: Detects `.eslintrc`, `prettier.config.js`, `markdownlint.json`
 - **Integration Mode**: Works alongside existing linting, focuses on DOH-specific rules
 - **Standalone Mode**: Provides comprehensive linting if no existing setup
@@ -40,11 +42,13 @@ lint_enabled = false   # DOH linting disabled
 When enabled, adds DOH-specific linting rules:
 
 #### DOH Task Documentation
+
 - **.doh/tasks/*.json**: Validates DOH task structure and required fields
 - **CHANGELOG.md**: Ensures DOH task references are properly formatted
 - **README.md**: Validates DOH integration sections if present
 
 #### Documentation Quality
+
 - **Markdown consistency**: Standardizes DOH documentation patterns
 - **Link validation**: Checks internal links to .doh/ structure
 - **Format compliance**: Ensures DOH template compliance
@@ -52,11 +56,13 @@ When enabled, adds DOH-specific linting rules:
 ### 3. Respectful Integration
 
 **Existing Project Linting**:
+
 - **Never conflicts**: DOH linting runs after existing project linting
 - **Complementary rules**: Focuses on DOH-specific content, not general code style
 - **Graceful coexistence**: Respects project's existing linting configuration
 
 **Example Integration**:
+
 ```bash
 # Project with existing linting
 npm run lint              # Project's own linting
@@ -99,16 +105,19 @@ Project has .eslintrc or similar?
 ## Linting Rules by Scope
 
 ### DOH-Only Scope
+
 - **.doh/tasks/*.json**: Task structure validation
 - **.doh/config.ini**: Configuration format validation
 - **CHANGELOG.md**: DOH task reference format (DOH-123, [DOH #123])
 
 ### Enhanced Scope (+ DOH-Only)
+
 - **README.md**: DOH integration sections
 - **docs/*.md**: General markdown quality
 - **Project documentation**: Link validation, formatting
 
 ### Comprehensive Scope (+ Enhanced)
+
 - **All markdown files**: Full markdown linting
 - **JSON/YAML**: Format validation
 - **Basic code quality**: If no existing linting
@@ -116,6 +125,7 @@ Project has .eslintrc or similar?
 ## Example Usage
 
 ### Check if DOH linting is recommended
+
 ```bash
 /doh:lint
 # Auto-detects project setup:
@@ -124,6 +134,7 @@ Project has .eslintrc or similar?
 ```
 
 ### Enable DOH linting
+
 ```bash
 /doh:lint --enable
 # Prompts for scope selection:
@@ -135,6 +146,7 @@ Project has .eslintrc or similar?
 ```
 
 ### Run DOH linting (when enabled)
+
 ```bash
 /doh:lint
 # Output:
@@ -147,6 +159,7 @@ Project has .eslintrc or similar?
 ```
 
 ### Check-only mode
+
 ```bash
 /doh:lint --check-only
 # Reports issues without fixes, respects existing project workflow
@@ -199,16 +212,19 @@ lint_enabled = false    # /doh:changelog skips linting
 ## Use Cases
 
 ### For Projects with Existing Linting
+
 - **Complementary**: Adds DOH-specific validation without conflicts
 - **Focused**: Only processes DOH-related files and documentation
 - **Respectful**: Never overrides existing project linting rules
 
 ### For Projects without Linting
+
 - **Comprehensive**: Offers full project linting capabilities
 - **Gradual adoption**: Start with DOH files, expand scope as needed
 - **Quality improvement**: Enhances overall project documentation quality
 
 ### For DOH-Heavy Projects
+
 - **Task validation**: Ensures DOH task files are properly structured
 - **Documentation consistency**: Maintains quality across DOH documentation
 - **Link integrity**: Validates references between DOH tasks and documentation

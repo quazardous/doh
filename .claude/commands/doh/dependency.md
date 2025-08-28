@@ -1,6 +1,7 @@
 # /doh:dependency - Centralized Dependency Management
 
 ## Description
+
 Manage dependencies between tasks, features, epics, and PRDs in the DOH system. This command provides centralized functionality for adding, removing, listing, and visualizing dependencies between DOH items.
 
 ## Usage
@@ -387,17 +388,20 @@ export DOH_DEPENDENCY_VALIDATION="enabled"
 ## Integration Points
 
 ### With Other DOH Commands
+
 - `/doh:quick` - Automatically detect dependencies based on task descriptions
 - `/doh:agent` - Include dependency context in agent bundles
 - `/doh:task` / `/doh:epic` - Show dependencies when displaying items
 - `/doh:sync-github` - Sync dependency relationships to GitHub issue links
 
 ### With Memory System
+
 - Record dependency changes in active session
 - Track dependency patterns in project memory
 - Include dependency context in agent sessions
 
 ### With Agent Context Protocol
+
 - Dependencies included in context bundles for agent awareness
 - Agent memory enrichment includes dependency discoveries
 - Worktree creation considers dependency relationships
@@ -405,6 +409,7 @@ export DOH_DEPENDENCY_VALIDATION="enabled"
 ## Test Scenarios
 
 ### Basic Dependency Management
+
 ```bash
 # Create test items
 /doh:quick "Setup database schema"      # Gets ID 1
@@ -421,6 +426,7 @@ export DOH_DEPENDENCY_VALIDATION="enabled"
 ```
 
 ### Circular Dependency Prevention
+
 ```bash
 # Create chain: A → B → C
 /doh:dependency add 1 2
@@ -434,6 +440,7 @@ export DOH_DEPENDENCY_VALIDATION="enabled"
 ```
 
 ### Dependency Path Finding
+
 ```bash
 # Find path between distant items
 /doh:dependency path 1 5

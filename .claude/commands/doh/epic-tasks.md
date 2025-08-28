@@ -1,20 +1,25 @@
 # /doh:epic-tasks Command
 
 ## Description
+
 Analyze an epic and create/update tasks directly using the specialized DOH Decomposer Agent.
 
 ## Usage
+
 ```
 /doh:epic-tasks <epic_id>
 ```
 
 ## Parameters
+
 - `epic_id` (required): ID of the Epic to analyze and decompose into tasks
 
 ## Examples
+
 - `/doh:epic-tasks 2` - Analyze Epic #2 and create direct tasks
 
 ## Implementation
+
 When this command is executed:
 
 1. **Locate Epic**: Find epic file in `.claude/doh/epics/{folder}/epic{id}.md`
@@ -25,6 +30,7 @@ When this command is executed:
 6. **Update References**: Link tasks to parent epic
 
 ## Agent Invocation
+
 ```
 Use the DOH Decomposer Agent to analyze Epic #{epic_id} and break it down into direct implementation tasks.
 
@@ -43,7 +49,9 @@ Each task should be independently implementable and testable.
 ```
 
 ## Task Identification Criteria
+
 The agent analyzes for:
+
 - **Implementation Units**: Specific code modules or functions
 - **Technical Setup**: Infrastructure, configuration, dependencies
 - **Data Layer**: Database changes, migrations, models
@@ -53,7 +61,9 @@ The agent analyzes for:
 - **Documentation**: Technical docs, user guides, API docs
 
 ## Output Generation
+
 Tasks created directly under epic folder:
+
 ```
 .claude/doh/epics/notification-system/
 ├── epic2.md                    # Epic definition
@@ -64,7 +74,9 @@ Tasks created directly under epic folder:
 ```
 
 ## Task Specifications
+
 Each generated task includes:
+
 - Clear acceptance criteria
 - Technical implementation approach  
 - Dependencies on other tasks
@@ -73,6 +85,7 @@ Each generated task includes:
 - Code traceability placeholders
 
 ## Integration
+
 - Links all tasks back to parent epic
 - Establishes task dependencies and sequencing
 - Prepares tasks for implementation phase

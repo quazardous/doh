@@ -1,20 +1,25 @@
 # /doh:epic-features Command
 
 ## Description
+
 Analyze an epic and create/update features with mnemonics using the specialized DOH Decomposer Agent.
 
 ## Usage
+
 ```
 /doh:epic-features <epic_id>
 ```
 
 ## Parameters
+
 - `epic_id` (required): ID of the Epic to analyze and decompose into features
 
 ## Examples
+
 - `/doh:epic-features 2` - Analyze Epic #2 and create/suggest features
 
 ## Implementation
+
 When this command is executed:
 
 1. **Locate Epic**: Find epic file in `.claude/doh/epics/{folder}/epic{id}.md`
@@ -25,6 +30,7 @@ When this command is executed:
 6. **Update Structure**: Maintain proper nested hierarchy
 
 ## Agent Invocation
+
 ```
 Use the DOH Decomposer Agent to analyze Epic #{epic_id} and identify logical feature groupings.
 
@@ -43,7 +49,9 @@ Features should group related tasks and represent coherent user-facing capabilit
 ```
 
 ## Feature Identification Criteria
+
 The agent analyzes for:
+
 - **User Workflows**: Complete user interaction flows
 - **Functional Cohesion**: Related capabilities that belong together
 - **Technical Boundaries**: Natural architectural separations
@@ -52,7 +60,9 @@ The agent analyzes for:
 - **Business Logic Areas**: Coherent domain functionality
 
 ## Output Generation
+
 Creates nested feature structure:
+
 ```
 .claude/doh/epics/notification-system/
 ├── epic2.md                           # Epic definition
@@ -65,7 +75,9 @@ Creates nested feature structure:
 ```
 
 ## Feature Specifications
+
 Each generated feature includes:
+
 - Clear feature scope and boundaries
 - User stories and acceptance criteria
 - Technical requirements and constraints
@@ -74,6 +86,7 @@ Each generated feature includes:
 - Preparation for task decomposition
 
 ## Integration
+
 - Links all features back to parent epic
 - Creates foundation for `/doh:feature-tasks` decomposition
 - Maintains nested folder hierarchy

@@ -1,9 +1,11 @@
 # /doh:sync-github - Synchronisation GitHub Issues ↔ DOH Tasks
 
 ## Description
+
 Synchronisation bidirectionnelle entre les issues GitHub et les tâches DOH. Implémente le dual ID system (!123 → #456) avec gestion intelligente des conflits.
 
 ## Usage
+
 ```bash
 /doh:sync-github                    # Sync bidirectionnel complet
 /doh:sync-github --pull             # Import issues GitHub → DOH  
@@ -13,6 +15,7 @@ Synchronisation bidirectionnelle entre les issues GitHub et les tâches DOH. Imp
 ```
 
 ## Prérequis
+
 - Repository Git avec remote GitHub configuré
 - Token GitHub avec permissions issues (GITHUB_TOKEN env var)
 - Index.json avec configuration github_repo
@@ -20,6 +23,7 @@ Synchronisation bidirectionnelle entre les issues GitHub et les tâches DOH. Imp
 ## Fonctionnalités
 
 ### 1. Détection Automatique Configuration
+
 ```bash
 # Auto-détection repository GitHub
 git remote get-url origin → github.com/user/repo
@@ -29,6 +33,7 @@ git remote get-url origin → github.com/user/repo
 ### 2. Dual ID System Management
 
 #### Mapping Local → Remote
+
 ```bash
 # États des items DOH
 !123 (Local only)     → Peut être pushé vers GitHub
@@ -38,6 +43,7 @@ git remote get-url origin → github.com/user/repo
 ```
 
 #### Headers MD Automatiques
+
 ```bash
 # Génération automatique URLs GitHub
 # Task !123→#456: Titre tâche
@@ -50,6 +56,7 @@ git remote get-url origin → github.com/user/repo
 ### 3. Synchronisation Pull (GitHub → DOH)
 
 #### Import Nouvelles Issues
+
 ```bash
 # Scan toutes les issues GitHub ouvertes
 GET /repos/{owner}/{repo}/issues
@@ -58,6 +65,7 @@ GET /repos/{owner}/{repo}/issues
 ```
 
 #### Détection Modifications Remote
+
 ```bash
 # Compare last_sync vs updated_at GitHub
 GitHub issue.updated_at > item.synced
@@ -66,6 +74,7 @@ GitHub issue.updated_at > item.synced
 ```
 
 #### Création Fichiers MD
+
 ```bash
 # Pour chaque nouvelle issue GitHub
 /epics/maintenance-general/task{next_id}.md
@@ -77,6 +86,7 @@ GitHub issue.updated_at > item.synced
 ### 4. Synchronisation Push (DOH → GitHub)
 
 #### Export Nouvelles Tâches
+
 ```bash
 # Items !123 (Local only)
 POST /repos/{owner}/{repo}/issues
@@ -90,6 +100,7 @@ POST /repos/{owner}/{repo}/issues
 ```
 
 #### Mise à Jour Issues Existantes
+
 ```bash
 # Items !123*→#456 (Dirty)
 PATCH /repos/{owner}/{repo}/issues/{issue_number}
@@ -104,6 +115,7 @@ PATCH /repos/{owner}/{repo}/issues/{issue_number}
 ### 5. Gestion des Conflits
 
 #### Détection Conflicts
+
 ```bash
 # Conflict = modifications simultanées remote ET local
 item.dirty > item.synced AND github.updated_at > item.synced
@@ -111,6 +123,7 @@ item.dirty > item.synced AND github.updated_at > item.synced
 ```
 
 #### Résolution Interactive
+
 ```bash
 🚨 CONFLICT détecté sur Task !123→#456:
 
@@ -127,6 +140,7 @@ Choix (1-4):
 ```
 
 #### Auto-Resolution Rules
+
 ```bash
 # Résolution automatique quand possible
 - Seul le title modifié → Merge automatique
@@ -138,6 +152,7 @@ Choix (1-4):
 ### 6. Format de Synchronisation
 
 #### DOH Task → GitHub Issue
+
 ```bash
 # Transformation automatique
 Title: "Task !123: {doh_title}"
@@ -158,6 +173,7 @@ Labels: ["doh-task", "epic-1", "priority-medium"]
 ```
 
 #### GitHub Issue → DOH Task
+
 ```bash
 # Parsing et normalisation
 GitHub Title: "Fix responsive menu bug" 
@@ -173,6 +189,7 @@ GitHub Labels: ["bug", "frontend"]
 ### 7. Batch Operations
 
 #### Sync Multiple Items
+
 ```bash
 # Sync sélectif par epic
 /doh:sync-github --epic=1    # Sync seulement epic !1
@@ -181,6 +198,7 @@ GitHub Labels: ["bug", "frontend"]
 ```
 
 #### Bulk Import
+
 ```bash
 # Import massif issues GitHub
 /doh:sync-github --import-all
@@ -192,6 +210,7 @@ GitHub Labels: ["bug", "frontend"]
 ## Interface & Reporting
 
 ### Sync Status Display
+
 ```bash
 /doh:sync-github --status
 
@@ -222,6 +241,7 @@ GitHub Labels: ["bug", "frontend"]
 ```
 
 ### Sync Execution Report
+
 ```bash
 🚀 GitHub Sync Complete!
 
@@ -248,6 +268,7 @@ GitHub Labels: ["bug", "frontend"]
 ## Configuration & Security
 
 ### GitHub Token Setup
+
 ```bash
 # Configuration token GitHub
 export GITHUB_TOKEN="ghp_xxxxxxxxxxxx"
@@ -262,6 +283,7 @@ GITHUB_TOKEN=ghp_xxxxxxxxxxxx
 ```
 
 ### Repository Configuration
+
 ```bash
 # Configuration automatique dans index.json
 {
@@ -276,6 +298,7 @@ GITHUB_TOKEN=ghp_xxxxxxxxxxxx
 ```
 
 ### Mapping Persistence
+
 ```bash
 # Sauvegarde relations dans index.json
 {
@@ -298,6 +321,7 @@ GITHUB_TOKEN=ghp_xxxxxxxxxxxx
 ## Error Handling & Robustness
 
 ### API Rate Limits
+
 ```bash
 # GitHub rate limit: 5000 req/hour
 → Batch requests quand possible
@@ -307,6 +331,7 @@ GITHUB_TOKEN=ghp_xxxxxxxxxxxx
 ```
 
 ### Network Failures
+
 ```bash
 # Gestion failures réseau
 → Retry automatique avec exponential backoff
@@ -316,6 +341,7 @@ GITHUB_TOKEN=ghp_xxxxxxxxxxxx
 ```
 
 ### Data Integrity
+
 ```bash
 # Protection données
 → Backup index.json avant sync majeure
@@ -327,6 +353,7 @@ GITHUB_TOKEN=ghp_xxxxxxxxxxxx
 ## Exemples Pratiques
 
 ### Workflow Collaboratif
+
 ```bash
 # Dev A crée tâche locale
 /doh:quick "corriger bug mobile"  → Task !130
@@ -342,6 +369,7 @@ GITHUB_TOKEN=ghp_xxxxxxxxxxxx
 ```
 
 ### Import Projet Existant  
+
 ```bash
 # Projet avec issues GitHub existantes
 /doh:sync-github --import-all
@@ -351,6 +379,7 @@ GITHUB_TOKEN=ghp_xxxxxxxxxxxx
 ```
 
 ### Résolution Conflict Complexe
+
 ```bash
 # Conflict sur description technique
 Task !125: Description détaillée côté DOH

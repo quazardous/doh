@@ -19,18 +19,62 @@ completion detection.
 ## Usage
 
 ```bash
-/doh-sys:commit [task-completion] [--no-version-bump] [--no-lint] [--dry-run] [--amend] [--force]
+/doh-sys:commit [task-completion] [--no-version-bump] [--no-lint] [--dry-run] [--amend] [--force] [--split] [--interactive] [--staged-focused]
 ```
 
 ## Parameters
 
-- `task-completion`: (Optional) Task ID or description of completed work (e.g., "T035", "fix documentation")
+### Primary Parameters
+- `task-completion`: (Optional) Task ID or description of completed work
+  - **Examples**: `"T035"`, `"fix documentation"`, `"implement user auth"`
   - **If omitted**: Auto-generates commit label based on git changes and asks for confirmation
-- `--no-version-bump`: Skip automatic version bumping (version bump is default behavior)
-- `--no-lint`: Skip linting and auto-fixes
-- `--dry-run`: Show what would be done without executing
+  - **Smart detection**: Analyzes file changes to suggest appropriate descriptions
+
+### Control Flags
+- `--dry-run`: Preview what would be done without executing any changes
+  - **Use when**: Want to verify changes before committing
+  - **Safe**: No modifications to git history or files
+  - **Output**: Shows planned commits, version changes, and documentation updates
+
+- `--no-version-bump`: Skip automatic version bumping 
+  - **Default**: Version bump enabled with user confirmation
+  - **Use when**: Minor changes that don't warrant version increment
+  - **Note**: Version analysis still runs, just skips the actual bump
+
+- `--no-lint`: Skip linting and auto-fixes on documentation
+  - **Default**: Intelligent linting with prettier-first approach
+  - **Use when**: Confident files are already properly formatted
+  - **Speeds up**: Commit process by ~30-60 seconds
+
+### Advanced Git Operations  
 - `--amend`: Amend the previous commit instead of creating a new one
-- `--force`: Override safety checks (⚠️ DANGEROUS - can break collaboration)
+  - **Use when**: Adding forgotten changes to recent commit
+  - **⚠️ Warning**: Don't amend pushed commits (breaks collaboration)
+  - **Combines with**: --no-version-bump (usually don't bump version for amendments)
+
+- `--force`: Override safety checks and confirmations
+  - **⚠️ DANGEROUS**: Can break collaboration if used incorrectly
+  - **Use when**: Automated scripts or when you're absolutely certain
+  - **Bypasses**: All interactive confirmations and safety validations
+
+### Semantic Splitting System (NEW)
+- `--split`: Intelligently split large staging area into multiple semantic commits
+  - **Algorithm**: Epic/TODO updates → System changes → Documentation → Implementation → Misc
+  - **Smart analysis**: Groups related files by semantic meaning
+  - **Use when**: Staging area contains multiple logical units of work
+  - **Example**: Mixed epic updates, DOH system changes, and code modifications
+
+- `--interactive`: Review and confirm each commit in the split sequence
+  - **Requires**: `--split` flag to be effective
+  - **Process**: Shows each planned commit with files and message for approval
+  - **Control**: Can edit commit messages, skip commits, or abort sequence
+  - **Use when**: Want control over each commit in a split sequence
+
+- `--staged-focused`: Process staged files + obvious semantic matches only
+  - **Requires**: `--split` flag to be effective  
+  - **Behavior**: Ignores unrelated unstaged/untracked files
+  - **Smart matching**: Auto-stages files that are obviously part of staged work
+  - **Use when**: Large workspace with many unrelated changes, want focused commits
 
 ## Auto-Label Generation
 
@@ -135,6 +179,147 @@ The commit command intelligently extracts information from the documentation pip
 
 **Architecture**: `/doh-sys:commit` = `/doh-sys:changelog` + Intelligent Git Operations
 
+## Semantic Commit Splitting (--split)
+
+The `--split` flag enables intelligent analysis of large staging areas and automatically creates multiple focused commits following a priority-based strategy.
+
+### Split Strategy: Epic/TODO Updates First
+
+The splitting algorithm follows a semantic priority order designed to separate planning work from implementation:
+
+#### **Phase 1: Epic & TODO Updates** (Highest Priority)
+- Files: `todo/*.md`, `todo/NEXT.md`, epic documentation
+- Purpose: Isolate project management and planning changes
+- Example: `"feat: Complete T059 AI Task Engine and update project roadmap"`
+
+#### **Phase 2: DOH System Infrastructure**
+- Files: `.claude/doh/*`, `.claude/commands/*`, system templates
+- Purpose: Separate framework/tooling changes from project work
+- Example: `"feat: Enhance DOH runtime with AI task intelligence system"`
+
+#### **Phase 3: Project Documentation**  
+- Files: `README.md`, `WORKFLOW.md`, `DEVELOPMENT.md`, `docs/*`
+- Purpose: Group user-facing documentation updates
+- Example: `"docs: Update DOH runtime documentation with task intelligence"`
+
+#### **Phase 4: Core Implementation**
+- Files: `src/*`, `lib/*`, main application code
+- Purpose: Focus implementation changes separately from planning
+- Example: `"feat: Implement user authentication with JWT tokens"`
+
+#### **Phase 5: Configuration & Support**
+- Files: `package.json`, config files, build scripts, tests
+- Purpose: Group supporting infrastructure changes
+- Example: `"chore: Update project configuration and test setup"`
+
+### Split Analysis Engine
+
+The command performs intelligent semantic analysis of staged changes:
+
+#### **File Pattern Recognition**
+```bash
+# Epic/TODO priority detection
+epic_files=$(git diff --cached --name-only | grep -E "todo/.*\.md|NEXT\.md")
+doh_system_files=$(git diff --cached --name-only | grep -E "\.claude/doh/|\.claude/commands/")
+docs_files=$(git diff --cached --name-only | grep -E "README\.md|WORKFLOW\.md|DEVELOPMENT\.md|docs/")
+```
+
+#### **Content Analysis**
+- **Task Completion Detection**: Scans for TODO status changes to `COMPLETED`
+- **Feature Implementation**: Identifies new functionality additions
+- **Documentation Focus**: Analyzes doc changes for commit context
+- **Dependency Updates**: Detects related file modifications
+
+#### **Smart Message Generation**
+Each split commit gets contextually generated messages:
+- **Epic commits**: `"feat: Complete T### {task_title} and update project roadmap"`
+- **System commits**: `"feat: Enhance DOH {component} with {improvement}"`
+- **Documentation**: `"docs: Update {doc_type} with {focus_area}"`
+- **Implementation**: `"feat: Implement {feature_name} for {purpose}"`
+
+### Split Usage Examples
+
+#### **Automatic Splitting**
+```bash
+# Analyze staging and create semantic commit sequence
+/doh-sys:commit --split
+
+# Example output:
+🔍 Analysis: 12 files staged across 4 semantic categories
+
+📋 Proposed Commit Sequence:
+Commit 1: "feat: Complete T059 AI Task Engine and update project roadmap"
+  Files: todo/T059.md, todo/NEXT.md (3 files)
+  
+Commit 2: "feat: Enhance DOH runtime with task intelligence system" 
+  Files: .claude/commands/doh/next.md, .claude/doh/templates/ (4 files)
+  
+Commit 3: "docs: Update DOH runtime documentation"
+  Files: .claude/doh/inclaude.md (1 file)
+
+Execute this 3-commit sequence? [Y/n/preview]
+```
+
+#### **Interactive Review**
+```bash
+# Review and confirm each individual commit
+/doh-sys:commit --split --interactive
+
+# Example flow:
+Commit 1/3: "feat: Complete T059 AI Task Engine and update project roadmap"
+Files: todo/T059.md, todo/NEXT.md, todo/T061.md
+Execute this commit? [Y/n/edit/skip]
+> Y
+✅ Commit 1 complete
+
+Commit 2/3: "feat: Enhance DOH runtime with task intelligence"
+Files: .claude/commands/doh/next.md, templates/memory_structure.md
+Execute this commit? [Y/n/edit/skip]
+> edit
+Enter commit message: feat: Add /doh:next AI-powered task recommendations
+✅ Commit 2 complete (edited)
+
+Commit 3/3: "docs: Update runtime documentation"
+Files: .claude/doh/inclaude.md  
+Execute this commit? [Y/n/edit/skip]
+> Y
+✅ Commit 3 complete
+
+Split sequence complete! Created 3 focused commits.
+```
+
+#### **Preview Mode**
+```bash
+# Show split plan without executing
+/doh-sys:commit --split --dry-run
+
+# Shows complete analysis, file groupings, and proposed messages
+# No commits created - perfect for validation
+```
+
+### Split Benefits
+
+- **Cleaner History**: Each commit focuses on single logical unit of work
+- **Epic Separation**: Planning/management work isolated from implementation
+- **Better Traceability**: Easier to understand project evolution
+- **Code Review**: Reviewers can focus on specific aspects in each commit
+- **Rollback Granularity**: Can revert specific changes without affecting others
+
+### Split Safety Features
+
+- **Non-Destructive**: Original staging preserved if split is cancelled
+- **Preview Available**: `--dry-run` shows plan without execution
+- **Interactive Override**: `--interactive` allows message editing and commit skipping
+- **Rollback Capability**: Can undo split commits if something goes wrong
+- **Dependency Aware**: Ensures related changes stay together when logically connected
+
+### Split Integration
+
+- **Works with existing flags**: Combines with `--no-lint`, `--no-version-bump`, etc.
+- **Changelog integration**: Each commit can trigger documentation updates
+- **Quality assurance**: Linting applied to each commit individually
+- **Version management**: Smart version bumping across commit sequence
+
 ## Amend Functionality
 
 The `--amend` flag modifies the behavior to update the previous commit instead of creating a new one:
@@ -217,52 +402,319 @@ The pipeline includes intelligent auto-fixes for:
 - **Trailing Spaces**: Remove or normalize
 - **File Endings**: Ensure single trailing newline
 
-## Example Usage
+## Usage Examples & Smart Suggestions
+
+### 💡 Quick Start - Most Common Patterns
 
 ```bash
-# Intelligent extraction and commit (most common usage)
+# 🚀 Most common: Auto-extract from recent changes
 /doh-sys:commit
-# → Calls /doh-sys:changelog (if needed)
-# → Extracts: "T040 - /doh-sys:changelog command completed"
-# → Commits with intelligent message
+# Smart analysis → suggests commit message → single focused commit
 
-# Explicit task description
+# 📋 With specific task completion
 /doh-sys:commit "T039 - Lint command with auto-fix"
-# → Runs changelog pipeline with specific description
-# → Commits with provided context
+# Uses task description → updates changelog → creates commit
 
-# Version bump with confirmation (default behavior)
-/doh-sys:commit "T042 security analysis complete"
-# → Analyzes changes, detects version impact
-# → Prompts: "Version bump detected: 1.4.0 → 1.4.1 (minor features added). Confirm? [Y/n]"
-# → User confirms before applying version changes
-
-# Skip version bump when not needed
-/doh-sys:commit --no-version-bump
-# → Skips automatic version detection and bumping
-# → Focuses only on documentation and commit operations
-
-# Dry run shows full extraction
+# 👁️ Preview before committing (always safe)
 /doh-sys:commit --dry-run
-# → Shows what changelog would do + commit message preview
+# Shows exactly what would happen → no changes made
+```
 
-# Skip redundant linting
-/doh-sys:commit --no-lint
-# → Passes --no-lint to changelog pipeline
+### 🔧 Advanced Flag Combinations
 
-# Amend previous commit with new changes
-/doh-sys:commit --amend
-# → Runs changelog pipeline for new changes
-# → Amends previous commit instead of creating new one
-# → Preserves commit timestamp but updates message and content
+```bash
+# 🎯 Focus mode: Large workspace with unrelated changes
+/doh-sys:commit --split --staged-focused
+# Only processes staged files + obvious semantic matches
+# Ignores unrelated unstaged/untracked files
 
-# Combine flags for complex workflows
-/doh-sys:commit "T041 cleanup" --amend --no-lint
-# → Amend with specific task description, skip linting
+# 🔍 Interactive control: Review each commit
+/doh-sys:commit --split --interactive --staged-focused
+# Split sequence → review each → edit messages → full control
+
+# ⚡ Speed mode: Skip slow operations
+/doh-sys:commit "T041 cleanup" --no-lint --no-version-bump
+# Fastest commit → skips linting & version analysis → immediate commit
+
+# 🛠️ Amendment with safety
+/doh-sys:commit --amend --no-version-bump
+# Add to previous commit → don't bump version → safe for amendments
+
+# 🧪 Testing mode: See everything without doing anything
+/doh-sys:commit --split --dry-run
+# Shows split plan → no commits created → perfect for testing
+```
+
+### 📊 Smart Context-Based Suggestions
+
+**When you have many files staged:**
+```bash
+/doh-sys:commit --split
+# 💡 Suggested by Claude when 5+ files staged
+# Algorithm splits into semantic groups automatically
+```
+
+**When working directory is messy:**  
+```bash
+/doh-sys:commit --split --staged-focused
+# 💡 Suggested when many unrelated unstaged files present
+# Focuses only on intentionally staged work
+```
+
+**When you want control over commits:**
+```bash
+/doh-sys:commit --split --interactive
+# 💡 Suggested for complex changes requiring review
+# Full control over each commit in sequence
+```
+
+**When making quick fixes:**
+```bash
+/doh-sys:commit "fix typo" --no-lint --no-version-bump
+# 💡 Suggested for minor changes
+# Skip time-consuming operations
+```
+
+**When unsure about changes:**
+```bash
+/doh-sys:commit --dry-run
+# 💡 Always safe - shows what would happen
+# No actual changes made to git history
+```
+
+### 🔄 Common Workflow Patterns
+
+**Epic Task Completion:**
+```bash
+# 1. Complete epic work with splitting
+/doh-sys:commit --split --interactive "T054 complete"
+# → Epic updates first → System changes → Documentation → Implementation
+
+# 2. Quick documentation fix
+/doh-sys:commit "fix documentation" --no-version-bump --no-lint
+# → Skip version bump for docs-only changes
+```
+
+**Mixed Development Session:**
+```bash
+# 1. Stage intentional changes first
+git add todo/T065.md .claude/commands/doh-sys/commit.md
+
+# 2. Split with focus on staged files
+/doh-sys:commit --split --staged-focused
+# → Process staged files + auto-detect related changes
+# → Ignore unrelated workspace modifications
+```
+
+**Amendment and Cleanup:**
+```bash
+# 1. Realize you forgot something in previous commit
+/doh-sys:commit --amend --no-version-bump
+# → Add changes to previous commit without version bump
+
+# 2. Major changes require careful review
+/doh-sys:commit --split --interactive --dry-run
+# → First: preview the split plan
+/doh-sys:commit --split --interactive  
+# → Then: execute with full control
+```
+
+### ⚡ Flag Compatibility Matrix
+
+| Primary Flag | Compatible With | Recommended Combinations |
+|--------------|----------------|-------------------------|
+| `--split` | `--interactive`, `--staged-focused`, `--dry-run` | `--split --interactive` |
+| `--dry-run` | All flags | `--split --dry-run` (preview splits) |
+| `--amend` | `--no-version-bump`, `--no-lint` | `--amend --no-version-bump` |
+| `--interactive` | `--split` only | `--split --interactive --staged-focused` |
+| `--staged-focused` | `--split` only | `--split --staged-focused` |
+
+### 🚫 Flag Conflicts (Auto-Detected)
+
+```bash
+# ❌ These combinations are detected and prevented:
+/doh-sys:commit --amend --split
+# Error: Cannot amend with splitting (creates multiple commits)
+
+/doh-sys:commit --interactive
+# Error: --interactive requires --split flag
+
+/doh-sys:commit --staged-focused  
+# Error: --staged-focused requires --split flag
+```
+# → Shows proposed commit sequence and file groupings
+# → Perfect for validation before committing
+
+# Split with other options
+/doh-sys:commit "T064 implementation" --split --no-lint
+# → Split commits with specific task context, skip linting
+
+# Staged-focused splitting (ignore unrelated unstaged files)
+/doh-sys:commit --split --staged-focused
+# → Split staged files + obvious semantic matches
+# → Don't prompt about unrelated unstaged files
+# → Perfect for partial commits when working directory has unrelated changes
+```
+
+## Split Algorithm Implementation
+
+### Semantic File Categorization
+
+The split algorithm uses priority-based pattern matching to group files logically:
+
+```javascript
+// Priority 1: Epic & TODO Updates (Highest)
+const epicFiles = stagedFiles.filter(file => 
+  /^todo\/.*\.md$|^todo\/NEXT\.md$/.test(file)
+);
+
+// Priority 2: DOH System Infrastructure  
+const dohSystemFiles = stagedFiles.filter(file =>
+  /^\.claude\/(doh|commands)\//.test(file)
+);
+
+// Priority 3: Project Documentation
+const docsFiles = stagedFiles.filter(file =>
+  /^(README|WORKFLOW|DEVELOPMENT)\.md$|^docs\//.test(file)
+);
+
+// Priority 4: Core Implementation
+const sourceFiles = stagedFiles.filter(file =>
+  /^src\/|^lib\/|^app\/|\.(js|py|ts|php)$/.test(file)
+);
+
+// Priority 5: Configuration & Support
+const configFiles = stagedFiles.filter(file =>
+  /^(package\.json|.*\.config\.|.*rc\.|.*\.lock)$|^tests?\//.test(file)
+);
+```
+
+### Content Analysis for Smart Messages
+
+Each commit message is generated based on actual file content analysis:
+
+```javascript
+// Epic/TODO commit message generation
+const generateEpicCommitMessage = (files) => {
+  const completedTasks = extractCompletedTasks(files);
+  const taskUpdates = extractTaskUpdates(files);
+  
+  if (completedTasks.length > 0) {
+    return `feat: Complete ${completedTasks.join(', ')} and update project roadmap`;
+  } else if (taskUpdates.length > 0) {
+    return `docs: Update ${taskUpdates.join(', ')} task documentation`;
+  }
+  return 'docs: Update project task management';
+};
+
+// DOH System commit message generation
+const generateSystemCommitMessage = (files) => {
+  const newCommands = detectNewCommands(files);
+  const enhancedComponents = detectEnhancements(files);
+  
+  if (newCommands.length > 0) {
+    return `feat: Add ${newCommands.join(', ')} commands to DOH system`;
+  } else if (enhancedComponents.length > 0) {
+    return `feat: Enhance DOH ${enhancedComponents.join(', ')}`;
+  }
+  return 'feat: Update DOH system components';
+};
+```
+
+### Interactive Split Flow
+
+The interactive mode provides fine-grained control over each commit:
+
+```javascript
+const executeInteractiveSplit = async (commitPlan) => {
+  for (let i = 0; i < commitPlan.length; i++) {
+    const commit = commitPlan[i];
+    
+    console.log(`Commit ${i+1}/${commitPlan.length}: "${commit.message}"`);
+    console.log(`Files: ${commit.files.join(', ')}`);
+    
+    const action = await prompt('Execute this commit? [Y/n/edit/skip]');
+    
+    switch (action.toLowerCase()) {
+      case 'y':
+      case '':
+        await executeCommit(commit);
+        console.log(`✅ Commit ${i+1} complete`);
+        break;
+        
+      case 'edit':
+        const newMessage = await prompt('Enter commit message:');
+        commit.message = newMessage;
+        await executeCommit(commit);
+        console.log(`✅ Commit ${i+1} complete (edited)`);
+        break;
+        
+      case 'skip':
+        console.log(`⏭️  Commit ${i+1} skipped`);
+        // Add files back to staging for potential later commits
+        await stageFiles(commit.files);
+        break;
+        
+      case 'n':
+        console.log('Split sequence cancelled');
+        return false;
+    }
+  }
+  return true;
+};
+```
+
+### Split Safety & Rollback
+
+The split system includes comprehensive safety features:
+
+```javascript
+const executeSplitCommits = async (commitPlan) => {
+  // Store original staging state for rollback
+  const originalStaging = await getCurrentStagingState();
+  const commitHashes = [];
+  
+  try {
+    for (const commit of commitPlan) {
+      // Reset staging and stage only files for this commit
+      await resetStaging();
+      await stageFiles(commit.files);
+      
+      // Execute commit with generated message
+      const hash = await executeGitCommit(commit.message);
+      commitHashes.push(hash);
+      
+      console.log(`✅ Commit created: ${hash.substring(0,7)} - ${commit.message}`);
+    }
+    
+    console.log(`\n🎉 Split complete! Created ${commitHashes.length} focused commits.`);
+    return true;
+    
+  } catch (error) {
+    console.log(`❌ Split failed: ${error.message}`);
+    
+    // Rollback: reset to before split and restore original staging
+    if (commitHashes.length > 0) {
+      const rollbackTo = commitHashes.length > 0 
+        ? `HEAD~${commitHashes.length}` 
+        : 'HEAD';
+      
+      console.log(`🔄 Rolling back ${commitHashes.length} commits...`);
+      await executeGitCommand(`git reset --soft ${rollbackTo}`);
+    }
+    
+    // Restore original staging
+    await restoreStagingState(originalStaging);
+    console.log('✅ Original staging state restored');
+    
+    return false;
+  }
+};
 ```
 
 ## Error Handling
 
+- **Split Failures**: Automatic rollback to original staging state if any commit fails
 - **Linting Failures**: Apply progressive auto-fixes, retry up to 2 times
 - **Git Hook Failures**: Attempt additional fixes, use `--no-verify` as last resort
 - **Version Conflicts**: Detect and resolve version inconsistencies
@@ -280,6 +732,7 @@ The pipeline includes intelligent auto-fixes for:
 
 Provides clear progress reporting:
 
+**Standard Single Commit:**
 ```
 🔄 DOH Pipeline: T035 Documentation Navigation
 ├── ✅ TODO.md updated (T035 → COMPLETED)
@@ -287,6 +740,49 @@ Provides clear progress reporting:
 ├── 🔧 Auto-fixed 3 markdown issues
 ├── ✅ All files linted successfully
 └── ✅ Committed: docs: Complete T035 documentation navigation
+```
+
+**Split Mode Output:**
+```
+🔍 Semantic Commit Split Analysis
+├── 📊 15 files staged across 4 categories
+├── 🎯 Epic/TODO priority: 3 files (todo/T064.md, todo/NEXT.md)
+├── 🔧 DOH system files: 2 files (.claude/commands/doh-sys/commit.md)
+├── 📖 Documentation files: 1 file (.claude/doh/inclaude.md)
+└── ⚙️  Configuration files: 1 file (package.json)
+
+🚀 Executing Split Sequence:
+├── ✅ Commit 1/3: feat: Complete T064 commit splitting and update roadmap
+│   └── Files: todo/T064.md, todo/NEXT.md (3 files)
+├── ✅ Commit 2/3: feat: Enhance DOH commit pipeline with semantic splitting  
+│   └── Files: .claude/commands/doh-sys/commit.md (2 files)
+└── ✅ Commit 3/3: docs: Update DOH documentation with split functionality
+    └── Files: .claude/doh/inclaude.md (1 file)
+
+🎉 Split complete! Created 3 focused commits in 2.4s
+```
+
+**Interactive Split Output:**
+```
+🔍 Proposed Split: 3 commits from 7 staged files
+
+Commit 1/3: "feat: Complete T064 commit splitting enhancement"
+Files: todo/T064.md, todo/NEXT.md
+Execute this commit? [Y/n/edit/skip] > Y
+✅ Commit 1 complete: a1b2c3d
+
+Commit 2/3: "feat: Enhance /doh-sys:commit with --split functionality" 
+Files: .claude/commands/doh-sys/commit.md
+Execute this commit? [Y/n/edit/skip] > edit
+Enter commit message: feat: Add intelligent semantic commit splitting to pipeline
+✅ Commit 2 complete (edited): d4e5f6g
+
+Commit 3/3: "docs: Update command documentation"
+Files: .claude/doh/inclaude.md
+Execute this commit? [Y/n/edit/skip] > Y  
+✅ Commit 3 complete: h7i8j9k
+
+🎉 Interactive split complete! 3 commits created successfully.
 ```
 
 ## Priority System
@@ -365,8 +861,24 @@ improving through intelligent pattern recognition and optimization.
 
 When this command is executed by Claude:
 
-1. **Parameter Processing**: Parse task description and flags (`--no-version-bump`, `--no-lint`, `--dry-run`, `--amend`, `--force`)
-2. **Amend Mode Detection**: If `--amend` flag detected:
+1. **Parameter Processing**: Parse task description and flags (`--no-version-bump`, `--no-lint`, `--dry-run`, `--amend`, `--force`, `--split`, `--interactive`, `--staged-focused`)
+2. **Split Mode Detection**: If `--split` flag detected:
+   - **Semantic Analysis**: Analyze staged files and categorize by logical grouping
+     - Epic/TODO files: `todo/*.md`, `NEXT.md` (highest priority)
+     - DOH system files: `.claude/doh/*`, `.claude/commands/*`
+     - Documentation files: `README.md`, `WORKFLOW.md`, `docs/*`
+     - Implementation files: `src/*`, `lib/*`, application code
+     - Configuration files: `package.json`, configs, tests
+   - **Content Analysis**: Scan file changes for commit message context
+     - Detect TODO completions and task IDs
+     - Identify feature implementations and improvements
+     - Analyze documentation focus areas
+   - **Commit Sequence Planning**: Create logical commit order with generated messages
+   - **Preview Mode**: If `--dry-run`, show planned sequence without execution
+   - **Interactive Mode**: If `--interactive`, prompt for confirmation on each commit
+   - **Execute Split**: Create multiple commits following priority order
+   - **Skip remaining steps**: Split mode handles its own pipeline
+3. **Amend Mode Detection**: If `--amend` flag detected (not compatible with `--split`):
    - Check for uncommitted changes in working directory
    - **CRITICAL SAFETY CHECK**: Abort with error if previous commit has been pushed to remote
      - **Override with `--force`**: Skip safety check (requires explicit confirmation)

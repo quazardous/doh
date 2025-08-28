@@ -9,13 +9,29 @@ version tracking without committing changes. Works with the new structured todo/
 /doh-sys:changelog [task-completion] [--no-version-bump] [--no-lint] [--dry-run]
 ```
 
-## Parameters
+## Parameters  
 
-- `task-completion`: (Optional) Task ID or description of completed work (e.g., "T035", "fix documentation")
+### Primary Input
+- `task-completion`: (Optional) Task ID or description of completed work
+  - **Examples**: `"T035"`, `"fix documentation"`, `"implement changelog pipeline"`
   - **If omitted**: Auto-generates description based on git changes and asks for confirmation
-- `--no-version-bump`: Skip automatic version tracking (version bump is default behavior with confirmation)
+  - **Smart detection**: Analyzes staging area and recent commits to suggest descriptions
+
+### Control Flags
+- `--dry-run`: Preview all changes without making any modifications
+  - **Safe**: Shows TODO updates, CHANGELOG entries, version changes, archive operations
+  - **Use when**: Want to verify changes before executing
+  - **Perfect for**: Testing and understanding what the command will do
+
+- `--no-version-bump`: Skip automatic version tracking
+  - **Default**: Version analysis with user confirmation before changes
+  - **Use when**: Minor documentation updates that don't warrant version increment  
+  - **Note**: Version analysis still runs to show impact, just skips the actual bump
+
 - `--no-lint`: Skip linting and auto-fixes on documentation files
-- `--dry-run`: Show what would be done without making changes
+  - **Default**: Intelligent prettier-first linting with auto-corrections
+  - **Use when**: Documentation is already properly formatted
+  - **Speeds up**: Process by 30-60 seconds, focuses on content updates only
 
 ## Auto-Description Generation
 

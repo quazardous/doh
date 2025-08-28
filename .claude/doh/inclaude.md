@@ -80,6 +80,21 @@ PRD → Epic → [Feature] → Task → Code
 /doh:dependency validate       # Check for circular dependencies
 ```
 
+### Task Intelligence
+```bash
+/doh:next [query]                    # AI-powered task recommendations
+/doh:next "what should I work on?"   # Natural language queries
+/doh:next --context=quick           # Filter by context (quick/docs/features/testing)
+/doh:next --cache-only              # Ultra-fast mode from memory
+```
+
+### Pipeline Automation
+```bash
+/doh:changelog          # Update CHANGELOG.md with completed DOH tasks
+/doh:lint              # Intelligent project linting with DOH validation
+/doh:commit [task_id]  # Complete commit pipeline with task linking
+```
+
 ### Autonomous Execution
 ```bash
 /doh:agent [task_id]  # Launch agent with isolated worktree + full context
@@ -170,6 +185,20 @@ git commit -m "[DOH #123] Description of change"
     "learnings": ["Database migration strategy"]
   }
 }
+```
+
+### Task Intelligence Memory
+**Location**: `.doh/memory/NEXT.md` - AI memory for intelligent task recommendations
+
+- **Smart Prioritization**: Analyzes task dependencies, epic phases, and team workload
+- **Natural Language Queries**: Pre-computed results for common queries
+- **Pattern Learning**: Adapts to project and team working patterns
+- **Performance Modes**: Standard analysis or ultra-fast memory-only responses
+
+```bash
+# Memory automatically maintained by /doh:next
+# Manual refresh when needed:
+/doh:next --refresh
 ```
 
 ## Workflow Types

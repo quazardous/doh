@@ -1,20 +1,25 @@
 # /doh:feature-tasks Command
 
 ## Description
+
 Analyze a feature and create/update tasks using the specialized DOH Decomposer Agent.
 
 ## Usage
+
 ```
 /doh:feature-tasks <feature_id>
 ```
 
 ## Parameters
+
 - `feature_id` (required): ID of the Feature to analyze and decompose into tasks
 
 ## Examples
+
 - `/doh:feature-tasks 12` - Analyze Feature #12 and create tasks
 
 ## Implementation
+
 When this command is executed:
 
 1. **Locate Feature**: Find feature file in `.claude/doh/epics/{epic}/{feature}/feature{id}.md`
@@ -25,6 +30,7 @@ When this command is executed:
 6. **Link Hierarchy**: Maintain feature-task relationships
 
 ## Agent Invocation
+
 ```
 Use the DOH Decomposer Agent to analyze Feature #{feature_id} and break it down into implementation tasks.
 
@@ -47,7 +53,9 @@ Tasks should be focused on completing this specific feature.
 ```
 
 ## Task Identification Criteria
+
 The agent analyzes for:
+
 - **Frontend Tasks**: UI components, user interactions, styling
 - **Backend Tasks**: APIs, business logic, data processing  
 - **Integration Tasks**: External services, system connections
@@ -57,7 +65,9 @@ The agent analyzes for:
 - **Documentation**: User guides, technical documentation
 
 ## Output Generation
+
 Tasks created within feature subfolder:
+
 ```
 .claude/doh/epics/notification-system/email-notifications/
 ├── feature12.md                        # Feature definition
@@ -69,7 +79,9 @@ Tasks created within feature subfolder:
 ```
 
 ## Task Specifications
+
 Each generated task includes:
+
 - Feature-specific acceptance criteria
 - Technical implementation details
 - Dependencies within the feature scope
@@ -78,6 +90,7 @@ Each generated task includes:
 - Code traceability for feature completion
 
 ## Integration
+
 - Links all tasks back to parent feature and epic
 - Maintains nested hierarchy integrity
 - Establishes task sequencing within feature scope

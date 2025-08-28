@@ -11,23 +11,51 @@ suggest the optimal next tasks with natural language interaction support.
 
 ## Parameters
 
-- `query`: (Optional) Natural language query about what to work on (e.g., "what can I do that's high impact", "show me
-  documentation tasks", "what's ready to start")
-- `--context=focus`: Filter by development context
-  - `docs` - Documentation and writing tasks
-  - `build` - Build system and architecture
-  - `testing` - Testing and QA tasks
-  - `features` - Core functionality development
-  - `quick` - Tasks that can be completed in <2 hours
-  - `blocked` - Show what's currently blocking other tasks
-- `--format=output`: Output format
-  - `brief` - Concise task list (default)
-  - `detailed` - Full analysis with reasoning
-  - `plan` - Step-by-step implementation plan
-- `--limit=N`: Maximum number of tasks to suggest (default: 3-5)
-- `--refresh`: Force cache refresh (ignore existing todo/NEXT.md)
-- `--cache-only`: Extreme speed mode - read directly from Claude's memory file without re-computation
-- `--no-cache`: Ignore memory file entirely - fresh analysis without reading or updating todo/NEXT.md
+### Primary Input
+- `query`: (Optional) Natural language query about what to work on
+  - **Examples**: `"what can I do that's high impact"`, `"show me documentation tasks"`, `"what's ready to start"`
+  - **Smart matching**: Understands intent and maps to appropriate filters
+  - **If omitted**: Shows top priority tasks based on current project state
+
+### Context Filtering  
+- `--context=focus`: Filter recommendations by development area
+  - `docs` - Documentation and writing tasks (README, WORKFLOW, TODO updates)
+  - `build` - Build system and architecture tasks
+  - `testing` - Testing, QA, and quality assurance tasks  
+  - `features` - Core functionality development and implementation
+  - `quick` - Tasks that can be completed in under 2 hours
+  - `blocked` - Show what's currently blocking other tasks (dependencies)
+  - **Smart detection**: Analyzes task tags and descriptions for automatic categorization
+
+### Output Control
+- `--format=output`: Control the level of detail in responses
+  - `brief` - Concise task list with key information (default)
+  - `detailed` - Full analysis with reasoning, dependencies, and impact
+  - `plan` - Step-by-step implementation plan for recommended tasks
+  - **Adaptive**: Format adjusts based on query complexity
+
+- `--limit=N`: Maximum number of tasks to suggest
+  - **Default**: 3-5 tasks (optimal for decision making)
+  - **Range**: 1-20 (automatically caps at available tasks)
+  - **Smart limiting**: Prioritizes most relevant tasks
+
+### Performance Modes  
+- `--cache-only`: Ultra-fast mode using smart memory
+  - **Speed**: Sub-100ms response time
+  - **Source**: Reads directly from todo/NEXT.md memory file
+  - **Use when**: Quick checks, rapid workflow, scripting integration
+  - **Note**: Results may be slightly outdated if tasks recently changed
+
+- `--refresh`: Force complete re-analysis
+  - **Ignores**: Existing todo/NEXT.md cache
+  - **Rebuilds**: Complete task analysis from current todo/ folder state
+  - **Use when**: Major task changes, memory corruption, or fresh perspective needed
+  - **Slower**: Takes 3-5 seconds but guarantees current accuracy
+
+- `--no-cache`: Pure analysis without memory
+  - **Clean slate**: Ignores memory file entirely
+  - **No updates**: Doesn't update todo/NEXT.md with results
+  - **Use when**: Testing, debugging, or when memory file is problematic
 
 ## Smart Memory System
 
@@ -83,7 +111,25 @@ Priority Score = Base Priority × Dependency Weight × Context Relevance × Impa
 - **Context Relevance**: 2.0 if matches user context/query, 1.0 baseline, 0.5 if mismatched
 - **Impact Factor**: 1.5 if blocks other tasks, 1.0 baseline, 2.0 if critical path item
 
-## Natural Language Query Examples
+## Usage Examples & Smart Auto-completion
+
+### 💡 Quick Start - Most Common Patterns
+
+```bash
+# 🚀 Most common: Get top recommendations
+/doh-sys:next
+# Analyzes current project state → shows 3-5 best tasks
+
+# 🎯 Context-specific filtering  
+/doh-sys:next --context=docs
+# Shows documentation tasks → README, WORKFLOW, TODO updates
+
+# ⚡ Ultra-fast mode from memory
+/doh-sys:next --cache-only
+# Sub-100ms response → uses smart memory cache
+```
+
+### 🗣️ Natural Language Query Examples
 
 ### Development Focus Queries
 
@@ -150,6 +196,121 @@ Priority Score = Base Priority × Dependency Weight × Context Relevance × Impa
 /doh-sys:next --no-cache "high impact tasks"
 /doh-sys:next --no-cache --context=testing --format=detailed
 # Pure analysis from current TODO files, ignores memory entirely
+```
+
+### 🔧 Smart Flag Combinations & Context Suggestions
+
+```bash
+# 📋 Context + Format combinations  
+/doh-sys:next --context=quick --format=plan
+# Quick tasks → with implementation plans → ready to execute
+
+/doh-sys:next --context=docs --limit=2
+# Documentation focus → only top 2 → avoid choice paralysis  
+
+/doh-sys:next --context=blocked --format=detailed
+# Show blockers → with full analysis → understand dependencies
+
+# ⚡ Performance optimization patterns
+/doh-sys:next --cache-only --context=features  
+# Fast feature recommendations → from memory → rapid workflow
+
+/doh-sys:next --refresh --format=detailed
+# Force fresh analysis → detailed reasoning → major project changes
+
+/doh-sys:next --no-cache --context=testing --limit=1
+# Pure analysis → testing focus → single recommendation → debugging mode
+```
+
+### 📊 Context-Aware Smart Suggestions
+
+**When Claude detects large TODO backlog:**
+```bash
+/doh-sys:next --context=quick --limit=3
+# 💡 Auto-suggested: Focus on quick wins to build momentum
+# Shows 3 tasks under 2 hours each
+```
+
+**When many documentation tasks pending:**
+```bash
+/doh-sys:next --context=docs --format=plan
+# 💡 Auto-suggested: Documentation sprint with implementation plans
+# Perfect for focused documentation sessions
+```
+
+**When project has complex dependencies:**
+```bash  
+/doh-sys:next --context=blocked --format=detailed
+# 💡 Auto-suggested: Understand what's blocking progress
+# Full dependency analysis and resolution strategies
+```
+
+**When memory might be stale:**
+```bash
+/doh-sys:next --refresh
+# 💡 Auto-suggested: After major task completions or status changes
+# Ensures recommendations reflect current reality
+```
+
+### 🔄 Common Workflow Integration Patterns
+
+**Morning Planning Session:**
+```bash
+# 1. Quick overview from memory
+/doh-sys:next --cache-only --limit=5
+
+# 2. Deep dive on top recommendation  
+/doh-sys:next --format=plan --limit=1
+# → Get implementation plan for chosen task
+```
+
+**Context Switching:**
+```bash
+# 1. Finished documentation work, want technical task
+/doh-sys:next "I just finished docs work, show me technical tasks"
+
+# 2. Blocked on current work, need alternatives
+/doh-sys:next --context=quick "what can I do while waiting?"
+```
+
+**Epic Completion Check:**
+```bash
+# 1. Check version-specific progress
+/doh-sys:next "version 1.4" --cache-only
+
+# 2. See what's blocking epic completion
+/doh-sys:next --context=blocked --format=detailed
+```
+
+### ⚡ Performance Mode Selection Guide
+
+| Scenario | Recommended Mode | Reason |
+|----------|------------------|--------|
+| Quick daily check | `--cache-only` | Sub-100ms response |
+| After completing tasks | `--refresh` | Ensure current accuracy |  
+| Debugging recommendations | `--no-cache` | Clean slate analysis |
+| Normal workflow | (default) | Balanced speed + accuracy |
+
+### 🎯 Smart Query Interpretation Examples
+
+Claude Code will intelligently map natural language to technical filters:
+
+```bash
+# Intent: "I want to be productive quickly"
+/doh-sys:next "quick wins" 
+# → Maps to: --context=quick --limit=3
+
+# Intent: "What's holding up the project?"  
+/doh-sys:next "what's blocking progress"
+# → Maps to: --context=blocked --format=detailed
+
+# Intent: "I want to work on core features"
+/doh-sys:next "show me feature development"  
+# → Maps to: --context=features --format=brief
+
+# Intent: "Need a detailed plan for next task"
+/doh-sys:next --format=plan --limit=1
+# → Provides step-by-step implementation guide
 ```
 
 ## Smart Response Formats
