@@ -1,4 +1,4 @@
-# /doh-sys:commit - DOH System Commit Pipeline
+# /dd:commit - DOH System Commit Pipeline
 
 ## 🚫 EXPLICIT PROHIBITION: External Tool Attribution
 
@@ -7,19 +7,29 @@
 - ❌ NO "Co-Authored-By: AI Assistant" or similar
 - ✅ All commits must appear as clean, professional development work
 
-Executes the complete DOH system commit pipeline by calling `/doh-sys:changelog` for documentation updates, then
+Executes the complete DOH system commit pipeline by calling `/dd:changelog` for documentation updates, then
 performing git operations with intelligent commit message generation.
 
 ## Description
 
-Fully automated DOH development workflow command that handles documentation updates, quality assurance, and git
-operations in a single pipeline. Implements intelligent commit message generation based on change analysis and TODO
+Complete DOH development workflow command that orchestrates documentation updates, quality assurance, and git
+operations in a sequential pipeline. Uses intelligent commit message generation based on change analysis and TODO
 completion detection.
+
+## Claude AI Execution Protocol
+
+**Primary Workflow Steps**:
+1. **Call `/dd:changelog`** with inherited parameters (`--no-lint`, `--lenient`, etc.)
+2. **Monitor changelog response** for success/failure signals and user decision requirements
+3. **IF changelog succeeds**: Continue to git operations with generated commit message
+4. **IF changelog blocked**: Present user options, AWAIT input, apply user choice
+5. **Execute git operations** using configured parameters (--no-verify based on linting results)
+6. **Report completion** with commit hash and summary
 
 ## Usage
 
 ```bash
-/doh-sys:commit [task-completion] [--no-version-bump] [--no-lint] [--lenient] [--dry-run] [--amend] [--force] [--split] [--interactive] [--staged-focused]
+/dd:commit [task-completion] [--no-version-bump] [--no-lint] [--lenient] [--dry-run] [--amend] [--force] [--split] [--interactive] [--staged-focused]
 ```
 
 ## Parameters
@@ -106,16 +116,16 @@ When called without a task description, the command:
 
 ```bash
 # Called without parameters - extracts from changelog pipeline
-/doh-sys:commit
+/dd:commit
 
 # Example extraction and suggestion:
 # Detected: T040 completed, version bump to 1.4.1, 3 files modified
-# Suggested: "feat: Complete T040 /doh-sys:changelog command implementation (v1.4.1)"
+# Suggested: "feat: Complete T040 /dd:changelog command implementation (v1.4.1)"
 # Confirm commit? [Y/n/edit]:
 
 # Called after specific changelog update
-/doh-sys:changelog "T039 - Lint command with auto-fix"
-/doh-sys:commit
+/dd:changelog "T039 - Lint command with auto-fix"
+/dd:commit
 
 # Extracts: "Complete T039 lint command with auto-fix capabilities"
 ```
@@ -133,15 +143,27 @@ This command provides the complete automation by composing existing commands:
 
 ### 1. Documentation Pipeline
 
-- **Calls `/doh-sys:changelog`**: Executes the full documentation update pipeline
+- **Calls `/dd:changelog`**: Executes the full documentation update pipeline with strict linting enforcement
+  - AI-powered linting pipeline (multi-layer fix system)
   - TODO management and CHANGELOG updates
   - Version tracking and metadata
-  - Quality assurance via `/doh-sys:lint` auto-fix
-- **Inherits all parameters**: `--no-version-bump`, `--no-lint`, `--dry-run` passed through
+  - Pattern learning and configuration optimization
+- **Parameter Inheritance Matrix**:
+
+| Input Flag | Action | Pass to /dd:changelog | Git Operation Effect |
+|-----------|--------|----------------------|---------------------|
+| --no-version-bump | ✅ Pass through | ✅ Skip version analysis | No version changes |
+| --no-lint | ✅ Pass through | ✅ Skip linting pipeline | Uses git --no-verify |
+| --lenient | ✅ Pass through | ✅ Enable linting bypass | Uses git --no-verify |
+| --dry-run | ✅ Pass through | ✅ Preview mode only | No git operations |
+| --amend | ❌ Handle locally | ❌ Not applicable | git commit --amend |
+| --force | ❌ Handle locally | ❌ Not applicable | git commit --force |
+| --split | ❌ Handle locally | ❌ Not applicable | Multiple git commits |
+- **Quality Gate**: Pipeline blocked in `/dd:changelog` if linting fails (strict mode)
 
 ### 2. Intelligent Git Operations
 
-- **Extract Commit Context**: Analyzes `/doh-sys:changelog` output to extract:
+- **Extract Commit Context**: Analyzes `/dd:changelog` output to extract:
   - Completed TODO IDs (e.g., "T040", "T039")
   - Version bump information (if `--version-bump` was used)
   - CHANGELOG entries added
@@ -182,7 +204,7 @@ The commit command intelligently extracts information from the documentation pip
 - **Impact assessment**: Determines scope and importance of changes
 - **Traceability preservation**: Maintains full audit trail
 
-**Architecture**: `/doh-sys:commit` = `/doh-sys:changelog` + Intelligent Git Operations
+**Architecture**: `/dd:commit` = `/dd:changelog` + Intelligent Git Operations
 
 ## Semantic Commit Splitting (--split)
 
@@ -247,7 +269,7 @@ Each split commit gets contextually generated messages:
 #### **Automatic Splitting**
 ```bash
 # Analyze staging and create semantic commit sequence
-/doh-sys:commit --split
+/dd:commit --split
 
 # Example output:
 🔍 Analysis: 12 files staged across 4 semantic categories
@@ -268,7 +290,7 @@ Execute this 3-commit sequence? [Y/n/preview]
 #### **Interactive Review**
 ```bash
 # Review and confirm each individual commit
-/doh-sys:commit --split --interactive
+/dd:commit --split --interactive
 
 # Example flow:
 Commit 1/3: "feat: Complete T059 AI Task Engine and update project roadmap"
@@ -296,7 +318,7 @@ Split sequence complete! Created 3 focused commits.
 #### **Preview Mode**
 ```bash
 # Show split plan without executing
-/doh-sys:commit --split --dry-run
+/dd:commit --split --dry-run
 
 # Shows complete analysis, file groupings, and proposed messages
 # No commits created - perfect for validation
@@ -332,7 +354,7 @@ The `--amend` flag modifies the behavior to update the previous commit instead o
 ### Amend Workflow
 
 1. **Change Detection**: Analyzes current working directory changes
-2. **Documentation Pipeline**: Runs `/doh-sys:changelog` to update documentation for new changes
+2. **Documentation Pipeline**: Runs `/dd:changelog` to update documentation for new changes
 3. **Message Generation**: Creates new commit message based on combined changes (previous + current)
 4. **Git Amend**: Uses `git commit --amend` to update the previous commit
 5. **Timestamp Preservation**: Maintains original commit timestamp unless `--reset-author` is needed
@@ -350,16 +372,16 @@ The `--amend` flag modifies the behavior to update the previous commit instead o
 
 ```bash
 # Initial commit
-/doh-sys:commit "T042 security analysis task"
+/dd:commit "T042 security analysis task"
 
 # Realized you missed updating a file
 echo "additional content" >> missed-file.md
-/doh-sys:commit --amend
+/dd:commit --amend
 # → Updates previous commit to include missed-file.md
 
 # Fix typo in previous commit's documentation
 vim TODO.md  # fix typo
-/doh-sys:commit --amend --no-lint
+/dd:commit --amend --no-lint
 # → Amends previous commit with typo fix
 ```
 
@@ -384,9 +406,9 @@ vim TODO.md  # fix typo
    Risk: Amending pushed commits breaks collaboration and git history
    
    Solutions:
-   1. Use regular commit: /doh-sys:commit (recommended)
+   1. Use regular commit: /dd:commit (recommended)
    2. Create fixup commit: git commit --fixup=HEAD~1
-   3. Force push WARNING: /doh-sys:commit --amend --force (dangerous!)
+   3. Force push WARNING: /dd:commit --amend --force (dangerous!)
 ```
 
 ### Amend Limitations
@@ -396,77 +418,171 @@ vim TODO.md  # fix typo
 - **History rewriting**: Changes commit hash, affecting git history
 - **Single-user workflow**: Best for solo development or feature branches
 
-## Strict Linting Enforcement (NEW)
+## Strict Linting Enforcement (NEW - Architectural Fix)
 
-The command now enforces professional documentation quality by default, blocking commits with linting errors.
+The command enforces professional documentation quality by default through the `/dd:changelog` pipeline, with explicit decision tree logic when linting errors are found.
 
-### Default Behavior: Quality Gate
+## Claude AI Linting Decision Protocol
 
-```
-🔍 Running pre-commit checks...
-📝 Checking Markdown files...
-❌ Markdown linting failed: 3 errors found
-
-Critical Issues (must fix):
-- todo/T070.md:45 MD047 Files should end with a single newline
-- todo/T070.md:23 MD032 Lists should be surrounded by blank lines
-
-Minor Issues:
-- todo/T070.md:120 MD013 Line length [Expected: 120; Actual: 125]
-
-❌ COMMIT BLOCKED: Linting errors must be resolved before committing.
-
-Options:
-1. Fix issues automatically: make lint-fix
-2. Allow errors this time: /doh-sys:commit "message" --lenient
-3. Skip all checks: /doh-sys:commit "message" --no-lint
-
-Run 'make lint-manual' for detailed explanations.
-```
-
-### Interactive Bypass (When Blocked)
-
-When linting fails, the command prompts for user confirmation:
+**When `/dd:changelog` encounters linting failures**:
 
 ```
-❌ COMMIT BLOCKED: 5 linting errors found
-
-⚠️  BYPASS CONFIRMATION REQUIRED:
-Found 5 linting errors in staged files:
-- 2 critical issues (structure/syntax)  
-- 3 minor issues (formatting)
-
-This will create a commit with imperfect documentation quality.
-Bypass linting and commit anyway? [y/N]: 
+IF linting_pipeline_fails THEN:
+  1. DISPLAY error classification (critical vs minor issues)
+  2. DISPLAY pattern analysis and optimization suggestions  
+  3. PRESENT user decision options:
+     - [1] Continue in lenient mode → SET git_no_verify=true
+     - [2] Abort pipeline → HALT execution, display retry instructions
+     - [3] Show fix suggestions → DISPLAY detailed help, AWAIT new choice
+     - [4] Apply config optimizations → Run optimization, retry linting
+  4. AWAIT user input
+  5. EXECUTE chosen option:
+     - IF option 1: CONTINUE with --no-verify flag for git operations
+     - IF option 2: HALT command execution  
+     - IF option 3: DISPLAY suggestions, RETURN to step 3
+     - IF option 4: APPLY optimizations, RETRY linting pipeline
+  6. PROCEED with configured git operation parameters
 ```
 
-### Intelligent Error Classification
+### Fixed Architecture: Linting in Changelog Pipeline
 
-**Critical Errors** (Always require attention):
-- MD047: Missing final newline (breaks file parsing)
-- MD025: Multiple top-level headings (document structure)
-- MD031: Code blocks not surrounded by blank lines
-- MD002: First heading should be top-level
+```bash
+/dd:commit "T070 complete"
 
-**Minor Errors** (Formatting preferences):
-- MD013: Line length violations
-- MD012: Multiple consecutive blank lines
-- MD009: Trailing spaces
-- MD040: Missing code block language tags
+🔄 DOH Pipeline: T070 complete
+├── 📝 Running linting pipeline in /dd:changelog (STRICT mode)...
+│   ├── 🔧 Step 1: make lint-fix (fixed 8/12 issues)
+│   ├── 🤖 Step 2: AI analyzing remaining 4 issues...
+│   │   ├── ✅ Fixed MD047 (missing newlines)
+│   │   ├── ✅ Fixed MD032 (list spacing)
+│   │   ├── ⚠️  MD013 line 120 needs manual attention
+│   │   └── ⚠️  MD025 multiple H1s (structural issue)
+│   └── ❌ LINTING FAILED - 2 critical issues remain
+│
+├── 📊 Pattern tracking: Updated ./linting/feedback.md
+├── 💡 Auto-suggestion: Consider line-length increase to 130
+│
+└── ⚠️  PIPELINE BLOCKED - USER DECISION REQUIRED:
+    [1] Continue in lenient mode (uses --no-verify in git operations)
+    [2] Abort and fix manually
+    [3] Show detailed fix suggestions  
+    [4] Apply suggested config optimizations
 
-### Smart Bypass Options
+# User selects [1] - Continue in lenient mode
+├── ⚡ CONTINUING IN LENIENT MODE
+├── ✅ Documentation updates complete
+├── 📝 Intelligent commit message generated
+└── git commit --no-verify -m "T070 complete"  # Only uses --no-verify when bypassed
+```
+
+**Key Architectural Changes**:
+- **Linting moved to `/dd:changelog`**: Quality checks happen BEFORE any git operations
+- **Pipeline blocking**: Entire workflow halts when linting fails in strict mode
+- **Smart `--no-verify` usage**: Only applied when user explicitly chooses lenient/skip mode
+- **AI-powered fixes**: Multi-layer automated correction system
+- **Pattern learning**: Feedback stored in `./linting/feedback.md` for optimization
+
+### Bypass Control Integration
+
+The bypass control is now handled in the `/dd:changelog` pipeline with intelligent options:
+
+#### **Interactive Decision Flow** (When Linting Fails)
+
+```bash
+⚠️  PIPELINE BLOCKED - USER DECISION REQUIRED:
+
+📄 Problematic Files:
+├── todo/T070.md (3 issues remaining after AI fixes)
+│   ├── Line 45: MD047 Missing final newline (CRITICAL)
+│   ├── Line 120: MD013 Line too long [125/120] (minor)
+│   └── Line 89: MD032 List spacing (minor)
+└── docs/guide.md (1 issue)
+    └── Line 12: MD025 Multiple H1 headings (CRITICAL)
+
+🤖 AI Analysis: 2 critical issues require manual attention
+💡 Suggestions: Run 'make lint-manual' for detailed guidance
+
+DECISION OPTIONS:
+[1] Continue in lenient mode → Pipeline continues with --no-verify
+[2] Abort and fix manually → Halt pipeline, fix issues, retry
+[3] Show detailed fix suggestions → Display specific resolution help
+[4] Apply config optimizations → Update .markdownlint.json rules
+
+Choice [1/2/3/4]: 
+```
+
+#### **Smart Flag Integration**
 
 **Lenient Mode (`--lenient`)**:
-- Shows all linting errors as warnings
-- Proceeds without user confirmation
-- Still applies auto-fixes where possible
-- Use for legacy files or minor issues
+- **Pipeline behavior**: Shows errors as warnings, continues automatically
+- **Git operations**: Uses `git commit --no-verify` 
+- **No prompts**: Automatic bypass without user interaction
+- **Pattern tracking**: Still logs issues to `./linting/feedback.md`
+
+```bash
+/dd:commit "T070 complete" --lenient
+
+🔄 DOH Pipeline: T070 complete (LENIENT mode)
+├── 📝 Linting checks: 5 issues found - continuing with warnings
+├── ✅ Documentation updates complete
+├── 📊 Issues logged to ./linting/feedback.md
+└── git commit --no-verify -m "T070 complete"
+```
 
 **Complete Skip (`--no-lint`)**:
-- Bypasses all quality checks entirely
-- Emergency override for urgent commits
-- Not recommended for normal workflow
-- Provides clear warning about skipped checks
+- **Pipeline behavior**: Bypasses entire linting pipeline
+- **Git operations**: Uses `git commit --no-verify`
+- **Performance**: Fastest execution, no quality checks
+- **Clear warnings**: Explicit messaging about skipped validation
+
+```bash
+/dd:commit "T070 complete" --no-lint
+
+🔄 DOH Pipeline: T070 complete (NO-LINT mode)
+├── ⚡ SKIPPING ALL LINTING - No quality checks performed
+├── ✅ Documentation updates complete
+└── git commit --no-verify -m "T070 complete"
+```
+
+### Error Classification & AI Success Tracking
+
+The pipeline uses intelligent error categorization and tracks AI fix success rates:
+
+**Critical Errors** (Pipeline blocking):
+- **MD047**: Missing final newline → **AI Success: 100%**
+- **MD025**: Multiple H1 headings → **AI Success: 23%** (needs manual fix)
+- **MD002**: First heading not H1 → **AI Success: 45%**
+- **MD031**: Code block spacing → **AI Success: 90%**
+
+**Minor Errors** (Warning level in lenient mode):
+- **MD013**: Line length → **AI Success: 95%** (smart line breaking)
+- **MD032**: List spacing → **AI Success: 87%**
+- **MD009**: Trailing spaces → **AI Success: 100%**
+- **MD040**: Code block languages → **AI Success: 78%**
+
+### Feedback-Driven Optimization
+
+The system continuously learns and suggests improvements:
+
+```bash
+🔍 LINTING OPTIMIZATION AVAILABLE
+
+📊 Pattern Analysis (last 25 commits):
+├── MD013 (line length): 18 failures → 72% of all issues
+├── MD047 (missing newline): 8 failures → 32% of all issues  
+└── MD032 (list spacing): 5 failures → 20% of all issues
+
+💡 Recommended .markdownlint.json optimizations:
+{
+  "MD013": { "line_length": 130, "code_blocks": false },
+  "MD047": true,
+  "MD032": { "style": "consistent" }
+}
+
+📈 Impact: Would eliminate ~85% of recurring linting failures
+
+Apply these optimizations? [Y/n]
+```
 
 ### Quality Assurance Benefits
 
@@ -493,15 +609,15 @@ The pipeline includes intelligent auto-fixes for:
 
 ```bash
 # 🚀 Most common: Auto-extract from recent changes
-/doh-sys:commit
+/dd:commit
 # Smart analysis → suggests commit message → single focused commit
 
 # 📋 With specific task completion
-/doh-sys:commit "T039 - Lint command with auto-fix"
+/dd:commit "T039 - Lint command with auto-fix"
 # Uses task description → updates changelog → creates commit
 
 # 👁️ Preview before committing (always safe)
-/doh-sys:commit --dry-run
+/dd:commit --dry-run
 # Shows exactly what would happen → no changes made
 ```
 
@@ -509,28 +625,28 @@ The pipeline includes intelligent auto-fixes for:
 
 ```bash
 # 🎯 Focus mode: Large workspace with unrelated changes
-/doh-sys:commit --split --staged-focused
+/dd:commit --split --staged-focused
 # Only processes staged files + obvious semantic matches
 # Ignores unrelated unstaged/untracked files
 
 # 🔍 Interactive control: Review each commit
-/doh-sys:commit --split --interactive --staged-focused
+/dd:commit --split --interactive --staged-focused
 # Split sequence → review each → edit messages → full control
 
 # ⚡ Speed mode: Skip slow operations
-/doh-sys:commit "T041 cleanup" --no-lint --no-version-bump
+/dd:commit "T041 cleanup" --no-lint --no-version-bump
 # Fastest commit → skips linting & version analysis → immediate commit
 
 # 🎯 Quality mode: Allow minor linting issues
-/doh-sys:commit "T041 cleanup" --lenient
+/dd:commit "T041 cleanup" --lenient
 # Shows linting warnings → proceeds without confirmation → maintains quality awareness
 
 # 🛠️ Amendment with safety
-/doh-sys:commit --amend --lenient
+/dd:commit --amend --lenient
 # Add to previous commit → allow minor linting issues → safe for amendments
 
 # 🧪 Testing mode: See everything without doing anything
-/doh-sys:commit --split --dry-run
+/dd:commit --split --dry-run
 # Shows split plan → no commits created → perfect for testing
 ```
 
@@ -538,35 +654,35 @@ The pipeline includes intelligent auto-fixes for:
 
 **When you have many files staged:**
 ```bash
-/doh-sys:commit --split
+/dd:commit --split
 # 💡 Suggested by Claude when 5+ files staged
 # Algorithm splits into semantic groups automatically
 ```
 
 **When working directory is messy:**  
 ```bash
-/doh-sys:commit --split --staged-focused
+/dd:commit --split --staged-focused
 # 💡 Suggested when many unrelated unstaged files present
 # Focuses only on intentionally staged work
 ```
 
 **When you want control over commits:**
 ```bash
-/doh-sys:commit --split --interactive
+/dd:commit --split --interactive
 # 💡 Suggested for complex changes requiring review
 # Full control over each commit in sequence
 ```
 
 **When making quick fixes:**
 ```bash
-/doh-sys:commit "fix typo" --no-lint --no-version-bump
+/dd:commit "fix typo" --no-lint --no-version-bump
 # 💡 Suggested for minor changes
 # Skip time-consuming operations
 ```
 
 **When unsure about changes:**
 ```bash
-/doh-sys:commit --dry-run
+/dd:commit --dry-run
 # 💡 Always safe - shows what would happen
 # No actual changes made to git history
 ```
@@ -576,11 +692,11 @@ The pipeline includes intelligent auto-fixes for:
 **Epic Task Completion:**
 ```bash
 # 1. Complete epic work with splitting
-/doh-sys:commit --split --interactive "T054 complete"
+/dd:commit --split --interactive "T054 complete"
 # → Epic updates first → System changes → Documentation → Implementation
 
 # 2. Quick documentation fix
-/doh-sys:commit "fix documentation" --no-version-bump --no-lint
+/dd:commit "fix documentation" --no-version-bump --no-lint
 # → Skip version bump for docs-only changes
 ```
 
@@ -590,7 +706,7 @@ The pipeline includes intelligent auto-fixes for:
 git add todo/T065.md .claude/commands/doh-sys/commit.md
 
 # 2. Split with focus on staged files
-/doh-sys:commit --split --staged-focused
+/dd:commit --split --staged-focused
 # → Process staged files + auto-detect related changes
 # → Ignore unrelated workspace modifications
 ```
@@ -598,13 +714,13 @@ git add todo/T065.md .claude/commands/doh-sys/commit.md
 **Amendment and Cleanup:**
 ```bash
 # 1. Realize you forgot something in previous commit
-/doh-sys:commit --amend --no-version-bump
+/dd:commit --amend --no-version-bump
 # → Add changes to previous commit without version bump
 
 # 2. Major changes require careful review
-/doh-sys:commit --split --interactive --dry-run
+/dd:commit --split --interactive --dry-run
 # → First: preview the split plan
-/doh-sys:commit --split --interactive  
+/dd:commit --split --interactive  
 # → Then: execute with full control
 ```
 
@@ -622,24 +738,24 @@ git add todo/T065.md .claude/commands/doh-sys/commit.md
 
 ```bash
 # ❌ These combinations are detected and prevented:
-/doh-sys:commit --amend --split
+/dd:commit --amend --split
 # Error: Cannot amend with splitting (creates multiple commits)
 
-/doh-sys:commit --interactive
+/dd:commit --interactive
 # Error: --interactive requires --split flag
 
-/doh-sys:commit --staged-focused  
+/dd:commit --staged-focused  
 # Error: --staged-focused requires --split flag
 ```
 # → Shows proposed commit sequence and file groupings
 # → Perfect for validation before committing
 
 # Split with other options
-/doh-sys:commit "T064 implementation" --split --no-lint
+/dd:commit "T064 implementation" --split --no-lint
 # → Split commits with specific task context, skip linting
 
 # Staged-focused splitting (ignore unrelated unstaged files)
-/doh-sys:commit --split --staged-focused
+/dd:commit --split --staged-focused
 # → Split staged files + obvious semantic matches
 # → Don't prompt about unrelated unstaged files
 # → Perfect for partial commits when working directory has unrelated changes
@@ -860,7 +976,7 @@ Files: todo/T064.md, todo/NEXT.md
 Execute this commit? [Y/n/edit/skip] > Y
 ✅ Commit 1 complete: a1b2c3d
 
-Commit 2/3: "feat: Enhance /doh-sys:commit with --split functionality" 
+Commit 2/3: "feat: Enhance /dd:commit with --split functionality" 
 Files: .claude/commands/doh-sys/commit.md
 Execute this commit? [Y/n/edit/skip] > edit
 Enter commit message: feat: Add intelligent semantic commit splitting to pipeline
@@ -908,7 +1024,7 @@ This command continuously learns and improves through execution pattern analysis
    - Add VERSION.md change pattern recognition
    - Better semantic commit type classification
 
-   Update /doh-sys:commit with this optimization? [Y/n]
+   Update /dd:commit with this optimization? [Y/n]
 ```
 
 **Pipeline Execution Learning**:
@@ -938,7 +1054,7 @@ This command continuously learns and improves through execution pattern analysis
    - [Technical improvement 1]
    - [Technical improvement 2]
 
-   Update /doh-sys:commit pipeline with this optimization? [Y/n]
+   Update /dd:commit pipeline with this optimization? [Y/n]
 
    [If confirmed, logs to DOHSYSOPTIM.md with execution statistics and improvement metrics]
 ```
@@ -951,6 +1067,7 @@ improving through intelligent pattern recognition and optimization.
 When this command is executed by Claude:
 
 1. **Parameter Processing**: Parse task description and flags (`--no-version-bump`, `--no-lint`, `--lenient`, `--dry-run`, `--amend`, `--force`, `--split`, `--interactive`, `--staged-focused`)
+
 2. **Split Mode Detection**: If `--split` flag detected:
    - **Semantic Analysis**: Analyze staged files and categorize by logical grouping
      - Epic/TODO files: `todo/*.md`, `NEXT.md` (highest priority)
@@ -967,30 +1084,42 @@ When this command is executed by Claude:
    - **Interactive Mode**: If `--interactive`, prompt for confirmation on each commit
    - **Execute Split**: Create multiple commits following priority order
    - **Skip remaining steps**: Split mode handles its own pipeline
+
 3. **Amend Mode Detection**: If `--amend` flag detected (not compatible with `--split`):
    - Check for uncommitted changes in working directory
    - **CRITICAL SAFETY CHECK**: Abort with error if previous commit has been pushed to remote
      - **Override with `--force`**: Skip safety check (requires explicit confirmation)
    - Analyze both current changes and previous commit context
-3. **Change Analysis**: Use git commands to analyze current status and detect modification patterns
-4. **Documentation Pipeline**: Execute `/doh-sys:changelog` AI logic with extracted or provided task information
-5. **Version Bump Confirmation**: If version changes detected (unless `--no-version-bump`):
+
+4. **Change Analysis**: Use git commands to analyze current status and detect modification patterns
+
+5. **Documentation Pipeline with Strict Linting**: Execute `/dd:changelog` with enhanced quality enforcement
+   - **AI-Powered Linting Pipeline**: Multi-layer fix system (make lint-fix → AI fixes → validation → user decision)
+   - **Pipeline Blocking**: `/dd:changelog` halts execution when linting fails in strict mode
+   - **Pattern Learning**: Track failures in `./linting/feedback.md` for optimization
+   - **Flag Propagation**: Pass `--lenient`, `--no-lint` flags to control linting behavior
+   - **Quality Gate**: Only proceeds if linting passes or user explicitly bypasses
+
+6. **Version Bump Confirmation**: If version changes detected (unless `--no-version-bump`):
    - Analyze impact and determine appropriate version bump (major/minor/patch)
    - Present version change with rationale: "Version 1.4.0 → 1.4.1 (feature additions)? [Y/n]"
    - Wait for user confirmation before proceeding
-6. **Quality Assurance**: Strict linting enforcement with intelligent bypass control
-   - **Default**: Block commits with any linting errors, prompt for confirmation
-   - **Lenient mode (`--lenient`)**: Show errors as warnings, proceed without confirmation  
-   - **Skip mode (`--no-lint`)**: Bypass all quality checks entirely
-   - **Error Classification**: Distinguish critical (structural) vs minor (formatting) issues
-   - **Smart Auto-fixes**: Apply prettier-first corrections where possible
+
 7. **Commit Message Generation**: Create intelligent semantic commit message based on analysis
    - **Normal mode**: Generate new commit message
    - **Amend mode**: Update previous commit message while preserving structure
-8. **Git Operations**: Stage changes and execute git command
-   - **Normal mode**: `git commit` with generated message
-   - **Amend mode**: `git commit --amend` with updated message
-9. **Error Handling**: Progressive retry with intelligent linting bypass, user confirmation prompts
+
+8. **Git Operations with Smart --no-verify Control**: Stage changes and execute git command
+   - **Strict mode (default)**: `git commit` (no --no-verify flag, relies on clean pre-commit state)
+   - **Lenient mode**: `git commit --no-verify` (when user chose bypass in changelog pipeline)
+   - **Skip mode**: `git commit --no-verify` (when --no-lint flag used)
+   - **Amend mode**: Apply same logic to `git commit --amend`
+
+9. **Error Handling & Recovery**: Progressive retry with intelligent bypass options
+   - **Linting failures**: Handled in `/dd:changelog` pipeline with user decision flow
+   - **Git hook failures**: Rare due to pre-linting, but handled with retry logic
+   - **Version conflicts**: Detect and resolve inconsistencies
+   - **Rollback capability**: Restore original state if pipeline fails
 
 ## AI-Driven Execution
 
@@ -1003,6 +1132,6 @@ This command is executed entirely by Claude's AI logic:
 
 ## Integration with Other Commands
 
-- **Calls `/doh-sys:changelog`**: AI-driven documentation updates
+- **Calls `/dd:changelog`**: AI-driven documentation updates
 - **Calls `/doh-sys:lint`**: AI-driven quality assurance with prettier-first approach
 - **No bash scripts required**: Pure AI workflow execution

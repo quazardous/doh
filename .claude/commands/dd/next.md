@@ -1,4 +1,4 @@
-# /doh-sys:next - AI-Powered TODO Analysis & Task Recommendation Engine
+# /dd:next - AI-Powered TODO Analysis & Task Recommendation Engine
 
 Intelligent task prioritization system that analyzes TODO dependencies, developer context, and project priorities to
 suggest the optimal next tasks with natural language interaction support.
@@ -6,7 +6,7 @@ suggest the optimal next tasks with natural language interaction support.
 ## Usage
 
 ```bash
-/doh-sys:next [query] [--context=focus] [--format=output] [--limit=N] [--refresh] [--cache-only] [--no-cache]
+/dd:next [query] [--context=focus] [--project=type] [--internal] [--format=output] [--limit=N] [--refresh] [--cache-only] [--no-cache]
 ```
 
 ## Parameters
@@ -27,6 +27,19 @@ suggest the optimal next tasks with natural language interaction support.
   - `blocked` - Show what's currently blocking other tasks (dependencies)
   - **Smart detection**: Analyzes task tags and descriptions for automatic categorization
 
+### Project Filtering
+- `--project=type`: Filter tasks by project context for isolation
+  - `doh-dev` - Internal development support and tooling (dd-x.x.x versioning)
+  - `doh-runtime` - Public distribution and end-user features (doh-x.x.x versioning)
+  - `all` - Show both projects with clear separation (default behavior)
+  - **Dependency isolation**: Respects project boundaries, warns on cross-project dependencies
+
+- `--internal`: Convenient shorthand for `--project=doh-dev`
+  - **Focus**: DOH-DEV internal development tasks (dd-x.x.x versioning)
+  - **Default behavior**: Without this flag, focuses on DOH runtime user features (doh-x.x.x)
+  - **Equivalent to**: `--project=doh-dev` for streamlined workflow
+  - **Task indicators**: Version files `dd-*.md`, internal tooling, command enhancements
+
 ### Output Control
 - `--format=output`: Control the level of detail in responses
   - `brief` - Concise task list with key information (default)
@@ -39,31 +52,53 @@ suggest the optimal next tasks with natural language interaction support.
   - **Range**: 1-20 (automatically caps at available tasks)
   - **Smart limiting**: Prioritizes most relevant tasks
 
-### Performance Modes  
-- `--cache-only`: Ultra-fast mode using smart memory
-  - **Speed**: Sub-100ms response time
-  - **Source**: Reads directly from todo/NEXT.md memory file
-  - **Use when**: Quick checks, rapid workflow, scripting integration
-  - **Note**: Results may be slightly outdated if tasks recently changed
+### Performance Modes
+
+**Default Behavior - Hybrid Mode** (New):
+- **Automatic optimization**: Checks cache age and decides best approach
+- **Fresh cache (<1 hour)**: Uses cache-only mode for sub-100ms response
+- **Stale cache (>1 hour)**: Performs fresh analysis and updates cache
+- **Smart balance**: Speed when possible, accuracy when needed
+- **No flags required**: Optimal performance by default
+
+#### Explicit Performance Flags
+- `--cache-only`: Force ultra-fast mode using smart memory
+  - **Speed**: Sub-100ms response time guaranteed
+  - **Source**: Reads from todo/NEXT.md (default) or todo/NEXT-dd.md (with --internal)
+  - **Use when**: Speed critical, scripting, or rapid iterations
+  - **Note**: May use outdated data regardless of cache age
 
 - `--refresh`: Force complete re-analysis
-  - **Ignores**: Existing todo/NEXT.md cache
+  - **Ignores**: Existing cache files (NEXT.md or NEXT-dd.md based on context)
   - **Rebuilds**: Complete task analysis from current todo/ folder state
-  - **Use when**: Major task changes, memory corruption, or fresh perspective needed
+  - **Use when**: Major task changes, ensure absolute accuracy
   - **Slower**: Takes 3-5 seconds but guarantees current accuracy
 
 - `--no-cache`: Pure analysis without memory
-  - **Clean slate**: Ignores memory file entirely
-  - **No updates**: Doesn't update todo/NEXT.md with results
-  - **Use when**: Testing, debugging, or when memory file is problematic
+  - **Clean slate**: Ignores memory files entirely
+  - **No updates**: Doesn't update cache files with results
+  - **Use when**: Testing, debugging, or when memory files are problematic
 
 ## Smart Memory System
 
-The command uses `todo/NEXT.md` as intelligent memory with version awareness and pre-computed queries.
+The command uses dual cache files for project isolation and performance optimization.
+
+### Dual Cache Architecture
+
+- **todo/NEXT.md**: DOH Runtime cache (default) - doh-1.4.0 tasks, user features, distribution
+- **todo/NEXT-dd.md**: DOH-DEV Internal cache - dd-0.1.0 tasks, /dd:* commands, developer tools
+
+Cache selection is automatic based on context:
+- Default behavior uses `todo/NEXT.md` for runtime tasks
+- `--internal` flag uses `todo/NEXT-dd.md` for internal development tasks
+
+Cache file format:
+- **Line 1**: Unix timestamp (seconds since epoch) for cache generation time
+- **Rest of file**: Task recommendations and analysis in markdown format
 
 ### Version Goal Awareness
 
-The command reads `todo/version-*.md` files to understand:
+The command reads `todo/doh-*.md` and `todo/dd-*.md` version files to understand:
 - Current version philosophy and goals (Must Have/Should Have/Should NOT Have)
 - Version constraints that affect task selection  
 - Key strategic decisions that guide recommendations
@@ -73,12 +108,14 @@ Version awareness ensures task recommendations align with strategic goals and re
 
 ### Memory Architecture
 
-- **todo/NEXT.md**: Claude's memory file with pre-analyzed task data and smart query results
-- **Version awareness**: Tracks current version (1.4.0-dev) and version-specific tasks
-- **Pre-computed queries**: Common searches like "version 1.4", "quick wins", "high impact" pre-calculated
-- **Smart context matching**: Natural language queries instantly mapped to stored results
-- **Auto-update**: Memory refreshed on every standard call to maintain current state
-- **Extreme speed**: `--cache-only` reads memory directly with zero re-computation overhead
+- **Context isolation**: Separate caches prevent project cross-contamination
+- **Version awareness**: Each cache tracks its respective version (doh-1.4.0 vs dd-0.1.0)
+- **Project classification**: Pre-computed DOH-DEV vs DOH Runtime task categorization
+- **Pre-computed queries**: Common searches like "version 1.4", "quick wins", "high impact", "internal tasks" pre-calculated
+- **Smart context matching**: Natural language queries instantly mapped to stored results including `--internal` context
+- **Hybrid freshness check**: Auto-uses cache if <3600 seconds old, else refreshes (default behavior)
+- **Auto-update**: Memory refreshed when stale or with `--refresh` flag
+- **Extreme speed**: Sub-100ms responses when cache is fresh (<1 hour old)
 
 ## AI Analysis Engine
 
@@ -97,15 +134,22 @@ The command performs comprehensive intelligent analysis with memory optimization
 ### 2. Context-Aware Filtering
 
 - **Tag analysis**: Processes #doc, #build, #testing, #features tags
+- **Project classification**: Identifies DOH-DEV Internal vs DOH Runtime tasks
+  - **DOH-DEV Internal**: Version files `dd-*.md`, command enhancements, internal tooling
+  - **DOH Runtime**: Version files `doh-*.md`, user-facing features, public distribution
 - **Status tracking**: Differentiates IN PROGRESS, COMPLETED, and pending tasks
 - **Priority parsing**: Extracts High/Medium/Low priority indicators
 - **Complexity estimation**: Analyzes task descriptions for effort indicators
+- **Cross-project dependency detection**: Warns when tasks cross project boundaries
+- **Internal flag processing**: Automatically filters for DOH-DEV tasks when `--internal` used
 
 ### 3. Natural Language Processing
 
 - **Intent recognition**: Understands queries like "what should I work on next?"
 - **Context matching**: Maps natural language to technical categories
 - **Smart filtering**: Interprets phrases like "high impact", "quick wins", "documentation work"
+- **Project classification**: Recognizes "internal development", "runtime features", "command enhancements"
+- **Auto-flag mapping**: Automatically applies `--internal` for DOH-DEV context queries
 - **Conversational responses**: Provides explanations in natural language
 
 ### 4. Intelligent Prioritization Algorithm
@@ -128,17 +172,25 @@ Priority Score = Base Priority × Dependency Weight × Context Relevance × Impa
 ### 💡 Quick Start - Most Common Patterns
 
 ```bash
-# 🚀 Most common: Get top recommendations
-/doh-sys:next
-# Analyzes current project state → shows 3-5 best tasks
+# 🚀 Most common: Get top recommendations (NEW HYBRID MODE)
+/dd:next
+# Auto-optimized: Uses cache if <1hr old, else refreshes → Best speed/accuracy
 
 # 🎯 Context-specific filtering  
-/doh-sys:next --context=docs
-# Shows documentation tasks → README, WORKFLOW, TODO updates
+/dd:next --context=docs
+# Shows documentation tasks → README, WORKFLOW, TODO updates (hybrid mode)
 
-# ⚡ Ultra-fast mode from memory
-/doh-sys:next --cache-only
-# Sub-100ms response → uses smart memory cache
+# 🔧 Internal development focus
+/dd:next --internal
+# Shows DOH-DEV internal tasks → uses NEXT-dd.md cache (hybrid mode)
+
+# ⚡ Force ultra-fast mode
+/dd:next --cache-only
+# Sub-100ms guaranteed → ignores cache age, always uses memory
+
+# 🔄 Force fresh analysis
+/dd:next --refresh
+# 3-5 seconds → always performs full analysis regardless of cache age
 ```
 
 ### 🗣️ Natural Language Query Examples
@@ -146,39 +198,45 @@ Priority Score = Base Priority × Dependency Weight × Context Relevance × Impa
 ### Development Focus Queries
 
 ```bash
-/doh-sys:next "what can I work on while the build system is being designed?"
+/dd:next "what can I work on while the build system is being designed?"
 # AI Response: Analyzes T032 (build) as blocked, suggests parallel work on T027 (linting), T037 (cleanup)
 
-/doh-sys:next "show me some quick wins I can complete today"
+/dd:next "show me some quick wins I can complete today"
 # AI Response: Filters for tasks with simple deliverables and clear scope
 
-/doh-sys:next "what documentation needs attention?"
+/dd:next "what documentation needs attention?"
 # AI Response: Filters #doc tagged tasks, analyzes completion gaps in README/WORKFLOW/DEVELOPMENT docs
+
+/dd:next "internal tooling improvements"
+# AI Response: Auto-maps to --internal flag, shows DOH-DEV command enhancements and dev workflow tasks
+
+/dd:next "what runtime features are ready?"
+# AI Response: Focuses on doh-1.4.0 tasks, user-facing features, public distribution work
 ```
 
 ### Priority and Impact Queries
 
 ```bash
-/doh-sys:next "what's the most important thing to work on right now?"
+/dd:next "what's the most important thing to work on right now?"
 # AI Response: Calculates highest priority×impact score, explains reasoning
 
-/doh-sys:next "what's blocking the most other work?"
+/dd:next "what's blocking the most other work?"
 # AI Response: Identifies bottleneck tasks that are dependencies for multiple others
 
-/doh-sys:next "what can I do that will unblock the most tasks?"
+/dd:next "what can I do that will unblock the most tasks?"
 # AI Response: Prioritizes tasks that are blocking dependencies for others
 ```
 
 ### Contextual Development Queries
 
 ```bash
-/doh-sys:next "I want to work on testing"
+/dd:next "I want to work on testing"
 # AI Response: Shows T024, T019, T027 with testing focus, explains relationships
 
-/doh-sys:next "what build system work is ready?"
+/dd:next "what build system work is ready?"
 # AI Response: Analyzes T032, T003, T005 build-related tasks and their readiness
 
-/doh-sys:next "I have 2 hours, what should I tackle?"
+/dd:next "I have 2 hours, what should I tackle?"
 # AI Response: Suggests appropriately-scoped tasks based on complexity analysis
 ```
 
@@ -186,27 +244,28 @@ Priority Score = Base Priority × Dependency Weight × Context Relevance × Impa
 
 ```bash
 # Version-specific tasks (pre-computed in memory)
-/doh-sys:next "version 1.4"
+/dd:next "version 1.4"
 # Returns: Epic E001 tasks with phase breakdown instantly
 
 # Pre-computed quick wins
-/doh-sys:next "quick wins"  
+/dd:next "quick wins"  
 # Returns: T037 (1h), T056 (1.5h), T008 (2h) from memory
 
 # High-impact tasks (instant from memory)
-/doh-sys:next "high impact"
+/dd:next "high impact"
 # Returns: T032, T054 with unlock explanations
 
 # Extreme speed with memory-only mode
-/doh-sys:next --cache-only
-/doh-sys:next --cache-only --context=build
-/doh-sys:next --cache-only "what next after t054"
-# All return sub-100ms responses from smart memory
+/dd:next --cache-only                    # Uses todo/NEXT.md for Runtime tasks
+/dd:next --cache-only --context=build    # Uses todo/NEXT.md for Runtime build tasks
+/dd:next --internal --cache-only         # Uses todo/NEXT-dd.md for DOH-DEV tasks
+/dd:next --cache-only "what next after t054"  # Runtime context from NEXT.md
+# All return sub-100ms responses from appropriate cache
 
 # Fresh analysis without memory (testing/debugging)
-/doh-sys:next --no-cache
-/doh-sys:next --no-cache "high impact tasks"
-/doh-sys:next --no-cache --context=testing --format=detailed
+/dd:next --no-cache
+/dd:next --no-cache "high impact tasks"
+/dd:next --no-cache --context=testing --format=detailed
 # Pure analysis from current TODO files, ignores memory entirely
 ```
 
@@ -214,23 +273,33 @@ Priority Score = Base Priority × Dependency Weight × Context Relevance × Impa
 
 ```bash
 # 📋 Context + Format combinations  
-/doh-sys:next --context=quick --format=plan
+/dd:next --context=quick --format=plan
 # Quick tasks → with implementation plans → ready to execute
 
-/doh-sys:next --context=docs --limit=2
+/dd:next --context=docs --limit=2
 # Documentation focus → only top 2 → avoid choice paralysis  
 
-/doh-sys:next --context=blocked --format=detailed
+/dd:next --context=blocked --format=detailed
 # Show blockers → with full analysis → understand dependencies
 
+# 🔧 Internal development combinations
+/dd:next --internal --context=testing --format=detailed
+# DOH-DEV internal testing tools → detailed analysis → development focus
+
+/dd:next --internal --cache-only
+# Fast internal task recommendations → from memory → dev workflow
+
+/dd:next --internal "quick wins"
+# DOH-DEV quick tasks → command enhancements, workflow improvements
+
 # ⚡ Performance optimization patterns
-/doh-sys:next --cache-only --context=features  
+/dd:next --cache-only --context=features  
 # Fast feature recommendations → from memory → rapid workflow
 
-/doh-sys:next --refresh --format=detailed
+/dd:next --refresh --format=detailed
 # Force fresh analysis → detailed reasoning → major project changes
 
-/doh-sys:next --no-cache --context=testing --limit=1
+/dd:next --no-cache --context=testing --limit=1
 # Pure analysis → testing focus → single recommendation → debugging mode
 ```
 
@@ -238,28 +307,28 @@ Priority Score = Base Priority × Dependency Weight × Context Relevance × Impa
 
 **When Claude detects large TODO backlog:**
 ```bash
-/doh-sys:next --context=quick --limit=3
+/dd:next --context=quick --limit=3
 # 💡 Auto-suggested: Focus on quick wins to build momentum
 # Shows 3 tasks under 2 hours each
 ```
 
 **When many documentation tasks pending:**
 ```bash
-/doh-sys:next --context=docs --format=plan
+/dd:next --context=docs --format=plan
 # 💡 Auto-suggested: Documentation sprint with implementation plans
 # Perfect for focused documentation sessions
 ```
 
 **When project has complex dependencies:**
 ```bash  
-/doh-sys:next --context=blocked --format=detailed
+/dd:next --context=blocked --format=detailed
 # 💡 Auto-suggested: Understand what's blocking progress
 # Full dependency analysis and resolution strategies
 ```
 
 **When memory might be stale:**
 ```bash
-/doh-sys:next --refresh
+/dd:next --refresh
 # 💡 Auto-suggested: After major task completions or status changes
 # Ensures recommendations reflect current reality
 ```
@@ -269,39 +338,40 @@ Priority Score = Base Priority × Dependency Weight × Context Relevance × Impa
 **Morning Planning Session:**
 ```bash
 # 1. Quick overview from memory
-/doh-sys:next --cache-only --limit=5
+/dd:next --cache-only --limit=5
 
 # 2. Deep dive on top recommendation  
-/doh-sys:next --format=plan --limit=1
+/dd:next --format=plan --limit=1
 # → Get implementation plan for chosen task
 ```
 
 **Context Switching:**
 ```bash
 # 1. Finished documentation work, want technical task
-/doh-sys:next "I just finished docs work, show me technical tasks"
+/dd:next "I just finished docs work, show me technical tasks"
 
 # 2. Blocked on current work, need alternatives
-/doh-sys:next --context=quick "what can I do while waiting?"
+/dd:next --context=quick "what can I do while waiting?"
 ```
 
 **Epic Completion Check:**
 ```bash
 # 1. Check version-specific progress
-/doh-sys:next "version 1.4" --cache-only
+/dd:next "version 1.4" --cache-only
 
 # 2. See what's blocking epic completion
-/doh-sys:next --context=blocked --format=detailed
+/dd:next --context=blocked --format=detailed
 ```
 
 ### ⚡ Performance Mode Selection Guide
 
 | Scenario | Recommended Mode | Reason |
 |----------|------------------|--------|
-| Quick daily check | `--cache-only` | Sub-100ms response |
-| After completing tasks | `--refresh` | Ensure current accuracy |  
-| Debugging recommendations | `--no-cache` | Clean slate analysis |
-| Normal workflow | (default) | Balanced speed + accuracy |
+| Normal workflow | (default hybrid) | Auto-optimizes: fast if cache fresh, accurate if stale |
+| Rapid iterations | `--cache-only` | Force sub-100ms response regardless of cache age |
+| After major changes | `--refresh` | Force fresh analysis to capture all updates |  
+| Debugging/testing | `--no-cache` | Clean slate analysis without cache interference |
+| Scripting/automation | `--cache-only` | Predictable fast response for scripts |
 
 ### 🎯 Smart Query Interpretation Examples
 
@@ -309,19 +379,31 @@ Claude Code will intelligently map natural language to technical filters:
 
 ```bash
 # Intent: "I want to be productive quickly"
-/doh-sys:next "quick wins" 
+/dd:next "quick wins" 
 # → Maps to: --context=quick --limit=3
 
 # Intent: "What's holding up the project?"  
-/doh-sys:next "what's blocking progress"
+/dd:next "what's blocking progress"
 # → Maps to: --context=blocked --format=detailed
 
 # Intent: "I want to work on core features"
-/doh-sys:next "show me feature development"  
+/dd:next "show me feature development"  
 # → Maps to: --context=features --format=brief
 
+# Intent: "I want to work on internal tooling"
+/dd:next "internal development" 
+# → Maps to: --internal --format=brief
+
+# Intent: "Show me DOH system improvements"
+/dd:next "command enhancements"
+# → Maps to: --internal --context=features
+
+# Intent: "What runtime work is ready?"
+/dd:next "runtime features"
+# → Maps to: --project=doh-runtime --format=brief
+
 # Intent: "Need a detailed plan for next task"
-/doh-sys:next --format=plan --limit=1
+/dd:next --format=plan --limit=1
 # → Provides step-by-step implementation guide
 ```
 
@@ -346,6 +428,27 @@ Claude Code will intelligently map natural language to technical filters:
    ├── ✅ Task completed successfully
    ├── ⏱️  Time taken: 45 minutes
    └── 🎯 Impact: Clean commit history, professional codebase presentation
+```
+
+### Internal Development Format (`--internal`)
+
+```
+🔧 DOH-DEV Internal Tasks (3 of 12 total)
+
+1. **T073** - Add --internal flag to /dd:next command (Medium Priority)
+   ├── 🟢 Ready to start (epic-less, standalone)
+   ├── ⏱️  Estimated: 1-2 hours
+   └── 🎯 Impact: DOH-DEV vs Runtime filtering in task recommendations
+
+2. **T072** - Rename /doh-dev Commands to /dd (COMPLETED)
+   ├── ✅ DOH-DEV system enhancement completed
+   ├── ⏱️  Time taken: 3 hours  
+   └── 🎯 Impact: Streamlined command interface for developers
+
+3. **dd-0.1.0** - DOH-DEV Internal System Enhancement
+   ├── 🟡 30% complete (6 of 20 features implemented)
+   ├── ⏱️  Next milestone: Testing framework integration
+   └── 🎯 Impact: Enhanced development workflow and tooling
 ```
 
 ### Detailed Format
@@ -457,12 +560,12 @@ Adapts suggestions based on inferred developer preferences:
 
 ## Integration Points
 
-### With Other doh-sys Commands
+### With Other doh-dev Commands
 
-- **Post-completion hook**: Automatically suggests next task after `/doh-sys:commit`
-- **Memory refresh**: `/doh-sys:commit` and `/doh-sys:changelog` auto-update todo/NEXT.md
-- **Dependency updates**: Integrates with `/doh-sys:changelog` to update dependencies
-- **Quality gates**: Considers `/doh-sys:lint` results in task readiness assessment
+- **Post-completion hook**: Automatically suggests next task after `/dd:commit`
+- **Memory refresh**: `/dd:commit` and `/dd:changelog` auto-update todo/NEXT.md
+- **Dependency updates**: Integrates with `/dd:changelog` to update dependencies
+- **Quality gates**: Considers `/dd:lint` results in task readiness assessment
 - **Smart updates**: Other commands can append memory updates instead of full re-computation
 
 ### With DOH System
@@ -476,7 +579,7 @@ Adapts suggestions based on inferred developer preferences:
 ### Getting Started
 
 ```
-User: /doh-sys:next
+User: /dd:next
 AI: 🎯 Based on current project state, I recommend T037 (cleanup old references).
     It's ready to start, high impact, and builds on your recent documentation work.
     Would you like details or alternatives?
@@ -492,12 +595,12 @@ AI: 📋 Alternative options:
 ### Context-Driven Selection
 
 ```
-User: /doh-sys:next "I want something technical after all this documentation work"
+User: /dd:next "I want something technical after all this documentation work"
 AI: 🔧 Perfect! Based on your recent doc focus, I recommend T027 (Markdown Linting System).
     Technical implementation with clear scope, builds testing infrastructure,
     and complements your documentation work. Ready to start with no blockers.
 
-User: /doh-sys:next --format=plan
+User: /dd:next --format=plan
 AI: [Provides detailed T027 implementation plan]
 ```
 
@@ -518,30 +621,36 @@ This command is executed entirely by Claude's AI logic with smart memory:
 
 ### Execution Modes
 
-#### Standard Mode (Default)
+#### Hybrid Mode (Default - NEW)
 
-1. **Read Previous Memory**: Load existing todo/NEXT.md if available for context
-2. **Analyze Current State**: Scan todo/ folder for any changes since last run
-3. **Incremental Update**: Update analysis based on changes detected
-4. **Generate Recommendations**: Create prioritized task suggestions
-5. **Update Memory**: Refresh todo/NEXT.md with current analysis and recommendations
-6. **Return Results**: Provide recommendations to user with fresh insights
+1. **Cache Selection**: Choose NEXT.md (default) or NEXT-dd.md (--internal flag)
+2. **Cache Age Check**: Read Unix timestamp from first line of cache file
+3. **Decision Point**:
+   - **Fresh cache (<1 hour from timestamp)**: Jump to step 7 (cache-only behavior)
+   - **Stale cache (>1 hour old)**: Continue to step 4 (full analysis)
+4. **Analyze Current State**: Scan todo/ folder for complete analysis
+5. **Project Filtering**: Apply DOH Runtime or DOH-DEV Internal context
+6. **Update Memory**: Refresh appropriate cache with current analysis (Unix timestamp on line 1)
+7. **Extract Recommendations**: Read from cache (fresh or just updated)
+8. **Return Results**: Provide recommendations with optimal speed/accuracy balance
 
 #### Memory-Only Mode (`--cache-only`)
 
-1. **Direct Read**: Load todo/NEXT.md memory file immediately
-2. **Extract Recommendations**: Parse top recommendations from stored memory
-3. **Format Output**: Apply requested format (brief/detailed/plan)
-4. **Instant Return**: Provide memory-based recommendations with zero re-computation
-5. **Skip Analysis**: No file scanning, no memory refresh, no analysis overhead
+1. **Cache Selection**: Choose NEXT.md (default) or NEXT-dd.md (--internal flag)
+2. **Direct Read**: Load appropriate cache file immediately
+3. **Extract Recommendations**: Parse top recommendations from stored memory
+4. **Format Output**: Apply requested format (brief/detailed/plan)
+5. **Instant Return**: Provide memory-based recommendations with zero re-computation
+6. **Skip Analysis**: No file scanning, no memory refresh, no analysis overhead
 
 #### No-Cache Mode (`--no-cache`)
 
-1. **Skip Memory**: Completely ignore todo/NEXT.md file (don't read or update)
+1. **Skip Memory**: Completely ignore both cache files (don't read or update)
 2. **Fresh Analysis**: Scan todo/ folder and analyze all tasks from scratch
-3. **Pure Computation**: Generate recommendations using only current file state
-4. **No Memory Updates**: Don't update todo/NEXT.md with results
-5. **Clean State**: Useful for testing, debugging, or when memory is corrupted
+3. **Project Filtering**: Apply DOH Runtime or DOH-DEV Internal context
+4. **Pure Computation**: Generate recommendations using only current file state
+5. **No Memory Updates**: Don't update any cache files with results
+6. **Clean State**: Useful for testing, debugging, or when memory is corrupted
 
 ### Full Analysis (Memory Miss)
 
@@ -564,10 +673,10 @@ This command is executed entirely by Claude's AI logic with smart memory:
 
 | Mode | Response Time | Accuracy | Use Case |
 |------|---------------|----------|-----------|
-| Standard | 1-3 seconds | Current | Normal workflow, up-to-date recommendations |
-| Memory-Only | <100ms | Last update | Quick checks, rapid workflow, scripting |
-| Refresh | 3-5 seconds | Perfect | Major changes, memory reset, fresh start |
-| No-Cache | 2-4 seconds | Perfect | Testing, debugging, corrupted memory, clean analysis |
+| **Hybrid (Default)** | <100ms or 1-3s | Optimal | Auto-decides based on cache age (1hr threshold) |
+| Cache-Only | <100ms | Last update | Force speed, scripting, rapid iterations |
+| Refresh | 3-5 seconds | Perfect | Force fresh analysis, major changes |
+| No-Cache | 2-4 seconds | Perfect | Testing, debugging, clean analysis |
 
 ### Archive Management & Analysis Scope
 
@@ -584,7 +693,7 @@ This command is executed entirely by Claude's AI logic with smart memory:
 
 **Archive Rules**:
 ```bash
-# Keep in todo/ (analyzed by /doh-sys:next)
+# Keep in todo/ (analyzed by /dd:next)
 T064.md (COMPLETED) - Epic E001 still active → Stay in todo/
 T070.md (COMPLETED) - Epic E001 still active → Stay in todo/
 
@@ -629,7 +738,7 @@ This command continuously learns and improves through pattern analysis:
    - Scan descriptions for: "documentation", "README", "markdown", "cleanup"
    - Add inference: reference cleanup = documentation work
 
-   Update /doh-sys:next with this optimization? [Y/n]
+   Update /dd:next with this optimization? [Y/n]
 ```
 
 **Dependency Resolution Learning**:
@@ -642,7 +751,7 @@ This command continuously learns and improves through pattern analysis:
 
 - **Emergent patterns**: Any new inefficiency, miss, or improvement opportunity I observe
 - **Novel optimizations**: Creative solutions to problems I identify during execution
-- **Cross-command learning**: Insights from other `/doh-sys` commands that could enhance task recommendations
+- **Cross-command learning**: Insights from other `/doh-dev` commands that could enhance task recommendations
 - **User behavior adaptation**: Previously unknown preference patterns or work style insights
 
 ### Optimization Confirmation Workflow
@@ -665,7 +774,7 @@ This command continuously learns and improves through pattern analysis:
    - [Implementation detail 1]
    - [Implementation detail 2]
 
-   Update /doh-sys:next command with this optimization? [Y/n]
+   Update /dd:next command with this optimization? [Y/n]
 
    [If confirmed, logs to DOHSYSOPTIM.md with pattern details and impact metrics]
 ```

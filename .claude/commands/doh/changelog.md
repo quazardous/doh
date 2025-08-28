@@ -1,6 +1,6 @@
 # /doh:changelog - Project Documentation Pipeline
 
-Executes project documentation updates: DOH task management, CHANGELOG updates, and version tracking for any DOH-managed project. Adapts the sophisticated /doh-sys pipeline for runtime use with .doh project structure.
+Executes project documentation updates: DOH task management, CHANGELOG updates, and version tracking for any DOH-managed project. Adapts the sophisticated /doh-dev pipeline for runtime use with .doh project structure.
 
 ## Usage
 
@@ -18,7 +18,7 @@ Executes project documentation updates: DOH task management, CHANGELOG updates, 
 
 ## Auto-Description Generation
 
-When called without a task description, uses intelligent analysis similar to /doh-sys:commit:
+When called without a task description, uses intelligent analysis similar to /dd:commit:
 
 1. **Analyzes git changes** using `git diff --name-only` and `git status`
 2. **Categorizes changes** by file patterns and detects DOH task completions
@@ -51,7 +51,7 @@ This command executes the core DOH documentation pipeline for .doh projects:
 
 ### 2. Project Structure Adaptation
 
-**Development** (/doh-sys):
+**Development** (/doh-dev):
 
 - Source: todo/*.md files → TODO management
 - Target: TODO.md, CHANGELOG.md in project root
@@ -207,7 +207,7 @@ Uses progressive error handling:
 - **Missing information**: Prompts for required details
 - **Validation failures**: Reports issues with suggestions for DOH task format
 
-## Migration from /doh-sys
+## Migration from /doh-dev
 
 Key differences for runtime use:
 
@@ -217,4 +217,4 @@ Key differences for runtime use:
 - **Configuration**: .doh/config.ini instead of hardcoded DOH system settings
 - **ID Format**: DOH-### or custom prefix instead of T###
 
-This command brings enterprise-grade documentation pipeline capabilities to every DOH-managed project while maintaining the intelligent automation and AI-driven optimizations of the /doh-sys equivalent.
+This command brings enterprise-grade documentation pipeline capabilities to every DOH-managed project while maintaining the intelligent automation and AI-driven optimizations of the /doh-dev equivalent.

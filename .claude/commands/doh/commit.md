@@ -1,6 +1,6 @@
 # /doh:commit - Project Commit Pipeline
 
-Executes the complete DOH project commit pipeline by calling `/doh:changelog` for documentation updates, then performing git operations with intelligent commit message generation. Adapts the sophisticated /doh-sys pipeline for any DOH-managed project.
+Executes the complete DOH project commit pipeline by calling `/doh:changelog` for documentation updates, then performing git operations with intelligent commit message generation. Adapts the sophisticated /doh-dev pipeline for any DOH-managed project.
 
 ## Usage
 
@@ -184,9 +184,9 @@ Pipeline completed successfully!
 
 ## Project Adaptation Features
 
-### Compared to /doh-sys:commit
+### Compared to /dd:commit
 
-| Feature | /doh-sys | /doh (Runtime) |
+| Feature | /doh-dev | /doh (Runtime) |
 |---------|----------|----------------|
 | Task Source | todo/*.md | .doh/tasks/*.json |
 | Changelog | DOH CHANGELOG.md | Project CHANGELOG.md |
