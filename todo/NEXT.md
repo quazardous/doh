@@ -1,227 +1,163 @@
-# DOH Task Intelligence Memory 🧠
+1756403604
+# /dd:next Smart Memory Cache - DOH Runtime 🚀
 
-**Last Analysis**: 2025-08-28  
-**Version Context**: DOH 1.4.0 Development  
-**Epic Progress**: E074 Phase 3 (18% complete - T054✅ T058✅ T059✅ T064✅)  
-**Total Tasks**: 37 active, 13 ready to start, T062 & T061 highest priority
+**Last Updated**: 2025-08-28  
+**Cache Generation**: 1756403604 (Unix timestamp)
+**Project Focus**: DOH Runtime (doh-1.4.0)  
+**Task Scope**: User-facing features, production distribution  
+**Source Analysis**: 51 DOH Runtime tasks, 3 ready to start immediately
 
 ## 🎯 Top Recommendations
 
-### Recent Completions ✅
+### Ready to Work (Priority Order)
 
-#### **T060** - Version Tracking Fields (1-2h) ✅ COMPLETED (2025-08-28)
+#### 1. **T054** - DOH Skeleton Memory & Context System ✅ COMPLETED (2025-08-28)
+- **Impact**: Intelligent project companion with persistent context
+- **Delivered**: Advanced memory architecture for analysis persistence and project intelligence
+- **Result**: Foundation for context-aware DOH system achieved
 
-- **Impact**: Three-tier version system implemented in templates and docs
-- **Deliverable**: Enhanced roadmap planning capabilities for all tasks
+#### 2. **T032** - Design DOH Runtime Build Process (3-4h) 🔧
+- **Score**: 8.5/10 - Critical architecture foundation
+- **Status**: 🟢 READY (T031 architecture decision completed)
+- **Impact**: Enables stable inclaude.md generation and runtime distribution
+- **Why Now**: Foundation for T003 distribution and all downstream tasks
 
-#### **T058** - Port Pipeline to Runtime (3-4h) ✅ COMPLETED (2025-08-28)
+#### 3. **T024** - Comprehensive Testing Framework (6-8h) 🧪  
+- **Score**: 8.0/10 - Quality foundation for production
+- **Status**: 🟢 READY (T028 dev environment available)
+- **Impact**: Dual testing: CI/CD (free) + local Claude tests (controlled budget)
+- **Why**: Essential for reliable DOH production readiness
 
-- **Impact**: Enterprise-grade /doh:commit, /doh:changelog, /doh:lint for all projects
-- **Delivered**: Optional linting, smart integration, project-configurable pipeline
+#### 4. **T022** - DOH System Self-Hosting Project (8-10h) 🏠
+- **Score**: 7.5/10 - Critical for distribution and reference
+- **Status**: 🟢 READY (dependencies T013✅, T018✅ completed)
+- **Impact**: DOH manages its own development, enables proper distribution
+- **Why**: "Eat your own dog food" - validates DOH methodology
 
-#### **T059** - Port AI Task Engine (4-5h) ✅ COMPLETED (2025-08-28)
+## 📊 Task Classification
 
-- **Impact**: AI-powered /doh:next with natural language queries now available to all projects
-- **Delivered**: Complete task intelligence system with memory-based recommendations
+### DOH Runtime Tasks (User-Facing)
 
-#### **T064** - Enhance /doh-sys:commit with --split Flag (3-4h) ✅ COMPLETED (2025-08-28)
+#### **Epic E074** - DOH Version 1.4.0 Release (ACTIVE)
+- **Phase 1**: T053✅ (skeleton), T054✅ (memory), T055, T056  
+- **Phase 2**: T032 (build), T003 (distribution), T005 (installation)
+- **Phase 3**: T024 (testing), T019 (integration)
+- **Phase 4**: T022 (self-hosting)
 
-- **Impact**: Intelligent semantic commit splitting with epic/TODO priority strategy
-- **Delivered**: Enhanced pipeline with automatic multi-commit creation for better history
+#### **Epic E076** - Codebase Analysis Engine (PROPOSED)  
+- **Phase 1**: T049, T050, T051, T052 (all pending dependency resolution)
 
-### Immediate Priority (Next Session)
+#### **Epic E077** - Natural Language & Performance (PROPOSED)
+- **Phase 1**: T017✅ (analysis), E076 integration
+- **Phase 2**: T044, T045, T046 (pending early phase completion)
 
-#### 1. **T062** - Enhance /doh:init with Linting Intelligence (2-3h) 🔍
-
-- **Score**: 8.5/10 - User experience enhancement (boosted after T059 completion)
-- **Status**: 🟢 READY (T058✅ T059✅)
-- **Impact**: Seamless DOH project setup with intelligent linting detection
-- **Why Now**: Perfect follow-up to T058/T059, completes pipeline intelligence suite
-
-#### 2. **T061** - Natural Language Router for /doh Commands (3-4h) 🗣️
-
-- **Score**: 8.2/10 - Enhanced user experience
-- **Status**: 🟢 READY (T002✅ T059✅)
-- **Impact**: Conversational interface for all DOH commands
-- **Why**: Natural complement to T059's AI engine, unified UX
-
-#### 3. **T037** - Cleanup Old References (1h) 📝
-
-- **Score**: 7.0/10 - Quick documentation polish
-- **Status**: 🟢 READY (no blockers)
-- **Impact**: Professional documentation quality
-- **Why**: Quick win between major features
-
-## 📊 Task Dependency Graph
-
+### Ready to Start (3 tasks)
 ```text
-Legend: 🟢 Ready | 🟡 Waiting | 🔴 Blocked | ✅ Complete
-
-✅ T054 (Memory System)
-    └─→ ✅ T058 (Pipeline Port)
-            ├─→ ✅ T059 (AI Task Engine)
-            │       └─→ 🟢 T061 (NL Router)
-            └─→ 🟢 T062 (Init Linting Enhancement)
-
-🟢 T032 (Build Process)
-    ├─→ 🟢 T003 (Architecture)
-    │       └─→ 🔴 T063 (V2.0 Arch Refactor)
-    ├─→ 🟢 T005 (Installation)
-    └─→ 🔴 T022 (Self-Hosting)
-
-🟢 T002 (Core Commands)
-    └─→ 🟡 T061 (NL Router)
-
-🟢 T024 (Testing Framework)
-🟢 T019 (Integration Testing)
+T032 → Build process design (dependencies: architecture decisions✅)
+T024 → Testing framework (dependencies: T028 dev environment✅) 
+T022 → Self-hosting project (dependencies: T013✅, T018✅)
 ```
+
+### Recently Completed (Context)
+- **T054**: DOH Memory & Context System (COMPLETED 2025-08-28)
+- **T053**: DOH Skeleton Core Structure (COMPLETED 2025-08-27)
 
 ## 🔍 Pre-computed Queries
 
-### "high impact"
+### "high impact tasks"
+1. T032 - Runtime build foundation (unlocks distribution)
+2. T024 - Testing framework (enables production quality)
+3. T022 - Self-hosting (validates methodology, enables distribution)
 
-1. T058 - Pipeline Port (unlocks T059)
-2. T032 - Build Process (unlocks T003, T005, T022)
-3. T002 - Core Commands (unlocks T061)
+### "quick wins"  
+1. T032 - Build system design (3-4h, well-scoped)
+2. T024 - Testing framework (6-8h, clear architecture) 
+3. T003 - Distribution system (4-6h, depends on T032)
 
-### "quick wins"
+### "version 1.4.0"
+1. T032 - Build process (Phase 2, critical path)
+2. T024 - Testing framework (Phase 3, quality gate)
+3. T022 - Self-hosting (Phase 4, validation)
+4. T003 - Distribution (Phase 2, user access)
+5. T005 - Installation scripts (Phase 2, deployment)
 
-1. T060 - Version Tracking (1-2h)
-2. T037 - Documentation Cleanup (1h)
-3. T008 - CLAUDE.md Integration (2h)
+### "build system work"
+1. T032 - DOH Runtime Build Process (READY)
+2. T003 - Architecture & Distribution (blocked by T032)
+3. T005 - Installation/Distribution Scripts (blocked by T032, T003)
 
-### "version 1.4"
-
-**Epic E074 Tasks** (25-35h total):
-
-- Phase 1: T054✅ (missing T055, T056)
-- Phase 2: T032🟢 T003🟢 T005🟢
-- Phase 3: T058✅ T059✅ T024🟢 T019🟢 T061🟢 T062🟢
-- Phase 4: T022🔴
-
-### "documentation"
-
-1. T037 - Cleanup old references
-2. T060 - Version tracking templates
-3. T008 - CLAUDE.md integration
-
-### "testing"
-
-1. T024 - Testing Framework (4-5h)
-2. T019 - Integration Testing (3-4h)
-3. T056 - Validation (missing file?)
-
-### "build system"
-
-1. T032 - Runtime Build Process
-2. T003 - Architecture & Distribution
-3. T005 - Installation Scripts
-
-### "ready to start"
-
-13 tasks with no blockers: T062, T059, T037, T032, T002, T003, T005, T024, T019, T008, T006, T007
+### "testing work"
+1. T024 - Comprehensive Testing Framework (READY)
+2. T019 - DOH System Integration Testing (blocked by foundation work)
 
 ## 📈 Strategic Sequence
 
-### Week 1: Runtime Intelligence & Infrastructure
-
+### Immediate Session (4-6h available)
 ```text
-Day 1-2: T060 (2h) + T058 (4h) = Foundation
-Day 3-4: T059 (5h) = AI Engine
-Day 5: T037 (1h) + T008 (2h) = Documentation
+Priority 1: T032 (3-4h) - Build foundation unlocks everything
+Priority 2: Start T024 (2-3h initial) - Begin testing architecture
+
+Alternative: T022 (8-10h) - If longer session planned, self-hosting validation
 ```
 
-### Week 2: Build & Distribution
-
+### Week Sequence (doh-1.4.0 focus)
 ```text
-Day 1-2: T032 (4h) = Build Process
-Day 3-4: T003 (6h) = Architecture
-Day 5: T005 (4h) = Installation
+Week 1: T032 → T024 → T003 (Build → Test → Distribution)
+Week 2: T022 → T019 → T005 (Self-hosting → Integration → Installation)
+Result: Production-ready DOH 1.4.0 release
 ```
 
-### Week 3: Quality & Polish
-
-```text
-Day 1-2: T024 (5h) = Testing Framework
-Day 3-4: T019 (4h) = Integration Testing
-Day 5: T061 (4h) = NL Router
-```
-
-## 🚩 Critical Issues
-
-### Missing Files
-
-- **T055** - Referenced in NEXT.md but file doesn't exist
-- **T056** - Referenced in NEXT.md but file doesn't exist
-- **Action**: Clarify if completed/archived or need creation
-
-### Priority Misalignment
-
-- **T002** - Core Commands marked MEDIUM but blocks T061 HIGH
-- **Recommendation**: Elevate T002 to HIGH priority
+### Development Impact  
+- **T032**: Unlocks stable distribution pipeline for all teams
+- **T024**: Enables confident production deployment and maintenance
+- **T022**: Validates DOH methodology through self-application
+- **Combined**: Production-ready DOH system with proven architecture
 
 ## 💡 Context Patterns
 
-### Recent Completions
+### DOH Runtime Focus
+- All tasks support user-facing features and production distribution
+- No internal development tools (/dd:* commands excluded)
+- Focus on doh-1.4.0 release stability and adoption
 
-- T054 (Memory System) - Just completed today
-- T057 (TODO refactoring) - Recent system improvement
-- T053 (Skeleton enhancement) - Analysis capabilities
+### Epic E074 Momentum  
+- **Strong progress**: 40% completion with solid foundation (T053✅, T054✅)
+- **Critical path**: T032 blocks Phase 2 entirely (build, distribution)
+- **Quality gates**: T024 essential before production release
+- **Validation**: T022 proves DOH works through self-application
 
-### Development Momentum
-
-- Strong focus on runtime intelligence features
-- Pipeline automation maturity from /doh-sys
-- Moving from development to runtime capabilities
-
-### Team Preferences
-
-- Comprehensive analysis before coding
-- Structured task breakdowns
-- Clear dependency management
+### Version Context
+- **Current Version**: doh-1.4.0 (~60% complete)
+- **Must Have**: Runtime distribution, AI intelligence, professional stability  
+- **Should NOT Have**: External API dependencies, breaking changes
+- **Philosophy**: Transform DOH from internal tool to production runtime
 
 ## 🎯 Natural Language Mappings
 
 ### Intent → Task Mappings
-
-- "work on pipeline" → T058
-- "quick task" → T060, T037
-- "testing work" → T024, T019
-- "build system" → T032, T003, T005
-- "ai features" → T059, T061
-- "documentation" → T037, T060, T008
+- "build system" → T032
+- "testing framework" → T024  
+- "distribution" → T003, T005, T022
+- "foundation work" → T032, T024
+- "production ready" → T032, T024, T022, T003
+- "architecture" → T032, T003, T022
 
 ### Context Filters
-
-- `#features`: T058, T059, T061, T002
 - `#build`: T032, T003, T005
-- `#testing`: T024, T019
-- `#doc`: T037, T060, T008
-- `#runtime`: T058, T059, T061
-
-## 📊 Version Tracking
-
-### 1.4.0 Release (E074)
-
-- **Progress**: 10% (1/10 tasks)
-- **Critical Path**: T032 → T003 → T005 → T022
-- **High Value**: T058 → T059 → T061
-- **Timeline**: 25-35 hours total effort
-
-### Future Versions
-
-- **1.5.0**: E076 (Codebase Analysis)
-- **2.0.0**: E077 (Natural Language), T063 (Architectural Refactor)
+- `#testing`: T024, T019  
+- `#features`: T054✅, T055, T056
+- `#distribution`: T003, T005, T022
+- `#foundation`: T032, T024, T022
 
 ## 🔄 Auto-refresh Triggers
 
 Memory should be refreshed when:
-
-- Any task status changes
-- New tasks created (T062+)
-- Epic phase transitions
-- Weekly planning sessions
+- DOH Runtime task status changes
+- Epic E074 phase milestones reached
+- New runtime features proposed
+- Version 1.4.0 progress updates
+- Major architectural decisions made
 
 ---
 
-**Memory Version**: 1.0 | **DOH Version**: 1.4.0-dev | **Analysis Engine**: /doh-sys:next
+**Memory Version**: 2.0 | **DOH Runtime Version**: doh-1.4.0 | **Analysis Engine**: /dd:next --refresh
