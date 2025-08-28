@@ -6,7 +6,7 @@ suggest the optimal next tasks with natural language interaction support.
 ## Usage
 
 ```bash
-/doh-sys:next [query] [--context=focus] [--format=output] [--limit=N]
+/doh-sys:next [query] [--context=focus] [--format=output] [--limit=N] [--refresh] [--cache-only] [--no-cache]
 ```
 
 ## Parameters
@@ -25,17 +25,34 @@ suggest the optimal next tasks with natural language interaction support.
   - `detailed` - Full analysis with reasoning
   - `plan` - Step-by-step implementation plan
 - `--limit=N`: Maximum number of tasks to suggest (default: 3-5)
+- `--refresh`: Force cache refresh (ignore existing todo/NEXT.md)
+- `--cache-only`: Extreme speed mode - read directly from Claude's memory file without re-computation
+- `--no-cache`: Ignore memory file entirely - fresh analysis without reading or updating todo/NEXT.md
+
+## Smart Memory System
+
+The command uses `todo/NEXT.md` as intelligent memory with version awareness and pre-computed queries:
+
+### Memory Architecture
+
+- **todo/NEXT.md**: Claude's memory file with pre-analyzed task data and smart query results
+- **Version awareness**: Tracks current version (1.4.0-dev) and version-specific tasks
+- **Pre-computed queries**: Common searches like "version 1.4", "quick wins", "high impact" pre-calculated
+- **Smart context matching**: Natural language queries instantly mapped to stored results
+- **Auto-update**: Memory refreshed on every standard call to maintain current state
+- **Extreme speed**: `--cache-only` reads memory directly with zero re-computation overhead
 
 ## AI Analysis Engine
 
-The command performs comprehensive intelligent analysis:
+The command performs comprehensive intelligent analysis with memory optimization:
 
 ### 1. Dependency Mapping
 
-- **Parses TODO.md** for task dependencies and status
+- **Parses todo/ folder** for individual task files and status
 - **Identifies blockers**: Tasks marked as dependencies for others
 - **Maps ready tasks**: Tasks with all dependencies completed
 - **Calculates impact**: How many other tasks depend on this one
+- **Stores results**: Saves analysis in todo/NEXT.md for Claude's memory
 
 ### 2. Context-Aware Filtering
 
@@ -105,6 +122,34 @@ Priority Score = Base Priority × Dependency Weight × Context Relevance × Impa
 
 /doh-sys:next "I have 2 hours, what should I tackle?"
 # AI Response: Suggests appropriately-scoped tasks based on complexity analysis
+```
+
+### Smart Memory Queries
+
+```bash
+# Version-specific tasks (pre-computed in memory)
+/doh-sys:next "version 1.4"
+# Returns: Epic E001 tasks with phase breakdown instantly
+
+# Pre-computed quick wins
+/doh-sys:next "quick wins"  
+# Returns: T037 (1h), T056 (1.5h), T008 (2h) from memory
+
+# High-impact tasks (instant from memory)
+/doh-sys:next "high impact"
+# Returns: T032, T054 with unlock explanations
+
+# Extreme speed with memory-only mode
+/doh-sys:next --cache-only
+/doh-sys:next --cache-only --context=build
+/doh-sys:next --cache-only "what next after t054"
+# All return sub-100ms responses from smart memory
+
+# Fresh analysis without memory (testing/debugging)
+/doh-sys:next --no-cache
+/doh-sys:next --no-cache "high impact tasks"
+/doh-sys:next --no-cache --context=testing --format=detailed
+# Pure analysis from current TODO files, ignores memory entirely
 ```
 
 ## Smart Response Formats
@@ -242,8 +287,10 @@ Adapts suggestions based on inferred developer preferences:
 ### With Other doh-sys Commands
 
 - **Post-completion hook**: Automatically suggests next task after `/doh-sys:commit`
+- **Memory refresh**: `/doh-sys:commit` and `/doh-sys:changelog` auto-update todo/NEXT.md
 - **Dependency updates**: Integrates with `/doh-sys:changelog` to update dependencies
 - **Quality gates**: Considers `/doh-sys:lint` results in task readiness assessment
+- **Smart updates**: Other commands can append memory updates instead of full re-computation
 
 ### With DOH System
 
@@ -294,13 +341,60 @@ AI: [Auto-suggestion] 🎯 T037 complete! Next recommendation: T027 (linting sys
 
 ## Implementation Architecture
 
-This command is executed entirely by Claude's AI logic:
+This command is executed entirely by Claude's AI logic with smart memory:
 
-- **TODO.md parsing**: Claude analyzes markdown structure and extracts task metadata
+### Execution Modes
+
+#### Standard Mode (Default)
+
+1. **Read Previous Memory**: Load existing todo/NEXT.md if available for context
+2. **Analyze Current State**: Scan todo/ folder for any changes since last run
+3. **Incremental Update**: Update analysis based on changes detected
+4. **Generate Recommendations**: Create prioritized task suggestions
+5. **Update Memory**: Refresh todo/NEXT.md with current analysis and recommendations
+6. **Return Results**: Provide recommendations to user with fresh insights
+
+#### Memory-Only Mode (`--cache-only`)
+
+1. **Direct Read**: Load todo/NEXT.md memory file immediately
+2. **Extract Recommendations**: Parse top recommendations from stored memory
+3. **Format Output**: Apply requested format (brief/detailed/plan)
+4. **Instant Return**: Provide memory-based recommendations with zero re-computation
+5. **Skip Analysis**: No file scanning, no memory refresh, no analysis overhead
+
+#### No-Cache Mode (`--no-cache`)
+
+1. **Skip Memory**: Completely ignore todo/NEXT.md file (don't read or update)
+2. **Fresh Analysis**: Scan todo/ folder and analyze all tasks from scratch
+3. **Pure Computation**: Generate recommendations using only current file state
+4. **No Memory Updates**: Don't update todo/NEXT.md with results
+5. **Clean State**: Useful for testing, debugging, or when memory is corrupted
+
+### Full Analysis (Memory Miss)
+
+- **todo/ folder parsing**: Claude analyzes individual T*.md and E*.md files
 - **Dependency resolution**: Claude builds dependency graphs and identifies ready tasks
 - **Natural language processing**: Claude interprets user queries and provides conversational responses
 - **Priority calculation**: Claude applies weighting algorithms and contextual scoring
+- **Memory generation**: Claude creates todo/NEXT.md with comprehensive analysis for future reference
 - **Response generation**: Claude formats recommendations in requested style
+
+### Memory Benefits
+
+- **Contextual continuity**: Maintains task analysis history and patterns
+- **Faster computation**: Previous analysis provides baseline for incremental updates
+- **Progress tracking**: Historical view of task completion and emerging priorities
+- **Manual override**: `--refresh` flag forces complete re-analysis if needed
+- **Extreme speed**: `--cache-only` provides sub-100ms responses using stored memory
+
+### Performance Characteristics
+
+| Mode | Response Time | Accuracy | Use Case |
+|------|---------------|----------|-----------|
+| Standard | 1-3 seconds | Current | Normal workflow, up-to-date recommendations |
+| Memory-Only | <100ms | Last update | Quick checks, rapid workflow, scripting |
+| Refresh | 3-5 seconds | Perfect | Major changes, memory reset, fresh start |
+| No-Cache | 2-4 seconds | Perfect | Testing, debugging, corrupted memory, clean analysis |
 
 ## AI-Driven Features
 
