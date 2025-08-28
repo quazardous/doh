@@ -5,7 +5,7 @@
 
 ## 🚨 CRITICAL: Next Task ID
 
-**Next ID**: 085 (shared counter for TODOs and Epics)
+**Next ID**: 087 (shared counter for TODOs and Epics)
 
 **⚠️ MANDATORY**: Always use this Next ID for new tasks, then increment it after creation
 
