@@ -167,7 +167,7 @@ Level 4: Enterprise compliance + reporting
 🔍 Analyse du projet...
 📁 Structure détectée: Symfony + JavaScript (Webpack Encore)
 🌐 Langue détectée: Français (sur base des commentaires et commits)
-📡 Git remote détecté: github.com/user/mrtroove
+📡 Git remote détecté: github.com/user/myproject
 
 ❓ Configuration /doh:
   [1] Minimal - Mention /doh disponible  
@@ -179,7 +179,7 @@ Level 4: Enterprise compliance + reporting
 Niveau souhaité (1-5)? [3]: 
 
 ❓ Synchronisation GitHub?
-  → Detected: github.com/user/mrtroove
+  → Detected: github.com/user/myproject
   → Configurer sync bidirectionnel (y/N)? [N]: 
 
 ❓ Langue projet confirmée: Français 

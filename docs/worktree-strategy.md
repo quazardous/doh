@@ -10,7 +10,7 @@ Les worktrees Git nécessitent le contexte IA (`.claude/`) pour que l'assistant 
 
 ```text
 /home/david/Private/dev/projects/
-├── mrtroove/                      # Projet principal
+├── myproject/                      # Projet principal
 │   ├── .claude/                   # Config IA originale
 │   │   ├── doh/                   # Système DOH (specs)
 │   │   ├── commands/              # Commandes Claude
@@ -21,11 +21,11 @@ Les worktrees Git nécessitent le contexte IA (`.claude/`) pour que l'assistant 
 │       ├── tasks/                 # Tasks projet
 │       └── memory/                # Mémoire persistante
 │
-├── mrtroove-epic-auth/            # Worktree pour epic auth
+├── myproject-epic-auth/            # Worktree pour epic auth
 │   ├── .claude/                   # COPIE complète de .claude/
 │   └── .doh/                      # COPIE complète de .doh/ (permet divergence)
 │
-└── mrtroove-feature-login/        # Worktree pour feature
+└── myproject-feature-login/        # Worktree pour feature
     ├── .claude/                   # COPIE complète de .claude/
     └── .doh/                      # COPIE complète de .doh/ (permet divergence)
 ```
@@ -95,9 +95,9 @@ git merge epic/auth
 git mergetool .doh/project-index.json
 
 # Retour au projet principal
-cd ../mrtroove
+cd ../myproject
 git pull  # Récupérer les changements mergés
-git worktree remove ../mrtroove-epic-auth
+git worktree remove ../myproject-epic-auth
 ```
 
 ### 4. Cas Particuliers
@@ -109,22 +109,22 @@ Si des modifications de `.claude/` sont nécessaires dans un worktree :
 ```bash
 # Les changements restent locaux au worktree
 # Au merge, décider si propager au principal
-diff -r .claude/ ../mrtroove/.claude/
+diff -r .claude/ ../myproject/.claude/
 ```
 
 #### Multiple Worktrees Actifs
 
 ```text
-mrtroove/                 # Principal
+myproject/                 # Principal
 ├── .doh/                 # État DOH principal
 │
-├── mrtroove-epic-auth/   # Worktree 1
+├── myproject-epic-auth/   # Worktree 1
 │   └── .doh/            # Copie DOH (peut créer tasks spécifiques)
 │
-├── mrtroove-epic-ui/     # Worktree 2
+├── myproject-epic-ui/     # Worktree 2
 │   └── .doh/            # Copie DOH (peut créer son epic UI)
 │
-└── mrtroove-fix-bug/     # Worktree 3
+└── myproject-fix-bug/     # Worktree 3
     └── .doh/            # Copie DOH (ajoute task bug à Epic #0)
 ```
 
@@ -227,7 +227,7 @@ echo "Usage: ./scripts/create-doh-worktree.sh [epic|feature|task] [name]"
 ./scripts/create-doh-worktree.sh feature login-redesign
 
 # 2. Dans worktree, créer tasks DOH
-cd ../mrtroove-feature-login-redesign
+cd ../myproject-feature-login-redesign
 /doh:quick "refactorer formulaire login"
 /doh:quick "ajouter validation côté client"
 

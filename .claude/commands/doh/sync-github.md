@@ -217,7 +217,7 @@ GitHub Labels: ["bug", "frontend"]
 📊 DOH ↔ GitHub Sync Status
 
 🔄 Configuration:
-  Repository: github.com/mrtroove/project
+  Repository: github.com/myproject/project
   Last sync: 2024-08-27T14:30:00Z
   Token: ✅ Valid (expires 2024-12-31)
 
@@ -288,7 +288,7 @@ GITHUB_TOKEN=ghp_xxxxxxxxxxxx
 # Configuration automatique dans index.json
 {
   "metadata": {
-    "github_repo": "mrtroove/project",
+    "github_repo": "myproject/project",
     "github_api_base": "https://api.github.com",
     "sync_enabled": true,
     "auto_sync_interval": null,

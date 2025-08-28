@@ -16,7 +16,7 @@ When an agent is launched via `/doh:agent`, it receives a standardized context b
   "agent_session": {
     "id": "agent-{timestamp}-{task_id}",
     "created_at": "2024-08-27T10:00:00Z",
-    "worktree_path": "../mrtroove-worktree-task-websocket-handler",
+    "worktree_path": "../myproject-worktree-task-websocket-handler",
     "branch": "task/websocket-handler",
     "target": {
       "type": "task",
@@ -30,7 +30,7 @@ When an agent is launched via `/doh:agent`, it receives a standardized context b
     "project": {
       "name": "MyProject",
       "language": "fr",
-      "working_directory": "/home/david/Private/dev/projects/mrtroove"
+      "working_directory": "/home/david/Private/dev/projects/myproject"
     },
     "epic": {
       "id": "12",
@@ -104,7 +104,7 @@ When an agent is launched via `/doh:agent`, it receives a standardized context b
   "status": "active",
   "started_at": "2024-08-27T10:00:00Z",
   "target": { "type": "task", "id": "45" },
-  "worktree": "../mrtroove-worktree-task-websocket-handler",
+  "worktree": "../myproject-worktree-task-websocket-handler",
   "progress": {
     "phase": "implementation",
     "completed_subtasks": ["analysis", "design"],
