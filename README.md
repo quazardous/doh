@@ -51,9 +51,9 @@ Like Homer's "Doh!" - the answer was there all along, you just needed the right 
 ### 🤖 For Claude/AI Runtime
 
 - **[.claude/doh/inclaude.md](.claude/doh/inclaude.md)** - **RUNTIME REFERENCE** Essential /doh guide for Claude
-    - Primary document Claude uses during project work
-    - Optimized for fast loading and reference (2KB vs 15KB+)
-    - Referenced by `.claude/CLAUDE.md` in projects using /doh
+  - Primary document Claude uses during project work
+  - Optimized for fast loading and reference (2KB vs 15KB+)
+  - Referenced by `.claude/CLAUDE.md` in projects using /doh
 
 ### 👩‍💻 For Contributors (Development)
 

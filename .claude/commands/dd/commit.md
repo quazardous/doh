@@ -3,44 +3,46 @@
 ## 🚫 EXPLICIT PROHIBITION: External Tool Attribution
 
 **FORBIDDEN**: This command must NEVER add external tool attributions to commits:
+
 - ❌ NO "Generated with [Tool Name]" attributions
 - ❌ NO "Co-Authored-By: AI Assistant" or similar
 - ✅ All commits must appear as clean, professional development work
 
-Executes the complete DOH system commit pipeline by calling `/dd:changelog` for documentation updates, then
-performing git operations with intelligent commit message generation.
+Executes the complete DOH system commit pipeline by calling `/dd:changelog` for documentation updates, then performing
+git operations with intelligent commit message generation.
 
 ## Description
 
-Complete DOH development workflow command that orchestrates documentation updates, quality assurance, and git
-operations in a sequential pipeline. Uses intelligent commit message generation based on change analysis and TODO
-completion detection.
+Complete DOH development workflow command that orchestrates documentation updates, quality assurance, and git operations
+in a sequential pipeline. Uses intelligent commit message generation based on change analysis and TODO completion
+detection.
 
 ## Claude AI Execution Protocol (Enhanced T085 2-Pass Algorithm)
 
 **Primary Workflow Steps**:
+
 1. **Parse parameters and detect mode** - Analyze flags (--split, --staged, --staged-only, shortcuts)
 2. **Analyze staging area state** - Determine staged vs unstaged files (preserve developer intent)
 3. **IF --split mode detected**: Execute 2-pass iterative splitting workflow:
-   - **Pass 1 - Staged Files Processing**: 
-     * `while(stagedFiles.length > 0) { group → commit → repeat }`
-     * Smart extensions: Add related unstaged files to complete logical groups
-     * Respect original staging intention throughout
+   - **Pass 1 - Staged Files Processing**:
+     - `while(stagedFiles.length > 0) { group → commit → repeat }`
+     - Smart extensions: Add related unstaged files to complete logical groups
+     - Respect original staging intention throughout
    - **Pass 2 - Unstaged Files Processing** (unless --staged or --staged-only):
-     * `while(unstagedFiles.length > 0) { group → commit → repeat }`
-     * Semantic grouping: Epic/TODO → System → Docs → Implementation → Config
-     * Clean remaining modifications iteratively
+     - `while(unstagedFiles.length > 0) { group → commit → repeat }`
+     - Semantic grouping: Epic/TODO → System → Docs → Implementation → Config
+     - Clean remaining modifications iteratively
    - **Mode handling**:
-     * **DEFAULT**: Both Pass 1 + Pass 2 (complete processing)
-     * **--staged**: Pass 1 only (respect staging intent, leave unstaged)
-     * **--staged-only**: Pass 1 without extensions (conservative)
-   - **Interactive controls**: 
-     * **IF --interactive**: Present each commit for approval per pass
-     * **IF --dry-run**: Display 2-pass plan without executing
+     - **DEFAULT**: Both Pass 1 + Pass 2 (complete processing)
+     - **--staged**: Pass 1 only (respect staging intent, leave unstaged)
+     - **--staged-only**: Pass 1 without extensions (conservative)
+   - **Interactive controls**:
+     - **IF --interactive**: Present each commit for approval per pass
+     - **IF --dry-run**: Display 2-pass plan without executing
 4. **IF single commit mode**: Call `/dd:changelog` with inherited parameters
-6. **Execute git operations**: Create commits using configured parameters
-7. **Validate clean state**: Ensure working directory is clean (except for --staged-only mode)
-8. **Report completion**: Provide commit hashes, staging decisions, and working directory status
+5. **Execute git operations**: Create commits using configured parameters
+6. **Validate clean state**: Ensure working directory is clean (except for --staged-only mode)
+7. **Report completion**: Provide commit hashes, staging decisions, and working directory status
 
 ## Usage
 
@@ -51,24 +53,26 @@ completion detection.
 ## Parameters
 
 ### Primary Parameters
+
 - `task-completion`: (Optional) Task ID or description of completed work
   - **Examples**: `"T035"`, `"fix documentation"`, `"implement user auth"`
   - **If omitted**: Auto-generates commit label based on git changes and asks for confirmation
   - **Smart detection**: Analyzes file changes to suggest appropriate descriptions
 
 ### Control Flags
+
 - `--dry-run`: Preview what would be done without executing any changes
   - **Use when**: Want to verify changes before committing
   - **Safe**: No modifications to git history or files
   - **Output**: Shows planned commits, version changes, and documentation updates
 
-- `--no-version-bump`: Skip automatic version bumping 
+- `--no-version-bump`: Skip automatic version bumping
   - **Default**: Version bump enabled with user confirmation
   - **Use when**: Minor changes that don't warrant version increment
   - **Note**: Version analysis still runs, just skips the actual bump
 
+### Advanced Git Operations
 
-### Advanced Git Operations  
 - `--amend`: Amend the previous commit instead of creating a new one
   - **Use when**: Adding forgotten changes to recent commit
   - **⚠️ Warning**: Don't amend pushed commits (breaks collaboration)
@@ -80,23 +84,26 @@ completion detection.
   - **Bypasses**: All interactive confirmations and safety validations
 
 ### Semantic Splitting System (Enhanced with T085 2-Pass Algorithm)
+
 - `--split` or `-s`: Intelligently split changes using 2-pass iterative algorithm
   - **Algorithm**: Respects developer staging intent with iterative processing
   - **Pass 1**: Process staged files with smart extensions (developer intent first)
-  - **Pass 2**: Process remaining unstaged files iteratively  
+  - **Pass 2**: Process remaining unstaged files iteratively
   - **Use when**: Multiple logical units of work need separate commits
 
 #### 2-Pass Staging Algorithm (T085 Implementation)
 
 - **Default Mode**: "Complete 2-Pass Processing" (Recommended)
+
   ```bash
   /dd:commit --split "T085 implementation"
   # Pass 1: while(stagedFiles) { group → commit → repeat }
-  # Pass 2: while(unstagedFiles) { group → commit → repeat }  
+  # Pass 2: while(unstagedFiles) { group → commit → repeat }
   # Result: Clean directory + respected developer intent
   ```
 
 - `--staged`: "Pass 1 Only" (Respects Staging Intent)
+
   ```bash
   /dd:commit --split --staged "staged work only"
   # Pass 1: Process staged files with smart extensions
@@ -105,9 +112,10 @@ completion detection.
   ```
 
 - `--staged-only`: "Pass 1 Without Extensions" (Conservative)
+
   ```bash
   /dd:commit --split --staged-only "strict staged only"
-  # Pass 1: Process ONLY staged files, no smart extensions  
+  # Pass 1: Process ONLY staged files, no smart extensions
   # No Pass 2: Ignore unstaged files completely
   # Result: Most conservative staged-only processing
   ```
@@ -128,7 +136,7 @@ completion detection.
 #### Convenience Shortcuts (T085 2-Pass Integration)
 
 - `-si`: Shortcut for `--split --interactive` (most common pattern)
-- `-ss`: Shortcut for `--split --staged` (Pass 1 only, respects staging intent)  
+- `-ss`: Shortcut for `--split --staged` (Pass 1 only, respects staging intent)
 - `-so`: Shortcut for `--split --staged-only` (conservative staged-only)
 - `-sd`: Shortcut for `--split --dry-run` (safe preview)
 
@@ -191,13 +199,14 @@ This command provides the complete automation by composing existing commands:
   - Pattern learning and configuration optimization
 - **Parameter Inheritance Matrix**:
 
-| Input Flag | Action | Pass to /dd:changelog | Git Operation Effect |
-|-----------|--------|----------------------|---------------------|
-| --no-version-bump | ✅ Pass through | ✅ Skip version analysis | No version changes |
-| --force | ❌ Handle locally | ❌ Not applicable | git commit --no-verify |
-| --dry-run | ✅ Pass through | ✅ Preview mode only | No git operations |
-| --amend | ❌ Handle locally | ❌ Not applicable | git commit --amend |
-| --split | ❌ Handle locally | ❌ Not applicable | Multiple git commits |
+| Input Flag        | Action            | Pass to /dd:changelog    | Git Operation Effect   |
+| ----------------- | ----------------- | ------------------------ | ---------------------- |
+| --no-version-bump | ✅ Pass through   | ✅ Skip version analysis | No version changes     |
+| --force           | ❌ Handle locally | ❌ Not applicable        | git commit --no-verify |
+| --dry-run         | ✅ Pass through   | ✅ Preview mode only     | No git operations      |
+| --amend           | ❌ Handle locally | ❌ Not applicable        | git commit --amend     |
+| --split           | ❌ Handle locally | ❌ Not applicable        | Multiple git commits   |
+
 - **Quality Gate**: Pipeline blocked in `/dd:changelog` if linting fails (strict mode)
 
 ### 2. Intelligent Git Operations
@@ -247,33 +256,39 @@ The commit command intelligently extracts information from the documentation pip
 
 ## Semantic Commit Splitting (--split)
 
-The `--split` flag enables intelligent analysis of large staging areas and automatically creates multiple focused commits following a priority-based strategy.
+The `--split` flag enables intelligent analysis of large staging areas and automatically creates multiple focused
+commits following a priority-based strategy.
 
 ### Split Strategy: Epic/TODO Updates First
 
 The splitting algorithm follows a semantic priority order designed to separate planning work from implementation:
 
 #### **Phase 1: Epic & TODO Updates** (Highest Priority)
+
 - Files: `todo/*.md`, `todo/NEXT.md`, epic documentation
 - Purpose: Isolate project management and planning changes
 - Example: `"feat: Complete T059 AI Task Engine and update project roadmap"`
 
 #### **Phase 2: DOH System Infrastructure**
+
 - Files: `.claude/doh/*`, `.claude/commands/*`, system templates
 - Purpose: Separate framework/tooling changes from project work
 - Example: `"feat: Enhance DOH runtime with AI task intelligence system"`
 
-#### **Phase 3: Project Documentation**  
+#### **Phase 3: Project Documentation**
+
 - Files: `README.md`, `WORKFLOW.md`, `DEVELOPMENT.md`, `docs/*`
 - Purpose: Group user-facing documentation updates
 - Example: `"docs: Update DOH runtime documentation with task intelligence"`
 
 #### **Phase 4: Core Implementation**
+
 - Files: `src/*`, `lib/*`, main application code
 - Purpose: Focus implementation changes separately from planning
 - Example: `"feat: Implement user authentication with JWT tokens"`
 
 #### **Phase 5: Configuration & Support**
+
 - Files: `package.json`, config files, build scripts, tests
 - Purpose: Group supporting infrastructure changes
 - Example: `"chore: Update project configuration and test setup"`
@@ -283,6 +298,7 @@ The splitting algorithm follows a semantic priority order designed to separate p
 The command performs intelligent semantic analysis of staged changes:
 
 #### **File Pattern Recognition**
+
 ```bash
 # Epic/TODO priority detection
 epic_files=$(git diff --cached --name-only | grep -E "todo/.*\.md|NEXT\.md")
@@ -291,13 +307,16 @@ docs_files=$(git diff --cached --name-only | grep -E "README\.md|WORKFLOW\.md|DE
 ```
 
 #### **Content Analysis**
+
 - **Task Completion Detection**: Scans for TODO status changes to `COMPLETED`
 - **Feature Implementation**: Identifies new functionality additions
 - **Documentation Focus**: Analyzes doc changes for commit context
 - **Dependency Updates**: Detects related file modifications
 
 #### **Smart Message Generation**
+
 Each split commit gets contextually generated messages:
+
 - **Epic commits**: `"feat: Complete T### {task_title} and update project roadmap"`
 - **System commits**: `"feat: Enhance DOH {component} with {improvement}"`
 - **Documentation**: `"docs: Update {doc_type} with {focus_area}"`
@@ -306,6 +325,7 @@ Each split commit gets contextually generated messages:
 ### Split Usage Examples
 
 #### **Automatic Splitting**
+
 ```bash
 # Analyze staging and create semantic commit sequence
 /dd:commit --split
@@ -316,10 +336,10 @@ Each split commit gets contextually generated messages:
 📋 Proposed Commit Sequence:
 Commit 1: "feat: Complete T059 AI Task Engine and update project roadmap"
   Files: todo/T059.md, todo/NEXT.md (3 files)
-  
-Commit 2: "feat: Enhance DOH runtime with task intelligence system" 
+
+Commit 2: "feat: Enhance DOH runtime with task intelligence system"
   Files: .claude/commands/doh/next.md, .claude/doh/templates/ (4 files)
-  
+
 Commit 3: "docs: Update DOH runtime documentation"
   Files: .claude/doh/inclaude.md (1 file)
 
@@ -327,6 +347,7 @@ Execute this 3-commit sequence? [Y/n/preview]
 ```
 
 #### **Interactive Review**
+
 ```bash
 # Review and confirm each individual commit
 /dd:commit --split --interactive
@@ -346,7 +367,7 @@ Enter commit message: feat: Add /doh:next AI-powered task recommendations
 ✅ Commit 2 complete (edited)
 
 Commit 3/3: "docs: Update runtime documentation"
-Files: .claude/doh/inclaude.md  
+Files: .claude/doh/inclaude.md
 Execute this commit? [Y/n/edit/skip]
 > Y
 ✅ Commit 3 complete
@@ -355,6 +376,7 @@ Split sequence complete! Created 3 focused commits.
 ```
 
 #### **Preview Mode**
+
 ```bash
 # Show split plan without executing
 /dd:commit --split --dry-run
@@ -401,6 +423,7 @@ The `--amend` flag modifies the behavior to update the previous commit instead o
 ### Amend Use Cases
 
 **Perfect for**:
+
 - **Fixing typos** in documentation after committing
 - **Adding forgotten files** to the previous commit
 - **Updating commit messages** with better descriptions
@@ -434,16 +457,18 @@ vim TODO.md  # fix typo
 ### Amend Safety Enforcement
 
 **AUTOMATIC ABORT CONDITIONS**:
+
 - **Pushed commit detected**: `git branch -r --contains HEAD~1` shows remote tracking
-- **Remote branch ahead**: Previous commit exists on `origin/main` or other remotes  
+- **Remote branch ahead**: Previous commit exists on `origin/main` or other remotes
 - **Collaboration risk**: Multiple contributors detected in recent commit history
 
 **Safety Check Output**:
+
 ```bash
 ❌ AMEND BLOCKED: Previous commit already pushed to origin/main
    Commit: 95981a9 "feat: Add TODOARCHIVED management..."
    Risk: Amending pushed commits breaks collaboration and git history
-   
+
    Solutions:
    1. Use regular commit: /dd:commit (recommended)
    2. Create fixup commit: git commit --fixup=HEAD~1
@@ -470,7 +495,7 @@ The command enforces documentation quality through git pre-commit hooks with str
 ```
 /dd:commit → /dd:changelog (NO linting) → git commit (WITH pre-commit hooks)
                                                ↓
-                                        [SINGLE ENFORCEMENT POINT]  
+                                        [SINGLE ENFORCEMENT POINT]
                                                ↓
                                       Pass → Commit succeeds
                                       Fail → Commit blocked (period)
@@ -496,7 +521,7 @@ fi
 
 # Force override - EXPLICIT DEVELOPER CHOICE
 if --force_flag_passed; then
-    git commit --no-verify -m "message"  
+    git commit --no-verify -m "message"
     echo "⚠️  LINTING BYPASSED with --force"
     # → SUCCESS (but with clear warning)
 fi
@@ -522,6 +547,7 @@ fi
 ### **Clean User Experience**
 
 **✅ Success Path**:
+
 ```bash
 /dd:commit "T087 fix"
 # → ✅ Documentation updated
@@ -529,8 +555,9 @@ fi
 ```
 
 **❌ Failure Path**:
+
 ```bash
-/dd:commit "T087 fix" 
+/dd:commit "T087 fix"
 # → ✅ Documentation updated
 # → ❌ LINTING FAILED - COMMIT BLOCKED
 # → Fix issues or use --force to override
@@ -540,7 +567,7 @@ make lint-fix
 /dd:commit "T087 fix"
 # → ✅ Success
 
-# OR developer forces override  
+# OR developer forces override
 /dd:commit "T087 fix" --force
 # → ⚠️  LINTING BYPASSED with --force
 # → ✅ Success (with warning)
@@ -548,23 +575,25 @@ make lint-fix
 
 ### **Flag Behavior**
 
-| Flag | Git Command | Linting | Description |
-|------|-------------|---------|-------------|
-| *(none)* | `git commit` | ✅ Enforced | Default strict behavior |
-| `--force` | `git commit --no-verify` | ❌ Bypassed | Explicit override |  
-| `--dry-run` | *(no git)* | ❌ Skipped | Preview only |
+| Flag        | Git Command              | Linting     | Description             |
+| ----------- | ------------------------ | ----------- | ----------------------- |
+| _(none)_    | `git commit`             | ✅ Enforced | Default strict behavior |
+| `--force`   | `git commit --no-verify` | ❌ Bypassed | Explicit override       |
+| `--dry-run` | _(no git)_               | ❌ Skipped  | Preview only            |
 
 ### **Removed Complexity**
 
 **❌ No More**:
+
 - Complex decision trees with 4 options
 - AI-powered linting pipeline in `/dd:changelog`
-- Pattern learning and feedback systems  
+- Pattern learning and feedback systems
 - Interactive prompts about linting failures
 - Complex decision trees and bypass modes
 - Dual linting systems causing coordination issues
 
 **✅ Benefits**:
+
 - **Predictable**: Linting fails → commit blocked (always)
 - **Simple**: Two modes only (strict or force)
 - **Fast**: No AI processing or complex decision trees
@@ -573,7 +602,7 @@ make lint-fix
 ## Error Handling
 
 - **Split Failures**: Automatic rollback to original staging state if any commit fails
-- **Linting Failures**: Commit blocked, user must fix issues or use `--force` 
+- **Linting Failures**: Commit blocked, user must fix issues or use `--force`
 - **Git Hook Failures**: Clear error messages with actionable solutions
 - **Version Conflicts**: Detect and resolve version inconsistencies
 - **File Lock Issues**: Retry operations with brief delays
@@ -591,6 +620,7 @@ make lint-fix
 Provides clear progress reporting:
 
 **Standard Single Commit:**
+
 ```
 🔄 DOH Pipeline: T035 Documentation Navigation
 ├── ✅ TODO.md updated (T035 → COMPLETED)
@@ -601,6 +631,7 @@ Provides clear progress reporting:
 ```
 
 **Split Mode Output:**
+
 ```
 🔍 Semantic Commit Split Analysis
 ├── 📊 15 files staged across 4 categories
@@ -612,7 +643,7 @@ Provides clear progress reporting:
 🚀 Executing Split Sequence:
 ├── ✅ Commit 1/3: feat: Complete T064 commit splitting and update roadmap
 │   └── Files: todo/T064.md, todo/NEXT.md (3 files)
-├── ✅ Commit 2/3: feat: Enhance DOH commit pipeline with semantic splitting  
+├── ✅ Commit 2/3: feat: Enhance DOH commit pipeline with semantic splitting
 │   └── Files: .claude/commands/doh-sys/commit.md (2 files)
 └── ✅ Commit 3/3: docs: Update DOH documentation with split functionality
     └── Files: .claude/doh/inclaude.md (1 file)
@@ -621,6 +652,7 @@ Provides clear progress reporting:
 ```
 
 **Interactive Split Output:**
+
 ```
 🔍 Proposed Split: 3 commits from 7 staged files
 
@@ -629,7 +661,7 @@ Files: todo/T064.md, todo/NEXT.md
 Execute this commit? [Y/n/edit/skip] > Y
 ✅ Commit 1 complete: a1b2c3d
 
-Commit 2/3: "feat: Enhance /dd:commit with --split functionality" 
+Commit 2/3: "feat: Enhance /dd:commit with --split functionality"
 Files: .claude/commands/doh-sys/commit.md
 Execute this commit? [Y/n/edit/skip] > edit
 Enter commit message: feat: Add intelligent semantic commit splitting to pipeline
@@ -637,7 +669,7 @@ Enter commit message: feat: Add intelligent semantic commit splitting to pipelin
 
 Commit 3/3: "docs: Update command documentation"
 Files: .claude/doh/inclaude.md
-Execute this commit? [Y/n/edit/skip] > Y  
+Execute this commit? [Y/n/edit/skip] > Y
 ✅ Commit 3 complete: h7i8j9k
 
 🎉 Interactive split complete! 3 commits created successfully.
@@ -719,9 +751,11 @@ improving through intelligent pattern recognition and optimization.
 
 ### Staging Modes: "Clean Working Directory" Philosophy
 
-The command now follows a "Clean Working Directory" principle by default - leaving users with completely clean working directories after commits. Three distinct modes provide flexibility:
+The command now follows a "Clean Working Directory" principle by default - leaving users with completely clean working
+directories after commits. Three distinct modes provide flexibility:
 
 #### **Default Mode: "Clean Working Directory"**
+
 ```bash
 /dd:commit "T084 fix"
 /dd:commit --split "T084 complete"
@@ -734,12 +768,14 @@ The command now follows a "Clean Working Directory" principle by default - leavi
 ```
 
 **Auto-Staging Strategy**:
+
 - **Comprehensive staging**: Automatically stages all modified and deleted files
 - **Semantic processing**: All changes processed through split algorithm
 - **Clean result**: Working directory becomes completely clean
 - **Predictable behavior**: Users know everything will be committed
 
 #### **--staged-focused Mode: "Priority + Smart Extension"**
+
 ```bash
 /dd:commit --split --staged-focused "T084 complete"
 
@@ -751,12 +787,14 @@ The command now follows a "Clean Working Directory" principle by default - leavi
 ```
 
 **Smart Extension Algorithm**:
+
 - **Related file detection**: Identifies unstaged files related to staged work
 - **Semantic relationships**: Test files, documentation, configuration dependencies
 - **Priority treatment**: Staged files get primary commit positions
 - **Complete cleanup**: All modifications still get committed
 
 **Extension Examples**:
+
 ```bash
 # Smart extension scenarios:
 
@@ -777,6 +815,7 @@ The command now follows a "Clean Working Directory" principle by default - leavi
 ```
 
 #### **--staged-only Mode: "Explicit Partial Commits"** (New)
+
 ```bash
 /dd:commit --split --staged-only "T084 partial"
 
@@ -788,6 +827,7 @@ The command now follows a "Clean Working Directory" principle by default - leavi
 ```
 
 **Explicit Partial Processing**:
+
 - **Limited scope**: Only processes currently staged files
 - **No auto-staging**: Completely ignores unstaged modifications
 - **Advanced control**: For power users needing partial commits
@@ -798,6 +838,7 @@ The command now follows a "Clean Working Directory" principle by default - leavi
 Enhanced shortcuts combine common flag combinations for streamlined workflow:
 
 #### **Split Shortcuts**
+
 ```bash
 # Quick interactive splitting (most common pattern)
 /dd:commit -si "T083 complete"    # --split --interactive
@@ -813,6 +854,7 @@ Enhanced shortcuts combine common flag combinations for streamlined workflow:
 ```
 
 #### **Combined Shortcuts**
+
 ```bash
 # Interactive staged-focused (full control + priority)
 /dd:commit -sif "T083 complete"  # --split --interactive --staged-focused
@@ -823,15 +865,16 @@ Enhanced shortcuts combine common flag combinations for streamlined workflow:
 
 ### Mode Comparison Matrix (T085 2-Pass Algorithm)
 
-| Mode | Pass 1 (Staged Files) | Pass 2 (Unstaged Files) | Smart Extensions | Result |
-|------|----------------------|-------------------------|------------------|---------|
-| **Default** | ✅ Process with extensions | ✅ Process remaining iteratively | ✅ Related files added to groups | Clean directory |
-| **--staged** | ✅ Process with extensions | ❌ Skip Pass 2 | ✅ Related files added to staged groups | Unstaged remain |
-| **--staged-only** | ✅ Process without extensions | ❌ Skip Pass 2 | ❌ No extensions | Unstaged remain |
+| Mode              | Pass 1 (Staged Files)         | Pass 2 (Unstaged Files)          | Smart Extensions                        | Result          |
+| ----------------- | ----------------------------- | -------------------------------- | --------------------------------------- | --------------- |
+| **Default**       | ✅ Process with extensions    | ✅ Process remaining iteratively | ✅ Related files added to groups        | Clean directory |
+| **--staged**      | ✅ Process with extensions    | ❌ Skip Pass 2                   | ✅ Related files added to staged groups | Unstaged remain |
+| **--staged-only** | ✅ Process without extensions | ❌ Skip Pass 2                   | ❌ No extensions                        | Unstaged remain |
 
 ### User Experience Improvements
 
 #### **Before T085 (Sub-Optimal)**
+
 ```bash
 # Old T084 approach was flawed:
 /dd:commit --split "T084"
@@ -847,6 +890,7 @@ git add important-feature.js tests/important-feature.test.js  # Developer's choi
 ```
 
 #### **After T085 (Intelligent 2-Pass)**
+
 ```bash
 # Respects developer intent with 2-pass algorithm:
 git add important-feature.js tests/important-feature.test.js  # Developer's choice
@@ -857,7 +901,7 @@ git add important-feature.js tests/important-feature.test.js  # Developer's choi
 # → May add related unstaged files (smart extensions)
 # → Commit focused groups iteratively
 
-# Pass 2: Clean remaining unstaged files  
+# Pass 2: Clean remaining unstaged files
 # → Processes remaining docs, config, etc.
 # → Groups semantically and commits iteratively
 # → Result: Clean directory + respected intent
@@ -866,6 +910,7 @@ git add important-feature.js tests/important-feature.test.js  # Developer's choi
 ### Smart Auto-Detection and Suggestions
 
 #### **Auto-Split Detection**
+
 ```bash
 # When /dd:commit detects split-worthy staging:
 /dd:commit "mixed changes"
@@ -890,6 +935,7 @@ Apply splitting? [Y/n/preview]:
 ```
 
 #### **Staging Mode Recommendations**
+
 ```bash
 # When working directory has many unrelated changes:
 /dd:commit --split
@@ -914,20 +960,21 @@ Use recommended staging mode? [Y/n/default]:
 
 When this command is executed by Claude:
 
-1. **Parameter Processing**: Parse task description and flags (`--no-version-bump`, `--dry-run`, `--amend`, `--force`, `--split`, `--interactive`, `--staged`, `--staged-only`) and convenience shortcuts (`-si`, `-ss`, `-so`, `-sd`)
+1. **Parameter Processing**: Parse task description and flags (`--no-version-bump`, `--dry-run`, `--amend`, `--force`,
+   `--split`, `--interactive`, `--staged`, `--staged-only`) and convenience shortcuts (`-si`, `-ss`, `-so`, `-sd`)
 
 2. **Split Mode Detection**: If `--split` flag detected:
    - **2-Pass Algorithm Execution**: Apply T085 intelligent staging approach
    - **Pass 1 - Staged Files Processing**:
-     * Analyze currently staged files (preserve developer intent)
-     * `while(stagedFiles.length > 0)`:
+     - Analyze currently staged files (preserve developer intent)
+     - `while(stagedFiles.length > 0)`:
        - Find next logical group from staged files
        - Smart extension: Add related unstaged files to complete group (unless --staged-only)
        - Reset staging, stage group files, create commit
        - Remove processed files from remaining staged list
    - **Pass 2 - Unstaged Files Processing** (unless --staged or --staged-only):
-     * `while(unstagedFiles.length > 0)`:
-       - Find next logical group from remaining unstaged files  
+     - `while(unstagedFiles.length > 0)`:
+       - Find next logical group from remaining unstaged files
        - Reset staging, stage group files, create commit
        - Remove processed files from remaining unstaged list
    - **Smart Extension Detection** (Pass 1, unless --staged-only):
@@ -999,29 +1046,30 @@ This command is executed entirely by Claude's AI logic:
 
 ## T085 Integration: Intelligent 2-Pass Algorithm
 
-**✅ ALGORITHM ENHANCED**: The splitting system now uses T085's intelligent 2-pass approach for optimal staging management and developer intent preservation.
+**✅ ALGORITHM ENHANCED**: The splitting system now uses T085's intelligent 2-pass approach for optimal staging
+management and developer intent preservation.
 
 ### Key Improvements in T085
 
-| Aspect | Before T085 | After T085 |
-|--------|-------------|-----------|
-| **Staging Approach** | `git add -A` (destroys intent) | 2-pass iterative (respects intent) |
-| **Performance** | Mass staging/unstaging juggling | Efficient iterative processing |
-| **Developer Intent** | Lost during mass operations | Preserved throughout process |
-| **Flags** | Complex --staged-focused | Simple --staged (Pass 1 only) |
+| Aspect               | Before T085                     | After T085                         |
+| -------------------- | ------------------------------- | ---------------------------------- |
+| **Staging Approach** | `git add -A` (destroys intent)  | 2-pass iterative (respects intent) |
+| **Performance**      | Mass staging/unstaging juggling | Efficient iterative processing     |
+| **Developer Intent** | Lost during mass operations     | Preserved throughout process       |
+| **Flags**            | Complex --staged-focused        | Simple --staged (Pass 1 only)      |
 
 ### Migration from T084 Approach
 
-| Old T084 Behavior | New T085 Behavior |
-|-------------------|-------------------|
+| Old T084 Behavior       | New T085 Behavior                   |
+| ----------------------- | ----------------------------------- |
 | `git add -A` then split | Pass 1 (staged) → Pass 2 (unstaged) |
-| `--staged-focused` | `--staged` (cleaner, Pass 1 only) |
-| Mass staging operations | Iterative group → commit → repeat |
+| `--staged-focused`      | `--staged` (cleaner, Pass 1 only)   |
+| Mass staging operations | Iterative group → commit → repeat   |
 
 ### Benefits of T085 Algorithm
 
 - **Developer Intent Preservation**: Staged files processed first with priority
-- **Optimal Performance**: No staging/unstaging juggling overhead  
+- **Optimal Performance**: No staging/unstaging juggling overhead
 - **Cleaner Logic**: Straightforward 2-pass approach vs complex undo operations
 - **Better User Experience**: Predictable, logical commit sequence
 - **Professional Workflow**: Maintains staging best practices
@@ -1029,6 +1077,7 @@ This command is executed entirely by Claude's AI logic:
 ### Enhanced Features vs /commit-split
 
 **New capabilities in consolidated /dd:commit --split**:
+
 - ✅ **Enhanced staging management**: Three distinct staging modes
 - ✅ **Smart extension algorithm**: Related file detection in --staged-focused mode
 - ✅ **Convenience shortcuts**: `-si`, `-sf`, `-so`, `-sd` combinations
@@ -1037,6 +1086,7 @@ This command is executed entirely by Claude's AI logic:
 - ✅ **Clean working directory**: Predictable "clean everything" behavior by default
 
 **Removed limitations from /commit-split**:
+
 - ❌ **No pipeline integration**: Now has full /dd:changelog integration
 - ❌ **Limited flag support**: Now supports all /dd:commit flags
 - ❌ **Incomplete staging**: Now provides complete staging management

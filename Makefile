@@ -65,57 +65,44 @@ deps-check: ## Verify all dependencies are present
 	@echo "jq: $$(jq --version)"
 	@echo "shellcheck: $$(shellcheck --version | head -n1)"
 
-# Linting
-lint: deps-check ## Run all linters (markdown, shell)
-	@echo "🔍 Running linters..."
-	@if [ -f package.json ] && npm list markdownlint-cli >/dev/null 2>&1; then \
-		echo "📝 Linting Markdown files..."; \
-		npm run lint:md 2>/dev/null || npx markdownlint --config dev-tools/linters/.markdownlint.json *.md docs/ analysis/ || true; \
-	else \
-		echo "⚠️  markdownlint-cli not installed, skipping markdown linting"; \
-	fi
-	@echo "🐚 Linting shell scripts..."
-	@find . -name "*.sh" -not -path "./node_modules/*" -exec shellcheck {} + || true
-	@echo "✅ Linting complete"
+# Linting - Comprehensive auto-correcting system
+lint: ## Run linters on all markdown files (check mode)
+	@./dev-tools/scripts/lint-files.sh --check
 
-lint-fix: deps-check ## Auto-fix linting issues where possible
-	@echo "🔧 Auto-fixing linting issues..."
-	@if [ -f package.json ] && npm list prettier >/dev/null 2>&1; then \
-		echo "📝 Formatting with prettier..."; \
-		npx prettier --write '*.md' 'docs/**/*.md' 'analysis/**/*.md' || true; \
+lint-fix: ## Auto-fix all markdown files with 3-tool pipeline
+	@./dev-tools/scripts/lint-files.sh --fix
+
+lint-file: ## Lint single file (usage: make lint-file FILE=README.md)
+	@if [ -z "$(FILE)" ]; then \
+		echo "❌ Usage: make lint-file FILE=path/to/file.md"; \
+		exit 1; \
 	fi
-	@if [ -f package.json ] && npm list markdownlint-cli >/dev/null 2>&1; then \
-		echo "📝 Auto-fixing Markdown files..."; \
-		npm run lint:md:fix 2>/dev/null || npx markdownlint --config dev-tools/linters/.markdownlint.json --fix *.md docs/ analysis/ || true; \
+	@./dev-tools/scripts/lint-files.sh --fix "$(FILE)"
+
+lint-check-file: ## Check single file without fixing (usage: make lint-check-file FILE=README.md)
+	@if [ -z "$(FILE)" ]; then \
+		echo "❌ Usage: make lint-check-file FILE=path/to/file.md"; \
+		exit 1; \
 	fi
-	@echo "✅ Auto-fix complete"
+	@./dev-tools/scripts/lint-files.sh --check "$(FILE)"
+
+lint-staged: ## Auto-fix all staged files
+	@./dev-tools/scripts/lint-files.sh --fix --staged
+
+lint-modified: ## Auto-fix all modified/new files
+	@./dev-tools/scripts/lint-files.sh --fix --modified
+
+lint-dir: ## Lint all files in directory (usage: make lint-dir DIR=todo/)
+	@if [ -z "$(DIR)" ]; then \
+		echo "❌ Usage: make lint-dir DIR=path/to/dir/"; \
+		exit 1; \
+	fi
+	@./dev-tools/scripts/lint-files.sh --fix "$(DIR)"
 
 lint-manual: deps-check ## Show manual markdown fixes needed (line length, etc.)
 	@echo "📝 Checking for manual fixes needed..."
-	@if [ -f package.json ] && npm list markdownlint-cli >/dev/null 2>&1; then \
-		echo "🔍 Scanning for non-auto-fixable issues..."; \
-		echo ""; \
-		npx markdownlint --config dev-tools/linters/.markdownlint.json '*.md' 'docs/**/*.md' 'analysis/**/*.md' 2>&1 | \
-		grep -E "(MD013|MD029|MD024|MD036)" | \
-		head -20 | \
-		while IFS= read -r line; do \
-			if echo "$$line" | grep -q "MD013"; then \
-				echo "📏 $$line"; \
-			elif echo "$$line" | grep -q "MD029"; then \
-				echo "🔢 $$line"; \
-			elif echo "$$line" | grep -q "MD024"; then \
-				echo "📑 $$line"; \
-			elif echo "$$line" | grep -q "MD036"; then \
-				echo "📝 $$line"; \
-			else \
-				echo "❓ $$line"; \
-			fi; \
-		done; \
-		echo ""; \
-		echo "💡 Fix these manually, then run 'make lint' to verify"; \
-	else \
-		echo "⚠️  markdownlint-cli not available"; \
-	fi
+	@echo "🔍 Running comprehensive check to identify non-auto-fixable issues..."
+	@./dev-tools/scripts/lint-files.sh --check | grep -E "(MD013|MD024|MD036)" || echo "✅ No manual fixes needed"
 
 # Quality checks
 check: lint ## All quality checks (lint + test)
