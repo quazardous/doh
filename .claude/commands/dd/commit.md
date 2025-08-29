@@ -45,7 +45,7 @@ completion detection.
 ## Usage
 
 ```bash
-/dd:commit [task-completion] [--no-version-bump] [--no-lint] [--lenient] [--dry-run] [--amend] [--force] [--split] [--interactive] [--staged-focused]
+/dd:commit [task-completion] [--no-version-bump] [--dry-run] [--amend] [--force] [--split] [--interactive] [--staged] [--staged-only]
 ```
 
 ## Parameters
@@ -67,15 +67,6 @@ completion detection.
   - **Use when**: Minor changes that don't warrant version increment
   - **Note**: Version analysis still runs, just skips the actual bump
 
-- `--no-lint`: Skip linting and auto-fixes on documentation
-  - **Default**: Strict linting enforcement - blocks commits with errors
-  - **Use when**: Emergency commits or when linting is problematic
-  - **⚠️ Warning**: Bypasses all quality checks
-
-- `--lenient`: Allow commits with linting errors after showing warnings
-  - **Behavior**: Shows linting errors but proceeds without user confirmation
-  - **Use when**: Working with legacy files or minor formatting issues
-  - **Quality**: Still shows all issues but doesn't block commit
 
 ### Advanced Git Operations  
 - `--amend`: Amend the previous commit instead of creating a new one
@@ -203,11 +194,9 @@ This command provides the complete automation by composing existing commands:
 | Input Flag | Action | Pass to /dd:changelog | Git Operation Effect |
 |-----------|--------|----------------------|---------------------|
 | --no-version-bump | ✅ Pass through | ✅ Skip version analysis | No version changes |
-| --no-lint | ✅ Pass through | ✅ Skip linting pipeline | Uses git --no-verify |
-| --lenient | ✅ Pass through | ✅ Enable linting bypass | Uses git --no-verify |
+| --force | ❌ Handle locally | ❌ Not applicable | git commit --no-verify |
 | --dry-run | ✅ Pass through | ✅ Preview mode only | No git operations |
 | --amend | ❌ Handle locally | ❌ Not applicable | git commit --amend |
-| --force | ❌ Handle locally | ❌ Not applicable | git commit --force |
 | --split | ❌ Handle locally | ❌ Not applicable | Multiple git commits |
 - **Quality Gate**: Pipeline blocked in `/dd:changelog` if linting fails (strict mode)
 
@@ -392,7 +381,7 @@ Split sequence complete! Created 3 focused commits.
 
 ### Split Integration
 
-- **Works with existing flags**: Combines with `--no-lint`, `--no-version-bump`, etc.
+- **Works with existing flags**: Combines with `--no-version-bump`, `--force`, etc.
 - **Changelog integration**: Each commit can trigger documentation updates
 - **Quality assurance**: Linting applied to each commit individually
 - **Version management**: Smart version bumping across commit sequence
@@ -431,7 +420,7 @@ echo "additional content" >> missed-file.md
 
 # Fix typo in previous commit's documentation
 vim TODO.md  # fix typo
-/dd:commit --amend --no-lint
+/dd:commit --amend --force
 # → Amends previous commit with typo fix
 ```
 
@@ -572,7 +561,7 @@ make lint-fix
 - AI-powered linting pipeline in `/dd:changelog`
 - Pattern learning and feedback systems  
 - Interactive prompts about linting failures
-- `--lenient` and `--no-lint` flags (confusing)
+- Complex decision trees and bypass modes
 - Dual linting systems causing coordination issues
 
 **✅ Benefits**:
@@ -925,7 +914,7 @@ Use recommended staging mode? [Y/n/default]:
 
 When this command is executed by Claude:
 
-1. **Parameter Processing**: Parse task description and flags (`--no-version-bump`, `--no-lint`, `--lenient`, `--dry-run`, `--amend`, `--force`, `--split`, `--interactive`, `--staged`, `--staged-only`) and convenience shortcuts (`-si`, `-ss`, `-so`, `-sd`)
+1. **Parameter Processing**: Parse task description and flags (`--no-version-bump`, `--dry-run`, `--amend`, `--force`, `--split`, `--interactive`, `--staged`, `--staged-only`) and convenience shortcuts (`-si`, `-ss`, `-so`, `-sd`)
 
 2. **Split Mode Detection**: If `--split` flag detected:
    - **2-Pass Algorithm Execution**: Apply T085 intelligent staging approach
@@ -967,12 +956,10 @@ When this command is executed by Claude:
 
 4. **Change Analysis**: Use git commands to analyze current status and detect modification patterns
 
-5. **Documentation Pipeline with Strict Linting**: Execute `/dd:changelog` with enhanced quality enforcement
-   - **AI-Powered Linting Pipeline**: Multi-layer fix system (make lint-fix → AI fixes → validation → user decision)
-   - **Pipeline Blocking**: `/dd:changelog` halts execution when linting fails in strict mode
-   - **Pattern Learning**: Track failures in `./linting/feedback.md` for optimization
-   - **Flag Propagation**: Pass `--lenient`, `--no-lint` flags to control linting behavior
-   - **Quality Gate**: Only proceeds if linting passes or user explicitly bypasses
+5. **Documentation Pipeline**: Execute `/dd:changelog` without linting (T087)
+   - **No linting in pipeline**: /dd:changelog focuses purely on documentation updates
+   - **Single enforcement point**: Linting handled only by git pre-commit hooks
+   - **Clean separation**: Documentation updates separate from quality enforcement
 
 6. **Version Bump Confirmation**: If version changes detected (unless `--no-version-bump`):
    - Analyze impact and determine appropriate version bump (major/minor/patch)
@@ -983,15 +970,15 @@ When this command is executed by Claude:
    - **Normal mode**: Generate new commit message
    - **Amend mode**: Update previous commit message while preserving structure
 
-8. **Git Operations with Smart --no-verify Control**: Stage changes and execute git command
-   - **Strict mode (default)**: `git commit` (no --no-verify flag, relies on clean pre-commit state)
-   - **Lenient mode**: `git commit --no-verify` (when user chose bypass in changelog pipeline)
-   - **Skip mode**: `git commit --no-verify` (when --no-lint flag used)
-   - **Amend mode**: Apply same logic to `git commit --amend`
+8. **Git Operations with T087 STRICT Enforcement**: Stage changes and execute git command
+   - **Default mode**: `git commit` (respects pre-commit hooks, blocks on linting failure)
+   - **Force override**: `git commit --no-verify` (ONLY when --force flag explicitly passed by user)
+   - **Amend mode**: Apply same logic to `git commit --amend` or `git commit --amend --no-verify`
 
-9. **Error Handling & Recovery**: Progressive retry with intelligent bypass options
-   - **Linting failures**: Handled in `/dd:changelog` pipeline with user decision flow
-   - **Git hook failures**: Rare due to pre-linting, but handled with retry logic
+9. **Error Handling & Recovery**: T087 STRICT enforcement
+   - **Linting failures**: COMMIT BLOCKED - display error message and stop execution
+   - **User must fix issues OR use --force explicitly**
+   - **No automatic bypass or retry logic**
    - **Version conflicts**: Detect and resolve inconsistencies
    - **Rollback capability**: Restore original state if pipeline fails
 
