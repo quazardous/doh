@@ -5,7 +5,7 @@
 
 ## 🚨 CRITICAL: Next Task ID
 
-**Next ID**: 106 (shared counter for TODOs and Epics)
+**Next ID**: 112 (shared counter for TODOs and Epics)
 
 **⚠️ MANDATORY**: Always use this Next ID for new tasks, then increment it after creation
 
@@ -19,11 +19,11 @@ an individual file for better organization, version control, and collaboration.
 ```text
 todo/
 ├── README.md                 # This file - management documentation
-├── T002.md ... T057.md       # Individual TODO files (active and proposed)
-├── E074.md, E075.md, E076.md, E077.md # Epic files
+├── DOH002.md ... DOH057.md       # Individual TODO files (active and proposed)
+├── EDOH074.md, EDD075.md, EDOH076.md, EDOH077.md # Epic files
 └── archive/                  # Completed TODOs
-    ├── T013.md
-    ├── T017.md
+    ├── DOH013.md
+    ├── DOH017.md
     └── ...
 ```
 
@@ -32,7 +32,7 @@ todo/
 ### Active and Proposed TODOs
 
 - Place directly in `todo/` folder
-- Format: `T###.md` (e.g., `T054.md`, `T055.md`)
+- Format: `T###.md` (e.g., `DOH054.md`, `DOH055.md`)
 - No subfolders for active/proposed items
 
 ### Completed TODOs
@@ -44,7 +44,7 @@ todo/
 ### Epics
 
 - Place directly in `todo/` folder
-- Format: `E###.md` (e.g., `E074.md`, `E076.md`)
+- Format: `E###.md` (e.g., `EDOH074.md`, `EDOH076.md`)
 - Track component TODOs and progress
 
 ## TODO Template
@@ -153,19 +153,19 @@ Only assign a TODO to an Epic when:
 
 ```text
 ✅ Good Epic Assignment:
-T072 - Epic: E075 (clear component of existing DOH-DEV Internal System Epic)
+DD072 - Epic: EDD075 (clear component of existing DOH-DEV Internal System Epic)
 
 ❌ Bad Epic Assignment:
-T073 - Epic: E004 (E004 doesn't exist, forced assignment)
+DD073 - Epic: E004 (E004 doesn't exist, forced assignment)
 
 ✅ Good Epic-less TODO:
-T073 - Epic: None (standalone enhancement, no existing Epic matches)
+DD073 - Epic: None (standalone enhancement, no existing Epic matches)
 ```
 
 ### Shared Numbering
 
 - TODOs and Epics share the same sequence counter
-- Current sequence: T001-T081, E074-E077, next ID: 082
+- Current sequence: DOH001-DD081, EDOH074-EDOH077, next ID: 082
 - This prevents numbering conflicts and maintains chronological order
 
 ## Workflow
@@ -176,7 +176,7 @@ T073 - Epic: None (standalone enhancement, no existing Epic matches)
 
 1. ✅ **Check current Next ID above** (currently 082)
 2. ✅ **Copy TODO template** from this README
-3. ✅ **Create T082.md** in `todo/` folder (use EXACT Next ID number)
+3. ✅ **Create DD082.md** in `todo/` folder (use EXACT Next ID number)
 4. ✅ **Fill in all required metadata**
 5. ✅ **Update "Next ID" counter** in this README to 083
 
@@ -213,7 +213,7 @@ All TODO management is done manually by editing files directly:
 
 ### 🚨 CRITICAL REMINDER: Always Check Next ID First
 
-- **Create TODO**: ✅ Check Next ID (082) → create `T082.md` → update Next ID to 083
+- **Create TODO**: ✅ Check Next ID (082) → create `DD082.md` → update Next ID to 083
 - **Create Epic**: ✅ Check Next ID (082) → create `E082.md` → update Next ID to 083
 - **Update status**: Edit the file's Status line
 - **Archive completed**: Move file from `todo/` to `todo/archive/`
