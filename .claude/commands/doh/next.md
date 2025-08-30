@@ -1,6 +1,7 @@
 # /doh:next - AI-Powered Task Analysis & Recommendation Engine
 
-Intelligent task prioritization system that analyzes DOH task dependencies, project context, and priorities to suggest optimal next tasks with natural language interaction support.
+Intelligent task prioritization system that analyzes DOH task dependencies, project context, and priorities to suggest
+optimal next tasks with natural language interaction support.
 
 ## Usage
 
@@ -10,7 +11,8 @@ Intelligent task prioritization system that analyzes DOH task dependencies, proj
 
 ## Parameters
 
-- `query`: (Optional) Natural language query about what to work on (e.g., "what can I do that's high impact", "show me documentation tasks", "what's ready to start")
+- `query`: (Optional) Natural language query about what to work on (e.g., "what can I do that's high impact", "show me
+  documentation tasks", "what's ready to start")
 - `--context=focus`: Filter by development context
   - `docs` - Documentation and writing tasks
   - `build` - Build system and architecture
@@ -220,7 +222,7 @@ Priority Score = DOH Priority × Dependency Weight × Context Relevance × Epic 
 
 ## Dependency Analysis
 ✅ **Ready to Start**: 8 tasks with no blockers
-🟡 **Waiting**: 5 tasks with pending dependencies  
+🟡 **Waiting**: 5 tasks with pending dependencies
 🔴 **Blocked**: 2 tasks with incomplete critical dependencies
 
 ## Top Recommendation: DOH-125 (Score: 9.2/10)
@@ -249,6 +251,7 @@ Priority Score = DOH Priority × Dependency Weight × Context Relevance × Epic 
 ### Execution Modes
 
 #### Standard Mode (Default)
+
 1. **Read Previous Memory**: Load existing .doh/memory/NEXT.md for context
 2. **Analyze Current State**: Scan .doh/ structure for changes
 3. **Incremental Update**: Update analysis based on task/epic changes
@@ -257,6 +260,7 @@ Priority Score = DOH Priority × Dependency Weight × Context Relevance × Epic 
 6. **Return Results**: Provide recommendations with fresh insights
 
 #### Memory-Only Mode (`--cache-only`)
+
 1. **Direct Read**: Load .doh/memory/NEXT.md immediately
 2. **Extract Recommendations**: Parse stored recommendations
 3. **Format Output**: Apply requested format
@@ -264,6 +268,7 @@ Priority Score = DOH Priority × Dependency Weight × Context Relevance × Epic 
 5. **Skip Analysis**: No file scanning, no memory refresh
 
 #### No-Cache Mode (`--no-cache`)
+
 1. **Skip Memory**: Ignore .doh/memory/NEXT.md completely
 2. **Fresh Analysis**: Scan .doh/ structure from scratch
 3. **Pure Computation**: Generate recommendations from current state only
@@ -272,12 +277,12 @@ Priority Score = DOH Priority × Dependency Weight × Context Relevance × Epic 
 
 ### Performance Characteristics
 
-| Mode | Response Time | Accuracy | Use Case |
-|------|---------------|----------|-----------|
-| Standard | 1-3 seconds | Current | Normal workflow, up-to-date recommendations |
-| Memory-Only | <100ms | Last update | Quick checks, rapid workflow, scripting |
-| Refresh | 3-5 seconds | Perfect | Major changes, memory reset, fresh start |
-| No-Cache | 2-4 seconds | Perfect | Testing, debugging, clean analysis |
+| Mode        | Response Time | Accuracy    | Use Case                                    |
+| ----------- | ------------- | ----------- | ------------------------------------------- |
+| Standard    | 1-3 seconds   | Current     | Normal workflow, up-to-date recommendations |
+| Memory-Only | <100ms        | Last update | Quick checks, rapid workflow, scripting     |
+| Refresh     | 3-5 seconds   | Perfect     | Major changes, memory reset, fresh start    |
+| No-Cache    | 2-4 seconds   | Perfect     | Testing, debugging, clean analysis          |
 
 ## Integration with DOH Workflow
 
@@ -351,4 +356,6 @@ next_epic_priority = high   ; Weight epic tasks higher
 - **Strategic alignment**: Prioritizes epic critical path items
 - **Continuous optimization**: Improves recommendations based on completion patterns
 
-This command transforms DOH task management from static lists into an intelligent, conversational recommendation system that understands your project's epic structure, task dependencies, and team dynamics to provide contextually aware suggestions for optimal productivity.
+This command transforms DOH task management from static lists into an intelligent, conversational recommendation system
+that understands your project's epic structure, task dependencies, and team dynamics to provide contextually aware
+suggestions for optimal productivity.

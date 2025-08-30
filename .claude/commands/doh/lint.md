@@ -1,6 +1,7 @@
 # /doh:lint - Optional Project Linting with Smart Integration
 
-Provides optional intelligent linting for DOH-managed projects with smart integration, respecting existing project linting setup while offering DOH-enhanced documentation quality assurance.
+Provides optional intelligent linting for DOH-managed projects with smart integration, respecting existing project
+linting setup while offering DOH-enhanced documentation quality assurance.
 
 ## Usage
 
@@ -43,7 +44,7 @@ When enabled, adds DOH-specific linting rules:
 
 #### DOH Task Documentation
 
-- **.doh/tasks/*.json**: Validates DOH task structure and required fields
+- **.doh/tasks/\*.json**: Validates DOH task structure and required fields
 - **CHANGELOG.md**: Ensures DOH task references are properly formatted
 - **README.md**: Validates DOH integration sections if present
 
@@ -90,7 +91,7 @@ lint_scope = doh         # doh-only, enhanced, comprehensive
 ### Scope Levels
 
 1. **doh-only**: Only .doh/ folder and DOH-specific files
-2. **enhanced**: DOH files + project documentation (README, CHANGELOG)  
+2. **enhanced**: DOH files + project documentation (README, CHANGELOG)
 3. **comprehensive**: Full project linting (if no existing linting detected)
 
 ### Auto-Detection Logic
@@ -106,14 +107,14 @@ Project has .eslintrc or similar?
 
 ### DOH-Only Scope
 
-- **.doh/tasks/*.json**: Task structure validation
+- **.doh/tasks/\*.json**: Task structure validation
 - **.doh/config.ini**: Configuration format validation
 - **CHANGELOG.md**: DOH task reference format (DOH-123, [DOH #123])
 
 ### Enhanced Scope (+ DOH-Only)
 
 - **README.md**: DOH integration sections
-- **docs/*.md**: General markdown quality
+- **docs/\*.md**: General markdown quality
 - **Project documentation**: Link validation, formatting
 
 ### Comprehensive Scope (+ Enhanced)
@@ -140,7 +141,7 @@ Project has .eslintrc or similar?
 # Prompts for scope selection:
 # "Select DOH linting scope:
 #  1. doh-only     - Only .doh/ files (recommended for projects with existing linting)
-#  2. enhanced     - DOH files + project documentation  
+#  2. enhanced     - DOH files + project documentation
 #  3. comprehensive - Full project linting
 # Choice [1]: "
 ```
@@ -204,7 +205,7 @@ lint_enabled = false    # /doh:changelog skips linting
 "✨ Detected ESLint in your project. DOH linting will focus on .doh/ files only.
    Use '/doh:lint --enable' to configure DOH-specific enhancements."
 
-# No existing linting detected  
+# No existing linting detected
 "💡 No existing linting detected. DOH can provide comprehensive linting.
    Use '/doh:lint --enable' to improve code quality across your project."
 ```
@@ -239,4 +240,5 @@ Key differences for runtime use:
 - **Graceful fallback**: Pipeline continues even if linting fails or is disabled
 - **Project-specific rules**: Uses .doh/config.ini instead of hardcoded DOH system rules
 
-This command brings intelligent linting capabilities to DOH projects while respecting existing project setup and providing flexible, optional enhancement rather than mandatory processing.
+This command brings intelligent linting capabilities to DOH projects while respecting existing project setup and
+providing flexible, optional enhancement rather than mandatory processing.

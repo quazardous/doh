@@ -2,7 +2,8 @@
 
 ## Description
 
-Initialise ou re-initialise intelligemment le système /doh dans un projet existant. Commande réentrante qui peut être exécutée plusieurs fois sans dégâts.
+Initialise ou re-initialise intelligemment le système /doh dans un project existent. Commande réentrante qui peut être
+exécutée plusieurs fois sans dégâts.
 
 ## Usage
 
@@ -18,31 +19,31 @@ Initialise ou re-initialise intelligemment le système /doh dans un projet exist
 
 ### 1. Health Check & Diagnostic
 
-- ✅ Vérifie la présence de `.claude/doh/` (système) ET `.doh/` (projet)
+- ✅ Vérifie la présence de `.claude/doh/` (système) ET `.doh/` (project)
 - ✅ Contrôle l'intégrité de `.doh/project-index.json`
 - ✅ Détecte les fichiers MD orphelins (non indexés)
-- ✅ Identifie les références index sans fichiers correspondants
-- ✅ Valide la cohérence hiérarchique (parents ↔ enfants)
+- ✅ Identifie les références index sans fichiers correspondents
+- ✅ Valid la cohérence hiérarchique (parents ↔ enfants)
 
 ### 2. Auto-Détection Intelligente
 
-#### Langue du Projet
+#### Langue du Project
 
 ```bash
 # Analyse automatique de la langue
-- Commentaires dans le code (// vs /**) 
+- Commentaires dans le code (// vs /**)
 - Messages de commit Git récents
 - Documentation (README.md, *.md)
 - Contenu des fichiers template/config
 → Défaut détecté: français/anglais
 ```
 
-#### Type de Projet
+#### Type de Project
 
 ```bash
 # Détection du stack technique
 - package.json → Node.js/JavaScript
-- composer.json → PHP/Symfony  
+- composer.json → PHP/Symfony
 - requirements.txt → Python
 - pom.xml → Java
 - Cargo.toml → Rust
@@ -66,7 +67,7 @@ Initialise ou re-initialise intelligemment le système /doh dans un projet exist
 ```bash
 # Recherche exhaustive dans .doh/
 .doh/epics/**/*.md    → Détecte epics non indexés
-.doh/tasks/**/*.md    → Détecte tasks orphelines  
+.doh/tasks/**/*.md    → Détecte tasks orphelines
 .doh/features/**/*.md → Détecte features manquantes
 .doh/prds/**/*.md     → Détecte PRDs non trackés
 ```
@@ -88,7 +89,7 @@ Initialise ou re-initialise intelligemment le système /doh dans un projet exist
 - Parse parent/child relationships
 - Détecte références circulaires
 - Résout dépendances manquantes
-- Reconstruit .doh/project-index.json complet
+- Reconstruit .doh/project-index.json complete
 ```
 
 ### 4. Configuration CLAUDE.md
@@ -99,7 +100,7 @@ Initialise ou re-initialise intelligemment le système /doh dans un projet exist
 # Niveaux d'intégration /doh
 Level 0: Mention disponibilité /doh
 Level 1: Commandes de base + Epic #0
-Level 2: Workflow complet + tracing recommandé  
+Level 2: Workflow complete + tracing recommandé
 Level 3: DOH obligatoire + tracing enforced
 Level 4: Enterprise compliance + reporting
 ```
@@ -109,7 +110,7 @@ Level 4: Enterprise compliance + reporting
 ```bash
 # Génération section CLAUDE.md selon:
 - Langue détectée (français/anglais)
-- Type de projet (Symfony/Node/etc.)
+- Type de project (Symfony/Node/etc.)
 - Niveau /doh choisi (0-4)
 - Configuration sync (GitHub/GitLab/local)
 ```
@@ -142,7 +143,7 @@ Level 4: Enterprise compliance + reporting
 #### Anti-Vibe Coding
 
 ```bash
-# Copie règles contexte obligatoire
+# Copy règles contexte obligatoire
 .claude/doh/anti-vibe-coding.md → .claude/context/anti-vibe-coding.md
 # Garantit que l'IA a toujours le contexte /doh
 ```
@@ -152,7 +153,7 @@ Level 4: Enterprise compliance + reporting
 ```bash
 # Installation templates
 - PRD templates (micro/standard/enterprise)
-- Epic templates (simple/feature-rich)  
+- Epic templates (simple/feature-rich)
 - Task templates (hotfix/standard/complex)
 - JSON schemas pour validation
 ```
@@ -164,33 +165,33 @@ Level 4: Enterprise compliance + reporting
 ```bash
 /doh:init
 
-🔍 Analyse du projet...
+🔍 Analyse du project...
 📁 Structure détectée: Symfony + JavaScript (Webpack Encore)
 🌐 Langue détectée: Français (sur base des commentaires et commits)
 📡 Git remote détecté: github.com/user/myproject
 
 ❓ Configuration /doh:
-  [1] Minimal - Mention /doh disponible  
+  [1] Minimal - Mention /doh disponible
   [2] Light - Commandes de base + Epic #0
-  [3] Standard - Workflow complet (RECOMMANDÉ)
+  [3] Standard - Workflow complete (RECOMMANDÉ)
   [4] Strict - DOH obligatoire + sync GitHub
   [5] Enterprise - Compliance complète
 
-Niveau souhaité (1-5)? [3]: 
+Niveau souhaité (1-5)? [3]:
 
 ❓ Synchronisation GitHub?
   → Detected: github.com/user/myproject
-  → Configurer sync bidirectionnel (y/N)? [N]: 
+  → Configurer sync bidirectionnel (y/N)? [N]:
 
-❓ Langue projet confirmée: Français 
+❓ Langue project confirmée: Français
   → Changer vers anglais (y/N)? [N]:
 
 ✅ Configuration:
   - Niveau: Standard (3)
-  - Langue: Français  
+  - Langue: Français
   - Sync: Local uniquement
   - Templates: Français + Symfony
-  
+
 Continuer installation (Y/n)? [Y]:
 ```
 
@@ -206,23 +207,23 @@ Continuer installation (Y/n)? [Y]:
 ### 1. Pre-flight Checks
 
 ```bash
-✅ Vérifier que dans un projet Git
-✅ Contrôler permissions filesystem  
+✅ Vérifier que dans un project Git
+✅ Contrôler permissions filesystem
 ✅ Détecter installation /doh existante
-✅ Identifier conflicts potentiels
+✅ Identifier conflicts potentials
 ```
 
 ### 2. Analysis Phase
 
 ```bash
-🔍 Scan filesystem pour /doh existant
+🔍 Scan filesystem pour /doh existent
 📊 Analyse langue (comments + commits + docs)
 🏗️ Détection stack technique (package.json, etc.)
 🌐 Configuration Git remote
 📈 Health check cohérence existante
 ```
 
-### 3. Configuration Phase  
+### 3. Configuration Phase
 
 ```bash
 ❓ Mode interactif OU paramètres CLI
@@ -234,12 +235,12 @@ Continuer installation (Y/n)? [Y]:
 ### 4. Installation Phase
 
 ```bash
-📁 Copie skeleton depuis .claude/doh/skel/ → .doh/
-📄 Installation templates + schemas dans .claude/doh/  
-📋 Personnalisation project-index.json (nom projet, dates, counters)
+📁 Copy skeleton depuis .claude/doh/skel/ → .doh/
+📄 Installation templates + schemas dans .claude/doh/
+📋 Personnalisation project-index.json (nom project, dates, counters)
 🔄 Migration données existantes si nécessaire
 📝 Mise à jour CLAUDE.md
-📋 Copie anti-vibe-coding.md → context/
+📋 Copy anti-vibe-coding.md → context/
 ```
 
 ### 5. Validation Phase
@@ -247,7 +248,7 @@ Continuer installation (Y/n)? [Y]:
 ```bash
 ✅ Validation intégrité installation
 🧪 Test loading de .doh/project-index.json
-🔗 Vérification cohérence hiérarchies  
+🔗 Vérification cohérence hiérarchies
 📊 Rapport final installation
 ```
 
@@ -270,7 +271,7 @@ Continuer installation (Y/n)? [Y]:
 → Mode réparation pour installation corrompue
 → Reconstruction .doh/project-index.json depuis filesystem scan
 → Résolution références orphelines
-→ Health check + diagnostic complet
+→ Health check + diagnostic complete
 ```
 
 ### Rollback Capability
@@ -297,20 +298,20 @@ Continuer installation (Y/n)? [Y]:
   - Niveau /doh: Standard
 
 📁 Structure créée:
-  ├── .doh/                              # Contenu projet (copié depuis skeleton)
+  ├── .doh/                              # Contenu project (copié depuis skeleton)
   │   ├── project-index.json             # Index unifié personnalisé
   │   ├── epics/quick/epic0.md           # Epic #0 prêt à utiliser
-  │   ├── memory/project/                # Mémoire niveau projet
+  │   ├── memory/project/                # Mémoire niveau project
   │   ├── memory/epics/                  # Mémoire niveau épics
   │   └── memory/agent-sessions/         # Sessions agents
   ├── .claude/doh/                       # Système /doh
-  │   ├── skel/                          # Skeleton pour futurs projets
+  │   ├── skel/                          # Skeleton pour futurs projects
   │   └── templates/ (FR + Symfony)      # Templates
   └── .claude/context/anti-vibe-coding.md
 
 ⚡ Commandes disponibles:
   /doh:quick "description"  → Création rapide via Epic #0
-  /doh:epic [id]           → Brainstorming épics  
+  /doh:epic [id]           → Brainstorming épics
   /doh:task [id]           → Gestion tâches
 
 📋 Next steps:
@@ -327,7 +328,7 @@ Continuer installation (Y/n)? [Y]:
 /doh:init --verbose
 → Logs détaillés de chaque étape
 → Affichage des fichiers scannés
-→ Détails des décisions automatiques  
+→ Détails des décisions automatiques
 → Timing des opérations
 ```
 
@@ -346,8 +347,8 @@ Continuer installation (Y/n)? [Y]:
 ### Node.js/JavaScript
 
 ```bash
-# Templates pour projets JS
-- Component creation templates  
+# Templates pour projects JS
+- Component creation templates
 - Package.json script integration
 - Jest/testing framework examples
 - Build pipeline references
@@ -371,8 +372,8 @@ Continuer installation (Y/n)? [Y]:
 # Mise à jour système /doh
 /doh:init --update-system
 → Télécharge dernière version templates
-→ Met à jour schemas + agents  
-→ Conserve configuration projet
+→ Met à jour schemas + agents
+→ Conserve configuration project
 ```
 
 ### Health Monitoring
@@ -382,9 +383,9 @@ Continuer installation (Y/n)? [Y]:
 /doh:init --health-check
 → Scan intégrité système
 → Détecte corruptions ou incohérences
-→ Rapport santé + recommandations
+→ Rapport santé + recommendations
 ```
 
 ---
 
-*Commande /doh:init - Installation et maintenance intelligente du système /doh*
+_Commande /doh:init - Installation et maintenance intelligente du système /doh_

@@ -1,13 +1,14 @@
 # DOH Memory Structure Templates
 
-This document defines the intelligent memory structure for DOH runtime projects, used by `/doh:next` for AI-powered task recommendations.
+This document defines the intelligent memory structure for DOH runtime projects, used by `/doh:next` for AI-powered task
+recommendations.
 
 ## Directory Structure
 
 ```
 .doh/memory/
 ├── NEXT.md              # AI memory for task recommendations
-├── patterns.md          # Learned project patterns  
+├── patterns.md          # Learned project patterns
 ├── preferences.md       # User preference tracking
 └── optimization.md      # AI optimization log
 ```
@@ -18,6 +19,7 @@ This document defines the intelligent memory structure for DOH runtime projects,
 
 ```markdown
 # DOH Task Intelligence Memory 🧠
+
 **Last Analysis**: {DATE}  
 **Project Context**: {PROJECT_NAME}  
 **Epic Progress**: {ACTIVE_EPICS_SUMMARY}  
@@ -28,27 +30,27 @@ This document defines the intelligent memory structure for DOH runtime projects,
 ### Immediate Priority (Next Session)
 
 #### 1. **{TASK_ID}** - {TASK_TITLE} ({EFFORT_ESTIMATE})
+
 - **Score**: {PRIORITY_SCORE}/10 - {IMPACT_DESCRIPTION}
 - **Status**: 🟢 READY ({DEPENDENCIES_MET})
 - **Impact**: {IMPACT_DESCRIPTION}
 - **Why Now**: {RECOMMENDATION_REASONING}
 
 #### 2. **{TASK_ID}** - {TASK_TITLE} ({EFFORT_ESTIMATE})
+
 - **Score**: {PRIORITY_SCORE}/10 - {CATEGORY}
 - **Status**: 🟡 WAITING ({BLOCKING_DEPENDENCIES})
 - **Impact**: {IMPACT_DESCRIPTION}
 - **Why**: {RECOMMENDATION_REASONING}
 
 ## 📊 Task Dependency Graph
-
 ```
+
 Legend: 🟢 Ready | 🟡 Waiting | 🔴 Blocked | ✅ Complete
 
-{EPIC_ID} ({EPIC_TITLE})
-    ├─→ ✅ {TASK_ID} ({TASK_TITLE})
-    │       └─→ 🟢 {DEPENDENT_TASK}
-    └─→ 🟡 {TASK_ID} ({TASK_TITLE})
-            └─→ 🔴 {BLOCKED_TASK}
+{EPIC_ID} ({EPIC_TITLE}) ├─→ ✅ {TASK_ID} ({TASK_TITLE}) │ └─→ 🟢 {DEPENDENT_TASK} └─→ 🟡 {TASK_ID} ({TASK_TITLE}) └─→
+🔴 {BLOCKED_TASK}
+
 ```
 
 ## 🔍 Pre-computed Queries
@@ -57,7 +59,7 @@ Legend: 🟢 Ready | 🟡 Waiting | 🔴 Blocked | ✅ Complete
 1. {TASK_ID} - {TASK_TITLE} (unlocks {DEPENDENT_COUNT} tasks)
 2. {TASK_ID} - {TASK_TITLE} (epic critical path)
 
-### "quick wins"  
+### "quick wins"
 1. {TASK_ID} - {TASK_TITLE} ({EFFORT_POINTS} points)
 2. {TASK_ID} - {TASK_TITLE} ({EFFORT_POINTS} points)
 
@@ -122,23 +124,25 @@ Legend: 🟢 Ready | 🟡 Waiting | 🔴 Blocked | ✅ Complete
 
 ```markdown
 # DOH Project Pattern Learning 📊
-**Last Updated**: {DATE}
-**Project**: {PROJECT_NAME}
-**Analysis Period**: {ANALYSIS_WINDOW}
+
+**Last Updated**: {DATE} **Project**: {PROJECT_NAME} **Analysis Period**: {ANALYSIS_WINDOW}
 
 ## Task Completion Patterns
 
 ### Typical Effort Estimates vs Actual
+
 - **1 point tasks**: Usually take {ACTUAL_TIME} (accuracy: {ACCURACY}%)
 - **3 point tasks**: Usually take {ACTUAL_TIME} (accuracy: {ACCURACY}%)
 - **5 point tasks**: Usually take {ACTUAL_TIME} (accuracy: {ACCURACY}%)
 
 ### Dependencies & Blockers
+
 - **Most common blockers**: {COMMON_BLOCKERS}
 - **Average dependency chain length**: {AVG_CHAIN_LENGTH}
 - **Frequent bottlenecks**: {BOTTLENECK_TASKS}
 
 ### Epic Progression
+
 - **{EPIC_ID}**: {PROGRESSION_PATTERN}
 - **Average phase duration**: {PHASE_DURATION}
 - **Common phase transitions**: {TRANSITION_PATTERNS}
@@ -146,11 +150,13 @@ Legend: 🟢 Ready | 🟡 Waiting | 🔴 Blocked | ✅ Complete
 ## Team Collaboration Patterns
 
 ### Agent Specialization
+
 - **{AGENT_NAME}**: Strong in {SPECIALIZATION_AREAS}
 - **Cross-agent dependencies**: {COLLABORATION_PATTERNS}
 - **Handoff efficiency**: {HANDOFF_METRICS}
 
 ### Working Rhythm
+
 - **Peak productivity times**: {PEAK_TIMES}
 - **Typical session lengths**: {SESSION_PATTERNS}
 - **Break patterns**: {BREAK_ANALYSIS}
@@ -158,40 +164,45 @@ Legend: 🟢 Ready | 🟡 Waiting | 🔴 Blocked | ✅ Complete
 ## Context Switch Patterns
 
 ### Task Switching
+
 - **Effective switches**: {GOOD_SWITCH_PATTERNS}
 - **Costly switches**: {EXPENSIVE_SWITCHES}
 - **Optimal sequencing**: {SEQUENCE_RECOMMENDATIONS}
 
 ### Focus Area Rotation
+
 - **Documentation → Development**: {ROTATION_EFFICIENCY}
 - **Testing → Features**: {ROTATION_PATTERNS}
 - **Architecture → Implementation**: {TRANSITION_SUCCESS}
 
 ---
-*Pattern analysis helps /doh:next provide increasingly accurate recommendations*
+
+_Pattern analysis helps /doh:next provide increasingly accurate recommendations_
 ```
 
 ### preferences.md - User Preference Tracking
 
 ```markdown
 # DOH User Preference Tracking 👤
-**Last Updated**: {DATE}
-**User Context**: {USER_IDENTIFIER}
-**Tracking Period**: {TRACKING_WINDOW}
+
+**Last Updated**: {DATE} **User Context**: {USER_IDENTIFIER} **Tracking Period**: {TRACKING_WINDOW}
 
 ## Task Selection Preferences
 
 ### Consistently Chosen Over Recommended
+
 - **User picks {TASK_TYPE}** when AI suggests {OTHER_TYPE}: {FREQUENCY}%
 - **Preference pattern**: {PATTERN_DESCRIPTION}
 - **Adaptation**: Increase weight for {PREFERRED_CHARACTERISTICS}
 
 ### Context Preferences
+
 - **"Quick wins"**: Prefers {TASK_CHARACTERISTICS}
 - **"High impact"**: Values {IMPACT_FACTORS}
 - **"Documentation"**: Focuses on {DOC_PREFERENCES}
 
 ### Work Style Indicators
+
 - **Sequential vs Parallel**: Tends to {WORK_STYLE_PREFERENCE}
 - **Deep focus vs Variety**: Prefers {FOCUS_PREFERENCE}
 - **Planning vs Doing**: Leans toward {APPROACH_PREFERENCE}
@@ -199,22 +210,26 @@ Legend: 🟢 Ready | 🟡 Waiting | 🔴 Blocked | ✅ Complete
 ## Epic & Strategic Preferences
 
 ### Epic Affinity
+
 - **Most engaged with**: {PREFERRED_EPICS}
 - **Avoids**: {AVOIDED_EPIC_TYPES}
 - **Timing preferences**: Works on {EPIC_TYPE} during {PREFERRED_TIMING}
 
 ### Priority Interpretation
+
 - **User's P1 vs System P1**: {PRIORITY_ALIGNMENT}%
 - **Urgency vs Importance**: Prioritizes {PREFERENCE_BALANCE}
 
 ## Query Pattern Learning
 
 ### Natural Language Preferences
+
 - **Most used queries**: {COMMON_QUERIES}
 - **Effective phrasings**: {SUCCESSFUL_QUERIES}
 - **Misunderstood queries**: {PROBLEMATIC_QUERIES}
 
 ### Context Usage
+
 - **Frequently used contexts**: {POPULAR_CONTEXTS}
 - **Effective combinations**: {SUCCESSFUL_COMBINATIONS}
 - **Underutilized features**: {UNUSED_FEATURES}
@@ -222,37 +237,38 @@ Legend: 🟢 Ready | 🟡 Waiting | 🔴 Blocked | ✅ Complete
 ## Adaptation Recommendations
 
 ### AI Behavior Adjustments
+
 - **Increase weight on**: {BOOST_FACTORS}
 - **Decrease emphasis on**: {REDUCE_FACTORS}
 - **Add new filters for**: {NEW_FILTER_SUGGESTIONS}
 
 ### Interface Optimizations
+
 - **Suggest shortcuts for**: {SHORTCUT_OPPORTUNITIES}
 - **Default contexts to**: {PREFERRED_DEFAULTS}
 - **Proactive suggestions**: {PROACTIVE_OPPORTUNITIES}
 
 ---
-*Preference tracking enables /doh:next to adapt to individual working styles*
+
+_Preference tracking enables /doh:next to adapt to individual working styles_
 ```
 
 ### optimization.md - AI Optimization Log
 
 ```markdown
 # DOH AI Optimization Log 🔧
-**Last Updated**: {DATE}
-**Project**: {PROJECT_NAME}
-**Optimization Version**: {VERSION}
+
+**Last Updated**: {DATE} **Project**: {PROJECT_NAME} **Optimization Version**: {VERSION}
 
 ## Applied Optimizations
 
 ### {DATE} - {OPTIMIZATION_TITLE}
-**Pattern Detected**: {DETECTED_PATTERN}
-**Issue**: {IDENTIFIED_ISSUE}
-**Solution**: {IMPLEMENTED_SOLUTION}
-**Impact**: {MEASURED_IMPACT}
-**Status**: ✅ Active | 🔄 Testing | ❌ Reverted
+
+**Pattern Detected**: {DETECTED_PATTERN} **Issue**: {IDENTIFIED_ISSUE} **Solution**: {IMPLEMENTED_SOLUTION} **Impact**:
+{MEASURED_IMPACT} **Status**: ✅ Active | 🔄 Testing | ❌ Reverted
 
 ### Performance Improvements
+
 - **Query response time**: Improved from {OLD_TIME}ms to {NEW_TIME}ms
 - **Recommendation accuracy**: Increased from {OLD_ACCURACY}% to {NEW_ACCURACY}%
 - **User satisfaction**: {SATISFACTION_METRICS}
@@ -260,34 +276,34 @@ Legend: 🟢 Ready | 🟡 Waiting | 🔴 Blocked | ✅ Complete
 ## Detected Patterns Awaiting Optimization
 
 ### {PATTERN_NAME}
-**Observed**: {PATTERN_DESCRIPTION}
-**Frequency**: {OCCURRENCE_RATE}
-**Potential Impact**: {ESTIMATED_IMPROVEMENT}
-**Proposed Solution**: {SOLUTION_PROPOSAL}
-**Risk Assessment**: {RISK_LEVEL}
+
+**Observed**: {PATTERN_DESCRIPTION} **Frequency**: {OCCURRENCE_RATE} **Potential Impact**: {ESTIMATED_IMPROVEMENT}
+**Proposed Solution**: {SOLUTION_PROPOSAL} **Risk Assessment**: {RISK_LEVEL}
 
 ## Failed Optimizations
 
 ### {OPTIMIZATION_NAME}
-**Attempted**: {DATE}
-**Reason for Failure**: {FAILURE_ANALYSIS}
-**Lessons Learned**: {INSIGHTS}
-**Alternative Approaches**: {ALTERNATIVES}
+
+**Attempted**: {DATE} **Reason for Failure**: {FAILURE_ANALYSIS} **Lessons Learned**: {INSIGHTS} **Alternative
+Approaches**: {ALTERNATIVES}
 
 ## Optimization Pipeline
 
 ### Scheduled Reviews
+
 - **Weekly pattern analysis**: {NEXT_ANALYSIS_DATE}
 - **Monthly accuracy audit**: {NEXT_AUDIT_DATE}
 - **Quarterly system optimization**: {NEXT_OPTIMIZATION_DATE}
 
 ### Continuous Learning Triggers
+
 - **Accuracy drops below**: {THRESHOLD}%
 - **Response time exceeds**: {THRESHOLD}ms
 - **User override rate above**: {THRESHOLD}%
 
 ---
-*Optimization log ensures /doh:next continuously improves its intelligence*
+
+_Optimization log ensures /doh:next continuously improves its intelligence_
 ```
 
 ## Memory Initialization
@@ -310,4 +326,5 @@ When `/doh:next` is first run in a project, it creates these templates populated
 
 ---
 
-This memory structure enables `/doh:next` to provide intelligent, contextual, and continuously improving task recommendations tailored to each DOH project's specific patterns and team dynamics.
+This memory structure enables `/doh:next` to provide intelligent, contextual, and continuously improving task
+recommendations tailored to each DOH project's specific patterns and team dynamics.

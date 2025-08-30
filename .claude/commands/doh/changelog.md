@@ -1,6 +1,7 @@
 # /doh:changelog - Project Documentation Pipeline
 
-Executes project documentation updates: DOH task management, CHANGELOG updates, and version tracking for any DOH-managed project. Adapts the sophisticated /doh-dev pipeline for runtime use with .doh project structure.
+Executes project documentation updates: DOH task management, CHANGELOG updates, and version tracking for any DOH-managed
+project. Adapts the sophisticated /doh-dev pipeline for runtime use with .doh project structure.
 
 ## Usage
 
@@ -13,7 +14,8 @@ Executes project documentation updates: DOH task management, CHANGELOG updates, 
 - `task-completion`: (Optional) DOH task ID or description of completed work (e.g., "DOH-123", "implement user auth")
   - **If omitted**: Auto-generates description based on git changes and asks for confirmation
 - `--no-version-bump`: Skip automatic version tracking (version bump is default behavior with confirmation)
-- `--no-lint`: Skip linting and auto-fixes on documentation files (default: lint only if project has DOH linting enabled)
+- `--no-lint`: Skip linting and auto-fixes on documentation files (default: lint only if project has DOH linting
+  enabled)
 - `--dry-run`: Show what would be done without making changes
 
 ## Auto-Description Generation
@@ -53,13 +55,13 @@ This command executes the core DOH documentation pipeline for .doh projects:
 
 **Development** (/doh-dev):
 
-- Source: todo/*.md files → TODO management
+- Source: todo/\*.md files → TODO management
 - Target: TODO.md, CHANGELOG.md in project root
 - Context: DOH system development
 
 **Runtime** (/doh):
 
-- Source: .doh/tasks/*.json → DOH task management  
+- Source: .doh/tasks/\*.json → DOH task management
 - Target: Project's CHANGELOG.md
 - Context: User's project using DOH
 
@@ -100,10 +102,12 @@ Completed tasks automatically generate changelog entries:
 ## [1.2.1] - 2025-08-28
 
 ### Added
+
 - **DOH-123**: User authentication system with JWT tokens
 - **DOH-124**: Password reset functionality
 
 ### Changed
+
 - **DOH-125**: Updated API response format for consistency
 ```
 
@@ -162,7 +166,7 @@ Works seamlessly with other `/doh:` commands:
 
 Provides clear progress reporting:
 
-```
+```text
 📝 Project Documentation Updates: DOH-123 User Authentication
 ├── ✅ .doh/tasks/DOH-123.json updated (marked completed)
 ├── ✅ CHANGELOG.md updated (DOH-123 entry added)
@@ -211,10 +215,11 @@ Uses progressive error handling:
 
 Key differences for runtime use:
 
-- **Task Source**: .doh/tasks/*.json instead of todo/*.md
-- **Changelog Target**: Project CHANGELOG.md instead of DOH system CHANGELOG.md  
+- **Task Source**: .doh/tasks/_.json instead of todo/_.md
+- **Changelog Target**: Project CHANGELOG.md instead of DOH system CHANGELOG.md
 - **Version Source**: Project package.json/version files instead of VERSION.md
 - **Configuration**: .doh/config.ini instead of hardcoded DOH system settings
 - **ID Format**: DOH-### or custom prefix instead of T###
 
-This command brings enterprise-grade documentation pipeline capabilities to every DOH-managed project while maintaining the intelligent automation and AI-driven optimizations of the /doh-dev equivalent.
+This command brings enterprise-grade documentation pipeline capabilities to every DOH-managed project while maintaining
+the intelligent automation and AI-driven optimizations of the /doh-dev equivalent.

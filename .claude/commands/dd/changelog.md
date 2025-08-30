@@ -3,34 +3,45 @@
 Executes DOH system documentation updates: structured TODO management, CHANGELOG updates, archive maintenance, and
 version tracking without committing changes. Works with the new structured todo/ folder system with individual files.
 
+## 🚨 CRITICAL: NO GIT OPERATIONS
+
+**This command performs ZERO git operations**:
+
+- ❌ **NO `git add`** - Does not stage any files
+- ❌ **NO `git commit`** - Does not create commits
+- ❌ **NO `git status`** - Does not check git state
+- ✅ **Documentation ONLY** - Modifies files without touching git
+
+**For git operations**: Use `/dd:commit` after running this command
+
 ## Claude AI Execution Protocol
 
 **Sequential Pipeline Steps**:
-1. **Parse task-completion parameter** - Extract TODO ID and description
-2. **Execute linting pipeline** - Run 4-layer linting system (make lint-fix → AI fixes → validation → user decision)
-3. **IF linting succeeds**: Continue to documentation updates
-4. **IF linting fails**: Present user decision options, AWAIT input, apply user choice  
-5. **Update TODO files** - Modify T###.md status and metadata
-6. **Update CHANGELOG.md** - Add entry with completion details
-7. **Manage archives** - Move old completed TODOs to todo/archive/
-8. **Track patterns** - Update ./linting/feedback.md with linting data
-9. **Return pipeline status** - Success/blocked/bypassed for calling command
+
+1. **ENFORCE: No git operations allowed** - Verify no git commands in pipeline
+2. **Parse task-completion parameter** - Extract TODO ID and description
+3. **Update TODO files** - Modify T###.md status and metadata
+4. **Update CHANGELOG.md** - Add entry with completion details
+5. **Manage archives** - Move old completed TODOs to todo/archive/
+6. **Return pipeline status** - Success for calling command
 
 ## Usage
 
 ```bash
-/dd:changelog [task-completion] [--no-version-bump] [--no-lint] [--dry-run]
+/dd:changelog [task-completion] [--no-version-bump] [--dry-run]
 ```
 
-## Parameters  
+## Parameters
 
 ### Primary Input
+
 - `task-completion`: (Optional) Task ID or description of completed work
-  - **Examples**: `"T035"`, `"fix documentation"`, `"implement changelog pipeline"`
+  - **Examples**: `"DOH035"`, `"fix documentation"`, `"implement changelog pipeline"`
   - **If omitted**: Auto-generates description based on git changes and asks for confirmation
   - **Smart detection**: Analyzes staging area and recent commits to suggest descriptions
 
 ### Control Flags
+
 - `--dry-run`: Preview all changes without making any modifications
   - **Safe**: Shows TODO updates, CHANGELOG entries, version changes, archive operations
   - **Use when**: Want to verify changes before executing
@@ -38,20 +49,8 @@ version tracking without committing changes. Works with the new structured todo/
 
 - `--no-version-bump`: Skip automatic version tracking
   - **Default**: Version analysis with user confirmation before changes
-  - **Use when**: Minor documentation updates that don't warrant version increment  
+  - **Use when**: Minor documentation updates that don't warrant version increment
   - **Note**: Version analysis still runs to show impact, just skips the actual bump
-
-- `--no-lint`: Skip linting and auto-fixes on documentation files
-  - **Pipeline Effect**: Bypasses all 4 linting layers completely
-  - **Git Integration**: Forces git --no-verify for calling commands
-  - **Use when**: Documentation is already properly formatted  
-  - **Performance**: Saves 30-60 seconds, focuses on content updates only
-
-- `--lenient`: Enable linting bypass mode for non-critical issues
-  - **Pipeline Effect**: Allows bypassing linting failures with user confirmation
-  - **Git Integration**: Uses git --no-verify when bypass is chosen
-  - **Default**: Strict mode blocks pipeline on any linting failures
-  - **Use when**: Working in development environment with acceptable quality trade-offs
 
 ## Auto-Description Generation
 
@@ -69,7 +68,7 @@ When called without a task description, uses the same intelligent analysis as `/
 /dd:changelog
 
 # System analyzes changes and suggests:
-# "T038 pipeline command implementation completed"
+# "DOH038 pipeline command implementation completed"
 # Confirm for documentation updates? [Y/n/edit]:
 ```
 
@@ -84,223 +83,22 @@ This command executes the core DOH documentation pipeline with strict quality en
 - **CHANGELOG Updates**: Add completed tasks, update status, ensure formatting
 - **ID Counter Management**: Update next available ID counter in todo/README.md
 - **Version Tracking**: Update version files with project context isolation
-  - **Project-Aware Versioning**: 
-    - DOH-DEV Internal tasks → `dd-x.x.x` version files (`todo/dd-0.1.0.md`)
-    - DOH Runtime tasks → `doh-x.x.x` version files (`todo/doh-1.4.0.md`) 
+  - **Project-Aware Versioning**:
+    - DOH-DEV Internal tasks → `dd-x.x.x` version files (`todo/VDD-0.1.0.md`)
+    - DOH Runtime tasks → `doh-x.x.x` version files (`todo/VDOH-1.4.0.md`)
     - Default: DOH Runtime versioning unless task explicitly marked DOH-DEV Internal
   - **History Immutability**: NEVER modifies CHANGELOG.md or completed tasks during refactoring
   - **Automatic Analysis**: Detects version impact based on project context and task scope
   - **User Confirmation**: Prompts for approval with project-specific version increment
   - **Impact Assessment**: Shows version change rationale with project isolation respected
 
-### 2. Strict Linting Enforcement (NEW)
+### 2. Quality Assurance
 
-- **AI-Powered Linting Pipeline**: Multi-layer fix system for pixel-perfect documentation quality
-  - **Layer 1**: `make lint-fix` (automated tooling corrections)
-  - **Layer 2**: **AI-powered fixes** (Claude analyzes and fixes remaining issues)
-  - **Layer 3**: **Validation check** - `make lint` to verify perfect state
-  - **Layer 4**: **User decision** - prompt for lenient/abort if still failing
-- **Strict Default**: Blocks pipeline execution when linting errors found (pixel perfect requirement)
-- **Smart Bypass Control**: `--lenient` and `--no-lint` flags provide controlled bypass mechanisms
-- **Intelligent Feedback Tracking**: Stores linting patterns in `./linting/feedback.md` for DOH-DEV optimization
-- **Proactive Configuration Tuning**: Suggests `.markdownlint.json` optimizations based on failure patterns
+- **Documentation Standards**: Follows DOH markdown conventions
+- **Version Impact Analysis**: Automatic detection of version-affecting changes
+- **Archive Management**: Systematic organization of completed tasks
 
-**Architecture**: This command provides the core pipeline that `/dd:commit` builds upon with strict quality enforcement.
-
-### 3. AI-Powered Linting Pipeline Implementation
-
-The `/dd:changelog` command now includes a sophisticated linting pipeline that enforces pixel-perfect documentation quality:
-
-#### **Multi-Layer Fix System**
-
-```bash
-# Linting Pipeline Execution Flow
-/dd:changelog "T070 complete"
-
-🔄 DOH Documentation Pipeline: T070 complete
-├── 📝 Running linting pipeline (STRICT mode)...
-│   ├── 🔧 Step 1: make lint-fix (automated tooling)
-│   │   └── ✅ Fixed 8/12 issues automatically
-│   ├── 🤖 Step 2: AI analyzing remaining 4 issues...
-│   │   ├── ✅ Fixed MD047 (missing newlines)
-│   │   ├── ✅ Fixed MD032 (list spacing)  
-│   │   ├── ⚠️  MD013 (line length) needs manual attention
-│   │   └── ⚠️  MD025 (multiple H1s) structural issue
-│   ├── 🔍 Step 3: Final validation - 2 issues remaining
-│   └── ❌ LINTING FAILED - Pipeline blocked
-│
-├── 📊 Pattern tracking: MD013 frequency increased (23→24)
-├── 💡 Suggestion: Consider line-length limit increase to 130
-│
-└── ⚠️  USER DECISION REQUIRED:
-    [1] Continue in lenient mode (bypass with --no-verify)
-    [2] Abort and fix manually  
-    [3] Show detailed fix suggestions
-    [4] Apply suggested config optimizations
-```
-
-#### **Linting Enforcement Modes**
-
-**Default (Strict Mode)**:
-- **Pixel perfect requirement**: Zero linting errors allowed
-- **Pipeline blocking**: Halts execution when errors found
-- **Interactive decision**: Prompts user for bypass confirmation
-- **Pattern learning**: Tracks failures in `./linting/feedback.md`
-
-**Lenient Mode (`--lenient`)**:
-- **Minor error tolerance**: Allows formatting issues, blocks structural errors  
-- **Bypass mechanism**: Uses `--no-verify` in git operations
-- **Warning display**: Shows errors but continues pipeline
-- **Automatic continuation**: No user prompts required
-
-**Skip Mode (`--no-lint`)**:
-- **Complete bypass**: Skips all linting operations
-- **Emergency override**: For urgent commits
-- **Clear warnings**: Explicit messaging about skipped checks
-- **Fast execution**: Minimal quality assurance overhead
-
-#### **AI-Powered Fix Integration**
-
-```javascript
-const aiLintingPipeline = async (files, options) => {
-  console.log('🔍 Running pre-commit linting checks...');
-  
-  // Layer 1: Automated tooling fixes
-  const makeResult = await runCommand('make lint-fix');
-  console.log(`🔧 Step 1: Automated fixes applied (${makeResult.fixedCount} issues)`);
-  
-  // Layer 2: AI-powered analysis and fixes
-  const remainingIssues = await runCommand('make lint');
-  if (remainingIssues.length > 0) {
-    console.log('🤖 Step 2: AI analyzing remaining issues...');
-    
-    for (const file of remainingIssues.files) {
-      const aiFixResult = await claude.fixLintingIssues(file, remainingIssues.getIssues(file));
-      if (aiFixResult.success) {
-        fs.writeFileSync(file, aiFixResult.content);
-        console.log(`✅ AI fixed: ${file} (${aiFixResult.fixedCount} issues)`);
-      } else {
-        console.log(`⚠️  ${file}: ${aiFixResult.reason} (manual attention needed)`);
-      }
-    }
-  }
-  
-  // Layer 3: Final validation
-  const finalResult = await runCommand('make lint');
-  console.log(`🔍 Step 3: Final validation - ${finalResult.errorCount} issues remaining`);
-  
-  // Layer 4: User decision handling
-  if (finalResult.errorCount > 0) {
-    return handleLintingFailure(finalResult, options);
-  }
-  
-  return { proceed: true, mode: 'strict' };
-};
-```
-
-#### **Intelligent Feedback System**
-
-The changelog pipeline automatically tracks linting patterns and provides optimization suggestions:
-
-**Pattern Recognition**:
-- **File-specific issues**: `todo/*.md` → MD047, MD013 patterns
-- **Rule frequency**: MD013 (23 occurrences), MD047 (12 occurrences)  
-- **AI success rates**: MD047 (100%), MD013 (95%), MD025 (23%)
-- **Config optimization**: Suggests `.markdownlint.json` updates
-
-**Feedback Storage** (`./linting/feedback.md`) - Organized by Language:
-```markdown
-# DOH-DEV Linting Intelligence Feedback
-
-**Last Updated**: 2025-08-28  
-**Linting Runs**: 47 total (89% success rate)
-
-## Markdown Linting Patterns
-
-### Pattern Analysis
-- **MD013 (Line Length)**: 23 occurrences → Suggest 130-char limit
-- **MD047 (Missing Newline)**: 12 occurrences → Add EditorConfig
-- **MD032 (List Spacing)**: 8 occurrences → Configure Prettier
-
-### File Type Patterns
-```
-todo/T*.md       → MD047, MD013 (task documentation)
-docs/*.md        → MD013, MD032 (user guides)  
-.claude/commands → MD040, MD013 (command reference)
-README.md        → MD032, MD025 (top-level docs)
-```
-
-### AI Success Rates
-| Rule | Success Rate | Recommendation |
-|------|--------------|----------------|
-| MD047 | 100% | Fully automated |
-| MD013 | 95% | Works well |
-| MD032 | 87% | Generally reliable |
-| MD025 | 23% | Needs manual attention |
-
-### Configuration Suggestions
-```json
-{
-  "MD013": { "line_length": 130, "code_blocks": false },
-  "MD047": true,
-  "MD032": { "style": "consistent" }
-}
-```
-
-## Shell Script Linting (Future)
-
-### ShellCheck Patterns
-*To be populated when shell script linting is added*
-
-### Bash Style Guidelines
-*To be populated when bash linting is integrated*
-
-## JavaScript/TypeScript Linting (Future)
-
-### ESLint Patterns
-*To be populated if JS/TS files are added to the project*
-
-## Configuration Optimization History
-
-### Applied Changes
-- 2025-08-28: Initial markdown feedback system setup
-- [Future entries will track config updates and their impact]
-```
-
-**Proactive Optimization**:
-```bash
-# After accumulating patterns (10+ similar failures)
-🔍 LINTING OPTIMIZATION DETECTED
-
-📊 Analysis: MD013 (line length) failed 23 times in last 30 commits
-💡 Recommendation: Increase line limit from 120 → 130 chars
-📈 Impact: Would eliminate 89% of MD013 failures
-
-Apply this optimization to .markdownlint.json? [Y/n]
-```
-
-#### **Pipeline Integration**
-
-The linting pipeline is fully integrated into the changelog workflow:
-
-1. **Pre-Documentation Updates**: Linting runs BEFORE any file modifications
-2. **Blocking Behavior**: Failed linting halts the entire pipeline
-3. **Git Integration**: Controls `--no-verify` usage in downstream `/dd:commit`
-4. **Flag Inheritance**: `--lenient` and `--no-lint` flags propagate correctly
-
-**Git Operation Control**:
-```bash
-# Strict mode (default): Clean git commit
-git commit -m "message"  # No --no-verify flag
-
-# Lenient mode: Bypass pre-commit hooks  
-git commit --no-verify -m "message"
-
-# Skip mode: Bypass all checks
-git commit --no-verify -m "message"
-```
-
-**Architecture**: This command provides the core pipeline that `/dd:commit` builds upon with strict quality enforcement.
+**Architecture**: This command provides the core documentation pipeline that `/dd:commit` builds upon.
 
 ## Archive Management Workflow
 
@@ -327,11 +125,11 @@ The changelog command automatically manages the todo/archive/ folder to keep act
 
 Files moved to todo/archive/ maintain their complete original format:
 
-```
+```text
 todo/archive/
-├── T013.md    # Complete original TODO file
-├── T017.md    # Full metadata and content preserved
-├── T037.md    # All completion information intact
+├── DOH013.md    # Complete original TODO file
+├── DOH017.md    # Full metadata and content preserved
+├── DOH037.md    # All completion information intact
 └── ...
 ```
 
@@ -344,17 +142,17 @@ Each archived file retains its full structure including status, priority, depend
 /dd:changelog
 
 # Update with specific task description
-/dd:changelog "T039 - Lint command implementation"
+/dd:changelog "DOH039 - Lint command implementation"
 
 # Version tracking with confirmation (default behavior)
-/dd:changelog "T040 - Feature complete"
+/dd:changelog "DOH040 - Feature complete"
 # → Analyzes impact, prompts: "Version 1.4.0 → 1.4.1 (feature completion)? [Y/n]"
 
 # Check what would be updated
 /dd:changelog --dry-run
 
 # Skip version bump for minor updates
-/dd:changelog "analysis document updates" --no-version-bump --no-lint
+/dd:changelog "analysis document updates" --no-version-bump
 ```
 
 ## Integration with Other Commands
@@ -362,26 +160,30 @@ Each archived file retains its full structure including status, priority, depend
 Works seamlessly with other `/doh-sys:` commands:
 
 ```bash
-# Typical workflow
+# Typical workflow (NO GIT OPERATIONS in changelog)
 /doh-sys:lint                    # Clean up code quality
-/dd:changelog "T039 done"   # Update documentation
-/doh-sys:commit                  # Commit with auto-generated message
+/dd:changelog "DOH039 done"        # Update documentation ONLY (no git)
+/doh-sys:commit                  # NOW do git staging + commit
 
 # Or use the full pipeline
-/doh-sys:commit "T039 done"      # Does changelog + commit
+/doh-sys:commit "DOH039 done"      # Does changelog + commit
+
+# ⚠️ INCORRECT usage (changelog does NOT do git):
+/dd:changelog && git add .       # WRONG - changelog doesn't need staging
+git add . && /dd:changelog       # WRONG - changelog works on working tree
 ```
 
 ## Output Format
 
 Provides clear progress reporting:
 
-```
-📝 DOH Documentation Updates: T039 Lint Command
-├── ✅ todo/T039.md updated (marked COMPLETED)
-├── ✅ CHANGELOG.md updated (T039 entry added)
+```text
+📝 DOH Documentation Updates: DOH039 Lint Command
+├── ✅ todo/DOH039.md updated (marked COMPLETED)
+├── ✅ CHANGELOG.md updated (DOH039 entry added)
 ├── ✅ Archive management: 2 completed TODOs moved to todo/archive/
 ├── ✅ todo/README.md: Next ID counter updated
-├── 🔄 Version analysis: doh-1.4.0 → doh-1.4.1 (feature additions detected)
+├── 🔄 Version analysis: VDOH-1.4.0 → doh-1.4.1 (feature additions detected)
 ├── ✅ Version bump confirmed and applied
 ├── 🔧 Auto-fixed 2 documentation formatting issues
 └── ✅ Documentation updates complete
@@ -394,15 +196,16 @@ Ready for commit. Next: /doh-sys:commit (will use same description)
 This command executes steps 1-3 of the commit pipeline:
 
 | Step                  | /dd:changelog | /doh-sys:commit |
-| --------------------- | ------------------ | --------------- |
-| Structured TODO Mgmt  | ✅                 | ✅              |
-| CHANGELOG Updates     | ✅                 | ✅              |
-| Archive Management    | ✅                 | ✅              |
-| ID Counter Updates    | ✅                 | ✅              |
-| Version Tracking      | ✅                 | ✅              |
-| Documentation Linting | ✅                 | ✅              |
-| Git Staging           | ❌                 | ✅              |
-| Git Commit            | ❌                 | ✅              |
+| --------------------- | ------------- | --------------- |
+| Structured TODO Mgmt  | ✅            | ✅              |
+| CHANGELOG Updates     | ✅            | ✅              |
+| Archive Management    | ✅            | ✅              |
+| ID Counter Updates    | ✅            | ✅              |
+| Version Tracking      | ✅            | ✅              |
+| Documentation Updates | ✅            | ✅              |
+| Git Staging           | ❌ **NEVER**  | ✅              |
+| Git Commit            | ❌ **NEVER**  | ✅              |
+| Git Operations        | ❌ **ZERO**   | ✅ Full         |
 
 ## Use Cases
 

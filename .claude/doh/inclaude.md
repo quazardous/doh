@@ -1,10 +1,12 @@
 # /doh System - Usage Guide for Claude
 
 ---
+
 **Generated**: 2025-08-27T12:00:00Z  
 **DOH Runtime Version**: 1.3.0 (Stable)  
 **Status**: Production Ready for Project Usage  
-**Feature Set**: Agent Context Protocol, Worktree Automation, Memory Updates, Skeleton Implementation, Centralized Dependencies
+**Feature Set**: Agent Context Protocol, Worktree Automation, Memory Updates, Skeleton Implementation, Centralized
+Dependencies
 
 ---
 
@@ -16,11 +18,12 @@ The **/doh** system provides complete task traceability with the hierarchical wo
 PRD → Epic → [Feature] → Task → Code
 ```
 
-**Philosophy**: *"DOH!" - Context is obvious... once you have it.*
+**Philosophy**: _"DOH!" - Context is obvious... once you have it._
 
 ## Main Index
 
 **`.doh/project-index.json`** - Single source of truth
+
 ```json
 {
   "metadata": {
@@ -44,27 +47,32 @@ PRD → Epic → [Feature] → Task → Code
 ## Essential Commands
 
 ### Quick Creation
+
 ```bash
 /doh:quick "description"  # Smart creation based on complexity
 ```
+
 - **Simple** → Task in Epic #0
 - **Complex** → Questions + Dedicated epic suggested
 
 ### Project Setup
+
 ```bash
 /doh:init              # Initialize DOH system (uses skeleton)
 /doh:init --health-check  # Validate project integrity
 ```
 
 ### Brainstorming
+
 ```bash
 /doh:task [id]     # Explore a task
-/doh:epic [id]     # Explore an epic  
+/doh:epic [id]     # Explore an epic
 /doh:feature [id]  # Explore a feature
 /doh:prd [id]      # Explore a PRD
 ```
 
 ### Decomposition
+
 ```bash
 /doh:prd-epics [prd_id]         # PRD → Epics
 /doh:epic-tasks [epic_id]       # Epic → Tasks
@@ -73,6 +81,7 @@ PRD → Epic → [Feature] → Task → Code
 ```
 
 ### Dependencies
+
 ```bash
 /doh:dependency add 123 67     # Task 123 depends on Task 67
 /doh:dependency list 123       # Show dependencies for item 123
@@ -81,6 +90,7 @@ PRD → Epic → [Feature] → Task → Code
 ```
 
 ### Task Intelligence
+
 ```bash
 /doh:next [query]                    # AI-powered task recommendations
 /doh:next "what should I work on?"   # Natural language queries
@@ -89,6 +99,7 @@ PRD → Epic → [Feature] → Task → Code
 ```
 
 ### Pipeline Automation
+
 ```bash
 /doh:changelog          # Update CHANGELOG.md with completed DOH tasks
 /doh:lint              # Intelligent project linting with DOH validation
@@ -96,6 +107,7 @@ PRD → Epic → [Feature] → Task → Code
 ```
 
 ### Autonomous Execution
+
 ```bash
 /doh:agent [task_id]  # Launch agent with isolated worktree + full context
 ```
@@ -106,17 +118,20 @@ PRD → Epic → [Feature] → Task → Code
 **Location**: `.doh/epics/quick/epic0.md`
 
 ### Auto Categories
+
 - 🐛 **Bug** - Quick fixes
 - ⚡ **Perf** - Spot optimizations
 - 🔧 **Maintenance** - Refactoring, cleanup
 - 📝 **Doc** - Documentation, comments
 
 ### Auto-graduation
+
 **Threshold**: 6+ similar tasks → Dedicated epic suggested
 
 ## Mandatory Code Traceability
 
 ### In Code
+
 ```javascript
 // DOH #123: Change description
 function example() {
@@ -125,25 +140,29 @@ function example() {
 ```
 
 ### In Commits
+
 ```bash
 git commit -m "[DOH #123] Description of change"
 ```
 
 ### In PRs
+
 ```markdown
 ## Completed Tasks
+
 - [DOH #123] Authentication refactor
 - [DOH #456] Performance optimization
 ```
 
 ## Dual ID System
 
-| Type | Format | Example | Usage |
-|------|--------|---------|-------|
-| **Local** | `!123` | `!42` | Stable /doh internal ID |
-| **GitHub** | `#456` | `#789` | ID after synchronization |
+| Type       | Format | Example | Usage                    |
+| ---------- | ------ | ------- | ------------------------ |
+| **Local**  | `!123` | `!42`   | Stable /doh internal ID  |
+| **GitHub** | `#456` | `#789`  | ID after synchronization |
 
 **Synchronization states**:
+
 - `dirty`: Local change not synchronized
 - `synced`: Synchronized with GitHub/GitLab
 
@@ -171,11 +190,13 @@ git commit -m "[DOH #123] Description of change"
 **Hierarchical Context**: Project → Epic → Agent Session
 
 ### Memory Storage
+
 - **Project Memory**: Patterns, decisions, coding standards
 - **Epic Memory**: Epic-specific context and learnings
 - **Agent Sessions**: Persistent session data with memory updates
 
 ### Agent Memory Updates
+
 ```json
 {
   "session_id": "agent-task-123",
@@ -188,6 +209,7 @@ git commit -m "[DOH #123] Description of change"
 ```
 
 ### Task Intelligence Memory
+
 **Location**: `.doh/memory/NEXT.md` - AI memory for intelligent task recommendations
 
 - **Smart Prioritization**: Analyzes task dependencies, epic phases, and team workload
@@ -204,6 +226,7 @@ git commit -m "[DOH #123] Description of change"
 ## Workflow Types
 
 ### 1. Quick Hotfix
+
 ```bash
 /doh:quick "fix typo in menu"
 # → Task !123 created in Epic #0
@@ -211,6 +234,7 @@ git commit -m "[DOH #123] Description of change"
 ```
 
 ### 2. Complex Feature
+
 ```bash
 /doh:quick "implement user authentication"
 # → Questions: OAuth? 2FA? Sessions?
@@ -218,6 +242,7 @@ git commit -m "[DOH #123] Description of change"
 ```
 
 ### 3. Parallel Development
+
 ```bash
 /doh:agent !123
 # → Worktree `../project-worktree-task-123`
@@ -248,10 +273,12 @@ git commit -m "[DOH #123] Description of change"
 ```
 
 **Automatic headers**:
+
 ```markdown
 # Task: Authentication Refactor
-**DOH**: !123 | **GitHub**: [#456](https://github.com/user/repo/issues/456)
-**Status**: In Progress | **Synced**: 2025-08-27T10:00:00Z
+
+**DOH**: !123 | **GitHub**: [#456](https://github.com/user/repo/issues/456) **Status**: In Progress | **Synced**:
+2025-08-27T10:00:00Z
 ```
 
 ## Natural Language Support
@@ -276,13 +303,16 @@ git commit -m "[DOH #123] Description of change"
 ## Required Project Configuration
 
 In `.claude/CLAUDE.md`:
+
 ```markdown
 ## Project Management System
+
 This project uses the **/doh** system for complete task management.
 
 📖 **DOH Documentation**: See `.claude/doh/inclaude.md`
 
 ### DOH Rules
+
 - ALL modifications linked to /doh issue
 - Comments: `// DOH #123: Description`
 - Commits: `[DOH #123] Description`
@@ -300,5 +330,5 @@ This project uses the **/doh** system for complete task management.
 
 ---
 
-*For /doh internal architecture: see README.md*  
-*For /doh system development: see docs/*
+_For /doh internal architecture: see README.md_  
+_For /doh system development: see docs/_

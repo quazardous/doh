@@ -1,18 +1,22 @@
 # /dd:mkai - AI Documentation Management System
 
-**Purpose**: Comprehensive AI documentation management for brainstorming, maintaining compilation guides, generating AI.md, and validating documentation completeness.
+**Purpose**: Comprehensive AI documentation management for brainstorming, maintaining compilation guides, generating
+AI.md, and validating documentation completeness.
 
 ## 🤖 FULL AI COMMAND - NO BASH SCRIPT
 
-**IMPLEMENTATION**: This is a **full AI command** executed entirely by Claude AI - **NO bash script required**. Claude directly reads, analyzes, and compiles documentation using available tools.
+**IMPLEMENTATION**: This is a **full AI command** executed entirely by Claude AI - **NO bash script required**. Claude
+directly reads, analyzes, and compiles documentation using available tools.
 
-**Why No Script**: 
+**Why No Script**:
+
 - Complex document analysis and compilation requires AI intelligence
 - Dynamic content generation based on current project state
 - Interactive brainstorming and problem-solving capabilities
 - Contextual understanding of documentation needs
 
-**Execution Model**: When user runs `/dd:mkai`, Claude directly performs all operations using Read, Write, Edit, and analysis tools.
+**Execution Model**: When user runs `/dd:mkai`, Claude directly performs all operations using Read, Write, Edit, and
+analysis tools.
 
 ## Usage
 
@@ -27,6 +31,7 @@
 ### Core Functions
 
 #### Default Mode (Compilation)
+
 - **Default**: `/dd:mkai` (no flags) runs compilation mode
   - **Equivalent to**: `/dd:mkai --compile`
   - **Process**: Generate `./AI.md` from all source documents
@@ -34,6 +39,7 @@
   - **Most common usage**: Quick AI.md refresh for development workflow
 
 #### Documentation Brainstorming
+
 - `--brainstorm=topic`: Interactive AI documentation problem-solving
   - **Examples**: `--brainstorm="task-creation"`, `--brainstorm="linting-workflow"`
   - **Interactive mode**: Analyzes documentation challenges and provides solutions
@@ -41,28 +47,32 @@
   - **Use when**: Unclear about documentation structure, need AI perspective on docs problem
 
 #### Maintenance Operations
-- `--maintain`: Update compilation guide and track source changes  
+
+- `--maintain`: Update compilation guide and track source changes
   - **Updates**: `docs/mk-ai.md` with new compilation patterns and source analysis
   - **Tracking**: Source document modifications, compilation requirements
   - **Analysis**: Documentation drift, missing information, outdated references
   - **Use when**: Source documents have changed, need to update compilation strategy
 
 #### Explicit Compilation Mode
+
 - `--compile`: Explicitly run compilation (same as default behavior)
   - **Note**: This is now the default behavior when no flags provided
   - **Use when**: Want to be explicit about compilation or combine with other flags
   - **Example**: `/dd:mkai --compile --verbose` for detailed compilation output
 
 #### Validation Operations
+
 - `--validate`: Check `./AI.md` completeness and accuracy (PROJECT ROOT location)
   - **Completeness**: Verify all critical information is included
-  - **Accuracy**: Check information matches current project state  
+  - **Accuracy**: Check information matches current project state
   - **Findability**: Test Claude's ability to locate key information quickly
   - **Use when**: Want to verify AI.md quality, troubleshoot missing information
 
 ### Combined Operations
 
 #### Full Pipeline
+
 - `--full`: Execute maintain + compile + validate sequence (compilation is default, so this adds maintain + validate)
   - **Comprehensive**: Updates compilation guide, generates `./AI.md` (project root), validates result
   - **Efficient**: Single command for complete documentation refresh
@@ -71,13 +81,15 @@
 
 ### Control Flags
 
-#### Preview Mode  
+#### Preview Mode
+
 - `--dry-run`: Show what would be done without making changes
   - **Safe**: Preview all operations and file modifications
   - **Analysis**: Show source analysis, compilation plan, validation results
   - **Use when**: Want to verify operations before execution
 
 #### Output Control
+
 - `--verbose`: Detailed progress and analysis information
   - **Default**: Concise operation summaries
   - **Detailed**: Step-by-step progress, file analysis, debug information
@@ -97,13 +109,13 @@
 
 📊 Current Documentation Analysis:
 ├── CLAUDE.md: Task creation protocol (basic)
-├── DEVELOPMENT.md: TODO management workflow (detailed)  
+├── DEVELOPMENT.md: TODO management workflow (detailed)
 ├── todo/README.md: Next ID system (critical)
 └── AI.md: Compiled instructions (comprehensive)
 
 🔍 Identified Challenges:
 • Information scattered across 4 files
-• Next ID buried in README.md (Claude often misses)  
+• Next ID buried in README.md (Claude often misses)
 • Protocol steps not visually prominent
 • No quick decision tree for task vs no-task
 
@@ -132,10 +144,11 @@ Apply these improvements to documentation? [Y/n]
 ```
 
 **Topics Supported**:
+
 - `task-creation`: Task numbering and TODO management
 - `linting-workflow`: AI-powered linting pipeline understanding
 - `project-context`: DOH-DEV vs Runtime separation
-- `command-execution`: /dd:* command workflow analysis
+- `command-execution`: /dd:\* command workflow analysis
 - `documentation-architecture`: Overall docs structure optimization
 
 ### Maintenance Mode (`--maintain`)
@@ -156,11 +169,11 @@ Apply these improvements to documentation? [Y/n]
 🔍 Changes Detected Since Last Compilation:
 • CLAUDE.md: Modified 2025-08-28 (task creation protocol added)
 • todo/README.md: Modified 2025-08-28 (Next ID: 081→082)
-• .claude/commands/dd/lint.md: Modified 2025-08-28 (T070 implementation)
+• .claude/commands/dd/lint.md: Modified 2025-08-28 (DD070 implementation)
 
 📝 Updating docs/mk-ai.md:
 ├── ✅ Added new task creation protocol patterns
-├── ✅ Updated Next ID tracking requirements  
+├── ✅ Updated Next ID tracking requirements
 ├── ✅ Enhanced linting pipeline documentation
 └── ✅ Recorded compilation trigger points
 
@@ -173,6 +186,7 @@ Next: Run /dd:mkai --compile to apply changes to AI.md
 ```
 
 **Maintains**: `docs/mk-ai.md` compilation guide with:
+
 - Source document modification tracking
 - Compilation pattern evolution
 - Critical information mapping
@@ -198,7 +212,7 @@ Next: Run /dd:mkai --compile to apply changes to AI.md
 ├── ✅ Version synchronization (CLAUDE.md v1.1 → AI.md header)
 ├── ✅ Critical information identification (Next ID, project context)
 ├── ✅ Visual prominence system application (🚨 alerts, 📋 protocols)
-├── ✅ Cross-reference generation (source document links)  
+├── ✅ Cross-reference generation (source document links)
 ├── ✅ Conflict resolution (deduplicated information)
 └── ✅ Claude optimization (decision matrices, quick references)
 
@@ -215,6 +229,7 @@ Next: Run /dd:mkai --compile to apply changes to AI.md
 ```
 
 **Features**:
+
 - **Version Synchronization**: Automatically copies CLAUDE.md version to AI.md header
 - **Visual Prominence System**: 🚨 alerts, 📋 protocols, ⚡ quick references
 - **Intelligent Compilation**: Resolves conflicts, deduplicates information
@@ -235,7 +250,7 @@ Next: Run /dd:mkai --compile to apply changes to AI.md
 ├── ✅ Task creation protocol: Complete 4-step process documented
 ├── ✅ Command execution: All /dd:* commands covered
 ├── ✅ Project context: DOH-DEV vs Runtime clearly explained
-├── ⚠️  Linting workflow: Some T070 details could be more prominent
+├── ⚠️  Linting workflow: Some DD070 details could be more prominent
 └── ✅ Quality standards: Comprehensive requirements included
 
 🔍 Information Findability:
@@ -252,7 +267,7 @@ Next: Run /dd:mkai --compile to apply changes to AI.md
 • Claude Usability Score: 94% (very good)
 
 💡 Improvement Recommendations:
-1. Enhance T070 linting workflow prominence (add visual indicators)
+1. Enhance DD070 linting workflow prominence (add visual indicators)
 2. Add more decision flowcharts for complex scenarios
 3. Consider adding frequently used command examples
 
@@ -261,6 +276,7 @@ Next: Run /dd:mkai --compile to apply changes to AI.md
 ```
 
 **Validation Criteria**:
+
 - **Completeness**: All critical information included
 - **Findability**: Claude can quickly locate key information
 - **Accuracy**: Information matches current project state
@@ -280,7 +296,7 @@ Phase 1: Maintenance
 ├── 🔧 Updating compilation guide (docs/mk-ai.md)...
 └── ✅ Maintenance complete (3 changes processed)
 
-Phase 2: Compilation  
+Phase 2: Compilation
 ├── 📝 Compiling from all source documents...
 ├── 🎨 Applying visual prominence system...
 ├── 🔗 Generating cross-references...
@@ -294,7 +310,7 @@ Phase 3: Validation
 
 📊 Pipeline Summary:
 • Source files analyzed: 8 files
-• Documentation patterns updated: 3 categories  
+• Documentation patterns updated: 3 categories
 • ./AI.md sections compiled: 12 sections (project root location)
 • Quality score: 94% (very good)
 • Compilation time: 2025-08-28 17:40 UTC
@@ -307,7 +323,8 @@ Phase 3: Validation
 
 ### Command Integration
 
-**Works with existing /dd:* commands**:
+**Works with existing /dd:\* commands**:
+
 ```bash
 # Quick AI.md refresh (most common usage)
 /dd:mkai
@@ -315,19 +332,20 @@ Phase 3: Validation
 
 # Update documentation before major commits
 /dd:mkai --full
-/dd:changelog "T081 - AI documentation system"  
+/dd:changelog "DD081 - AI documentation system"
 /dd:commit
 
 # Brainstorm documentation improvements
 /dd:mkai --brainstorm="command-integration"
 
-# Validate after source changes  
+# Validate after source changes
 /dd:mkai --validate
 ```
 
 ### Documentation Maintenance
 
 **Regular maintenance workflow**:
+
 1. **Quick refresh**: `/dd:mkai` to update AI.md (most common - compilation is default)
 2. **After major changes**: `/dd:mkai --maintain` to track modifications
 3. **Quality assurance**: `/dd:mkai --validate` to verify completeness
@@ -337,13 +355,13 @@ Phase 3: Validation
 
 **Consistent, informative progress reporting**:
 
-```
+```text
 🔧 /dd:mkai - AI Documentation Management
 
 ├── 🧠 Analysis: [Current operation details]
 ├── 🔄 Processing: [Step-by-step progress]
 ├── ✅ Results: [Completion status and metrics]
-├── 💡 Insights: [Recommendations and improvements]  
+├── 💡 Insights: [Recommendations and improvements]
 └── 🎯 Next Steps: [Suggested follow-up actions]
 
 Operation Summary:
@@ -358,16 +376,19 @@ Operation Summary:
 ### Common Issues
 
 **Source Document Problems**:
+
 - **Missing files**: Reports specific missing sources, suggests recovery
 - **Parse errors**: Identifies problematic content, suggests fixes
 - **Conflicting information**: Highlights conflicts, provides resolution options
 
 **Compilation Failures**:
-- **Incomplete processing**: Shows progress, identifies blocking issues  
+
+- **Incomplete processing**: Shows progress, identifies blocking issues
 - **Validation errors**: Specific quality issues, improvement suggestions
 - **Cross-reference problems**: Broken links, outdated references
 
 **Recovery Procedures**:
+
 - **Graceful degradation**: Partial compilation when possible
 - **Detailed error reporting**: Specific file and line information
 - **Retry mechanisms**: Automatic recovery for transient issues
@@ -387,9 +408,11 @@ Uses DOH-DEV optimized settings:
 
 - **Incremental Processing**: Only recompile changed sections when possible
 - **Source Caching**: Remember file timestamps, avoid unnecessary re-reading
-- **Parallel Analysis**: Process multiple source documents simultaneously  
+- **Parallel Analysis**: Process multiple source documents simultaneously
 - **Smart Compilation**: Focus on Claude-relevant content, optimize for AI comprehension
 
 ## AI-Driven Optimization
 
-This command provides comprehensive AI documentation management with intelligent brainstorming, maintenance automation, compilation optimization, and quality validation - ensuring Claude always has complete, current, and optimally structured project context.
+This command provides comprehensive AI documentation management with intelligent brainstorming, maintenance automation,
+compilation optimization, and quality validation - ensuring Claude always has complete, current, and optimally
+structured project context.

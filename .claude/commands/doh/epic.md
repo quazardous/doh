@@ -12,8 +12,7 @@ Brainstorm on an Epic using the specialized DOH Brainstormer Agent.
 
 ## Parameters
 
-- `id` (optional): ID of existing Epic to brainstorm on. If omitted, starts
-  brainstorming for a new Epic.
+- `id` (optional): ID of existing Epic to brainstorm on. If omitted, starts brainstorming for a new Epic.
 
 ## Examples
 
@@ -25,8 +24,7 @@ Brainstorm on an Epic using the specialized DOH Brainstormer Agent.
 When this command is executed:
 
 1. **Parse Parameters**: Extract optional ID parameter
-2. **Load Context**: If ID provided, load existing Epic from
-   `.doh/epics/{folder}/epic{id}.md` using index lookup
+2. **Load Context**: If ID provided, load existing Epic from `.doh/epics/{folder}/epic{id}.md` using index lookup
 3. **Determine Parent**: For new Epics, identify parent PRD context
 4. **Invoke Brainstormer**: Use DOH Brainstormer Agent for ideation session
 5. **Generate Output**: Create or update epic{id}.md file with brainstorming results

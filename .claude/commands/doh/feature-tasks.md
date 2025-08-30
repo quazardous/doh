@@ -43,7 +43,7 @@ Parent Epic Context:
 Please identify:
 - Specific implementation tasks for this feature
 - Frontend development tasks
-- Backend development tasks  
+- Backend development tasks
 - Integration tasks
 - Testing and validation tasks
 - Configuration and deployment tasks
@@ -57,7 +57,7 @@ Tasks should be focused on completing this specific feature.
 The agent analyzes for:
 
 - **Frontend Tasks**: UI components, user interactions, styling
-- **Backend Tasks**: APIs, business logic, data processing  
+- **Backend Tasks**: APIs, business logic, data processing
 - **Integration Tasks**: External services, system connections
 - **Data Tasks**: Models, migrations, database work
 - **Testing Tasks**: Unit tests, integration tests, E2E tests

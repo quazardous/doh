@@ -5,6 +5,7 @@ This file tracks major architectural decisions for the project, providing contex
 ## Format
 
 Each decision follows this structure:
+
 - **Decision**: What was decided
 - **Context**: Why this decision was needed
 - **Rationale**: Why this approach was chosen
@@ -22,7 +23,8 @@ Each decision follows this structure:
 
 **Rationale**: [Why was this particular approach chosen over alternatives?]
 
-**Consequences**: 
+**Consequences**:
+
 - Positive: [Benefits of this decision]
 - Negative: [Trade-offs or limitations]
 - Neutral: [Other implications]
@@ -34,10 +36,10 @@ Each decision follows this structure:
 
 ## Decision History
 
-| ID | Title | Date | Status |
-|----|-------|------|--------|
+| ID      | Title              | Date       | Status |
+| ------- | ------------------ | ---------- | ------ |
 | ADR-001 | [Example Decision] | YYYY-MM-DD | Active |
 
 ---
 
-*Add new ADRs above this line. Keep decisions in reverse chronological order (newest first).*
+_Add new ADRs above this line. Keep decisions in reverse chronological order (newest first)._

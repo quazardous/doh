@@ -1,6 +1,7 @@
 # /next-docs - Documentation Task Recommendations
 
-Focused access to documentation and writing tasks - perfect for documentation sprints, improving project communication, or when you want to enhance project clarity and usability.
+Focused access to documentation and writing tasks - perfect for documentation sprints, improving project communication,
+or when you want to enhance project clarity and usability.
 
 ## Usage
 
@@ -10,7 +11,9 @@ Focused access to documentation and writing tasks - perfect for documentation sp
 
 ## Description
 
-This is a shortcut command for `/dd:next --context=docs` optimized for documentation-focused work sessions. Shows tasks that improve project documentation, communication, and knowledge sharing - essential for project maintainability and team collaboration.
+This is a shortcut command for `/dd:next --context=docs` optimized for documentation-focused work sessions. Shows tasks
+that improve project documentation, communication, and knowledge sharing - essential for project maintainability and
+team collaboration.
 
 ## Parameters
 
@@ -27,6 +30,7 @@ This is a shortcut command for `/dd:next --context=docs` optimized for documenta
 ## Documentation Task Categories
 
 Shows tasks focused on:
+
 - 📝 **README Updates** - Main project documentation and getting started guides
 - 📋 **Workflow Documentation** - DEVELOPMENT.md, WORKFLOW.md process improvements
 - 📊 **TODO Management** - Task documentation, completion tracking, project planning
@@ -41,7 +45,7 @@ Shows tasks focused on:
 /next-docs
 # Shows 3-4 best documentation improvements → perfect for doc sprints
 
-# Documentation with implementation plans  
+# Documentation with implementation plans
 /next-docs --format=plan
 # Documentation tasks → with writing/editing steps → ready to execute
 
@@ -61,14 +65,16 @@ Shows tasks focused on:
 ## Smart Documentation Examples
 
 **Project Clarity:**
+
 ```bash
 /next-docs "project clarity"
 # → README structure improvements
-# → Getting started guide enhancements  
+# → Getting started guide enhancements
 # → Navigation and cross-reference updates
 ```
 
 **Process Documentation:**
+
 ```bash
 /next-docs "workflow and development process"
 # → DEVELOPMENT.md updates
@@ -77,6 +83,7 @@ Shows tasks focused on:
 ```
 
 **User Experience:**
+
 ```bash
 /next-docs "user experience and guides"
 # → Usage examples
@@ -87,24 +94,28 @@ Shows tasks focused on:
 ## Common Documentation Scenarios
 
 **Documentation Sprint:**
+
 ```bash
 /next-docs --format=plan --limit=5
 # Multiple doc tasks → with implementation plans → focused documentation session
 ```
 
 **Project Polish:**
+
 ```bash
 /next-docs "project presentation and clarity"
 # Professional documentation improvements → project polish
 ```
 
 **Onboarding Improvement:**
+
 ```bash
 /next-docs "new user onboarding"
 # Getting started improvements → easier project adoption
 ```
 
 **Technical Debt Reduction:**
+
 ```bash
 /next-docs "outdated documentation"
 # Find and update stale documentation → maintain accuracy
@@ -113,6 +124,7 @@ Shows tasks focused on:
 ## Documentation Impact Analysis
 
 Documentation tasks often provide:
+
 - 🎯 **High Impact** - Improves entire project usability
 - ⚡ **Quick Completion** - Many documentation tasks are 1-2 hours
 - 🔗 **Enabling Effect** - Better docs help with all future development
@@ -121,6 +133,7 @@ Documentation tasks often provide:
 ## Workflow Integration
 
 **Weekly Documentation Time:**
+
 ```bash
 # Dedicated documentation improvement sessions
 /next-docs --format=plan --limit=3
@@ -128,6 +141,7 @@ Documentation tasks often provide:
 ```
 
 **Between Development Tasks:**
+
 ```bash
 # Quick documentation improvements between coding
 /next-docs --cache-only --limit=1
@@ -135,6 +149,7 @@ Documentation tasks often provide:
 ```
 
 **Epic Completion Documentation:**
+
 ```bash
 # After completing major features
 /next-docs "update documentation for recent changes"
@@ -144,9 +159,10 @@ Documentation tasks often provide:
 ## Documentation Quality Focus
 
 Shows tasks that improve:
+
 - **Clarity** - Making complex concepts understandable
 - **Completeness** - Filling documentation gaps
-- **Accuracy** - Updating outdated information  
+- **Accuracy** - Updating outdated information
 - **Navigation** - Cross-references and document structure
 - **Examples** - Practical usage demonstrations
 - **Onboarding** - New user experience improvements
@@ -154,17 +170,20 @@ Shows tasks that improve:
 ## Integration
 
 This command is equivalent to:
+
 ```bash
 /dd:next --context=docs [same-parameters]
 ```
 
 But provides:
+
 - **Documentation-focused mindset** for writing and editing sessions
 - **Faster access** to project communication improvements
 - **Shorter syntax** for documentation sprints
 - **Optimized defaults** for documentation workflow
 
 Perfect for:
+
 - Dedicated documentation improvement sessions
 - Project polish and professional presentation
 - Improving team collaboration through better docs

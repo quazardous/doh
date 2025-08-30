@@ -2,7 +2,8 @@
 
 ## Description
 
-Express task creation with intelligent analysis, complexity assessment, and automatic guidance toward appropriate granularity. Uses the DOH Project Agent for natural language processing and smart recommendations.
+Express task creation with intelligent analysis, complexity assessment, and automatic guidance toward appropriate
+granularity. Uses the DOH Project Agent for natural language processing and smart recommendations.
 
 ## Usage
 
@@ -17,8 +18,8 @@ Express task creation with intelligent analysis, complexity assessment, and auto
 ## Examples
 
 - `/doh:quick "corriger bug responsive menu mobile"`
-- `/doh:quick "hotfix typo dans titre page contact"`  
-- `/doh:quick "refactor méthode authentification utilisateur"`
+- `/doh:quick "hotfix typo dans titre page contact"`
+- `/doh:quick "refactor méthode authentication utilisateur"`
 - `/doh:quick "performance optimiser chargement images"`
 - `/doh:quick "améliorer système notification push"`
 
@@ -38,7 +39,7 @@ If description is unclear or complex, agent asks targeted questions:
 
 ```
 Description vague → "Précisions nécessaires : [questions spécifiques]"
-Scope ambigu → "Impact : frontend, backend, ou les deux ?"  
+Scope ambigu → "Impact : frontend, backend, ou les deux ?"
 Type incertain → "Nature : bug fix, amélioration, ou nouvelle fonctionnalité ?"
 ```
 
@@ -54,10 +55,10 @@ Output: → Task #145 created in Epic #0 (🔧 Maintenance)
 #### **Complex but Atomic** → Propose Phasage (Splitting)
 
 ```
-Input: /doh:quick "optimiser performance authentification"
+Input: /doh:quick "optimiser performance authentication"
 Analysis: "Détection complexité : backend + frontend
-Recommandation PHASAGE :
-1. 'Optimiser requêtes DB authentification'  
+Recommendation PHASAGE :
+1. 'Optimiser requêtes DB authentification'
 2. 'Améliorer cache session frontend'
 Créer 2 tâches séparées ?"
 ```
@@ -67,10 +68,10 @@ Créer 2 tâches séparées ?"
 ```
 Input: /doh:quick "système notification temps réel"
 Analysis: "Scope détecté : architecture multi-composant
-Recommandation SURCLASSEMENT :
+Recommendation SURCLASSEMENT :
 → Feature 'Notifications Temps Réel' avec tasks :
   - Backend WebSocket setup
-  - Frontend notification UI  
+  - Frontend notification UI
   - Database schema extension
 Créer Feature ?"
 ```
@@ -91,7 +92,7 @@ Based on keywords in description:
 
 - **🐛 Bug Fixes**: bug, fix, hotfix, corriger, réparer
 - **⚡ Performance**: performance, optimiser, accélérer, cache
-- **🔧 Maintenance**: refactor, nettoyer, mise à jour, dépendances  
+- **🔧 Maintenance**: refactor, nettoyer, mise à jour, dépendances
 - **📝 Documentation**: documenter, readme, commentaire, doc
 - **🎨 UI/UX**: design, interface, style, responsive, mobile
 
@@ -103,7 +104,7 @@ When Epic #0 accumulates related tasks, agent suggests graduation:
 "Epic #0 contient 6 tâches liées à l'authentification :
 Tasks #123, #124, #125, #126, #127, #128
 
-Recommandation : Créer Epic 'Système Authentification' 
+Recommendation : Créer Epic 'Système Authentification'
 et migrer ces tâches ? Cela améliorerait l'organisation."
 ```
 
@@ -118,7 +119,7 @@ Language: French for content, English for code identifiers
 
 Process Flow:
 1. Analyze description for clarity and complexity
-2. Ask clarifying questions if needed  
+2. Ask clarifying questions if needed
 3. Assess scope and recommend granularity (task/phasage/surclassement)
 4. Create appropriate DOH items based on analysis
 5. Auto-assign to Epic #0 with proper categorization
@@ -130,7 +131,7 @@ Follow DOH standards for traceability and file organization.
 ## Output Location
 
 - **Simple Tasks**: `.doh/tasks/task{id}.md` (lié à Epic #0)
-- **Promoted Features**: `.doh/features/{mnemonic}/feature{id}.md`  
+- **Promoted Features**: `.doh/features/{mnemonic}/feature{id}.md`
 - **New Epics**: `.doh/epics/{mnemonic}/epic{id}.md`
 - **Index Updates**: `.doh/project-index.json` avec métadonnées pour tous les items créés
 

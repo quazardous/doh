@@ -2,13 +2,14 @@
 
 ## Description
 
-Synchronisation bidirectionnelle entre les issues GitHub et les tâches DOH. Implémente le dual ID system (!123 → #456) avec gestion intelligente des conflits.
+Synchronisation bidirectionnelle entre les issues GitHub et les tâches DOH. Implémente le dual ID system (!123 → #456)
+avec gestion intelligente des conflicts.
 
 ## Usage
 
 ```bash
-/doh:sync-github                    # Sync bidirectionnel complet
-/doh:sync-github --pull             # Import issues GitHub → DOH  
+/doh:sync-github                    # Sync bidirectionnel complete
+/doh:sync-github --pull             # Import issues GitHub → DOH
 /doh:sync-github --push             # Export tâches DOH → GitHub
 /doh:sync-github --dry-run          # Preview des changements
 /doh:sync-github --force            # Force sync (ignore conflicts)
@@ -48,7 +49,7 @@ git remote get-url origin → github.com/user/repo
 # Génération automatique URLs GitHub
 # Task !123→#456: Titre tâche
 **Status**: Synced
-**Created**: 2024-08-27T10:00:00Z  
+**Created**: 2024-08-27T10:00:00Z
 **Last Sync**: 2024-08-27T14:30:00Z
 **GitHub Issue**: https://github.com/user/repo/issues/456
 ```
@@ -69,7 +70,7 @@ GET /repos/{owner}/{repo}/issues
 ```bash
 # Compare last_sync vs updated_at GitHub
 GitHub issue.updated_at > item.synced
-→ Marque item comme ayant conflict potentiel
+→ Marque item comme ayant conflict potential
 → Propose résolution ou merge automatique
 ```
 
@@ -112,7 +113,7 @@ PATCH /repos/{owner}/{repo}/issues/{issue_number}
 → Update timestamps: synced = now, dirty = null
 ```
 
-### 5. Gestion des Conflits
+### 5. Gestion des Conflicts
 
 #### Détection Conflicts
 
@@ -132,11 +133,11 @@ GitHub (modifié 2024-08-27 15:30): "Implement WebSocket handler with auth"
 
 Options:
 [1] Garder version locale (écrase GitHub)
-[2] Prendre version GitHub (écrase local) 
+[2] Prendre version GitHub (écrase local)
 [3] Merge manuel (ouvre éditeur)
-[4] Skip ce conflit
+[4] Skip ce conflict
 
-Choix (1-4): 
+Choix (1-4):
 ```
 
 #### Auto-Resolution Rules
@@ -156,12 +157,12 @@ Choix (1-4):
 ```bash
 # Transformation automatique
 Title: "Task !123: {doh_title}"
-Body: 
+Body:
 """
 ## Description DOH
 {task_description}
 
-## Implementation Details  
+## Implementation Details
 {technical_sections}
 
 ---
@@ -176,7 +177,7 @@ Labels: ["doh-task", "epic-1", "priority-medium"]
 
 ```bash
 # Parsing et normalisation
-GitHub Title: "Fix responsive menu bug" 
+GitHub Title: "Fix responsive menu bug"
 → DOH Title: "Fix responsive menu bug"
 
 GitHub Body: "{issue_description}"
@@ -225,7 +226,7 @@ GitHub Labels: ["bug", "frontend"]
   Total DOH items: 15
   Synced items (!123→#456): 8
   Local only (!123): 3
-  Remote only (#456): 2  
+  Remote only (#456): 2
   Conflicts: 1
   Dirty items: 1
 
@@ -236,7 +237,7 @@ GitHub Labels: ["bug", "frontend"]
 
 🔧 Next steps:
   1. Resolve conflict !125→#789
-  2. Push local task !126  
+  2. Push local task !126
   3. Import GitHub issue #790
 ```
 
@@ -249,7 +250,7 @@ GitHub Labels: ["bug", "frontend"]
   ✅ Task !126 → Created issue #791 "Optimize image loading"
   ✅ Task !127*→#788 → Updated issue #788 "Fix auth bug"
 
-📥 PULLED (GitHub → DOH):  
+📥 PULLED (GitHub → DOH):
   ✅ Issue #792 → Created task !128 "Update dependencies"
   ✅ Issue #788 → Updated task !127 (merged changes)
 
@@ -258,7 +259,7 @@ GitHub Labels: ["bug", "frontend"]
 
 📊 Summary:
   - Items synced: 4
-  - New mappings: 2  
+  - New mappings: 2
   - Conflicts resolved: 0 (1 pending)
   - Errors: 0
 
@@ -273,11 +274,11 @@ GitHub Labels: ["bug", "frontend"]
 # Configuration token GitHub
 export GITHUB_TOKEN="ghp_xxxxxxxxxxxx"
 
-# Ou dans .env projet
+# Ou dans .env project
 GITHUB_TOKEN=ghp_xxxxxxxxxxxx
 
 # Permissions requises
-- repo:read (lecture repository)  
+- repo:read (lecture repository)
 - issues:write (création/modification issues)
 - metadata:read (accès métadonnées repository)
 ```
@@ -304,7 +305,7 @@ GITHUB_TOKEN=ghp_xxxxxxxxxxxx
 {
   "items": {
     "!123": {
-      "remote_id": "#456", 
+      "remote_id": "#456",
       "remote_url": "https://github.com/user/repo/issues/456",
       "synced": "2024-08-27T14:30:00Z",
       "dirty": null
@@ -312,7 +313,7 @@ GITHUB_TOKEN=ghp_xxxxxxxxxxxx
   },
   "sync_status": {
     "last_github_sync": "2024-08-27T14:30:00Z",
-    "pending_sync_items": ["!126"],  
+    "pending_sync_items": ["!126"],
     "conflict_items": ["!125"]
   }
 }
@@ -325,7 +326,7 @@ GITHUB_TOKEN=ghp_xxxxxxxxxxxx
 ```bash
 # GitHub rate limit: 5000 req/hour
 → Batch requests quand possible
-→ Respect headers X-RateLimit-*  
+→ Respect headers X-RateLimit-*
 → Exponential backoff si rate limited
 → Cache API responses localement
 ```
@@ -336,7 +337,7 @@ GITHUB_TOKEN=ghp_xxxxxxxxxxxx
 # Gestion failures réseau
 → Retry automatique avec exponential backoff
 → Partial sync en cas d'interruption
-→ Recovery depuis dernière sync réussie  
+→ Recovery depuis dernière sync réussie
 → Rollback en cas d'échec critique
 ```
 
@@ -346,11 +347,11 @@ GITHUB_TOKEN=ghp_xxxxxxxxxxxx
 # Protection données
 → Backup index.json avant sync majeure
 → Validation JSON schema après modifications
-→ Vérification cohérence mappings  
+→ Vérification cohérence mappings
 → Détection corruptions et auto-repair
 ```
 
-## Exemples Pratiques
+## Examples Pratiques
 
 ### Workflow Collaboratif
 
@@ -368,10 +369,10 @@ GITHUB_TOKEN=ghp_xxxxxxxxxxxx
 /doh:sync-github --pull          → Task !130→#800 updated
 ```
 
-### Import Projet Existant  
+### Import Project Existent
 
 ```bash
-# Projet avec issues GitHub existantes
+# Project avec issues GitHub existantes
 /doh:sync-github --import-all
 → Import 47 issues → 47 tasks DOH
 → Auto-assignment Epic #0 avec catégorisation
@@ -393,4 +394,4 @@ Issue #789: Précisions ajoutées côté GitHub
 
 ---
 
-*Synchronisation GitHub/GitLab - Traceabilité complète projet ↔ issues*
+_Synchronisation GitHub/GitLab - Traceabilité complète project ↔ issues_

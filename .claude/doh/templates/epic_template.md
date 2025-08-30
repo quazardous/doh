@@ -1,8 +1,7 @@
 # Epic #{ID}: {Title}
 
 **Issue ID**: #{ID} **Type**: Epic **Parent PRD**: #{Parent_ID} **Status**: {Status} **Epic Folder**:
-`{epic_folder_name}` **Created**: {Date} **Last Updated**: {Date}
-**{Version_Field}**: {Version_Value}
+`{epic_folder_name}` **Created**: {Date} **Last Updated**: {Date} **{Version_Field}**: {Version_Value}
 
 ## Epic Overview
 
@@ -81,7 +80,7 @@
 ### Phase Version Mapping
 
 - **Phase 1**: Target Version {Phase1_Version}
-- **Phase 2**: Target Version {Phase2_Version}  
+- **Phase 2**: Target Version {Phase2_Version}
 - **Phase 3**: Target Version {Phase3_Version}
 
 ## Dependencies & Prerequisites
@@ -164,6 +163,7 @@ _Epic Folder: `.claude/doh/epics/{epic_folder_name}/`_
 ### Phase Version Strategy
 
 Epics can span multiple versions with phases:
+
 - **Single Version**: All phases in same version (focused epic)
 - **Multi-Version**: Phases spread across versions (large strategic epic)
 - **Constraint-Based**: Some phases must be in specific versions (external dependencies)

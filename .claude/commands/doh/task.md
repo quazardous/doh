@@ -63,7 +63,7 @@ Brainstorming output for tasks should include:
 
 - Clear acceptance criteria
 - Technical implementation approach
-- Dependencies and prerequisites  
+- Dependencies and prerequisites
 - Effort estimation
 - Testing considerations
 - Code traceability references

@@ -1,6 +1,7 @@
 # /next-features - Feature Development Recommendations
 
-Focused access to core functionality development tasks - perfect for implementation sessions, building new capabilities, or when you want to advance the project's feature set and technical capabilities.
+Focused access to core functionality development tasks - perfect for implementation sessions, building new capabilities,
+or when you want to advance the project's feature set and technical capabilities.
 
 ## Usage
 
@@ -10,7 +11,9 @@ Focused access to core functionality development tasks - perfect for implementat
 
 ## Description
 
-This is a shortcut command for `/dd:next --context=features` optimized for feature development work sessions. Shows tasks that implement new functionality, enhance existing capabilities, or build the technical foundation for advanced features.
+This is a shortcut command for `/dd:next --context=features` optimized for feature development work sessions. Shows
+tasks that implement new functionality, enhance existing capabilities, or build the technical foundation for advanced
+features.
 
 ## Parameters
 
@@ -27,6 +30,7 @@ This is a shortcut command for `/dd:next --context=features` optimized for featu
 ## Feature Development Categories
 
 Shows tasks focused on:
+
 - ⚡ **Core Functionality** - Essential features and primary capabilities
 - 🔧 **System Enhancements** - Infrastructure improvements and tool extensions
 - 🚀 **New Capabilities** - Novel features that expand project scope
@@ -42,7 +46,7 @@ Shows tasks focused on:
 # Shows 3 best feature development opportunities → ready for technical work
 
 # Features with implementation plans
-/next-features --format=plan  
+/next-features --format=plan
 # Feature tasks → with technical implementation steps → ready to code
 
 # Ultra-fast for development workflow
@@ -61,14 +65,16 @@ Shows tasks focused on:
 ## Smart Feature Examples
 
 **Core System Features:**
+
 ```bash
 /next-features "core system capabilities"
 # → Advanced task intelligence systems
-# → Workflow automation enhancements  
+# → Workflow automation enhancements
 # → Command pipeline improvements
 ```
 
 **User Experience Features:**
+
 ```bash
 /next-features "user experience improvements"
 # → Interactive command enhancements
@@ -77,7 +83,8 @@ Shows tasks focused on:
 ```
 
 **Integration Features:**
-```bash  
+
+```bash
 /next-features "system integration and connectivity"
 # → External tool integrations
 # → API enhancements
@@ -87,24 +94,28 @@ Shows tasks focused on:
 ## Common Feature Development Scenarios
 
 **Technical Implementation Session:**
+
 ```bash
 /next-features --format=plan --limit=2
 # Pick 1-2 features → with implementation plans → focused development session
 ```
 
 **Architecture Building:**
+
 ```bash
 /next-features "foundational features"
 # System foundation work → enables future development
 ```
 
 **Capability Expansion:**
+
 ```bash
 /next-features "new capabilities and functionality"
 # Novel features → expand project scope and value
 ```
 
 **Epic Feature Work:**
+
 ```bash
 /next-features --format=detailed "high impact features"
 # Strategic features → understand dependencies and impact → epic-level development
@@ -113,15 +124,17 @@ Shows tasks focused on:
 ## Feature Development Impact
 
 Feature tasks typically provide:
+
 - 🎯 **High Value** - Directly advances project capabilities
 - 🔧 **Technical Growth** - Builds implementation skills and patterns
-- 🚀 **Future Enablement** - Creates foundation for advanced features  
+- 🚀 **Future Enablement** - Creates foundation for advanced features
 - 👥 **User Benefit** - Improves project utility and adoption
 - 📈 **Project Advancement** - Moves project toward strategic goals
 
 ## Development Workflow Integration
 
 **Feature Development Sprints:**
+
 ```bash
 # Dedicated technical implementation sessions
 /next-features --format=plan --limit=3
@@ -129,6 +142,7 @@ Feature tasks typically provide:
 ```
 
 **Between Documentation Work:**
+
 ```bash
 # Balance documentation with technical implementation
 /next-features --cache-only --limit=1
@@ -136,6 +150,7 @@ Feature tasks typically provide:
 ```
 
 **Epic Implementation Planning:**
+
 ```bash
 # Major feature development planning
 /next-features --format=detailed "epic level features"
@@ -145,6 +160,7 @@ Feature tasks typically provide:
 ## Technical Complexity Awareness
 
 Shows features with consideration for:
+
 - **Dependencies** - What needs to be complete first
 - **Complexity** - Implementation difficulty and time requirements
 - **Impact** - How this feature affects other systems
@@ -155,6 +171,7 @@ Shows features with consideration for:
 ## Feature Readiness Assessment
 
 Prioritizes features that are:
+
 - ✅ **Well-Defined** - Clear requirements and acceptance criteria
 - ✅ **Dependency-Ready** - All blockers completed or minimal
 - ✅ **Technically Feasible** - Implementation approach is clear
@@ -164,17 +181,20 @@ Prioritizes features that are:
 ## Integration
 
 This command is equivalent to:
+
 ```bash
 /dd:next --context=features [same-parameters]
 ```
 
 But provides:
+
 - **Technical implementation focus** for development sessions
 - **Faster access** to capability-building tasks
 - **Shorter syntax** for feature development workflow
 - **Optimized defaults** for technical work planning
 
 Perfect for:
+
 - Technical implementation sprints and development sessions
 - Building new project capabilities and functionality
 - Advancing strategic project goals through feature development

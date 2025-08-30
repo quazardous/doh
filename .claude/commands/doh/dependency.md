@@ -2,7 +2,8 @@
 
 ## Description
 
-Manage dependencies between tasks, features, epics, and PRDs in the DOH system. This command provides centralized functionality for adding, removing, listing, and visualizing dependencies between DOH items.
+Manage dependencies between tasks, features, epics, and PRDs in the DOH system. This command provides centralized
+functionality for adding, removing, listing, and visualizing dependencies between DOH items.
 
 ## Usage
 
@@ -22,7 +23,7 @@ Manage dependencies between tasks, features, epics, and PRDs in the DOH system. 
 # Check for circular dependencies
 /doh:dependency validate
 
-# Show dependency path between two items  
+# Show dependency path between two items
 /doh:dependency path 123 45
 ```
 
@@ -42,14 +43,14 @@ doh_dependency_main() {
   local item_id="$2"
   local dependency_id="$3"
   local target_id="$4"
-  
+
   # Load project index
   local index_file=".doh/project-index.json"
   if [[ ! -f "$index_file" ]]; then
     echo "Error: No DOH project found. Run /doh:init first."
     return 1
   fi
-  
+
   case "$action" in
     "add")
       add_dependency "$item_id" "$dependency_id"
@@ -79,24 +80,24 @@ doh_dependency_main() {
 add_dependency() {
   local item_id="$1"
   local dependency_id="$2"
-  
+
   # Validate items exist
   if ! item_exists "$item_id" || ! item_exists "$dependency_id"; then
     echo "Error: One or both items don't exist"
     return 1
   fi
-  
+
   # Check for circular dependency
   if creates_circular_dependency "$item_id" "$dependency_id"; then
     echo "Error: Adding this dependency would create a circular dependency"
     return 1
   fi
-  
+
   # Update dependency graph in index.json
   update_dependency_graph "add" "$item_id" "$dependency_id"
-  
+
   echo "✅ Added dependency: !${item_id} depends on !${dependency_id}"
-  
+
   # Update agent memory if available
   update_dependency_memory "$item_id" "$dependency_id" "added"
 }
@@ -105,18 +106,18 @@ add_dependency() {
 remove_dependency() {
   local item_id="$1"
   local dependency_id="$2"
-  
+
   # Check if dependency exists
   if ! dependency_exists "$item_id" "$dependency_id"; then
     echo "Warning: Dependency !${item_id} → !${dependency_id} doesn't exist"
     return 0
   fi
-  
+
   # Update dependency graph in index.json
   update_dependency_graph "remove" "$item_id" "$dependency_id"
-  
+
   echo "✅ Removed dependency: !${item_id} no longer depends on !${dependency_id}"
-  
+
   # Update agent memory if available
   update_dependency_memory "$item_id" "$dependency_id" "removed"
 }
@@ -124,15 +125,15 @@ remove_dependency() {
 # List all dependencies for an item
 list_dependencies() {
   local item_id="$1"
-  
+
   if ! item_exists "$item_id"; then
     echo "Error: Item !${item_id} doesn't exist"
     return 1
   fi
-  
+
   echo "Dependencies for !${item_id}:"
   echo
-  
+
   # Dependencies this item has (things it depends on)
   local depends_on=$(get_item_dependencies "$item_id")
   if [[ -n "$depends_on" ]]; then
@@ -144,9 +145,9 @@ list_dependencies() {
   else
     echo "  No dependencies"
   fi
-  
+
   echo
-  
+
   # Items that depend on this item (blockers)
   local blocked_by=$(get_items_depending_on "$item_id")
   if [[ -n "$blocked_by" ]]; then
@@ -165,18 +166,18 @@ show_dependency_graph() {
   echo "DOH Project Dependency Graph"
   echo "============================"
   echo
-  
+
   # Load dependency graph from index.json
   local graph_data=$(jq -r '.dependency_graph' .doh/project-index.json)
-  
+
   if [[ "$graph_data" == "null" || "$graph_data" == "{}" ]]; then
     echo "No dependencies defined yet."
     return 0
   fi
-  
+
   echo "Format: [Item] → [Dependencies]"
   echo
-  
+
   # Process each dependency relationship
   jq -r '.dependency_graph | to_entries[] | "\\(.key) → [\\(.value | join(", "))]"' .doh/project-index.json | while read -r line; do
     # Replace IDs with titles for readability
@@ -184,7 +185,7 @@ show_dependency_graph() {
       echo "  $formatted_line"
     done
   done
-  
+
   echo
   echo "Use '/doh:dependency validate' to check for circular dependencies"
 }
@@ -192,15 +193,15 @@ show_dependency_graph() {
 # Validate dependency graph for circular dependencies
 validate_dependencies() {
   echo "Validating dependency graph..."
-  
+
   # Implement topological sort algorithm to detect cycles
   local has_cycles=false
   local visited_file=$(mktemp)
   local recursion_stack_file=$(mktemp)
-  
+
   # Get all items with dependencies
   local items=$(jq -r '.dependency_graph | keys[]' .doh/project-index.json)
-  
+
   for item in $items; do
     if ! is_visited "$item" "$visited_file"; then
       if detect_cycle_dfs "$item" "$visited_file" "$recursion_stack_file"; then
@@ -209,9 +210,9 @@ validate_dependencies() {
       fi
     fi
   done
-  
+
   rm -f "$visited_file" "$recursion_stack_file"
-  
+
   if [[ "$has_cycles" == "true" ]]; then
     echo "❌ Circular dependencies detected!"
     echo "Please review and fix dependency relationships."
@@ -226,17 +227,17 @@ validate_dependencies() {
 find_dependency_path() {
   local from_id="$1"
   local to_id="$2"
-  
+
   if ! item_exists "$from_id" || ! item_exists "$to_id"; then
     echo "Error: One or both items don't exist"
     return 1
   fi
-  
+
   echo "Finding dependency path from !${from_id} to !${to_id}..."
-  
+
   # Implement breadth-first search to find path
   local path=$(find_bfs_path "$from_id" "$to_id")
-  
+
   if [[ -n "$path" ]]; then
     echo "Dependency path found:"
     echo "$path"
@@ -264,8 +265,8 @@ dependency_exists() {
 creates_circular_dependency() {
   local item_id="$1"
   local dependency_id="$2"
-  
-  # If dependency_id already depends on item_id (directly or indirectly), 
+
+  # If dependency_id already depends on item_id (directly or indirectly),
   # then adding item_id → dependency_id would create a cycle
   local temp_path=$(find_bfs_path "$dependency_id" "$item_id")
   [[ -n "$temp_path" ]]
@@ -276,9 +277,9 @@ update_dependency_graph() {
   local action="$1"
   local item_id="$2"
   local dependency_id="$3"
-  
+
   local temp_file=$(mktemp)
-  
+
   if [[ "$action" == "add" ]]; then
     # Add dependency to graph
     jq ".dependency_graph.\"$item_id\" = (.dependency_graph.\"$item_id\" // []) + [\"$dependency_id\"] | .dependency_graph.\"$item_id\" |= unique" .doh/project-index.json > "$temp_file"
@@ -286,9 +287,9 @@ update_dependency_graph() {
     # Remove dependency from graph
     jq ".dependency_graph.\"$item_id\" = (.dependency_graph.\"$item_id\" // []) - [\"$dependency_id\"]" .doh/project-index.json > "$temp_file"
   fi
-  
+
   mv "$temp_file" .doh/project-index.json
-  
+
   # Update timestamps
   update_index_timestamp
 }
@@ -316,19 +317,19 @@ update_dependency_memory() {
   local item_id="$1"
   local dependency_id="$2"
   local action="$3"
-  
+
   # Update active session memory if available
   if [[ -f ".doh/memory/active-session.json" ]]; then
     local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
     local temp_file=$(mktemp)
-    
+
     jq ".dependency_changes = (.dependency_changes // []) + [{
       \"timestamp\": \"$timestamp\",
       \"action\": \"$action\",
       \"item_id\": \"$item_id\",
       \"dependency_id\": \"$dependency_id\"
     }]" .doh/memory/active-session.json > "$temp_file"
-    
+
     mv "$temp_file" .doh/memory/active-session.json
   fi
 }
@@ -337,7 +338,7 @@ update_dependency_memory() {
 update_index_timestamp() {
   local temp_file=$(mktemp)
   local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-  
+
   jq ".metadata.updated_at = \"$timestamp\"" .doh/project-index.json > "$temp_file"
   mv "$temp_file" .doh/project-index.json
 }
@@ -346,7 +347,7 @@ update_index_timestamp() {
 find_bfs_path() {
   local from_id="$1"
   local to_id="$2"
-  
+
   # Simplified BFS - in real implementation would use queue data structure
   # This is a placeholder for the concept
   echo "  !${from_id} → !${to_id} (direct/indirect path analysis needed)"

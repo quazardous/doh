@@ -33,7 +33,7 @@ When this command is executed:
 ## Agent Invocation
 
 ```
-Use the DOH Brainstormer Agent to facilitate a brainstorming session on PRD #{id}. 
+Use the DOH Brainstormer Agent to facilitate a brainstorming session on PRD #{id}.
 {existing_context_if_any}
 
 Please generate structured brainstorming output following /doh standards for PRD specifications.

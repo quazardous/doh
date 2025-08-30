@@ -46,15 +46,18 @@ This directory contains the DOH (DevOps Organization Helper) project structure f
 The DOH analysis system uses **convention over configuration**:
 
 ### Templates
+
 - Analysis templates: `.claude/doh/templates/analysis/`
 - Core templates: `.claude/doh/templates/` (epic, task, feature, etc.)
 
 ### Generated Reports
+
 - **`analysis/`**: All analysis reports generated here
 - **`memory/project/`**: Project context and decisions
 - **`memory/epics/`**: Epic-specific context and progress
 
 ### Conventions
+
 - Templates in `templates/analysis/` → Reports in `analysis/`
 - No configuration needed - uses standard filenames and locations
 

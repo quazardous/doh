@@ -78,7 +78,7 @@ Tasks created directly under epic folder:
 Each generated task includes:
 
 - Clear acceptance criteria
-- Technical implementation approach  
+- Technical implementation approach
 - Dependencies on other tasks
 - Estimated effort/complexity
 - Testing requirements

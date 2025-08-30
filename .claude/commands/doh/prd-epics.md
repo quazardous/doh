@@ -51,7 +51,7 @@ Generate structured epic specifications following /doh standards.
 The agent analyzes for:
 
 - **Functional Boundaries**: Distinct feature sets or capabilities
-- **User Personas**: Different user types or workflows  
+- **User Personas**: Different user types or workflows
 - **System Components**: Backend, frontend, integrations, etc.
 - **Project Phases**: Sequential delivery milestones
 - **Domain Areas**: Business logic groupings
@@ -73,7 +73,7 @@ For each identified epic:
 ├── notification-system/        # Epic folder (mnemonic)
 │   └── epic2.md               # Epic definition
 ├── user-dashboard/            # Another epic folder
-│   └── epic3.md               # Epic definition  
+│   └── epic3.md               # Epic definition
 └── data-analytics/            # Third epic folder
     └── epic4.md               # Epic definition
 ```

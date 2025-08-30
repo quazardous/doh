@@ -1,8 +1,8 @@
 # Task #{ID}: {Title}
 
 **Issue ID**: #{ID} **Type**: Task **Parent**: #{Parent_ID} ({Parent_Type}) **Status**: {Status} **Priority**:
-{Priority} **Effort Estimate**: {Effort} **Created**: {Date} **Last Updated**: {Date}
-**{Version_Field}**: {Version_Value}
+{Priority} **Effort Estimate**: {Effort} **Created**: {Date} **Last Updated**: {Date} **{Version_Field}**:
+{Version_Value}
 
 ## Task Description
 
@@ -190,7 +190,7 @@ Tasks progress through version planning stages (only one field present at a time
 
 2. **Target Version**: Mature planning commitment
    - Set when task is actively planned
-   - Indicates intended delivery version  
+   - Indicates intended delivery version
    - Subject to change based on priorities
 
 3. **Version**: Frozen roadmap commitment
@@ -202,7 +202,7 @@ Tasks progress through version planning stages (only one field present at a time
 
 ```
 New Task:         Proposed Version: 1.4.0
-Planned Task:     Target Version: 1.4.0  
+Planned Task:     Target Version: 1.4.0
 Roadmap Lock:     Version: 1.4.0
 Version Constraint: Version: 1.5.0 (must be in this version, Status: NOT PLANNED)
 ```

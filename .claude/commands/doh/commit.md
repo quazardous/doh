@@ -1,6 +1,8 @@
 # /doh:commit - Project Commit Pipeline
 
-Executes the complete DOH project commit pipeline by calling `/doh:changelog` for documentation updates, then performing git operations with intelligent commit message generation. Adapts the sophisticated /doh-dev pipeline for any DOH-managed project.
+Executes the complete DOH project commit pipeline by calling `/doh:changelog` for documentation updates, then performing
+git operations with intelligent commit message generation. Adapts the sophisticated /doh-dev pipeline for any
+DOH-managed project.
 
 ## Usage
 
@@ -152,7 +154,7 @@ npm run test                       # Run project tests
 
 # Complex workflow
 git add src/                       # Stage only code
-/doh:changelog "DOH-125"           # Update docs separately  
+/doh:changelog "DOH-125"           # Update docs separately
 git add .                          # Stage doc updates
 /doh:commit                        # Commit with auto-generated message
 ```
@@ -186,14 +188,14 @@ Pipeline completed successfully!
 
 ### Compared to /dd:commit
 
-| Feature | /doh-dev | /doh (Runtime) |
-|---------|----------|----------------|
-| Task Source | todo/*.md | .doh/tasks/*.json |
-| Changelog | DOH CHANGELOG.md | Project CHANGELOG.md |
-| Version Management | VERSION.md | package.json/project files |
-| Linting | Always enabled | Optional, respects project setup |
-| Commit Format | DOH system format | Project-configurable format |
-| ID References | T### format | DOH-### or custom prefix |
+| Feature            | /doh-dev          | /doh (Runtime)                   |
+| ------------------ | ----------------- | -------------------------------- |
+| Task Source        | todo/\*.md        | .doh/tasks/\*.json               |
+| Changelog          | DOH CHANGELOG.md  | Project CHANGELOG.md             |
+| Version Management | VERSION.md        | package.json/project files       |
+| Linting            | Always enabled    | Optional, respects project setup |
+| Commit Format      | DOH system format | Project-configurable format      |
+| ID References      | T### format       | DOH-### or custom prefix         |
 
 ### Smart Project Detection
 
@@ -220,7 +222,7 @@ Pipeline completed successfully!
 git status                         # Check staged changes
 /doh:commit --amend                # Fix and amend if needed
 
-# If documentation pipeline had issues  
+# If documentation pipeline had issues
 /doh:changelog --dry-run           # Check what would be updated
 /doh:changelog "fix"               # Update docs only
 git add .                          # Stage fixes
@@ -235,7 +237,7 @@ git commit -m "fix: Documentation updates"
 - **Bug fixes**: Fix issue, /doh:commit with bug reference, proper tracking
 - **Maintenance**: Update dependencies, docs automatically stay current
 
-### Team Collaboration  
+### Team Collaboration
 
 - **Consistent commits**: Team gets uniform commit messages with DOH references
 - **Traceability**: Every commit links back to DOH tasks and project planning
@@ -247,4 +249,5 @@ git commit -m "fix: Documentation updates"
 - **Changelog automation**: Release notes generated from completed DOH tasks
 - **Quality gates**: Optional linting ensures release-ready documentation
 
-This command brings enterprise-grade commit automation to any DOH-managed project while respecting existing project workflows, tools, and team conventions.
+This command brings enterprise-grade commit automation to any DOH-managed project while respecting existing project
+workflows, tools, and team conventions.
