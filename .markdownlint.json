@@ -17,5 +17,20 @@
   "MD033": false,
   "MD041": false,
   "MD046": false,
-  "MD047": false
+  "MD047": false,
+  "MD040": {
+    "allowed_languages": [
+      "yaml",
+      "yml",
+      "json",
+      "text",
+      "bash",
+      "shell",
+      "javascript",
+      "js",
+      "python",
+      "py"
+    ],
+    "language_only": true
+  }
 }

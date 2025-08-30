@@ -235,6 +235,8 @@ Next: Run /dd:mkai --compile to apply changes to AI.md
 - **Intelligent Compilation**: Resolves conflicts, deduplicates information
 - **Context Optimization**: Structures information for AI comprehension
 - **Source Attribution**: Links to detailed documentation sources
+- **Purely Factual Content**: Excludes task references (DD###, EDD###) - focuses on current factual state, not
+  historical tasks
 
 ### Validation Mode (`--validate`)
 
@@ -401,7 +403,7 @@ Uses DOH-DEV optimized settings:
 - **Output Location**: `./AI.md` (project root) for maximum Claude visibility
 - **Source Priority**: CLAUDE.md → DEVELOPMENT.md → Command docs → Supporting files
 - **Visual Prominence**: High-impact alerts for critical information
-- **Compilation Strategy**: Complete context in single file, detailed sources linked
+- **Compilation Strategy**: Complete context in single file, detailed sources linked, no historical task references
 - **Validation Standards**: Claude-optimized usability, complete decision context
 
 ## Performance Optimization

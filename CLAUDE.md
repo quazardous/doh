@@ -1,6 +1,6 @@
 # DOH Project Configuration for AI Development
 
-**Version**: 1.2 (2025-08-28)
+**Version**: 1.2 (2025-08-30)
 
 ## 🚨 CLAUDE: READ AI.md FIRST 🚨
 
@@ -27,21 +27,11 @@
 
 **Enforcement**: Any attribution to external tools must be removed immediately upon detection.
 
-## AI Development Configuration
+## Claude-Specific Behavioral Rules
 
-## Project Overview
+### **Development Approach**
 
-This is the DOH (DevOps Helper) system project - a task and project management framework designed to help Claude.ai
-users manage their development workflows.
-
-**Project Language**: This project is **full English** - all code, documentation, comments, and files must be in English
-for universal compatibility and distribution.
-
-## Claude-Specific Guidelines
-
-### Development Approach
-
-- **By default, brainstorm and present plans - only start coding when explicitly asked** (except for simple direct
+- **By default, brainstorm and present plans** - only start coding when explicitly asked (except for simple direct
   orders)
 - **Only work on complex tasks if there's a mature TODO entry** - complex work requires proper planning and
   documentation
@@ -50,119 +40,30 @@ for universal compatibility and distribution.
 - **When uncertain about task complexity, ask if a TODO should be created** - better to check than assume
 - **No comments unless explicitly requested**
 
-### DOH Development Context
+### **Project Language**
 
-- This project develops the DOH system itself (scripts, templates, schemas)
-- Uses TODO.md approach for tracking development tasks (not /doh commands)
-- Follow existing shell script patterns in `.claude/doh/scripts/`
-- Maintain backward compatibility when updating DOH components
-- Test changes against sample projects before deployment
-- Security best practices for file system operations
-
-## 🚨 CRITICAL: Task Creation Protocol
-
-**MANDATORY PROCESS**: Before creating any T### task:
-
-1. ✅ **ALWAYS read `todo/README.md` first** - Get current Next ID
-2. ✅ **Create T[NextID].md** - Use EXACT next number from README.md
-3. ✅ **Update README.md** - Increment Next ID after creation
-4. ✅ **Verify uniqueness** - Ensure task doesn't exist already
-
-**⚠️ CRITICAL**: Always use the sequence in todo/README.md - never arbitrary numbers
-
-## Dependencies Philosophy
-
-- **DOH System Development**: Can use any tools/dependencies (Node.js, Python, etc.) for development, testing, and
-  toolchain
-- **DOH Runtime Distribution**: MUST be 100% bash + jq + awk only - no other dependencies for end users
-
-## Task Management
-
-This project uses traditional TODO.md (in project root) for development tasks rather than the /doh system it provides to
-other projects.
-
-📋 **TODO Management**: See `DEVELOPMENT.md` for complete rules and workflow. Active tasks in `TODO.md`, completed tasks
-archived in `TODOARCHIVED.md`.
+This project is **full English** - all code, documentation, comments, and files must be in English for universal
+compatibility and distribution.
 
 ## Documentation References
 
-### For Development
+### **Primary Development Documentation**
 
-For comprehensive development patterns, architecture, testing, and implementation details, see:
+**[DEVELOPMENT.md](./DEVELOPMENT.md)** - Complete day-to-day development guide containing:
 
-**[DEVELOPMENT.md](./DEVELOPMENT.md)**
+- Task creation protocol and naming convention system
+- Markdown quality control workflow and commands
+- DOH development context and patterns
+- Dependencies philosophy and technical requirements
+- Architecture principles and file organization
 
-### For Usage
+### **DOH Runtime Documentation** (Not applicable to DOH-DEV)
 
-For DOH system usage, PRD/Epic/Feature/Task workflow, and practical examples, see:
+**Note**: `WORKFLOW.md` is for DOH runtime system users (end users of the DOH project management system). Since we are
+developing the DOH system itself (DOH-DEV), we do not use the DOH runtime workflow - we use the structured TODO system
+documented in DEVELOPMENT.md.
 
-**[WORKFLOW.md](./WORKFLOW.md)**
+---
 
-## Markdown Quality Control
-
-Complete markdown linting workflow for maintaining documentation quality:
-
-### Commands
-
-- **`make lint`** - Run all linters (markdown + shell scripts)
-- **`make lint-fix`** - Auto-correct markdown formatting issues
-- **`make lint-manual`** - Show non-auto-fixable issues that need manual correction
-
-### Workflow
-
-1. **Write/Edit markdown** - Create or modify documentation
-2. **Auto-fix** - Run `make lint-fix` to correct formatting automatically
-3. **Manual fixes** - Run `make lint-manual` to see issues requiring manual attention:
-   - 📏 **Line length (MD013)** - Break long lines at 120 characters
-   - 🔢 **List numbering (MD029)** - Fix ordered list prefixes (1, 2, 3...)
-   - 📑 **Duplicate headings (MD024)** - Make headings unique in document
-   - 📝 **Emphasis as heading (MD036)** - Use proper heading syntax instead of bold text
-4. **Verify** - Run `make lint` to confirm all issues resolved
-5. **Commit** - Pre-commit hooks automatically block commits with linting errors
-
-### Pre-commit Protection
-
-The pre-commit hook automatically runs markdown linting on staged files:
-
-- ✅ **Passes** - Commit proceeds normally
-- ❌ **Fails** - Commit blocked, fix issues first
-
-### Writing Bug-Free Markdown
-
-#### Common Issues and Solutions
-
-##### 📏 Line Length (MD013)
-
-- Keep lines under 120 characters (modern standard)
-- Break extremely long sentences into multiple lines
-- Split very long URLs or code examples when needed
-
-##### 🔢 List Numbering (MD029)
-
-- Each ordered list should start with `1.`
-- Use `1. 2. 3.` not `4. 5. 6.` in separate sections
-
-##### 📑 Duplicate Headings (MD024)
-
-- Make headings unique within the document
-- Add context: `### Added (v1.2.0)` instead of just `### Added`
-
-##### 📝 Emphasis as Heading (MD036)
-
-- Use `## Heading` instead of `**Bold text**` for headings
-- Bold text should emphasize words, not create structure
-
-##### 🏷️ Code Block Language (MD040)
-
-- Always specify language: `` `bash` not just ``
-- Use `text` for non-code content: ``` `text`
-- Common languages: `bash`, `json`, `javascript`, `text`
-
-#### Best Practices
-
-- **Preview before commit**: Run `make lint` locally
-- **Auto-fix first**: Use `make lint-fix` to catch obvious issues
-- **Manual review**: Use `make lint-manual` for remaining issues
-- **Short lines**: Break at natural points (commas, conjunctions)
-- **Consistent structure**: Follow existing document patterns
-- when creating command for claude check the official claude.ai documentation
+**This file provides Claude-specific behavioral configuration. All detailed development information is in DEVELOPMENT.md
+to avoid duplication and maintain single sources of truth.**

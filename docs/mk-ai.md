@@ -1,545 +1,160 @@
-# AI.md Compilation Guide 🤖
+# AI.md Compilation Process Guide
 
-**Purpose**: Guide complete pour compiler et maintenir le fichier `./AI.md` - le guide central pour Claude AI  
-**Target**: Claude AI et développeurs maintenant la documentation  
-**Last Updated**: 2025-08-28  
-**Related Task**: DD081 - Documentation tunnel optimization  
-**CRITICAL**: AI.md MUST be created at project root (`./AI.md`) NOT in `.claude/` directory
+**Purpose**: Documentation of the AI.md compilation concept and process  
+**Target**: Human developers maintaining the AI documentation system  
+**Last Updated**: 2025-08-30  
+**Related Command**: /dd:mkai
 
-## 📋 Overview
+## 📋 Concept Overview
 
-Le fichier `./AI.md` est un guide compilé qui agrège toute l'information critique dispersée dans plusieurs documents
-pour créer une "source unique de vérité" optimisée pour Claude AI.
+The `./AI.md` file is a **compiled documentation guide** that aggregates critical information from multiple source
+documents into a single, optimized reference for Claude AI development workflow.
 
-**🚨 CRITICAL LOCATION REQUIREMENT**: Le fichier `AI.md` DOIT être créé à la racine du project (`./AI.md`) pour une
-visibilité maximale, PAS dans le répertoire `.claude/`.
+### **Why Compilation is Needed**
 
-## 🎯 Compilation Objectives
+- **Information Scattered**: Critical info spread across CLAUDE.md, DEVELOPMENT.md, todo/README.md, command docs
+- **Claude Efficiency**: Single file prevents multiple reads and context switching
+- **Consistency**: Ensures all documentation references are synchronized
+- **Critical Info Prominence**: Makes essential information impossible to miss
 
-### **Primary Goals**
+## 🔄 Compilation Process
 
-- **Single Source of Truth**: Toute l'information critique en un seul endroit
-- **AI-Optimized Format**: Structure et language optimisés pour la compréhension IA
-- **Visual Prominence**: Information critique impossible à manquer
-- **Complete Context**: Contexte complete disponible sans navigation multiple
+### **Source → Target Flow**
 
-### **Quality Standards**
-
-- Information toujours à jour avec les sources
-- Language optimisé pour Claude AI (principles DD080)
-- Signalisation visuelle forte pour information critique
-- Cross-références vers documentation détaillée
-
-## 📁 Source Files Mapping
-
-### **Primary Sources (Must Include)**
-
-#### **.claude/CLAUDE.md**
-
-```markdown
-Sections to Compile:
-
-- 🚫 EXPLICIT PROHIBITION: External Tool Attribution
-- Project Management System (/doh overview)
-- Code Quality Standards
-- Essential Commands reference
-
-Critical Elements:
-
-- External tool attribution rules (FORBIDDEN section)
-- Markdown quality control workflow
-- Important instruction reminders
+```text
+CLAUDE.md           →  AI.md (Claude behavioral rules, external tool prohibitions)
+DEVELOPMENT.md      →  AI.md (Development patterns: naming convention, task protocols, decision patterns)
+todo/README.md      →  AI.md (Current Next ID, task management)
+.claude/commands/   →  AI.md (Command execution protocols)
+docs/ARCHITECTURE.md →  AI.md (Project structure context)
+docs/markdown-quality-control.md →  AI.md (Markdown workflow details)
 ```
 
-#### **.claude/DEVELOPMENT.md**
+### **Information Priority Hierarchy**
 
-```markdown
-Sections to Compile:
+1. **🚨 CRITICAL**: Information Claude MUST NOT miss (Next ID, prohibitions)
+2. **📋 MANDATORY**: Processes Claude MUST follow exactly (task creation, commands)
+3. **⚡ QUICK REFERENCE**: Frequently needed information (file paths, shortcuts)
+4. **💡 CONTEXT**: Background understanding (project structure, architecture)
 
-- DOH System Development context
-- Dependencies Philosophy (bash + jq + awk only for runtime)
-- Documentation References
-- Markdown Quality Control (complete workflow)
+### **Compilation Objectives**
 
-Critical Elements:
+- **Single Source of Truth**: All critical info accessible from one location
+- **AI-Optimized Format**: Structure and language optimized for Claude comprehension
+- **Visual Prominence**: Critical information highlighted with visual indicators
+- **Cross-References**: Links to detailed source documentation
+- **Purely Factual Content**: Current state only - exclude historical task references (DD###, EDD###)
 
-- make lint, make lint-fix, make lint-manual commands
-- Pre-commit protection system
-- Writing bug-free markdown guidelines
+## 🛠️ Manual Compilation Process
+
+### **Step 1: Source Analysis**
+
+- Read all source documents for changes since last compilation
+- Identify updated information (Next ID, new commands, architecture changes)
+- Note critical information that must be prominently displayed
+
+### **Step 2: Content Extraction**
+
+- Extract CRITICAL information first (Next ID from todo/README.md)
+- Extract MANDATORY protocols (from DEVELOPMENT.md, CLAUDE.md)
+- Extract frequently needed references (command protocols, file paths)
+- Extract contextual information (architecture, project structure)
+- **EXCLUDE historical task references**: Remove DD###, EDD### mentions - focus on current factual state
+
+### **Step 3: AI.md Assembly**
+
+- Apply visual prominence system (🚨📋⚡💡 indicators)
+- Structure information by priority hierarchy
+- Add cross-references to detailed source documents
+- Include compilation timestamp and source version info
+
+### **Step 4: Validation**
+
+- Verify all critical information is prominently displayed
+- Check that Next ID matches todo/README.md
+- Ensure command protocols match current implementation
+- Validate cross-references are accurate
+
+## 🤖 Automated Compilation: /dd:mkai
+
+The `/dd:mkai` command automates this compilation process:
+
+```bash
+/dd:mkai                    # Default: compile AI.md from all sources
+/dd:mkai --validate         # Check AI.md completeness and accuracy
+/dd:mkai --maintain         # Update compilation guide with source changes
+/dd:mkai --full            # Complete maintenance + compilation + validation
 ```
 
-#### **todo/README.md**
+### **Automation Benefits**
 
-```markdown
-Sections to Compile:
+- **Consistency**: Same compilation logic every time
+- **Efficiency**: Fast updates when sources change
+- **Accuracy**: Automatic detection of source modifications
+- **Validation**: Built-in quality assurance checks
 
-- 🚨 CRITICAL: Next ID counter (currently 082)
-- Task numbering system (shared counter TODOs/Epics)
-- Task creation workflow (mandatory 5-step process)
-- Epic assignment rules
+## 📁 Source Document Roles
 
-Critical Elements:
+### **Primary Sources**
 
-- Current Next ID: 082 (MUST be prominently displayed)
-- Shared numbering explanation: DOH001-DD081, EDOH074-EDOH077
-- Task creation protocol (MANDATORY PROCESS section)
-- Epic assignment rules (when to assign vs Epic: None)
-```
+- **CLAUDE.md**: Claude-specific behavioral rules, external tool prohibitions, AI.md delegation
+- **DEVELOPMENT.md**: Development patterns and methodology (naming convention, task protocols, decision patterns,
+  development philosophy)
+- **docs/markdown-quality-control.md**: Detailed markdown linting workflow and commands
+- **todo/README.md**: Current Next ID (CRITICAL), basic task management workflow
 
-#### **docs/project-isolation-guide.md**
+### **Secondary Sources**
 
-```markdown
-Sections to Compile:
+- **.claude/commands/dd/\*.md**: Command execution protocols and workflows
+- **docs/ARCHITECTURE.md**: Project structure and architectural context
+- **docs/QUICK-REFERENCE.md**: Daily development workflow shortcuts
 
-- DOH-DEV Internal vs DOH Runtime distinction
-- Task creation context rules
-- Version management (dd-x.x.x vs doh-x.x.x)
-- Command context mapping
+### **Dynamic Sources**
 
-Critical Elements:
+- **Version files**: Current project state and milestone information
+- **Recent tasks**: Completed work that affects development workflow
 
-- Project context rules (when to use DOH-DEV Internal)
-- Default: DOH Runtime unless enhancing /dd:\* commands
-- Version file associations (dd-_.md vs doh-_.md)
-```
+## 🔧 Maintenance Triggers
 
-#### **.claude/commands/dd/\*.md**
+### **Immediate Recompilation Required**
 
-```markdown
-Files to Compile:
+- Next ID changes in todo/README.md
+- New /dd:\* commands added or modified
+- Architecture changes (like EDD116 completion)
+- Quality standards or process changes
 
-- commit.md (pipeline overview, not full 1100 lines)
-- changelog.md (linting pipeline, archive management)
-- next.md (AI recommendations, project filtering)
+### **Regular Recompilation (Weekly)**
 
-Critical Elements:
+- Task completions affecting workflow
+- Documentation updates in core files
+- Integration point changes
+- Process improvements
 
-- Command execution protocols
-- Flag inheritance patterns
-- Pipeline integration (DD070 linting)
-- AI decision workflows
-```
+## ✅ Quality Standards
 
-### **Secondary Sources (Context/Reference)**
+### **Compilation Requirements**
 
-#### **linting/feedback.md**
+- All critical information prominently displayed
+- Visual hierarchy applied consistently
+- Cross-references accurate and current
+- Compilation timestamp updated
 
-```markdown
-Sections to Reference:
+### **Content Validation**
 
-- Current linting intelligence status
-- AI success rates overview
-- Pattern learning system
+- Next ID matches todo/README.md exactly
+- Command protocols match current implementation
+- No duplicated information from sources
+- All essential context included
+- **No historical task references**: DD###, EDD### mentions removed - purely factual current state
 
-Usage: Quick reference, link to full file for details
-```
+## 🎯 Success Metrics
 
-#### **docs/pattern-isolation-guide.md**
-
-```markdown
-Sections to Reference:
-
-- Development patterns overview
-- Architecture principles
-
-Usage: Background context, link for comprehensive patterns
-```
-
-## 🔧 Compilation Process
-
-### **Step 1: Information Extraction**
-
-#### **A. Critical Information First**
-
-```markdown
-Priority Order:
-
-1. 🚨 CRITICAL ALERTS - Information Claude MUST NOT miss
-   - Current Next ID (082)
-   - Task numbering protocol
-   - External tool attribution prohibition
-   - DOH-DEV vs Runtime context rules
-
-2. 📋 MANDATORY PROTOCOLS - Processes Claude MUST follow exactly
-   - Task creation 5-step process
-   - Command execution workflows
-   - Quality standards (linting, documentation)
-
-3. ⚡ QUICK REFERENCE - Frequently needed information
-   - Command summaries
-   - Flag inheritance patterns
-   - File structure overview
-
-4. 💡 CONTEXT NOTES - Background understanding
-   - Project architecture
-   - Integration points
-   - Historical context
-```
-
-#### **B. Content Optimization for AI**
-
-```markdown
-Language Optimization Rules (from DD080):
-
-- ❌ "Handle appropriately" → ✅ "Execute specific protocol X"
-- ❌ "As needed" → ✅ "When condition Y is true, then Z"
-- ❌ "Manage files" → ✅ "Move T###.md from todo/ to todo/archive/"
-
-Decision Tree Format:
-
-- Use explicit IF/THEN/ELSE structures
-- Number sequential steps clearly
-- Specify exact conditions and actions
-- Provide failure recovery procedures
-```
-
-### **Step 2: Structure Assembly**
-
-#### **A. AI.md Template Structure (ROOT LOCATION: `./AI.md`)**
-
-```markdown
-# 🤖 CLAUDE AI - COMPLETE PROJECT GUIDE 🤖
-
-🚨 **CRITICAL**: This file is located at `./AI.md` (project root) for maximum visibility 🚨
-
-## 🚨 READ THIS FIRST - CRITICAL INSTRUCTIONS 🚨
-
-[Attention-grabbing section with most critical info]
-
-### ⚡ QUICK REFERENCE CARD ⚡
-
-- **Next Task ID**: 082 (ALWAYS verify in todo/README.md)
-- **Project Context**: DOH-DEV Internal vs DOH Runtime (default)
-- **Linting Status**: DD070 strict enforcement active
-- **Active Commands**: /dd:commit, /dd:changelog, /dd:next
-
-## Part 1: ESSENTIAL CONTEXT (Always Read)
-
-### 1.1 🚫 EXPLICIT PROHIBITIONS
-
-### 1.2 📋 TASK CREATION PROTOCOL (MANDATORY)
-
-### 1.3 💡 PROJECT CONTEXT RULES
-
-### 1.4 🔧 QUALITY STANDARDS
-
-## Part 2: COMMAND EXECUTION PROTOCOLS
-
-### 2.1 /dd:commit - Complete Pipeline
-
-### 2.2 /dd:changelog - Documentation Updates
-
-### 2.3 /dd:next - Task Recommendations
-
-## Part 3: DEVELOPMENT WORKFLOWS
-
-### 3.1 Documentation Standards
-
-### 3.2 Code Quality Requirements
-
-### 3.3 Error Handling & Recovery
-
-## Part 4: REFERENCE INFORMATION
-
-### 4.1 File Structure & Organization
-
-### 4.2 Integration Points
-
-### 4.3 Source Document References
+- **Claude can quickly find Next ID** (< 30 seconds)
+- **Task creation protocol is unambiguous** (no interpretation needed)
+- **Command execution is clear** (step-by-step processes defined)
+- **Context is complete** (no need to read multiple files for decisions)
 
 ---
 
-📍 **File Location**: `./AI.md` (project root) - NOT in `.claude/` directory
-```
-
-#### **B. Visual Prominence Implementation**
-
-```markdown
-Visual Hierarchy: 🚨 - CRITICAL ALERTS (cannot be missed) 📋 - MANDATORY PROTOCOLS (must be followed exactly) ⚡ - QUICK
-REFERENCE (frequently needed) 💡 - CONTEXT NOTES (background understanding) 🔧 - IMPLEMENTATION DETAILS (execution
-specifics) 🎯 - EXAMPLES (practical demonstrations) ⚠️ - WARNINGS (important caveats) ✅ - SUCCESS CRITERIA (validation
-checkpoints)
-```
-
-### **Step 3: Content Compilation**
-
-#### **A. Critical Sections Assembly**
-
-**🚨 CRITICAL ALERTS Section:**
-
-```markdown
-## 🚨 READ THIS FIRST - CRITICAL INSTRUCTIONS 🚨
-
-### TASK CREATION PROTOCOL - NO EXCEPTIONS
-
-**MANDATORY PROCESS**:
-
-1. ✅ **READ todo/README.md FIRST** - Get current Next ID (082)
-2. ✅ **CREATE DD082.md** - Use EXACT next number (never arbitrary)
-3. ✅ **UPDATE README.md** - Increment Next ID to 083
-4. ✅ **VERIFY** - No DD082.md exists already
-
-**RECENT ERROR**: DD074 used instead of DD078 → DD079 created to prevent recurrence **PREVENTION**: ALWAYS consult
-todo/README.md before task creation
-
-### PROJECT CONTEXT RULES
-
-**DEFAULT**: DOH Runtime (doh-x.x.x versioning) **DOH-DEV Internal**: ONLY when enhancing /dd:\* commands or internal
-tooling
-
-- Add `**Project**: DOH-DEV Internal` header
-- Use dd-x.x.x versioning (VDD-0.1.0.md, VDD-0.2.0.md)
-
-### EXTERNAL TOOL ATTRIBUTION - FORBIDDEN
-
-❌ NO "Generated with [Claude Code]" in commits, docs, or code ❌ NO "Co-Authored-By: Claude" or similar attributions  
-❌ NO references to AI tools, IDEs, or development environments ✅ All work must appear as independent professional
-software
-```
-
-**📋 MANDATORY PROTOCOLS Section:**
-
-```markdown
-## 📋 MANDATORY PROTOCOLS - MUST FOLLOW EXACTLY 📋
-
-### Command Execution Protocol
-
-**Every /dd:\* command execution**:
-
-1. **Parse user flags** - Identify --lenient, --no-lint, --dry-run, etc.
-2. **Check dependencies** - Verify required files/context available
-3. **Execute pipeline** - Follow specific command protocol
-4. **Handle errors** - Use defined recovery procedures
-5. **Report results** - Provide clear success/failure feedback
-
-### Quality Standards Protocol
-
-**DD070 Strict Linting Enforcement**:
-
-- **Default**: Pixel perfect linting (zero errors allowed)
-- **Bypass**: Only with --lenient (warnings) or --no-lint (skip entirely)
-- **Pipeline**: 4-layer fix system (make lint-fix → AI fixes → validation → user decision)
-- **Feedback**: Patterns stored in ./linting/feedback.md for optimization
-
-### Documentation Protocol
-
-**All documentation must**:
-
-- Follow markdown linting rules (make lint)
-- Use English language throughout
-- Maintain professional standards
-- Include proper metadata and structure
-```
-
-#### **B. Command Integration Section**
-
-```markdown
-## Command Execution Protocols
-
-### /dd:commit - Complete Pipeline
-
-**Purpose**: Execute full DOH commit workflow with documentation updates **Pipeline**: /dd:changelog → git operations →
-intelligent commit messages
-
-| **Flag Inheritance**: | Flag    | /dd:changelog    | Git Operation           | Effect       |
-| --------------------- | ------- | ---------------- | ----------------------- | ------------ | ----------------- | ------- | ---------------- | -------- |
-| --lenient             | ✅ Pass | Uses --no-verify | Bypass linting warnings |              | --no-lint         | ✅ Pass | Uses --no-verify | Skip all |
-| linting               |         | --dry-run        | ✅ Pass                 | Preview only | No git operations |
-
-**Execution Protocol**:
-
-1. Parse flags and task description
-2. Call /dd:changelog with parameters
-3. Handle linting pipeline results (DD070)
-4. Generate intelligent commit message
-5. Execute git operations with appropriate --no-verify usage
-
-### /dd:changelog - Documentation Updates
-
-**Purpose**: Update documentation, manage archives, enforce quality **New Feature**: DD070 AI-powered linting pipeline
-integration
-
-**Execution Protocol**:
-
-1. Run AI-powered linting pipeline (unless --no-lint)
-2. Update TODO files and CHANGELOG.md
-3. Manage todo/archive/ folder (move completed tasks)
-4. Handle version tracking and metadata
-5. Report results with linting status
-
-### /dd:next - AI Task Recommendations
-
-**Purpose**: Provide intelligent task recommendations based on analysis **Enhancement**: DD073 --internal flag for
-DOH-DEV focus
-
-**Project Filtering**:
-
-- **Default**: DOH Runtime tasks (doh-x.x.x versioning)
-- **--internal**: DOH-DEV Internal tasks (dd-x.x.x versioning)
-- **--project=all**: Both contexts with clear separation
-```
-
-### **Step 4: Source Attribution & Cross-References**
-
-#### **A. Source Tracking Section**
-
-```markdown
-## 📚 SOURCE DOCUMENT REFERENCES
-
-### Detailed Documentation
-
-For comprehensive information, refer to source documents:
-
-**Core Configuration**:
-
-- `.claude/CLAUDE.md` - Basic project configuration and rules
-- `.claude/DEVELOPMENT.md` - Development workflow and patterns
-- `todo/README.md` - Task management system (CRITICAL for Next ID)
-
-**Command Details**:
-
-- `.claude/commands/dd/commit.md` - Complete /dd:commit documentation (~1100 lines)
-- `.claude/commands/dd/changelog.md` - Full /dd:changelog pipeline details
-- `.claude/commands/dd/next.md` - AI recommendation system details
-
-**Context & Patterns**:
-
-- `docs/project-isolation-guide.md` - DOH-DEV vs Runtime separation
-- `docs/pattern-isolation-guide.md` - Development pattern guidelines
-- `linting/feedback.md` - AI linting intelligence and patterns
-
-### Compilation Information
-
-- **Last Compiled**: 2025-08-28
-- **Source Document Versions**: As of compilation date
-- **Critical Updates**: Next ID, command enhancements, linting pipeline
-- **Compilation Guide**: `docs/mk-ai.md` (this file)
-```
-
-## 🔄 Maintenance Protocol
-
-### **When to Recompile AI.md**
-
-#### **Immediate Recompilation Required**
-
-- [ ] **Next ID changes** in todo/README.md (critical update)
-- [ ] **New /dd:\* commands** added or significantly modified
-- [ ] **Quality standards changes** (linting rules, requirements)
-- [ ] **Project context rules** modified (DOH-DEV vs Runtime)
-
-#### **Regular Recompilation (Weekly)**
-
-- [ ] **Task completions** that affect workflow
-- [ ] **Documentation updates** in core files
-- [ ] **New integration points** or dependencies
-- [ ] **Process improvements** or optimizations
-
-### **Recompilation Checklist**
-
-#### **Pre-Compilation**
-
-- [ ] **Read all source files** for changes since last compilation
-- [ ] **Check current Next ID** in todo/README.md
-- [ ] **Verify command status** - which /dd:\* commands are active
-- [ ] **Review recent tasks** for workflow changes (DD070, DD078, DD080, DD081)
-
-#### **During Compilation**
-
-- [ ] **Extract critical information** using priority hierarchy
-- [ ] **Optimize language** for Claude AI comprehension
-- [ ] **Apply visual prominence** system consistently
-- [ ] **Verify cross-references** are current and accurate
-
-#### **Post-Compilation**
-
-- [ ] **Update compilation timestamp** in AI.md
-- [ ] **Verify all critical information** present and prominent
-- [ ] **Check visual hierarchy** works effectively
-- [ ] **Test findability** of key information (Next ID, protocols, etc.)
-
-### **Quality Assurance**
-
-#### **Content Validation**
-
-```markdown
-Validation Checklist:
-
-- [ ] Next ID correctly displayed (currently 082)
-- [ ] All CRITICAL and MANDATORY sections complete
-- [ ] Command protocols match current implementation
-- [ ] Project context rules clearly explained
-- [ ] Source attributions accurate and current
-```
-
-#### **AI Comprehension Test**
-
-```markdown
-Test Questions:
-
-- Can Claude quickly find current Next ID?
-- Are task creation steps unambiguous?
-- Is command execution protocol clear?
-- Are decision points well-defined?
-- Is context complete for typical operations?
-```
-
-## ⚡ Quick Compilation Workflow
-
-### **Fast Update Protocol** (for minor changes)
-
-```bash
-1. Identify changed source sections
-2. Update corresponding AI.md sections
-3. Verify critical info (Next ID) is current
-4. Update compilation timestamp
-5. Validate key information findability
-```
-
-### **Full Recompilation Protocol** (for major changes)
-
-```bash
-1. Read all source documents completely
-2. Extract information using priority hierarchy
-3. Rebuild AI.md structure from template
-4. Apply visual prominence system
-5. Add cross-references and source attribution
-6. Complete quality assurance checklist
-7. Test AI comprehension effectiveness
-```
-
-## 🎯 Success Criteria
-
-### **Primary Objectives**
-
-- [ ] **Single source availability**: All critical info in AI.md
-- [ ] **Visual prominence effective**: Critical info impossible to miss
-- [ ] **Context completeness**: No need for multiple file navigation
-- [ ] **Current accuracy**: Information matches project state
-
-### **Quality Metrics**
-
-- [ ] **Information density**: High critical-to-total info ratio
-- [ ] **Findability speed**: Key info locatable in <30 seconds
-- [ ] **Decision support**: Complete context at decision points
-- [ ] **Error prevention**: Processes like DD079 numbering prevented
-
-## 🚨 Critical Reminders
-
-### **For Claude AI**
-
-- **ALWAYS check `./AI.md` first** before reading other documentation (located at project root)
-- **Verify Next ID** in Quick Reference Card matches todo/README.md
-- **Follow MANDATORY PROTOCOLS** exactly as specified
-- **Use visual prominence** to prioritize information processing
-
-### **For Developers**
-
-- **Update AI.md** when core processes change
-- **Verify compilation accuracy** after significant changes
-- **Monitor Claude's usage patterns** to improve effectiveness
-- **Maintain visual prominence** system consistently
-
----
-
-**This guide ensures `./AI.md` (at project root) remains an effective "tunnel" for Claude AI, providing complete,
-current, and optimally formatted information for reliable project execution.**
+This guide describes the **process** of AI.md compilation. The actual documentation content comes from the source files
+listed above, ensuring single sources of truth and avoiding duplication.

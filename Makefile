@@ -67,51 +67,51 @@ deps-check: ## Verify all dependencies are present
 
 # Linting - Comprehensive auto-correcting system
 lint: ## Run linters on all markdown files (check mode)
-	@./dev-tools/scripts/lint-files.sh --check
+	@./scripts/linting/lint-files.sh --check
 
 lint-fix: ## Auto-fix all markdown files with 3-tool pipeline
-	@./dev-tools/scripts/lint-files.sh --fix
+	@./scripts/linting/lint-files.sh --fix
 
 lint-file: ## Lint single file (usage: make lint-file FILE=README.md)
 	@if [ -z "$(FILE)" ]; then \
 		echo "❌ Usage: make lint-file FILE=path/to/file.md"; \
 		exit 1; \
 	fi
-	@./dev-tools/scripts/lint-files.sh --fix "$(FILE)"
+	@./scripts/linting/lint-files.sh --fix "$(FILE)"
 
 lint-check-file: ## Check single file without fixing (usage: make lint-check-file FILE=README.md)
 	@if [ -z "$(FILE)" ]; then \
 		echo "❌ Usage: make lint-check-file FILE=path/to/file.md"; \
 		exit 1; \
 	fi
-	@./dev-tools/scripts/lint-files.sh --check "$(FILE)"
+	@./scripts/linting/lint-files.sh --check "$(FILE)"
 
 lint-staged: ## Auto-fix all staged files
-	@./dev-tools/scripts/lint-files.sh --fix --staged
+	@./scripts/linting/lint-files.sh --fix --staged
 
 lint-modified: ## Auto-fix all modified/new files
-	@./dev-tools/scripts/lint-files.sh --fix --modified
+	@./scripts/linting/lint-files.sh --fix --modified
 
 lint-with-exceptions: ## Show exception handling details while linting
-	@./dev-tools/scripts/lint-files.sh --fix --show-exceptions
+	@./scripts/linting/lint-files.sh --fix --show-exceptions
 
 lint-validate-exceptions: ## Validate exception markers are properly closed
-	@./dev-tools/scripts/lint-files.sh --validate-exceptions
+	@./scripts/linting/lint-files.sh --validate-exceptions
 
 lint-show-skipped: ## Show what sections were skipped during linting
-	@./dev-tools/scripts/lint-files.sh --show-skipped
+	@./scripts/linting/lint-files.sh --show-skipped
 
 lint-dir: ## Lint all files in directory (usage: make lint-dir DIR=todo/)
 	@if [ -z "$(DIR)" ]; then \
 		echo "❌ Usage: make lint-dir DIR=path/to/dir/"; \
 		exit 1; \
 	fi
-	@./dev-tools/scripts/lint-files.sh --fix "$(DIR)"
+	@./scripts/linting/lint-files.sh --fix "$(DIR)"
 
 lint-manual: deps-check ## Show manual markdown fixes needed (line length, etc.)
 	@echo "📝 Checking for manual fixes needed..."
 	@echo "🔍 Running comprehensive check to identify non-auto-fixable issues..."
-	@./dev-tools/scripts/lint-files.sh --check | grep -E "(MD013|MD024|MD036)" || echo "✅ No manual fixes needed"
+	@./scripts/linting/lint-files.sh --check | grep -E "(MD013|MD024|MD036)" || echo "✅ No manual fixes needed"
 
 # Quality checks
 check: lint ## All quality checks (lint + test)
@@ -120,17 +120,17 @@ check: lint ## All quality checks (lint + test)
 # Git hooks
 hooks-install: ## Install pre-commit hooks with linter integration
 	@echo "🔗 Installing git hooks..."
-	@if [ -f dev-tools/hooks/pre-commit ]; then \
+	@if [ -f scripts/git/hooks/pre-commit ]; then \
 		if [ -f .git/hooks/pre-commit ] && [ ! -L .git/hooks/pre-commit ]; then \
 			echo "⚠️  Existing pre-commit hook detected!"; \
 			echo "💾 Backing up to .git/hooks/pre-commit.backup"; \
 			cp .git/hooks/pre-commit .git/hooks/pre-commit.backup; \
 		fi; \
-		chmod +x dev-tools/hooks/pre-commit; \
-		ln -sf ../../dev-tools/hooks/pre-commit .git/hooks/pre-commit; \
+		chmod +x scripts/git/hooks/pre-commit; \
+		ln -sf ../../scripts/git/hooks/pre-commit .git/hooks/pre-commit; \
 		echo "✅ Pre-commit hook installed"; \
 	else \
-		echo "❌ Pre-commit hook not found at dev-tools/hooks/pre-commit"; \
+		echo "❌ Pre-commit hook not found at scripts/git/hooks/pre-commit"; \
 		exit 1; \
 	fi
 

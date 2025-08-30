@@ -7,10 +7,12 @@
 
 ## Description
 
-Automatically detects YAML content in fenced code blocks and adds appropriate language specification to resolve MD040 errors.
+Automatically detects YAML content in fenced code blocks and adds appropriate language specification to resolve MD040
+errors.
 
 **Pattern Detection**: Identifies code blocks containing YAML structures like:
-- Key-value pairs: `key: value`  
+
+- Key-value pairs: `key: value`
 - Lists: `- item`
 - Document separators: `---`
 - Nested structures with indentation
@@ -33,13 +35,13 @@ This plugin is managed by the markdownlint plugin manager:
 
 ```bash
 # Enable plugin
-./linting/plugins.d/manager_markdownlint_plugin.sh --enable md040-yaml-blocks
+./scripts/linting/manager_markdownlint_plugin.sh --enable md040-yaml-blocks
 
-# Check status  
-./linting/plugins.d/manager_markdownlint_plugin.sh --status md040-yaml-blocks
+# Check status
+./scripts/linting/manager_markdownlint_plugin.sh --status md040-yaml-blocks
 
 # Disable plugin
-./linting/plugins.d/manager_markdownlint_plugin.sh --disable md040-yaml-blocks
+./scripts/linting/manager_markdownlint_plugin.sh --disable md040-yaml-blocks
 ```
 
 ## Integration with /dd:lint

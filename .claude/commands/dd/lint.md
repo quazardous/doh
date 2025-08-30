@@ -7,13 +7,13 @@ complex issues that automated tools can't fix.
 
 **Hybrid Intelligent Linting**:
 
-1. **Primary Backend**: `dev-tools/scripts/lint-files.sh` handles 95%+ of issues automatically
+1. **Primary Backend**: `scripts/linting/lint-files.sh` handles 95%+ of issues automatically
 2. **AI Enhancement Layer**: Claude analyzes remaining issues and applies intelligent fixes
 3. **Single Interface**: Simple commands with powerful backend integration
 
 ```mermaid
 graph LR
-    A[/dd:lint] --> B[dev-tools/scripts/lint-files.sh]
+    A[/dd:lint] --> B[scripts/linting/lint-files.sh]
     B --> C{All Issues Fixed?}
     C -->|Yes| D[✅ Success]
     C -->|No| E[🤖 AI Analysis]
@@ -25,17 +25,20 @@ graph LR
 ## Usage
 
 ```bash
-# Simple usage - unified backend
-/dd:lint                                    # All markdown files
-/dd:lint README.md                          # Single file
-/dd:lint todo/                              # Directory
-/dd:lint --modified                         # Git modified files
-/dd:lint --staged                           # Git staged files
+# Default behavior - modified files only with fixes
+/dd:lint                                    # Git modified files (default: --fix --modified)
+/dd:lint README.md                          # Single file with fixes
+/dd:lint todo/                              # Directory with fixes
 
-# Control modes
-/dd:lint --check                            # Check only, no fixes
-/dd:lint --verbose                          # Detailed output
-/dd:lint "*.md" --check                     # Pattern with check mode
+# Scope control
+/dd:lint --all                              # All markdown files in project
+/dd:lint --staged                           # Git staged files
+/dd:lint --modified                         # Git modified files (explicit)
+
+# Mode control
+/dd:lint --check                            # Check only, no fixes (with --modified by default)
+/dd:lint --all --check                      # Check all files, no fixes
+/dd:lint --verbose                          # Detailed output (with --modified by default)
 
 # Plugin management (DD107/DD108/DD109)
 /dd:lint --suggest-plugins                  # Analyze error cache and suggest plugins
@@ -48,18 +51,20 @@ graph LR
 
 ### **Target Selection**
 
-- `[no args]`: All markdown files in project
+- `[no args]`: **DEFAULT**: Git modified files only (equivalent to `--modified`)
 - `[file-path]`: Specific file (e.g., `README.md`)
 - `[directory]`: All markdown files in directory (e.g., `todo/`)
 - `[glob-pattern]`: Files matching pattern (e.g., `"docs/*.md"`)
 
-### **Git Integration** (New)
+### **Scope Control**
 
-- `--modified`: Process only git-modified files (`git diff --name-only`)
+- `--all`: Process all markdown files in project
+- `--modified`: Process only git-modified files (`git diff --name-only`) **[DEFAULT]**
 - `--staged`: Process only git-staged files (`git diff --cached --name-only`)
 
 ### **Mode Control**
 
+- `--fix`: Apply fixes to issues found **[DEFAULT]**
 - `--check`: Check-only mode (no modifications)
 - `--verbose`: Detailed output and progress information
 
@@ -75,15 +80,18 @@ graph LR
 ### **Development Workflow**
 
 ```bash
-# Check what needs fixing
+# Check what needs fixing (default behavior)
 git status
-/dd:lint --modified --check
+/dd:lint --check                        # Check modified files only
 
-# Fix modified files
-/dd:lint --modified
+# Fix modified files (default behavior)
+/dd:lint                                 # Fix modified files
 
 # Review specific file
 /dd:lint todo/DD087.md --verbose
+
+# Check all files before major commit
+/dd:lint --all --check
 
 # Check before staging
 /dd:lint --staged --check
@@ -95,7 +103,7 @@ git commit
 ```bash
 /dd:lint README.md
 
-🔧 Phase 1: Running dev-tools/scripts/lint-files.sh...
+🔧 Phase 1: Running scripts/linting/lint-files.sh...
 ├── ✅ Prettier: Fixed formatting (3 issues)
 ├── ✅ Markdownlint: Fixed MD047, MD032 (5 issues)
 ├── ✅ Codespell: Fixed typos (2 issues)
@@ -115,19 +123,21 @@ git commit
 
 ```bash
 # /dd:lint internally calls:
-dev-tools/scripts/lint-files.sh [target] [--fix|--check]
+scripts/linting/lint-files.sh [target] [--fix|--check]
 
 # Direct mapping examples:
-/dd:lint README.md          → ./dev-tools/scripts/lint-files.sh README.md --fix
-/dd:lint --check todo/      → ./dev-tools/scripts/lint-files.sh todo/ --check
-/dd:lint --modified         → ./dev-tools/scripts/lint-files.sh --modified --fix
-/dd:lint --staged           → ./dev-tools/scripts/lint-files.sh --staged --fix
-/dd:lint --check --staged   → ./dev-tools/scripts/lint-files.sh --staged --check
+/dd:lint                    → ./scripts/linting/lint-files.sh --modified --fix
+/dd:lint README.md          → ./scripts/linting/lint-files.sh README.md --fix
+/dd:lint --check            → ./scripts/linting/lint-files.sh --modified --check
+/dd:lint --all              → ./scripts/linting/lint-files.sh --fix
+/dd:lint --check todo/      → ./scripts/linting/lint-files.sh todo/ --check
+/dd:lint --staged           → ./scripts/linting/lint-files.sh --staged --fix
+/dd:lint --check --staged   → ./scripts/linting/lint-files.sh --staged --check
 ```
 
 ### **AI Enhancement Layer**
 
-When `dev-tools/scripts/lint-files.sh` completes with remaining issues:
+When `scripts/linting/lint-files.sh` completes with remaining issues:
 
 ```javascript
 const enhancedLinting = async (file, remainingIssues) => {
@@ -264,29 +274,36 @@ Run /dd:lint problematic-file.md --verbose for detailed guidance
 When you see a `/dd:lint` command, execute it using the unified backend:
 
 ```bash
+# User requests: /dd:lint (DEFAULT: --modified --fix)
+# Execute:
+./scripts/linting/lint-files.sh --modified --fix
+
 # User requests: /dd:lint README.md
 # Execute:
-./dev-tools/scripts/lint-files.sh README.md --fix
+./scripts/linting/lint-files.sh README.md --fix
 
-# User requests: /dd:lint --check todo/
+# User requests: /dd:lint --check (DEFAULT: --modified --check)
 # Execute:
-./dev-tools/scripts/lint-files.sh todo/ --check
+./scripts/linting/lint-files.sh --modified --check
 
-# User requests: /dd:lint --modified --verbose
+# User requests: /dd:lint --all
 # Execute:
-./dev-tools/scripts/lint-files.sh --modified --fix
-# (Note: unified script shows detailed output by default)
+./scripts/linting/lint-files.sh --fix
+
+# User requests: /dd:lint --all --check
+# Execute:
+./scripts/linting/lint-files.sh --check
 
 # User requests: /dd:lint --staged
 # Execute:
-./dev-tools/scripts/lint-files.sh --staged --fix
+./scripts/linting/lint-files.sh --staged --fix
 ```
 
 ### **AI Enhancement Trigger**
 
 If the unified script reports remaining issues, apply AI fixes:
 
-1. **Run unified script first**: `./dev-tools/scripts/lint-files.sh [target] --fix`
+1. **Run unified script first**: `./scripts/linting/lint-files.sh [target] --fix`
 2. **Check for remaining issues**: Look for "❌ Issues found" in output
 3. **Apply AI enhancement**: Use Claude to fix complex structural issues
 4. **Validate with unified script**: Re-run with `--check` to confirm fixes
@@ -304,13 +321,16 @@ If the unified script reports remaining issues, apply AI fixes:
 #### **Development Cycle**
 
 ```bash
-# 1. Check current state
-/dd:lint --modified --check
+# 1. Check current state (default behavior)
+/dd:lint --check
 
-# 2. Fix issues
-/dd:lint --modified
+# 2. Fix issues (default behavior)
+/dd:lint
 
-# 3. Stage and commit
+# 3. Check all files before major release
+/dd:lint --all --check
+
+# 4. Stage and commit
 git add .
 /dd:commit "fixes applied"
 ```

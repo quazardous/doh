@@ -14,7 +14,7 @@ fi
 
 # Get the root directory of the git repository
 GIT_ROOT=$(git rev-parse --show-toplevel)
-HOOKS_DIR="$GIT_ROOT/dev-tools/hooks"
+HOOKS_DIR="$GIT_ROOT/scripts/git/hooks"
 GIT_HOOKS_DIR="$GIT_ROOT/.git/hooks"
 
 # Check if hooks directory exists
@@ -38,7 +38,7 @@ if [ -f "$HOOKS_DIR/pre-commit" ]; then
     fi
     
     chmod +x "$HOOKS_DIR/pre-commit"
-    ln -sf "../../dev-tools/hooks/pre-commit" "$GIT_HOOKS_DIR/pre-commit"
+    ln -sf "../../scripts/git/hooks/pre-commit" "$GIT_HOOKS_DIR/pre-commit"
     echo "✅ Pre-commit hook installed"
 else
     echo "❌ Pre-commit hook not found: $HOOKS_DIR/pre-commit"
@@ -49,7 +49,7 @@ fi
 if [ -f "$HOOKS_DIR/pre-push" ]; then
     echo "📤 Installing pre-push hook..."
     chmod +x "$HOOKS_DIR/pre-push"
-    ln -sf "../../dev-tools/hooks/pre-push" "$GIT_HOOKS_DIR/pre-push"
+    ln -sf "../../scripts/git/hooks/pre-push" "$GIT_HOOKS_DIR/pre-push"
     echo "✅ Pre-push hook installed"
 fi
 

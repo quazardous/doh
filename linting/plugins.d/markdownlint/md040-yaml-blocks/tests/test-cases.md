@@ -39,7 +39,7 @@ database:
 services:
   - name: web
     port: 80
-  - name: api  
+  - name: api
     port: 8080
 ```
 
@@ -53,5 +53,6 @@ Not YAML at all
 ## Expected Results
 
 After plugin application:
+
 - Cases 1-4: Should have `yaml` language added automatically
 - Case 5: Should remain as plain text block (no language added)

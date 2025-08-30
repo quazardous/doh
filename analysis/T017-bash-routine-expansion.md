@@ -409,8 +409,8 @@ test_bash_routine() {
 
 ## Conclusion
 
-DOH017 analysis confirms that **5 additional bash routines** can achieve 85% token savings coverage with only 11 hours of
-development time. The established lib/doh.sh foundation makes implementation straightforward and consistent.
+DOH017 analysis confirms that **5 additional bash routines** can achieve 85% token savings coverage with only 11 hours
+of development time. The established lib/doh.sh foundation makes implementation straightforward and consistent.
 
 **Recommended Next Action**: Implement Phase 1 (update-status.sh, count-by-type.sh, validate-structure.sh) as immediate
 high-ROI wins.

@@ -8,7 +8,7 @@ set -e
 PROJECT_ROOT=$(pwd)
 CACHE_DIR="$PROJECT_ROOT/.cache/linting"
 ERROR_FILE="$CACHE_DIR/error-files.txt"
-LINTER="$PROJECT_ROOT/dev-tools/scripts/lint-files.sh"
+LINTER="$PROJECT_ROOT/scripts/linting/lint-files.sh"
 
 # Ensure cache directory exists
 mkdir -p "$CACHE_DIR"

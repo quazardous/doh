@@ -74,7 +74,7 @@ When called without a task description, uses the same intelligent analysis as `/
 
 ## Pipeline Architecture
 
-This command executes the core DOH documentation pipeline with strict quality enforcement:
+This command executes the core DOH documentation pipeline:
 
 ### 1. Documentation Updates
 
@@ -92,9 +92,8 @@ This command executes the core DOH documentation pipeline with strict quality en
   - **User Confirmation**: Prompts for approval with project-specific version increment
   - **Impact Assessment**: Shows version change rationale with project isolation respected
 
-### 2. Quality Assurance
+### 2. Version Management
 
-- **Documentation Standards**: Follows DOH markdown conventions
 - **Version Impact Analysis**: Automatic detection of version-affecting changes
 - **Archive Management**: Systematic organization of completed tasks
 
@@ -185,7 +184,6 @@ Provides clear progress reporting:
 ├── ✅ todo/README.md: Next ID counter updated
 ├── 🔄 Version analysis: VDOH-1.4.0 → doh-1.4.1 (feature additions detected)
 ├── ✅ Version bump confirmed and applied
-├── 🔧 Auto-fixed 2 documentation formatting issues
 └── ✅ Documentation updates complete
 
 Ready for commit. Next: /doh-sys:commit (will use same description)
@@ -219,10 +217,9 @@ Perfect for situations where you need to:
 
 ## Error Handling
 
-Uses the same progressive error handling as `/doh-sys:commit`:
+Simple error handling:
 
 - **File conflicts**: Detects and reports merge issues
-- **Format errors**: Applies intelligent auto-fixes
 - **Missing information**: Prompts for required details
 - **Validation failures**: Reports issues with suggestions
 

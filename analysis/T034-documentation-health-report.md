@@ -57,8 +57,8 @@ addressed for 1.4.0 release consistency.
 
 ### Analysis Documentation (/analysis - 2 files)
 
-| File                            | Purpose              | Status           | Relevance                         |
-| ------------------------------- | -------------------- | ---------------- | --------------------------------- |
+| File                              | Purpose              | Status           | Relevance                         |
+| --------------------------------- | -------------------- | ---------------- | --------------------------------- |
 | DOH014-data-structure-analysis.md | Architecture design  | ⚠️ Some old refs | Archive candidate                 |
 | DOH017-bash-routine-expansion.md  | Performance analysis | ✅ Good          | **Very current** - Active roadmap |
 

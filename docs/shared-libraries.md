@@ -1,4 +1,32 @@
-# DOH Cache Library - Multi-Purpose File Hash Caching
+# DOH Shared Script Libraries
+
+**Reusable script functions and utilities for the DOH project.**
+
+## Overview
+
+This directory contains shared utility functions used across the DOH project's scripting infrastructure. These libraries
+provide common functionality to avoid code duplication and ensure consistent behavior.
+
+### Architecture Position
+
+**Layer 3 - Shared Utilities** (`scripts/lib/`)
+
+- Reusable functions used by Layer 1 (execution scripts)
+- Provides common patterns and utilities
+- See `docs/linting-architecture.md` for complete system documentation
+
+## Library Inventory
+
+### Core Libraries
+
+| Library        | Purpose                            | Used By                       |
+| -------------- | ---------------------------------- | ----------------------------- |
+| `cache-lib.sh` | Cache management and optimization  | Performance scripts, scanning |
+| `lint-core.sh` | Core linting functions (if exists) | Linting execution scripts     |
+
+---
+
+# Cache Library - Multi-Purpose File Hash Caching
 
 Ultra-fast key-value cache library for optimizing file-based operations using SHA-256 hash tracking.
 

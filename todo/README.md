@@ -5,9 +5,13 @@
 
 ## 🚨 CRITICAL: Next Task ID
 
-**Next ID**: 112 (shared counter for TODOs and Epics)
+**Next ID**: 117 (shared counter for TODOs and Epics)
 
 **⚠️ MANDATORY**: Always use this Next ID for new tasks, then increment it after creation
+
+## 📋 TASK NAMING 📋
+
+Tasks use prefixed numbering for organization. See `DEVELOPMENT.md` for complete naming convention details.
 
 ## Overview
 
@@ -32,19 +36,19 @@ todo/
 ### Active and Proposed TODOs
 
 - Place directly in `todo/` folder
-- Format: `T###.md` (e.g., `DOH054.md`, `DOH055.md`)
+- Format: `DD###.md` (Development), `DOH###.md` (Runtime) (e.g., `DD117.md`, `DOH054.md`)
 - No subfolders for active/proposed items
 
 ### Completed TODOs
 
 - Move to `todo/archive/` when completed
-- Maintain same filename: `T###.md`
+- Maintain same filename: `DD###.md` or `DOH###.md`
 - Preserve all history and metadata
 
 ### Epics
 
 - Place directly in `todo/` folder
-- Format: `E###.md` (e.g., `EDOH074.md`, `EDOH076.md`)
+- Format: `EDD###.md` (Development Epics), `EDOH###.md` (Runtime Epics) (e.g., `EDD116.md`, `EDOH076.md`)
 - Track component TODOs and progress
 
 ## TODO Template

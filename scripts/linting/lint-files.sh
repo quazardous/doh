@@ -46,7 +46,7 @@ CACHE_STATS=false
 
 # Configure cache for linting
 export CACHE_DIR="./.cache/linting"
-export CONFIG_FILES=".markdownlint.json .prettierrc .prettierrc.json package.json pyproject.toml .codespell.conf dev-tools/scripts/lint-files.sh dev-tools/lib/lint-core.sh"
+export CONFIG_FILES=".markdownlint.json .prettierrc .prettierrc.json package.json pyproject.toml .codespell.conf scripts/linting/lint-files.sh scripts/lib/lint-core.sh"
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do

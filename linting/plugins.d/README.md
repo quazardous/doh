@@ -1,29 +1,46 @@
-# Linting Plugins Management System
+# DOH Linting System - Configuration Layer
 
-**Version**: 1.0  
-**Created**: 2025-08-29  
+**Version**: 1.0 (Post DD113 Migration)  
+**Last Updated**: 2025-08-30
 
 ## Overview
 
-This directory contains linting plugins organized by linter tool. Each linter has its own management system and plugin specifications.
+This directory contains linting plugin configurations for the DOH project's 3-layer linting architecture. All executable
+functionality has been consolidated into `scripts/linting/` during DD113 migration.
+
+### Architecture Position
+
+**Layer 2 - Configuration** (`linting/plugins.d/`)
+
+- Plugin configurations and project-specific rules
+- Used by Layer 1 (execution scripts in `scripts/linting/`)
+- See `docs/linting-architecture.md` for complete system documentation
+
+## Linting Plugins Management System
+
+This directory contains linting plugins organized by linter tool. Each linter has its own management system and plugin
+specifications.
 
 ## Supported Linters
 
 ### Markdownlint
+
 - **Tool**: markdownlint-cli
-- **Manager**: `manager_markdownlint_plugin.sh`
+- **Manager**: `scripts/linting/manager_markdownlint_plugin.sh`
 - **Plugin Directory**: `markdownlint/`
 - **Supported Errors**: MD040, MD036, MD013, MD024, MD025, MD032
 
 ### Prettier
+
 - **Tool**: prettier
-- **Manager**: `manager_prettier_plugin.sh` 
+- **Manager**: `scripts/linting/manager_prettier_plugin.sh`
 - **Plugin Directory**: `prettier/`
 - **Supported Errors**: Formatting, line length, code style
 
 ### Codespell
+
 - **Tool**: codespell
-- **Manager**: `manager_codespell_plugin.sh`
+- **Manager**: `scripts/linting/manager_codespell_plugin.sh`
 - **Plugin Directory**: `codespell/`
 - **Supported Errors**: Spelling corrections, custom dictionaries
 
@@ -34,9 +51,9 @@ Each linter has its own subdirectory with the following structure:
 ```text
 ./linting/plugins.d/
 ├── README.md                           # This file
-├── manager_markdownlint_plugin.sh      # Markdownlint plugin manager
-├── manager_prettier_plugin.sh          # Prettier plugin manager  
-├── manager_codespell_plugin.sh         # Codespell plugin manager
+├── scripts/linting/manager_markdownlint_plugin.sh      # Markdownlint plugin manager
+├── scripts/linting/manager_prettier_plugin.sh          # Prettier plugin manager
+├── scripts/linting/manager_codespell_plugin.sh         # Codespell plugin manager
 ├── markdownlint/                       # Markdownlint plugins
 │   ├── md040-yaml-blocks/
 │   │   ├── README.md                   # Plugin specification
@@ -74,40 +91,43 @@ Each linter has its own subdirectory with the following structure:
 ## Plugin Manager Commands
 
 ### Install Plugin
+
 ```bash
 # Install a markdownlint plugin
-./manager_markdownlint_plugin.sh --install md040-yaml-blocks
+./scripts/linting/manager_markdownlint_plugin.sh --install md040-yaml-blocks
 
 # Install a prettier plugin
-./manager_prettier_plugin.sh --install smart-line-breaks
+./scripts/linting/manager_prettier_plugin.sh --install smart-line-breaks
 
 # Install a codespell plugin
-./manager_codespell_plugin.sh --install project-dictionary
+./scripts/linting/manager_codespell_plugin.sh --install project-dictionary
 ```
 
 ### List Plugins
+
 ```bash
 # List all markdownlint plugins with status
-./manager_markdownlint_plugin.sh --list
+./scripts/linting/manager_markdownlint_plugin.sh --list
 
 # List specific linter plugins
-./manager_prettier_plugin.sh --list
-./manager_codespell_plugin.sh --list
+./scripts/linting/manager_prettier_plugin.sh --list
+./scripts/linting/manager_codespell_plugin.sh --list
 ```
 
 ### Plugin Status Management
+
 ```bash
 # Check plugin status
-./manager_markdownlint_plugin.sh --status md040-yaml-blocks
+./scripts/linting/manager_markdownlint_plugin.sh --status md040-yaml-blocks
 
 # Enable plugin (PROPOSED → APPLIED)
-./manager_markdownlint_plugin.sh --enable md040-yaml-blocks
+./scripts/linting/manager_markdownlint_plugin.sh --enable md040-yaml-blocks
 
 # Disable plugin (APPLIED → REFUSED)
-./manager_markdownlint_plugin.sh --disable md040-yaml-blocks
+./scripts/linting/manager_markdownlint_plugin.sh --disable md040-yaml-blocks
 
 # Remove plugin completely
-./manager_markdownlint_plugin.sh --remove md040-yaml-blocks
+./scripts/linting/manager_markdownlint_plugin.sh --remove md040-yaml-blocks
 ```
 
 ## Plugin States
@@ -139,18 +159,21 @@ The `/dd:lint` command integrates with this system via flags:
 Each linter manager handles configuration differently:
 
 ### Markdownlint
+
 - **Main config**: `.markdownlint.json`
 - **Plugin integration**: Merges `config-fragment.json` into main config
 - **Custom rules**: Copies `.js` files to `.markdownlint/rules/`
 - **Backup**: Creates `.markdownlint.json.bak-[plugin-name]`
 
-### Prettier  
+### Prettier
+
 - **Main config**: `.prettierrc`
 - **Plugin integration**: Merges `config-fragment.json` into main config
 - **Custom formatting**: Applies formatting rules
 - **Backup**: Creates `.prettierrc.bak-[plugin-name]`
 
 ### Codespell
+
 - **Main config**: `.codespell.cfg` or `pyproject.toml`
 - **Plugin integration**: Appends to dictionaries or ignore files
 - **Custom dictionaries**: Manages word lists and ignore patterns

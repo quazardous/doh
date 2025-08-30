@@ -12,7 +12,7 @@ ERROR_FILE="$CACHE_DIR/error-files.txt"
 # Check if cache exists
 if [[ ! -f "$ERROR_FILE" ]]; then
     echo "❌ No lint cache found"
-    echo "💡 Run: ./scripts/lint-scan.sh to create cache"
+    echo "💡 Run: ./scripts/linting/lint-scan.sh to create cache"
     exit 1
 fi
 
@@ -46,10 +46,10 @@ fi
 
 echo
 echo "🎯 Suggested actions:"
-echo "├── Process all: cat $ERROR_FILE | xargs ./dev-tools/scripts/lint-files.sh --fix"
-echo "├── Process batch: head -10 $ERROR_FILE | xargs ./dev-tools/scripts/lint-files.sh --fix"
-echo "├── Process specific: grep 'todo/' $ERROR_FILE | xargs ./dev-tools/scripts/lint-files.sh --fix"
-echo "└── Update cache: ./scripts/lint-update-cache.sh"
+echo "├── Process all: cat $ERROR_FILE | xargs ./scripts/linting/lint-files.sh --fix"
+echo "├── Process batch: head -10 $ERROR_FILE | xargs ./scripts/linting/lint-files.sh --fix"
+echo "├── Process specific: grep 'todo/' $ERROR_FILE | xargs ./scripts/linting/lint-files.sh --fix"
+echo "└── Update cache: ./scripts/linting/lint-update-cache.sh"
 
 # Show distribution by directory if multiple directories
 echo

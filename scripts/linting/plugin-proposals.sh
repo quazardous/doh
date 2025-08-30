@@ -24,7 +24,7 @@ analyze_error_cache() {
     echo "=========================================================="
     
     if [[ ! -f "$ERROR_FILE" ]]; then
-        echo "❌ No error cache found. Run: ./scripts/lint-scan.sh first"
+        echo "❌ No error cache found. Run: ./scripts/linting/lint-scan.sh first"
         return 1
     fi
     
@@ -46,13 +46,13 @@ analyze_error_cache() {
     # Analyze each file in error cache
     while IFS= read -r file; do
         if [[ -f "$file" ]]; then
-            if "$PROJECT_ROOT/dev-tools/scripts/lint-files.sh" --check "$file" 2>&1 | grep -q "MD040"; then
+            if "$PROJECT_ROOT/scripts/linting/lint-files.sh" --check "$file" 2>&1 | grep -q "MD040"; then
                 ((md040_count++))
             fi
-            if "$PROJECT_ROOT/dev-tools/scripts/lint-files.sh" --check "$file" 2>&1 | grep -q "MD036"; then
+            if "$PROJECT_ROOT/scripts/linting/lint-files.sh" --check "$file" 2>&1 | grep -q "MD036"; then
                 ((md036_count++))
             fi
-            if "$PROJECT_ROOT/dev-tools/scripts/lint-files.sh" --check "$file" 2>&1 | grep -q "MD013"; then
+            if "$PROJECT_ROOT/scripts/linting/lint-files.sh" --check "$file" 2>&1 | grep -q "MD013"; then
                 ((md013_count++))
             fi
         fi

@@ -9,12 +9,12 @@ PROJECT_ROOT=$(pwd)
 CACHE_DIR="$PROJECT_ROOT/.cache/linting"
 ERROR_FILE="$CACHE_DIR/error-files.txt"
 TEMP_FILE="$ERROR_FILE.tmp"
-LINTER="$PROJECT_ROOT/dev-tools/scripts/lint-files.sh"
+LINTER="$PROJECT_ROOT/scripts/linting/lint-files.sh"
 
 # Check if cache exists
 if [[ ! -f "$ERROR_FILE" ]]; then
     echo "❌ No lint cache found"
-    echo "💡 Run: ./scripts/lint-scan.sh to create cache"
+    echo "💡 Run: ./scripts/linting/lint-scan.sh to create cache"
     exit 1
 fi
 
@@ -71,5 +71,5 @@ else
     echo "🎯 Next steps for remaining $REMAINING_COUNT files:"
     echo "├── Process all: cat $ERROR_FILE | xargs $LINTER --fix"
     echo "├── Process batch: head -5 $ERROR_FILE | xargs $LINTER --fix"
-    echo "└── Check progress: ./scripts/lint-progress.sh"
+    echo "└── Check progress: ./scripts/linting/lint-progress.sh"
 fi

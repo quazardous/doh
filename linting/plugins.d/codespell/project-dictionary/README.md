@@ -7,11 +7,13 @@
 
 ## Description
 
-Adds project-specific technical terms and acronyms to the codespell dictionary to prevent false positives on legitimate project terminology.
+Adds project-specific technical terms and acronyms to the codespell dictionary to prevent false positives on legitimate
+project terminology.
 
 **Common Project Terms**:
+
 - `markdownlint`, `codespell`, `prettier`
-- `bashutils`, `gitignore`, `eslint`  
+- `bashutils`, `gitignore`, `eslint`
 - `repos`, `configs`, `utils`
 - Technical abbreviations and tool names
 
@@ -24,7 +26,7 @@ Adds project-specific technical terms and acronyms to the codespell dictionary t
 ## Plugin Components
 
 - **words.txt**: Custom dictionary entries for project terms
-- **config-fragment.cfg**: Codespell configuration fragment  
+- **config-fragment.cfg**: Codespell configuration fragment
 - **STATUS**: Current plugin status
 
 ## Installation
@@ -33,10 +35,10 @@ Managed by the codespell plugin manager:
 
 ```bash
 # Enable plugin
-./linting/plugins.d/manager_codespell_plugin.sh --enable project-dictionary
+./scripts/linting/manager_codespell_plugin.sh --enable project-dictionary
 
 # Check status
-./linting/plugins.d/manager_codespell_plugin.sh --status project-dictionary
+./scripts/linting/manager_codespell_plugin.sh --status project-dictionary
 ```
 
 ## Integration with /dd:lint
@@ -45,7 +47,7 @@ Managed by the codespell plugin manager:
 # Apply this plugin
 /dd:lint --apply-plugin codespell:project-dictionary
 
-# List codespell plugins  
+# List codespell plugins
 /dd:lint --list-plugins codespell
 ```
 
@@ -54,7 +56,7 @@ Managed by the codespell plugin manager:
 Based on project analysis, prevents false positives for:
 
 - **Development tools**: markdownlint, codespell, prettier, eslint
-- **Project structure**: bashutils, gitignore, workflows  
+- **Project structure**: bashutils, gitignore, workflows
 - **Technical terms**: repos, configs, utils, linters
 - **File extensions**: `.md`, `.json`, `.yml`, `.cfg`
 

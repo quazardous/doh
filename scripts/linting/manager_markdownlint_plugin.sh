@@ -5,7 +5,7 @@
 set -euo pipefail
 
 # Configuration
-PLUGINS_DIR="$(dirname "$0")/markdownlint"
+PLUGINS_DIR="$(dirname "$0")/../../linting/plugins.d/markdownlint"
 MAIN_CONFIG=".markdownlint.json"
 RULES_DIR=".markdownlint/rules"
 BACKUP_DIR="../backups"

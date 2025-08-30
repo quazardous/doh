@@ -45,16 +45,16 @@
 
 ### DOH Runtime Status
 
-| Version       | Status      | Release Date | Key Features                                   |
-| ------------- | ----------- | ------------ | ---------------------------------------------- |
+| Version        | Status      | Release Date | Key Features                                   |
+| -------------- | ----------- | ------------ | ---------------------------------------------- |
 | **VDOH-1.4.0** | 🟡 Planning | TBD          | Analysis & Distribution system                 |
-| **doh-1.3.0** | ✅ Stable   | 2025-08-27   | Infrastructure completion, worktree automation |
-| **doh-1.2.0** | ✅ Archived | Previous     | Agent context protocol, memory system          |
+| **doh-1.3.0**  | ✅ Stable   | 2025-08-27   | Infrastructure completion, worktree automation |
+| **doh-1.2.0**  | ✅ Archived | Previous     | Agent context protocol, memory system          |
 
 ### DOH-DEV Internal Status
 
-| Version      | Status      | Release Date | Key Features                                              |
-| ------------ | ----------- | ------------ | --------------------------------------------------------- |
+| Version       | Status      | Release Date | Key Features                                              |
+| ------------- | ----------- | ------------ | --------------------------------------------------------- |
 | **VDD-0.3.0** | 🔮 Future   | TBD          | Multi-agent collaboration systems, benchmarked validation |
 | **VDD-0.2.0** | 🟡 Planning | 2025-09-10   | Perfect linting with intelligent feedback learning        |
 | **VDD-0.1.0** | ✅ Complete | 2025-08-29   | Project isolation, /dd commands, smart cache              |

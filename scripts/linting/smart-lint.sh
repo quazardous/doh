@@ -180,7 +180,7 @@ approve_plugin() {
     "$SCRIPT_DIR/plugin-proposals.sh" approve "$pattern"
     
     echo "🔄 Next: Plugin will be implemented in development cycle"
-    echo "   Status can be checked with: .claude/linting/plugin-proposals.sh status"
+    echo "   Status can be checked with: .cache/linting/data/plugin-proposals.sh status"
 }
 
 reject_plugin() {

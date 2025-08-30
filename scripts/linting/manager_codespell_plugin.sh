@@ -5,7 +5,7 @@
 set -euo pipefail
 
 # Configuration
-PLUGINS_DIR="$(dirname "$0")/codespell"
+PLUGINS_DIR="$(dirname "$0")/../../linting/plugins.d/codespell"
 MAIN_CONFIG=".codespell.cfg"
 DICT_FILE=".codespell-words.txt"
 IGNORE_FILE=".codespell-ignore.txt"

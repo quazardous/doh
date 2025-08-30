@@ -1,6 +1,6 @@
 #!/bin/bash
 # T103 - Integration Hook for Existing Linting Workflow
-# Called from dev-tools/scripts/lint-files.sh when manual interventions occur
+# Called from scripts/linting/lint-files.sh when manual interventions occur
 
 set -euo pipefail
 
@@ -19,7 +19,7 @@ log_linting_intervention() {
         "markdownlint"|"prettier"|"codespell")
             echo "🧠 T103 - Learning opportunity detected for $tool/$rule"
             echo "   File: $file"
-            echo "   Use: .claude/linting/smart-lint.sh fix \"$file\" \"$tool\" \"$rule\""
+            echo "   Use: .cache/linting/data/smart-lint.sh fix \"$file\" \"$tool\" \"$rule\""
             echo "   This will enable intelligent automation learning."
             ;;
         *)

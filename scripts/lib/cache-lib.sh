@@ -18,7 +18,7 @@ METADATA_FILE="${CACHE_DIR}/metadata.txt"
 CONFIG_HASH_FILE="${CACHE_DIR}/config-hash.txt"
 
 # Files to monitor for config changes (space-separated)
-CONFIG_FILES=".markdownlint.json .prettierrc .prettierrc.json package.json pyproject.toml .codespell.conf dev-tools/scripts/lint-files.sh"
+CONFIG_FILES=".markdownlint.json .prettierrc .prettierrc.json package.json pyproject.toml .codespell.conf scripts/linting/lint-files.sh"
 
 # =============================================================================
 # CORE CACHE FUNCTIONS

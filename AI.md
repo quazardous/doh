@@ -1,6 +1,6 @@
 # 🤖 CLAUDE AI - COMPLETE PROJECT GUIDE 🤖
 
-**COMPILED GUIDE**: 2025-08-28  
+**COMPILED GUIDE**: 2025-08-30  
 **Source Version**: CLAUDE.md v1.2  
 **Next Update**: When source documents change
 
@@ -8,9 +8,10 @@
 
 ## ⚡ QUICK REFERENCE CARD ⚡
 
-- **Next Task ID**: **083** (ALWAYS check todo/README.md before creating tasks)
+- **Next Task ID**: **117** (ALWAYS check todo/README.md before creating tasks)
 - **Current Project Context**: DOH-DEV Internal vs DOH Runtime (use DOH-DEV only for /dd:\* commands)
-- **Linting Mode**: Strict enforcement (DD070 AI-powered 4-layer pipeline)
+- **Architecture Status**: EDD116 COMPLETE ✅ - New separation-by-function structure in place
+- **Linting System**: scripts/linting/ with unified backend (post-EDD116 migration)
 - **Command Status**: /dd:commit, /dd:changelog, /dd:next, /dd:mkai active + optimized
 - **Language**: Full English for all content (universal compatibility)
 
@@ -23,22 +24,24 @@
 **MANDATORY PROCESS - NO EXCEPTIONS**:
 
 1. ✅ **ALWAYS READ `todo/README.md` FIRST**
-   - **Current Next ID: 083** (verify this EVERY TIME before creating tasks)
-   - **Shared numbering**: TODOs and Epics use same counter (T### and E### both increment from 083)
+   - **Current Next ID: 117** (verify this EVERY TIME before creating tasks)
+   - **Shared numbering**: TODOs and Epics use same counter (DD### and EDD### both increment from 117)
 
-2. ✅ **CREATE DD083.md** (use EXACT next number from README.md)
+2. ✅ **CREATE DD117.md** (use EXACT next number from todo/README.md)
+   - **Naming Convention**: DD### (Development), DOH### (Runtime), EDD### (Dev Epics), EDOH### (Runtime Epics), VDD###
+     (Dev Versions), VDOH### (Runtime Versions)
+   - **Complete details**: See `DEVELOPMENT.md` for full naming convention system and decision rules
    - **Never use arbitrary numbers** (like DD074 instead of DD078)
    - **Never skip numbers** in sequence
    - **Never reuse old numbers** from archive
 
-3. ✅ **UPDATE README.md** - Increment Next ID to 084
+3. ✅ **UPDATE todo/README.md** - Increment Next ID to 118
    - **This is MANDATORY** after creating any task
-   - **Update the line**: `**Next ID**: 084` (increment from 083)
+   - **Update the line**: `**Next ID**: 118` (increment from 117)
 
-4. ✅ **VERIFY CONSISTENCY** - Ensure no DD083.md exists already
+4. ✅ **VERIFY CONSISTENCY** - Ensure no DD117.md exists already
    - **Resolve conflicts** if number collision exists
 
-**RECENT ERROR EXAMPLE**: DD074 used instead of DD078 → DD079 created to analyze this issue  
 **PREVENTION**: ALWAYS consult `todo/README.md` **Next ID** section before any task creation
 
 ---
@@ -66,7 +69,7 @@
 
 #### Pre-Execution Context Check
 
-- **Verify linting status**: DD070 strict enforcement active (4-layer AI-powered pipeline)
+- **Verify linting status**: Strict enforcement active (4-layer AI-powered pipeline)
 - **Identify command variant**: Standard vs --split vs --amend vs --interactive
 - **Parse user flags**: --lenient, --no-lint, --dry-run (inherit to downstream commands)
 - **Check git status**: Staged changes, conflicts, branch status
@@ -90,7 +93,7 @@
 
 3. **Generate intelligent commit message** based on changelog analysis
    - **Use /dd:changelog description**: Maintain consistency between documentation and commit
-   - **Apply message optimization**: DD080 principles for clarity and AI comprehension
+   - **Apply message optimization**: Established principles for clarity and AI comprehension
    - **Include context markers**: DOH-DEV vs Runtime, task completion indicators
 
 4. **Execute git operations** with appropriate verification control
@@ -102,13 +105,13 @@
    - **Success**: Show commit hash, files changed, next steps
    - **Failure**: Specific error details, retry instructions, manual fix guidance
 
-**Integration Dependencies**: DD070 (linting), DD080 (optimization), changelog pipeline
+**Integration Dependencies**: Linting pipeline, command optimization, changelog system
 
 ### 📋 /dd:changelog - DOCUMENTATION UPDATE PROTOCOL 📋
 
 **Execution Workflow**:
 
-1. **Pre-Documentation Linting** (DD070 Implementation)
+1. **Pre-Documentation Linting** (AI-Powered 4-Layer System)
    - **Layer 1**: `make lint-fix` (automated tooling corrections)
    - **Layer 2**: AI-powered analysis and fixes for remaining issues
    - **Layer 3**: Final validation with `make lint`
@@ -164,6 +167,43 @@
 
 ---
 
+## 🏗️ ARCHITECTURE UPDATE - EDD116 COMPLETED ✅ 🏗️
+
+### **Major Change: Separation-by-Function Architecture**
+
+**✅ COMPLETED 2025-08-30**: The DOH development project underwent complete architectural refactoring:
+
+#### **Before EDD116**
+
+- Organic growth structure with dev-tools/ mixing concerns
+- Scripts scattered across multiple directories
+- Complex dependencies and unclear organization
+
+#### **After EDD116**
+
+- **Clean separation-by-function**: All executables organized by purpose
+- **scripts/[category]/**: linting/, git/, development/, lib/
+- **Eliminated dev-tools/**: All functionality migrated to appropriate locations
+- **Cold storage**: contrib/ for reference materials
+- **Documentation**: Comprehensive ARCHITECTURE.md and QUICK-REFERENCE.md
+
+#### **Key Changes for Development**
+
+- **All linting scripts**: Now in `scripts/linting/` (13 scripts + intelligence)
+- **Git tools**: Now in `scripts/git/` (hooks, install scripts)
+- **Shared libraries**: Now in `scripts/lib/` (lint-core.sh, cache-lib.sh)
+- **Examples moved**: `contrib/examples/scripts/` for reference
+- **Makefile updated**: All targets use new script paths
+
+#### **Impact on Claude Development**
+
+- **Predictable structure**: Always know where to find/add components
+- **Clear paths**: `scripts/linting/lint-files.sh` instead of dev-tools confusion
+- **Better organization**: Function-based categorization vs mixed purposes
+- **Professional architecture**: Industry-standard directory patterns
+
+**All workflows preserved** - functionality identical, paths updated.
+
 ## 💡 PROJECT CONTEXT - DOH-DEV vs RUNTIME 💡
 
 ### 🚨 CRITICAL DISTINCTION 🚨
@@ -171,17 +211,22 @@
 #### DOH-DEV Internal (dd-x.x.x versioning)
 
 - **Purpose**: Internal tooling, /dd:\* commands, developer experience, Claude optimization
+- **Task Management**: Uses structured TODO system in `todo/` directory (DD###, EDD### files)
 - **Task Header**: `**Project**: DOH-DEV Internal` (REQUIRED when applicable)
 - **Version Files**: `todo/VDD-0.1.0.md`, `todo/VDD-0.2.0.md` (internal releases)
-- **Examples**: DD070 (linting), DD078 (lint intelligence), DD080 (command optimization), DD081 (AI.md)
+- **Examples**: Linting system, lint intelligence, command optimization, AI.md compilation
 - **When to Use**: ONLY when enhancing /dd:\* commands or internal Claude/development tooling
 
 #### DOH Runtime (doh-x.x.x versioning) - DEFAULT
 
 - **Purpose**: End-user distribution, public API, runtime functionality, user-facing features
+- **Task Management**: Uses /doh commands and WORKFLOW.md (NOT applicable to this DOH-DEV project)
 - **Task Header**: `**Project**: DOH Runtime` (default, can be omitted)
 - **Version Files**: `todo/VDOH-1.4.0.md`, `todo/doh-1.5.0.md` (public releases)
 - **Examples**: Most tasks unless specifically enhancing internal /dd:\* infrastructure
+
+**🚨 CRITICAL DISTINCTION**: We are developing the DOH system (DOH-DEV), NOT using it (DOH Runtime). WORKFLOW.md is for
+end users of the DOH system, not for developing the DOH system itself.
 
 **Decision Rule**: Use DOH-DEV Internal ONLY when work directly affects /dd:\* command system or Claude development
 experience
@@ -266,15 +311,23 @@ experience
 │       ├── next.md                 # Task recommendation engine
 │       ├── mkai.md                 # AI documentation management
 │       └── lint.md                 # AI-powered linting system
+├── scripts/                        # ✅ All executables by function (NEW: EDD116)
+│   ├── linting/                    # Linting execution + intelligence (13 scripts)
+│   ├── git/                        # Git tools and hooks
+│   ├── development/                # Development workflow scripts
+│   └── lib/                        # Shared libraries and modules
 ├── todo/                           # Structured task management
-│   ├── README.md                   # CRITICAL: Next ID = 083
-│   ├── T###.md                     # Individual TODO files
-│   ├── E###.md                     # Epic files
+│   ├── README.md                   # CRITICAL: Next ID = 117
+│   ├── DD###.md, DOH###.md         # Individual TODO files (Dev/Runtime)
+│   ├── EDD###.md, EDOH###.md       # Epic files (Dev/Runtime)
 │   └── archive/                    # Completed TODOs (≥1 day old)
 ├── docs/                           # User-facing documentation
+│   ├── ARCHITECTURE.md             # ✅ Complete architectural guide (NEW: EDD116)
+│   ├── QUICK-REFERENCE.md          # ✅ Developer quick reference (NEW: EDD116)
 │   ├── mk-ai.md                    # AI.md compilation guide
-│   ├── pattern-isolation-guide.md  # Project context isolation
-│   └── project-isolation-guide.md  # DOH-DEV vs Runtime separation
+│   └── pattern-isolation-guide.md  # Project context isolation
+├── contrib/                        # ✅ Cold storage references (NEW: EDD116)
+│   └── examples/scripts/           # Script examples and demos
 └── linting/                        # AI linting intelligence
     └── feedback.md                 # Pattern tracking and optimization
 ```
@@ -301,7 +354,7 @@ experience
 #### Linting Pipeline Failures
 
 - **Symptom**: /dd:changelog or /dd:commit blocked by linting errors
-- **Analysis**: DD070 4-layer system detecting issues
+- **Analysis**: 4-layer AI-powered linting system detecting issues
 - **Options**:
   - Fix manually and retry
   - Use --lenient flag for minor issues
@@ -320,7 +373,7 @@ experience
 ### Recovery Procedures
 
 1. **For blocked pipelines**: Check linting output, apply fixes, use appropriate flags
-2. **For task conflicts**: Verify Next ID, resolve numbering, update README.md
+2. **For task conflicts**: Verify Next ID, resolve numbering, update todo/README.md
 3. **For git issues**: Use /dd:commit built-in conflict detection and resolution
 4. **For unclear context**: Consult this AI.md first, then source documents as needed
 
@@ -347,9 +400,9 @@ experience
 
 ### "Which Next ID to use?"
 
-- **ALWAYS check todo/README.md first** → Current: 083
-- **Use exact number from README.md** → Don't guess or calculate
-- **Increment after creation** → Update README.md to 084
+- **ALWAYS check todo/README.md first** → Current: 117
+- **Use exact number from todo/README.md** → Don't guess or calculate
+- **Increment after creation** → Update todo/README.md to 118
 
 ---
 
@@ -373,16 +426,17 @@ This compiled guide draws from:
 
 ### Supporting Documentation
 
-- **todo/README.md** - Task numbering system (CRITICAL for Next ID)
+- **todo/README.md** - Task numbering system (CRITICAL for Next ID, public-friendly)
+- **DEVELOPMENT.md** - ✅ Complete naming convention system (DD/DOH/EDD/EDOH/VDD/VDOH)
+- **docs/ARCHITECTURE.md** - ✅ Complete architectural guide (7.5KB, post-EDD116)
+- **docs/QUICK-REFERENCE.md** - ✅ Developer quick reference (daily workflows)
 - **docs/mk-ai.md** - AI.md compilation guide and patterns
-- **docs/pattern-isolation-guide.md** - Project context isolation
-- **docs/project-isolation-guide.md** - DOH-DEV vs Runtime separation
-- **linting/feedback.md** - AI linting intelligence and optimization
+- **contrib/examples/scripts/** - Script examples and reference materials
 
 ### Version Information
 
-- **Last Compiled**: 2025-08-28
-- **Source Status**: Current with latest task completions and system updates
+- **Last Compiled**: 2025-08-30
+- **Source Status**: EDD116 COMPLETE - Architecture refactoring finished, Next ID updated to 117
 - **Next Update Trigger**: When source documents are modified or via /dd:mkai --compile
 
 ---

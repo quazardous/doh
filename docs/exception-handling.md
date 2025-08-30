@@ -71,16 +71,16 @@ that we want to preserve exactly as-is.
 
 ```bash
 # Standard linting (respects all exceptions)
-./dev-tools/scripts/lint-files.sh README.md
+./scripts/linting/lint-files.sh README.md
 
 # Show exception details during processing
-./dev-tools/scripts/lint-files.sh --show-exceptions README.md
+./scripts/linting/lint-files.sh --show-exceptions README.md
 
 # Validate exception markers are properly closed
-./dev-tools/scripts/lint-files.sh --validate-exceptions README.md
+./scripts/linting/lint-files.sh --validate-exceptions README.md
 
 # Show what sections were skipped
-./dev-tools/scripts/lint-files.sh --show-skipped README.md
+./scripts/linting/lint-files.sh --show-skipped README.md
 ```
 
 ### Makefile Targets
@@ -163,11 +163,11 @@ Regular content here will be linted normally.
 
 ### Pre-commit Hooks
 
-The enhanced pre-commit hook (`dev-tools/hooks/pre-commit-new`) uses the same exception handling system:
+The enhanced pre-commit hook (`scripts/git/hooks/pre-commit-new`) uses the same exception handling system:
 
 ```bash
 # Install enhanced pre-commit hook with exception support
-ln -sf ../../dev-tools/hooks/pre-commit-new .git/hooks/pre-commit
+ln -sf ../../scripts/git/hooks/pre-commit-new .git/hooks/pre-commit
 ```
 
 ### Command Integration
@@ -201,7 +201,7 @@ All `/dd:*` commands that use linting will respect exceptions:
 
 ```bash
 # See detailed exception processing
-./dev-tools/scripts/lint-files.sh --show-exceptions --validate-exceptions \
+./scripts/linting/lint-files.sh --show-exceptions --validate-exceptions \
   problem-file.md
 
 # Check what the system actually processes
@@ -213,8 +213,8 @@ ls -la problem-file.md.lint-temp  # Temporary file shows filtered content
 The exception handling system is implemented in:
 
 - **Core Logic**: `dev-tools/lib/lint-core.sh` - Exception detection and filtering
-- **Main Script**: `dev-tools/scripts/lint-files.sh` - Command-line interface
-- **Pre-commit**: `dev-tools/hooks/pre-commit-new` - Git integration
+- **Main Script**: `scripts/linting/lint-files.sh` - Command-line interface
+- **Pre-commit**: `scripts/git/hooks/pre-commit-new` - Git integration
 - **Makefile**: Enhanced targets for exception-aware linting
 
 This provides a comprehensive, intelligent linting system that can handle complex documentation and code examples while maintaining strict quality standards for regular content.
