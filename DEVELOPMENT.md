@@ -227,6 +227,10 @@ linting/              # Pure configurations only
 - Update task files when status changes
 - Maintain CHANGELOG.md with task mappings
 - Keep version files current
+- **Version Management**: See `./VERSION.md` for current version registry
+  - Version tracking managed automatically by `/dd:changelog` command
+  - Version goal files (`todo/VDOH-*.md`, `todo/VDD-*.md`) updated during version transitions
+  - Cross-file synchronization ensures VERSION.md, version goals, and CHANGELOG.md consistency
 - Archive completed tasks (≥1 day old)
 
 ## 🛠️ Implementation Patterns
@@ -278,6 +282,39 @@ linting/              # Pure configurations only
 - Documentation updated appropriately
 - No broken references or dependencies
 
+## 📊 Version Management Workflow
+
+### **Version Tracking System**
+
+**Primary Source**: `./VERSION.md` serves as the authoritative version registry
+
+**Version Files**:
+- **DOH Runtime**: `todo/VDOH-*.md` (user-facing features)  
+- **DOH-DEV Internal**: `todo/VDD-*.md` (development tooling)
+
+### **Automated Version Management**
+
+**Via `/dd:changelog` Command**:
+
+1. **Version Impact Analysis**: Detects when changes warrant version bumps
+2. **VERSION.md Updates**: Updates current version numbers in main registry
+3. **Version Goal File Management**: 
+   - Updates progress percentages in active version goal files
+   - Marks version files COMPLETED when milestones achieved
+   - Creates new version goal files for next milestones
+4. **Cross-File Synchronization**: Ensures VERSION.md, version goals, and CHANGELOG.md consistency
+5. **User Confirmation**: Interactive prompts for version bump approval
+
+**Version Workflow**:
+```bash
+# Complete a major feature/epic
+/dd:changelog "DD103 intelligent linting complete"
+# → Analyzes impact, suggests version bump
+# → Updates VERSION.md: VDD-0.2.0 → VDD-0.2.1
+# → Updates todo/VDD-0.2.0.md progress/status
+# → Maintains synchronization across all files
+```
+
 ## 🔄 Maintenance Patterns
 
 ### **Regular Maintenance**
@@ -285,9 +322,10 @@ linting/              # Pure configurations only
 **Periodic Tasks**:
 
 - Update compilation guides when core processes change
-- Verify documentation accuracy after significant changes
+- Verify documentation accuracy after significant changes  
 - Monitor development patterns for optimization opportunities
 - Maintain architectural consistency
+- **Version Consistency**: Ensure VERSION.md reflects current project state
 
 ### **Continuous Improvement**
 
