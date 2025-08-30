@@ -1,0 +1,6 @@
+{
+  "MD040": {
+    "allowed_languages": ["yaml", "yml", "json", "text", "bash", "shell", "javascript", "js", "python", "py"],
+    "language_only": true
+  }
+}

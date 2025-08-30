@@ -28,10 +28,25 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-# Default mode is fix
+# Load shared linting library
+source "$SCRIPT_DIR/../lib/lint-core.sh"
+
+# Load cache library for performance optimization
+source "$SCRIPT_DIR/../lib/cache-lib.sh"
+
+# Default options
 MODE="fix"
 TARGET=""
 FILES=()
+SHOW_EXCEPTIONS=false
+VALIDATE_EXCEPTIONS=false
+SHOW_SKIPPED=false
+CACHE_ENABLED=true
+CACHE_STATS=false
+
+# Configure cache for linting
+export CACHE_DIR="./.cache/linting"
+export CONFIG_FILES=".markdownlint.json .prettierrc .prettierrc.json package.json pyproject.toml .codespell.conf dev-tools/scripts/lint-files.sh dev-tools/lib/lint-core.sh"
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -52,6 +67,60 @@ while [[ $# -gt 0 ]]; do
             TARGET="modified"
             shift
             ;;
+        --show-exceptions)
+            SHOW_EXCEPTIONS=true
+            shift
+            ;;
+        --validate-exceptions)
+            VALIDATE_EXCEPTIONS=true
+            shift
+            ;;
+        --show-skipped)
+            SHOW_SKIPPED=true
+            SHOW_EXCEPTIONS=true
+            shift
+            ;;
+        --cache)
+            CACHE_ENABLED=true
+            shift
+            ;;
+        --no-cache)
+            CACHE_ENABLED=false
+            shift
+            ;;
+        --cache-stats)
+            CACHE_STATS=true
+            shift
+            ;;
+        --help)
+            echo "Usage: lint-files.sh [OPTIONS] [target]"
+            echo ""
+            echo "Options:"
+            echo "  --fix                Auto-fix issues (default)"
+            echo "  --check              Check only, no fixes"
+            echo "  --show-exceptions    Show detected exception markers"
+            echo "  --validate-exceptions Validate exception markers are properly closed"
+            echo "  --show-skipped       Show what sections were skipped during linting"
+            echo "  --cache              Enable caching for performance (default)"
+            echo "  --no-cache           Disable caching (force re-processing)"
+            echo "  --cache-stats        Show cache statistics after processing"
+            echo ""
+            echo "Targets:"
+            echo "  file.md              Single file"
+            echo "  path/to/dir/         Directory (all .md files)"
+            echo "  --staged             All staged files (git)"
+            echo "  --modified           All modified/new files (git)"
+            echo "  (no target)          All .md files in project"
+            echo ""
+            echo "Exception Patterns:"
+            echo "  <!-- markdownlint-disable MD013 --> ... <!-- markdownlint-enable MD013 -->"
+            echo "  <!-- prettier-ignore --> ... <!-- prettier-ignore-end -->"
+            echo "  <!-- codespell-ignore --> ... <!-- codespell-ignore-end -->"
+            echo "  <!-- lint-example:bad --> ... <!-- lint-example:end -->"
+            echo "  <!-- teaching-mode --> ... <!-- teaching-mode:end -->"
+            echo "  <!-- preserve-original --> ... <!-- preserve-original:end -->"
+            exit 0
+            ;;
         *)
             if [[ -z "$TARGET" ]]; then
                 TARGET="$1"
@@ -61,67 +130,53 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Determine files to process
+# Determine files to process using shared library functions
 determine_files() {
     local files_array=()
     
     case "$TARGET" in
         "staged")
-            # Get staged files
             echo "🔍 Finding staged files..."
-            mapfile -t files_array < <(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(md|mdx)$' || true)
+            mapfile -t files_array < <(get_staged_markdown_files)
             if [[ ${#files_array[@]} -eq 0 ]]; then
-                echo "ℹ️  No staged markdown files found"
+                print_info "No staged markdown files found"
                 exit 0
             fi
             ;;
         "modified")
-            # Get modified and new files
             echo "🔍 Finding modified/new files..."
-            mapfile -t files_array < <(git diff --name-only --diff-filter=ACMR | grep -E '\.(md|mdx)$' || true)
-            mapfile -t new_files < <(git ls-files --others --exclude-standard | grep -E '\.(md|mdx)$' || true)
-            files_array+=("${new_files[@]}")
+            mapfile -t files_array < <(get_modified_markdown_files)
             if [[ ${#files_array[@]} -eq 0 ]]; then
-                echo "ℹ️  No modified/new markdown files found"
+                print_info "No modified/new markdown files found"
                 exit 0
             fi
             ;;
         "")
-            # All markdown files in project
             echo "🔍 Finding all markdown files..."
-            mapfile -t files_array < <(find "$PROJECT_ROOT" -type f \( -name "*.md" -o -name "*.mdx" \) \
-                -not -path "*/node_modules/*" \
-                -not -path "*/.git/*" \
-                -not -path "*/dist/*" \
-                -not -path "*/build/*" \
-                -not -path "*/.next/*" || true)
+            mapfile -t files_array < <(get_markdown_files_in_dir "$PROJECT_ROOT")
             if [[ ${#files_array[@]} -eq 0 ]]; then
-                echo "ℹ️  No markdown files found in project"
+                print_info "No markdown files found in project"
                 exit 0
             fi
             ;;
         *)
             # Single file or directory
             if [[ -f "$TARGET" ]]; then
-                # Single file
                 if [[ "$TARGET" =~ \.(md|mdx)$ ]]; then
                     files_array=("$TARGET")
                 else
-                    echo "⚠️  Warning: $TARGET is not a markdown file"
+                    print_error "$TARGET is not a markdown file"
                     exit 1
                 fi
             elif [[ -d "$TARGET" ]]; then
-                # Directory
                 echo "🔍 Finding markdown files in $TARGET..."
-                mapfile -t files_array < <(find "$TARGET" -type f \( -name "*.md" -o -name "*.mdx" \) \
-                    -not -path "*/node_modules/*" \
-                    -not -path "*/.git/*" || true)
+                mapfile -t files_array < <(get_markdown_files_in_dir "$TARGET")
                 if [[ ${#files_array[@]} -eq 0 ]]; then
-                    echo "ℹ️  No markdown files found in $TARGET"
+                    print_info "No markdown files found in $TARGET"
                     exit 0
                 fi
             else
-                echo "❌ Error: Target not found: $TARGET"
+                print_error "Target not found: $TARGET"
                 exit 1
             fi
             ;;
@@ -131,158 +186,44 @@ determine_files() {
     echo "📋 Processing ${#FILES[@]} file(s)"
 }
 
-# Check if tools are installed
-check_tools() {
-    local missing_tools=()
-    
-    if ! command -v prettier &> /dev/null; then
-        missing_tools+=("prettier")
-    fi
-    
-    if ! command -v markdownlint &> /dev/null; then
-        missing_tools+=("markdownlint")
-    fi
-    
-    if ! command -v codespell &> /dev/null; then
-        missing_tools+=("codespell")
-    fi
-    
-    if [[ ${#missing_tools[@]} -gt 0 ]]; then
-        echo "❌ Missing required tools: ${missing_tools[*]}"
-        echo ""
-        echo "Install with:"
-        echo "  npm install -g prettier markdownlint-cli"
-        echo "  pip install codespell"
-        exit 1
-    fi
-}
+# This function is now provided by lint-core.sh
+# check_tools() { ... }
 
-# Run prettier
-run_prettier() {
-    local file="$1"
-    
-    if [[ "$MODE" == "fix" ]]; then
-        prettier --write "$file" &> /dev/null || {
-            echo "  ⚠️  Prettier failed on $file"
-            return 1
-        }
-    else
-        if ! prettier --check "$file" &> /dev/null; then
-            echo "  ⚠️  Prettier: formatting issues in $file"
-            return 1
-        fi
-    fi
-    return 0
-}
+# Linting functions are now provided by lint-core.sh library
 
-# Run markdownlint
-run_markdownlint() {
-    local file="$1"
-    local config_file=""
-    
-    # Look for markdownlint config
-    if [[ -f "$PROJECT_ROOT/.markdownlint.json" ]]; then
-        config_file="--config $PROJECT_ROOT/.markdownlint.json"
-    elif [[ -f "$PROJECT_ROOT/.markdownlintrc" ]]; then
-        config_file="--config $PROJECT_ROOT/.markdownlintrc"
-    fi
-    
-    if [[ "$MODE" == "fix" ]]; then
-        markdownlint --fix $config_file "$file" 2> /dev/null || {
-            # Try to show remaining issues
-            local issues
-            issues=$(markdownlint $config_file "$file" 2>&1 || true)
-            if [[ -n "$issues" ]]; then
-                echo "  ⚠️  Markdownlint: unfixable issues in $file"
-                echo "$issues" | head -5 | sed 's/^/      /'
-            fi
-            return 1
-        }
-    else
-        if ! markdownlint $config_file "$file" &> /dev/null; then
-            local issues
-            issues=$(markdownlint $config_file "$file" 2>&1 || true)
-            echo "  ⚠️  Markdownlint: issues in $file"
-            echo "$issues" | head -5 | sed 's/^/      /'
-            return 1
-        fi
-    fi
-    return 0
-}
-
-# Run codespell
-run_codespell() {
-    local file="$1"
-    local config_args=""
-    
-    # Look for codespell config
-    if [[ -f "$PROJECT_ROOT/.codespellrc" ]]; then
-        config_args="--config $PROJECT_ROOT/.codespellrc"
-    else
-        # Default ignore list for common false positives
-        config_args="-L teh,nd,iam,doesnt,thats"
-    fi
-    
-    if [[ "$MODE" == "fix" ]]; then
-        codespell -w $config_args "$file" &> /dev/null || {
-            # Show remaining issues
-            local issues
-            issues=$(codespell $config_args "$file" 2>&1 || true)
-            if [[ -n "$issues" ]]; then
-                echo "  ⚠️  Codespell: spelling issues in $file"
-                echo "$issues" | head -3 | sed 's/^/      /'
-            fi
-            return 1
-        }
-    else
-        if ! codespell $config_args "$file" &> /dev/null; then
-            local issues
-            issues=$(codespell $config_args "$file" 2>&1 || true)
-            echo "  ⚠️  Codespell: spelling issues in $file"
-            echo "$issues" | head -3 | sed 's/^/      /'
-            return 1
-        fi
-    fi
-    return 0
-}
-
-# Process a single file
+# Process a single file using shared library with cache support
 process_file() {
     local file="$1"
     local file_status=0
     
+    # Check cache first if enabled
+    if [[ "$CACHE_ENABLED" == "true" ]]; then
+        if cache_check_file "$file"; then
+            return 0  # Cache hit, file already processed successfully
+        fi
+    fi
+    
     echo "📝 Processing: $file"
     
-    # Run tools in order: prettier -> markdownlint -> codespell
-    # This order ensures best compatibility and fix coverage
-    
-    # 1. Prettier (formatting foundation)
-    if ! run_prettier "$file"; then
-        file_status=1
-    fi
-    
-    # 2. Markdownlint (Markdown-specific rules)
-    if ! run_markdownlint "$file"; then
-        file_status=1
-    fi
-    
-    # 3. Codespell (spelling corrections)
-    if ! run_codespell "$file"; then
-        file_status=1
-    fi
-    
-    if [[ $file_status -eq 0 ]]; then
+    # Use the enhanced lint_file function from lint-core.sh
+    if lint_file "$file" "$MODE" "$SHOW_EXCEPTIONS" "$VALIDATE_EXCEPTIONS"; then
+        # Mark file as successfully processed in cache
+        if [[ "$CACHE_ENABLED" == "true" && "$MODE" == "fix" ]]; then
+            cache_mark_clean "$file"
+        fi
+        
         if [[ "$MODE" == "fix" ]]; then
-            echo "  ✅ Fixed and clean"
+            print_success "Fixed and clean"
         else
-            echo "  ✅ Clean"
+            print_success "Clean"
         fi
     else
         if [[ "$MODE" == "fix" ]]; then
-            echo "  ⚠️  Some issues remain after auto-fix"
+            print_warning "Some issues remain after auto-fix"
         else
-            echo "  ❌ Issues found"
+            print_error "Issues found"
         fi
+        file_status=1
     fi
     
     return $file_status
@@ -292,12 +233,23 @@ process_file() {
 main() {
     local exit_code=0
     
-    echo "🔧 Markdown Linting Tool"
+    echo "🔧 Markdown Linting Tool with Exception Handling"
     echo "Mode: $MODE"
+    [[ "$SHOW_EXCEPTIONS" == "true" ]] && echo "Show exceptions: enabled"
+    [[ "$VALIDATE_EXCEPTIONS" == "true" ]] && echo "Validate exceptions: enabled"
+    if [[ "$CACHE_ENABLED" == "true" ]]; then
+        echo "Cache: enabled"
+        # Initialize cache
+        cache_init
+    else
+        echo "Cache: disabled"
+    fi
     echo ""
     
-    # Check tools are installed
-    check_tools
+    # Check tools are installed using shared function
+    if ! check_linting_tools; then
+        exit 1
+    fi
     
     # Determine files to process
     determine_files
@@ -328,6 +280,12 @@ main() {
             echo "❌ Issues found in some files"
             echo "Run with --fix to auto-correct fixable issues"
         fi
+    fi
+    
+    # Show cache statistics if requested
+    if [[ "$CACHE_STATS" == "true" && "$CACHE_ENABLED" == "true" ]]; then
+        echo ""
+        cache_stats
     fi
     
     exit $exit_code

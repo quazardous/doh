@@ -1,0 +1,158 @@
+{
+  "benchmark_info": {
+    "id": "example-T093",
+    "name": "Collaborative vs Solo Project Planning",
+    "framework_version": "1.0",
+    "execution_date": "2025-08-29",
+    "scenario": "Authentication System Planning"
+  },
+  
+  "test_conditions": {
+    "input_scenario": "Ambiguous authentication system requirement",
+    "time_limit": "2 hours",
+    "resources_available": ["Documentation", "Internet research", "Standard tools"],
+    "evaluators": ["Independent Evaluator A", "Independent Evaluator B", "Independent Evaluator C"]
+  },
+  
+  "approaches_tested": [
+    {
+      "approach_id": "A",
+      "approach_name": "Solo Analysis Method",
+      "implementation": "Single skilled analyst planning approach",
+      "execution_time_minutes": 90
+    },
+    {
+      "approach_id": "B", 
+      "approach_name": "Collaborative Planning Method",
+      "implementation": "Simulated PO + Lead Dev collaboration",
+      "execution_time_minutes": 110
+    }
+  ],
+  
+  "evaluation_results": {
+    "approach_A_scores": {
+      "completeness": {
+        "requirements_coverage": 7,
+        "edge_case_identification": 6,
+        "dependency_mapping": 4,
+        "subtotal": 17
+      },
+      "technical_accuracy": {
+        "architecture_feasibility": 8,
+        "implementation_realism": 7,
+        "technology_appropriateness": 4,
+        "subtotal": 19
+      },
+      "usability": {
+        "specification_clarity": 8,
+        "developer_actionability": 7,
+        "maintainability": 3,
+        "subtotal": 18
+      },
+      "business_value": {
+        "goal_alignment": 8,
+        "user_problem_solving": 6,
+        "roi_potential": 4,
+        "subtotal": 18
+      },
+      "total_score": 72
+    },
+    
+    "approach_B_scores": {
+      "completeness": {
+        "requirements_coverage": 9,
+        "edge_case_identification": 8,
+        "dependency_mapping": 5,
+        "subtotal": 22
+      },
+      "technical_accuracy": {
+        "architecture_feasibility": 9,
+        "implementation_realism": 8,
+        "technology_appropriateness": 5,
+        "subtotal": 22
+      },
+      "usability": {
+        "specification_clarity": 9,
+        "developer_actionability": 8,
+        "maintainability": 4,
+        "subtotal": 21
+      },
+      "business_value": {
+        "goal_alignment": 9,
+        "user_problem_solving": 8,
+        "roi_potential": 5,
+        "subtotal": 22
+      },
+      "total_score": 87
+    }
+  },
+  
+  "statistical_analysis": {
+    "score_difference": 15,
+    "percentage_improvement": "20.8%",
+    "significance_level": "Moderate Advantage",
+    "confidence_interval": "85%",
+    "effect_size": 0.7
+  },
+  
+  "process_metrics": {
+    "approach_A": {
+      "planning_time_minutes": 90,
+      "iteration_cycles": 2,
+      "decision_points": 5,
+      "information_requests": 3
+    },
+    "approach_B": {
+      "planning_time_minutes": 110,
+      "iteration_cycles": 3,
+      "decision_points": 8,
+      "information_requests": 7
+    }
+  },
+  
+  "qualitative_observations": {
+    "approach_A_strengths": [
+      "Fast execution",
+      "Clear individual perspective",
+      "Consistent terminology"
+    ],
+    "approach_A_weaknesses": [
+      "Missed edge cases",
+      "Limited perspective on user experience",
+      "Insufficient dependency analysis"
+    ],
+    "approach_B_strengths": [
+      "Comprehensive requirement coverage",
+      "Multi-perspective validation",
+      "Better edge case identification",
+      "Stronger business-technical alignment"
+    ],
+    "approach_B_weaknesses": [
+      "Longer execution time",
+      "More complex coordination",
+      "Potential for analysis paralysis"
+    ]
+  },
+  
+  "conclusions": {
+    "result_interpretation": "Moderate Advantage for Collaborative Approach",
+    "recommendation": "Consider collaborative planning for complex, high-impact features",
+    "context_factors": [
+      "Time constraints may favor solo approach",
+      "Complex requirements benefit from collaboration",
+      "Team expertise level affects approach effectiveness"
+    ],
+    "further_research": [
+      "Test with different complexity levels",
+      "Measure long-term implementation success",
+      "Compare with different evaluator backgrounds"
+    ]
+  },
+  
+  "metadata": {
+    "result_location": "Context-specific storage location",
+    "related_tasks": ["T093", "T097", "T101"],
+    "benchmark_framework": "./benchmarks/scenarios/T093-collaborative-planning/",
+    "reproduction_instructions": "Follow benchmark protocol in scenario documentation"
+  }
+}

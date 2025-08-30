@@ -47,3 +47,6 @@ logs/
 # Test artifacts
 test-output/
 test-projects/
+
+# Benchmarks (NOT SURE)
+agents/workspace/

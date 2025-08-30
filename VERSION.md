@@ -1,100 +1,95 @@
-# /doh System Version Management
+# DOH System Version Registry
 
-## Current Versions
+## Current Active Versions
 
-### Production (Runtime)
+### DOH Runtime (Public Distribution)
 
-- **Version**: `1.3.0`
-- **Codename**: Infrastructure Completion
-- **Status**: Stable
-- **Release Date**: 2025-08-27
-- **Compatible with**: AI Assistants, Git Worktrees, Skeleton System
+- **Current**: `VDOH-1.4.0` (Planning)
+- **Previous**: `doh-1.3.0` (Stable)
+- **Focus**: End-user task and project management system
+- **Audience**: Claude users, project developers using /doh commands
 
-### Development
+### DOH-DEV Internal (Development System)
 
-- **Version**: `1.4.0-dev`
-- **Status**: Planning
-- **Target Release**: Runtime 1.4.0
-- **Focus**: Analysis & Distribution
+- **Current**: `VDD-0.2.0` (Planning - Linting Focus)
+- **Future**: `VDD-0.3.0` (Planning - Multi-Agent Systems)
+- **Previous**: `VDD-0.1.0` ✅ (Completed 2025-08-29)
+- **Focus**: Internal development tooling and intelligent automation
+- **Audience**: DOH system developers using /dd commands
 
-## Version Strategy
+## Dual Version Architecture
 
-### Runtime Versions (inclaude.md)
+### DOH Runtime Versions (`doh-x.y.z`)
 
-- **Purpose**: Stable features ready for end-user consumption
-- **Audience**: Claude, project developers using /doh
-- **Update frequency**: When features are stable and tested
-- **Semantic versioning**: MAJOR.MINOR.PATCH
+- **Purpose**: Stable end-user features and task management system
+- **Tracking**: Version files in `todo/doh-*.md`
+- **Commands**: `/doh:*` command suite
+- **Release Cycle**: Major releases when feature sets complete
+- **Documentation**: User-facing features in README.md
 
-### Development Versions (./TODO.md)
+### DOH-DEV Internal Versions (`dd-x.y.z`)
 
-- **Purpose**: Development roadmap and work in progress
-- **Audience**: /doh system developers
-- **Update frequency**: Continuous during development
-- **Format**: `X.Y.Z-dev` where X.Y.Z is target runtime version
+- **Purpose**: Internal development tooling and AI collaboration systems
+- **Tracking**: Version files in `todo/dd-*.md`
+- **Commands**: `/dd:*` command suite for developers
+- **Release Cycle**: Rapid iteration based on development needs
+- **Documentation**: Internal tooling and workflows
 
-## Feature Stability Matrix
+### Version Isolation
 
-| Feature                     | Runtime 1.3.0 | Dev 1.4.0 | Status           |
-| --------------------------- | ------------- | --------- | ---------------- |
-| Agent Context Protocol      | ✅ Stable     | ✅ Stable | Production Ready |
-| Worktree Automation         | ✅ Stable     | ✅ Stable | Production Ready |
-| Memory Updates Protocol     | ✅ Stable     | ✅ Stable | Production Ready |
-| DOH Skeleton Implementation | ✅ Stable     | ✅ Stable | Production Ready |
-| File System Validation      | ✅ Stable     | ✅ Stable | Production Ready |
-| Memory Structure            | ✅ Stable     | ✅ Stable | Production Ready |
-| Centralized Dependencies    | ✅ Stable     | ✅ Stable | Production Ready |
+- **Complete Separation**: DOH Runtime and DOH-DEV maintain independent versioning
+- **No Cross-Contamination**: Runtime features never affect internal tooling versions
+- **Clear Boundaries**: `/doh` vs `/dd` command namespaces enforce separation
 
-## Release Process
+## Version Status Overview
 
-### Runtime Release Criteria
+### DOH Runtime Status
 
-- [ ] All features tested and stable
-- [ ] Documentation updated (inclaude.md)
-- [ ] Integration tests passing
-- [ ] No breaking changes without migration path
+| Version       | Status      | Release Date | Key Features                                   |
+| ------------- | ----------- | ------------ | ---------------------------------------------- |
+| **VDOH-1.4.0** | 🟡 Planning | TBD          | Analysis & Distribution system                 |
+| **doh-1.3.0** | ✅ Stable   | 2025-08-27   | Infrastructure completion, worktree automation |
+| **doh-1.2.0** | ✅ Archived | Previous     | Agent context protocol, memory system          |
 
-### Development Updates
+### DOH-DEV Internal Status
 
-- [ ] Feature implementation tracked in ./TODO.md
-- [ ] Version bumped when major milestones reached
-- [ ] Clear mapping from dev features to runtime releases
+| Version      | Status      | Release Date | Key Features                                              |
+| ------------ | ----------- | ------------ | --------------------------------------------------------- |
+| **VDD-0.3.0** | 🔮 Future   | TBD          | Multi-agent collaboration systems, benchmarked validation |
+| **VDD-0.2.0** | 🟡 Planning | 2025-09-10   | Perfect linting with intelligent feedback learning        |
+| **VDD-0.1.0** | ✅ Complete | 2025-08-29   | Project isolation, /dd commands, smart cache              |
 
-## Version History
+## Version Planning & References
 
-### Runtime 1.2.0 (2025-08-27)
+### Active Version Files
 
-- Agent Context Protocol with complete JSON bundles
-- Automated worktree creation and management
-- Memory enrichment system for agents
-- Integration testing framework
-- Runtime documentation (inclaude.md)
+#### DOH Runtime Versions
 
-### Runtime 1.1.0 (Previous)
+- **Current Planning**: `todo/VDOH-1.4.0.md` - Analysis & Distribution features
+- **Archived Versions**: Previous doh-\* files contain historical goals and achievements
 
-- Dual ID System (!123 → #456)
-- Index.json unified structure
-- GitHub/GitLab sync specifications
-- MD headers with URLs
+#### DOH-DEV Internal Versions
 
-### Runtime 1.0.0 (Previous)
+- **Current Planning**: `todo/VDD-0.2.0.md` - Perfect linting with intelligent feedback learning
+- **Future Planning**: `todo/VDD-0.3.0.md` - Multi-agent collaboration systems
+- **Completed**: `todo/VDD-0.1.0.md` - Project isolation and enhanced /dd commands
 
-- 2-Agent architecture consolidation
-- Basic DOH command structure
-- Epic #0 system foundation
+### Version References
 
-## Upgrade Path
+This VERSION.md file serves as a **registry only** - detailed goals, constraints, and progress tracking are maintained
+in individual version files:
 
-### From 1.1.0 → 1.2.0
+- **For planning**: See respective `todo/doh-*.md` or `todo/dd-*.md` files
+- **For implementation**: Follow Epic structures linked in version files
+- **For history**: Completed version files contain achievement records
 
-- Agents gain full context awareness
-- Worktree automation available
-- Memory system operational
-- No breaking changes to existing workflows
+### Cross-Version Independence
 
-### From 1.2.0 → 1.3.0 (Planned)
+- **DOH Runtime**: User-facing features, completely independent development cycle
+- **DOH-DEV Internal**: Developer tooling, can evolve rapidly without affecting runtime
+- **No Dependencies**: Each system can release independently based on its own readiness
 
-- Enhanced file system validation
-- Complete memory structure
-- Centralized dependency management
-- Backwards compatible
+---
+
+**Usage**: This file tracks **which versions are active** - see individual version files in `todo/` for detailed
+planning, goals, and progress.

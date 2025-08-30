@@ -96,34 +96,65 @@ has_exception_marker() {
     local file="$1"
     local marker="$2"
     
-    grep -q "$marker" "$file" 2>/dev/null
+    if [[ -f "$file" ]]; then
+        grep -q "$marker" "$file" 2>/dev/null
+    else
+        return 1
+    fi
 }
 
-# Extract sections with exceptions
+# Extract sections with exceptions and create filtered file
 extract_exception_sections() {
     local file="$1"
     local temp_file="${file}.lint-temp"
+    local show_info="${2:-false}"
     
-    # Check for inline exceptions
+    # Copy original file
+    cp "$file" "$temp_file"
+    
+    # Check for and report inline exceptions
+    local found_exceptions=false
+    
     if has_exception_marker "$file" "markdownlint-disable"; then
-        echo "  📝 Found markdownlint exceptions"
+        [[ "$show_info" == "true" ]] && echo "  📝 Found markdownlint exceptions"
+        found_exceptions=true
     fi
     
     if has_exception_marker "$file" "prettier-ignore"; then
-        echo "  📝 Found prettier exceptions"
+        [[ "$show_info" == "true" ]] && echo "  📝 Found prettier exceptions"
+        found_exceptions=true
     fi
     
     if has_exception_marker "$file" "codespell-ignore"; then
-        echo "  📝 Found codespell exceptions"
+        [[ "$show_info" == "true" ]] && echo "  📝 Found codespell exceptions"
+        found_exceptions=true
     fi
     
+    # Handle special teaching/example sections by removing them
     if has_exception_marker "$file" "lint-example:bad"; then
-        echo "  📝 Found bad example sections (will skip)"
+        [[ "$show_info" == "true" ]] && echo "  📝 Found bad example sections (will skip)"
+        # Remove content between lint-example:bad and lint-example:end markers
+        sed -i '/<!-- lint-example:bad -->/,/<!-- lint-example:end -->/d' "$temp_file"
+        found_exceptions=true
     fi
     
     if has_exception_marker "$file" "teaching-mode"; then
-        echo "  📝 Found teaching mode sections (will skip)"
+        [[ "$show_info" == "true" ]] && echo "  📝 Found teaching mode sections (will skip)"
+        # Remove content between teaching-mode and teaching-mode:end markers
+        sed -i '/<!-- teaching-mode -->/,/<!-- teaching-mode:end -->/d' "$temp_file"
+        found_exceptions=true
     fi
+    
+    if has_exception_marker "$file" "preserve-original"; then
+        [[ "$show_info" == "true" ]] && echo "  📝 Found preserve-original sections (will skip)"
+        # Remove content between preserve-original and preserve-original:end markers
+        sed -i '/<!-- preserve-original -->/,/<!-- preserve-original:end -->/d' "$temp_file"
+        found_exceptions=true
+    fi
+    
+    # Return the temp file path and whether exceptions were found
+    echo "$temp_file"
+    return $([ "$found_exceptions" = true ] && echo 0 || echo 1)
 }
 
 # Run prettier on a file
@@ -198,38 +229,118 @@ run_codespell_on_file() {
     return 0
 }
 
-# Main linting function for a single file
+# Validate exception markers are properly closed
+validate_exception_markers() {
+    local file="$1"
+    local validation_errors=0
+    
+    # Check markdownlint disable/enable pairs
+    local disable_count
+    local enable_count
+    disable_count=$(grep -c "markdownlint-disable" "$file" 2>/dev/null || echo 0)
+    enable_count=$(grep -c "markdownlint-enable" "$file" 2>/dev/null || echo 0)
+    
+    if [[ $disable_count -gt $enable_count ]]; then
+        print_warning "Unclosed markdownlint-disable markers in $file"
+        validation_errors=1
+    fi
+    
+    # Check teaching-mode pairs
+    local teaching_start
+    local teaching_end
+    teaching_start=$(grep -c "<!-- teaching-mode -->" "$file" 2>/dev/null || echo 0)
+    teaching_end=$(grep -c "<!-- teaching-mode:end -->" "$file" 2>/dev/null || echo 0)
+    
+    if [[ $teaching_start -ne $teaching_end ]]; then
+        print_warning "Mismatched teaching-mode markers in $file ($teaching_start start, $teaching_end end)"
+        validation_errors=1
+    fi
+    
+    # Check lint-example pairs
+    local example_bad
+    local example_end
+    example_bad=$(grep -c "<!-- lint-example:bad -->" "$file" 2>/dev/null || echo 0)
+    example_end=$(grep -c "<!-- lint-example:end -->" "$file" 2>/dev/null || echo 0)
+    
+    if [[ $example_bad -gt 0 && $example_bad -ne $example_end ]]; then
+        print_warning "Mismatched lint-example markers in $file ($example_bad bad, $example_end end)"
+        validation_errors=1
+    fi
+    
+    return $validation_errors
+}
+
+# Main linting function for a single file with intelligent exception handling
 lint_file() {
     local file="$1"
     local mode="${2:-fix}"  # Default to fix mode
     local show_exceptions="${3:-false}"
+    local validate_exceptions="${4:-false}"
     local file_status=0
+    local target_file="$file"
+    local temp_file=""
+    local cleanup_temp=false
     
-    # Check for exceptions if requested
-    if [[ "$show_exceptions" == "true" ]]; then
-        extract_exception_sections "$file"
+    # Validate exception markers if requested
+    if [[ "$validate_exceptions" == "true" ]]; then
+        if ! validate_exception_markers "$file"; then
+            return 1
+        fi
     fi
     
-    # Run linting pipeline
-    # 1. Prettier (formatting foundation)
-    if ! run_prettier_on_file "$file" "$mode"; then
-        print_warning "Prettier: formatting issues in $file"
+    # Handle exceptions by creating filtered file
+    if has_exception_marker "$file" "lint-example:bad\|teaching-mode\|preserve-original"; then
+        temp_file=$(extract_exception_sections "$file" "$show_exceptions")
+        if [[ $? -eq 0 ]]; then
+            target_file="$temp_file"
+            cleanup_temp=true
+            [[ "$show_exceptions" == "true" ]] && echo "  🔧 Using filtered version for linting"
+        fi
+    elif [[ "$show_exceptions" == "true" ]]; then
+        extract_exception_sections "$file" "$show_exceptions" > /dev/null
+    fi
+    
+    # Run linting pipeline on target file
+    # 1. Prettier (formatting foundation) - respects prettier-ignore
+    if ! run_prettier_on_file "$target_file" "$mode"; then
+        print_warning "Prettier: formatting issues in $(basename "$file")"
         file_status=1
     fi
     
-    # 2. Markdownlint (Markdown-specific rules)
-    if ! run_markdownlint_on_file "$file" "$mode"; then
-        print_warning "Markdownlint: issues in $file"
+    # 2. Markdownlint (Markdown-specific rules) - respects markdownlint-disable
+    if ! run_markdownlint_on_file "$target_file" "$mode"; then
+        print_warning "Markdownlint: issues in $(basename "$file")"
         file_status=1
     fi
     
-    # 3. Codespell (spelling corrections)
-    if ! run_codespell_on_file "$file" "$mode"; then
-        print_warning "Codespell: spelling issues in $file"
+    # 3. Codespell (spelling corrections) - respects codespell-ignore
+    if ! run_codespell_on_file "$target_file" "$mode"; then
+        print_warning "Codespell: spelling issues in $(basename "$file")"
         file_status=1
+    fi
+    
+    # Copy changes back to original file if we used a temp file and mode is fix
+    if [[ "$cleanup_temp" == "true" && "$mode" == "fix" && $file_status -eq 0 ]]; then
+        # Carefully merge changes back, preserving exception sections
+        merge_linting_changes "$file" "$temp_file"
+    fi
+    
+    # Cleanup temp file
+    if [[ "$cleanup_temp" == "true" && -f "$temp_file" ]]; then
+        rm -f "$temp_file"
     fi
     
     return $file_status
+}
+
+# Merge linting changes back to original file while preserving exceptions
+merge_linting_changes() {
+    local original_file="$1"
+    local linted_file="$2"
+    
+    # For now, simple approach: don't merge back changes to preserve exceptions
+    # In future versions, could implement more sophisticated merging
+    [[ -f "$linted_file" ]] && echo "  ℹ️  Exception sections preserved, some changes not applied"
 }
 
 # Lint multiple files
@@ -273,6 +384,8 @@ export -f get_modified_markdown_files
 export -f get_markdown_files_in_dir
 export -f has_exception_marker
 export -f extract_exception_sections
+export -f validate_exception_markers
+export -f merge_linting_changes
 export -f run_prettier_on_file
 export -f run_markdownlint_on_file
 export -f run_codespell_on_file

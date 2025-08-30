@@ -92,6 +92,15 @@ lint-staged: ## Auto-fix all staged files
 lint-modified: ## Auto-fix all modified/new files
 	@./dev-tools/scripts/lint-files.sh --fix --modified
 
+lint-with-exceptions: ## Show exception handling details while linting
+	@./dev-tools/scripts/lint-files.sh --fix --show-exceptions
+
+lint-validate-exceptions: ## Validate exception markers are properly closed
+	@./dev-tools/scripts/lint-files.sh --validate-exceptions
+
+lint-show-skipped: ## Show what sections were skipped during linting
+	@./dev-tools/scripts/lint-files.sh --show-skipped
+
 lint-dir: ## Lint all files in directory (usage: make lint-dir DIR=todo/)
 	@if [ -z "$(DIR)" ]; then \
 		echo "❌ Usage: make lint-dir DIR=path/to/dir/"; \
