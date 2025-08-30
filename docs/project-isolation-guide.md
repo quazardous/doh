@@ -8,14 +8,14 @@ context mixing and ensure proper dependency isolation.
 ### DOH Runtime (`doh-x.x.x`)
 
 - **Purpose**: Public distribution, end-user features, runtime functionality
-- **Version Files**: `todo/doh-1.4.0.md`, `todo/doh-1.5.0.md`
+- **Version Files**: `todo/VDOH-1.4.0.md`, `todo/doh-1.5.0.md`
 - **Task Header**: `**Project**: DOH Runtime` (default, can be omitted)
 - **Focus**: Runtime distribution, user features, public API, end-user workflows
 
 ### DOH-DEV Internal (`dd-x.x.x`)
 
 - **Purpose**: Internal development support, command tooling, developer experience
-- **Version Files**: `todo/dd-0.1.0.md`, `todo/dd-0.2.0.md`
+- **Version Files**: `todo/VDD-0.1.0.md`, `todo/VDD-0.2.0.md`
 - **Task Header**: `**Project**: DOH-DEV Internal` (required when applicable)
 - **Focus**: Command development, internal tooling, developer workflows
 
@@ -92,8 +92,8 @@ context mixing and ensure proper dependency isolation.
 
 ### Dual Version Tracking
 
-- **Runtime**: `doh-1.4.0.md`, `doh-1.5.0.md` (public releases)
-- **Internal**: `dd-0.1.0.md`, `dd-0.2.0.md` (internal development milestones)
+- **Runtime**: `VDOH-1.4.0.md`, `doh-1.5.0.md` (public releases)
+- **Internal**: `VDD-0.1.0.md`, `VDD-0.2.0.md` (internal development milestones)
 
 ### Version Selection Rules
 
@@ -108,7 +108,7 @@ context mixing and ensure proper dependency isolation.
 ```markdown
 # T123 - Implement Task Distribution System
 
-**Status**: READY **Priority**: HIGH **Epic**: E001 DOH Runtime doh-1.4.0 Release **Proposed Version**: doh-1.4.0
+**Status**: READY **Priority**: HIGH **Epic**: EDOH001 DOH Runtime VDOH-1.4.0 Release **Proposed Version**: VDOH-1.4.0
 ```
 
 ### DOH-DEV Internal Task (Explicit)
@@ -117,7 +117,7 @@ context mixing and ensure proper dependency isolation.
 # T124 - Add Auto-completion to /doh-dev Commands
 
 **Project**: DOH-DEV Internal **Status**: READY  
-**Priority**: MEDIUM **Epic**: E002 DOH-DEV Internal System **Proposed Version**: dd-0.2.0
+**Priority**: MEDIUM **Epic**: E002 DOH-DEV Internal System **Proposed Version**: VDD-0.2.0
 ```
 
 ## Benefits

@@ -8,7 +8,7 @@
 
 ### 1. **Bash + jq** (Choix actuel)
 
-**Avantages**:
+**Advantages**:
 
 - ✅ Universellement disponible (Linux/macOS/WSL)
 - ✅ jq parfait pour JSON parsing
@@ -19,14 +19,14 @@
 
 **Inconvénients**:
 
-- ❌ Syntaxe parfois complexe
+- ❌ Syntax parfois complexe
 - ❌ Gestion des structures de données limitée
 - ❌ Debugging plus difficile
 - ❌ Manipulation de strings fragile
 
 ### 2. **Python**
 
-**Avantages**:
+**Advantages**:
 
 - ✅ JSON natif, structures de données riches
 - ✅ Très lisible et maintenable
@@ -42,11 +42,11 @@
 
 ### 3. **Node.js**
 
-**Avantages**:
+**Advantages**:
 
 - ✅ JSON natif parfait
 - ✅ Très rapide
-- ✅ Syntaxe moderne
+- ✅ Syntax moderne
 - ✅ Excellent écosystème
 
 **Inconvénients**:
@@ -57,7 +57,7 @@
 
 ### 4. **Go** (binaires compilés)
 
-**Avantages**:
+**Advantages**:
 
 - ✅ Très rapide (binaires natifs)
 - ✅ Pas de dépendances runtime
@@ -89,7 +89,7 @@ Go (compilé):  ~2-5ms
 
 ### Opérations Simples (JSON lookup, comptage)
 
-**Recommandation**: **Bash + jq**
+**Recommendation**: **Bash + jq**
 
 - Performance optimale
 - Code simple
@@ -97,7 +97,7 @@ Go (compilé):  ~2-5ms
 
 ### Opérations Complexes (parsing, logique métier)
 
-**Recommandation**: **Python**
+**Recommendation**: **Python**
 
 - Code plus maintenable
 - Gestion d'erreurs meilleure
@@ -105,16 +105,16 @@ Go (compilé):  ~2-5ms
 
 ### Opérations Hybrides
 
-**Recommandation**: **Bash + Python fallback**
+**Recommendation**: **Bash + Python fallback**
 
 - Bash pour les cas simples
 - Python pour les cas complexes
 
 ---
 
-## Recommandation Finale
+## Recommendation Finale
 
-### **Approche Hybride Optimale**
+### **Approach Hybride Optimale**
 
 ```bash
 # Structure recommandée
@@ -144,7 +144,7 @@ Go (compilé):  ~2-5ms
 ### **Code Dispatcher Hybride**
 
 ```bash
-# Exemple intelligent
+# Example intelligent
 operation_dispatch() {
     local operation="$1"
 
@@ -180,17 +180,17 @@ operation_dispatch() {
 
 ## Conclusion
 
-**Réponse**: **Bash est parfait pour les opérations simples**, mais une approche hybride est optimale:
+**Réponse**: **Bash est parfait pour les opérations simples**, mais une approach hybride est optimale:
 
 1. **Bash + jq**: Pour 80% des opérations (JSON lookup, stats, validation)
 2. **Python**: Pour 15% des opérations complexes (analyse, logique métier)
 3. **Claude fallback**: Pour 5% des cas edge/erreurs
 
-**Avantages de cette approche**:
+**Advantages de cette approach**:
 
 - Performance maximale où c'est important
 - Maintenabilité où c'est nécessaire
 - Robustesse avec fallback Claude
 - Pas de dépendances critiques
 
-**T013 POC validé**: Bash + jq est le bon choix pour les opérations ciblées!
+**DOH013 POC validé**: Bash + jq est le bon choix pour les opérations ciblées!

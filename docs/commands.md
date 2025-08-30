@@ -59,16 +59,16 @@ The system maintains the folder structure and files automatically based on natur
 The system uses **2 optimized agents** (consolidation from 10 → 2 agents):
 
 - **`doh-project-agent`**: Complete DOH project management
-    - Intelligent complexity analysis (`/doh:quick`)
-    - Brainstorming and hierarchical decomposition
-    - Epic #0 system for quick tasks
-    - Clarifying questions and recommendations
+  - Intelligent complexity analysis (`/doh:quick`)
+  - Brainstorming and hierarchical decomposition
+  - Epic #0 system for quick tasks
+  - Clarifying questions and recommendations
 
 - **`autonomous-execution-agent`**: Autonomous code execution
-    - Isolated worktrees per epic/feature
-    - Full-stack autonomous development
-    - DOH traceability maintained
-    - Collaborative mode when needed
+  - Isolated worktrees per epic/feature
+  - Full-stack autonomous development
+  - DOH traceability maintained
+  - Collaborative mode when needed
 
 ## Specialized Commands vs Implementation
 
@@ -131,10 +131,10 @@ Default epic "Maintenance & General Tasks":
 #### Agent Commands
 
 - **`/doh:agent [description or #id]`** - Assign task/epic to autonomous agent
-    - Creates isolated worktree (`epic/{name}` or `feature/{name}`)
-    - Autonomous implementation with DOH traceability
-    - Supports parallel execution on different epics/features
-    - **Context Protocol**: Full context bundle with project memory (see
+  - Creates isolated worktree (`epic/{name}` or `feature/{name}`)
+  - Autonomous implementation with DOH traceability
+  - Supports parallel execution on different epics/features
+  - **Context Protocol**: Full context bundle with project memory (see
     [Agent Context Protocol](agent-context-protocol.md))
 
 ## Natural Language Support

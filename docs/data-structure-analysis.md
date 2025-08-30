@@ -2,7 +2,7 @@
 
 **Analysis Date**: 2025-08-27  
 **Target**: Identify bash-scriptable operations for performance optimization  
-**Scope**: T014 - Foundation for T013 script implementation
+**Scope**: DOH014 - Foundation for DOH013 script implementation
 
 ---
 
@@ -198,7 +198,7 @@ find_dependents() {
 
 ---
 
-## Recommendations for T013 Implementation
+## Recommendations for DOH013 Implementation
 
 ### 1. **Priority Scripts to Create**
 
@@ -250,14 +250,14 @@ doh_get_item() {
 
 ## Conclusion
 
-**T014 Analysis Results**:
+**DOH014 Analysis Results**:
 
 - ✅ **High bash-scripting potential**: ~70% of common operations can be bash-scripted
 - ✅ **Data structures are script-friendly**: JSON + jq is perfect combination
 - ✅ **Clear performance ROI**: 200-800 tokens saved per operation
 - ✅ **Low implementation risk**: Fallback to Claude always available
 
-**Ready for T013**: Data analysis complete, implementation patterns identified.
+**Ready for DOH013**: Data analysis complete, implementation patterns identified.
 
 **Estimated impact**: 60-80% reduction in Claude calls for routine operations while maintaining full functionality
 through fallback mechanism.
@@ -266,4 +266,4 @@ through fallback mechanism.
 
 ### Analysis Complete
 
-Ready for T013 POC implementation
+Ready for DOH013 POC implementation

@@ -29,9 +29,9 @@
 #### Mixed-Purpose Documentation (Careful separation required)
 
 - **CONTRIBUTING.md** - For external contributors
-    - ✅ CAN mention TODO.md exists for tracking
-    - ❌ Should NOT reference specific T### numbers
-    - ✅ Should explain contribution workflow
+  - ✅ CAN mention TODO.md exists for tracking
+  - ❌ Should NOT reference specific T### numbers
+  - ✅ Should explain contribution workflow
 
 ### Documentation Review Checklist
 
@@ -884,9 +884,9 @@ audit trail for understanding why architectural choices were made and what infor
 **MANDATORY PROCESS** - Before creating any T### task:
 
 1. ✅ **Read `todo/README.md` FIRST** - Get current Next ID (currently 082)
-2. ✅ **Use exact Next ID** - Create T082.md with the number from README.md
+2. ✅ **Use exact Next ID** - Create DD082.md with the number from README.md
 3. ✅ **Update Next ID** - Increment to 083 in README.md after creating task
-4. ✅ **Verify no conflicts** - Ensure T082.md doesn't already exist
+4. ✅ **Verify no conflicts** - Ensure DD082.md doesn't already exist
 
 **⚠️ Common Error**: Using arbitrary numbers instead of checking todo/README.md sequence
 
@@ -928,12 +928,12 @@ Old stable versions move to `todo/archive/` to reduce clutter.
 
 **ID Formats**:
 
-- **TODO Items**: T{number} (e.g., T001, T044, T045)
+- **TODO Items**: T{number} (e.g., DOH001, DOH044, DOH045)
 - **Epic Items**: E{number} (e.g., E047, E020)
 
 **Epic Transformation Rule**: When a TODO becomes an epic, it keeps the same number:
 
-- T020 → E020 (transforms into epic, keeps ID 020)
+- DOH020 → E020 (transforms into epic, keeps ID 020)
 - New child TODOs get new IDs from the sequence
 
 **Epic Identification**:
@@ -1014,19 +1014,19 @@ Status: COMPLETED + Version: 1.4.0 ✅
 ```markdown
 # Normal evolution
 
-T001: Proposed Version: 1.4.0 → Target Version: 1.4.0 → Version: 1.4.0 ✅
+DOH001: Proposed Version: 1.4.0 → Target Version: 1.4.0 → Version: 1.4.0 ✅
 
 # Deferred task
 
-T002: Proposed Version: 1.4.0 → Target Version: 1.5.0 → (still flexible)
+DOH002: Proposed Version: 1.4.0 → Target Version: 1.5.0 → (still flexible)
 
 # Version constraint (external requirement)
 
-T003: Status: NOT PLANNED + Version: 1.5.0 (must be in this specific version)
+DOH003: Status: NOT PLANNED + Version: 1.5.0 (must be in this specific version)
 
 # Fast-tracked urgent task
 
-T004: Proposed Version: 1.4.1 → Version: 1.4.1 (directly to frozen)
+DOH004: Proposed Version: 1.4.1 → Version: 1.4.1 (directly to frozen)
 ```
 
 #### Version Field Rules

@@ -6,7 +6,7 @@
 
 ## Option 1: Fichier Séparé `doh.ini`
 
-### Avantages ✅
+### Advantages ✅
 
 - **Lisibilité**: Format INI plus human-friendly pour configuration
 - **Édition manuelle**: Plus facile à éditer à la main
@@ -26,7 +26,7 @@
 
 ## Option 2: Intégration dans `project-index.json`
 
-### Avantages ✅
+### Advantages ✅
 
 - **Un seul fichier**: Source de vérité unique
 - **Atomicité**: Toutes les modifications dans un seul fichier
@@ -100,7 +100,7 @@ ini_value=$(grep '^enable_bash_optimization' .doh/doh.ini | cut -d'=' -f2)
 
 ---
 
-## Recommandation Finale
+## Recommendation Finale
 
 ### **CHOIX: Intégration dans project-index.json** 🏆
 
@@ -109,7 +109,7 @@ ini_value=$(grep '^enable_bash_optimization' .doh/doh.ini | cut -d'=' -f2)
 1. **Un seul fichier de vérité**: Simplicité maximale pour scripts
 2. **Atomicité**: Pas de problème de synchronisation
 3. **Performance**: Un seul `jq` call vs parsing INI + JSON
-4. **Cohérence**: Toute la configuration projet centralisée
+4. **Cohérence**: Toute la configuration project centralisée
 5. **Scripts bash**: Plus simple à maintenir
 
 ### **Structure JSON optimisée**
@@ -117,7 +117,7 @@ ini_value=$(grep '^enable_bash_optimization' .doh/doh.ini | cut -d'=' -f2)
 ```json
 {
   "metadata": {
-    // Métadonnées du projet (existant)
+    // Métadonnées du project (existent)
   },
   "config": {
     "project": {
@@ -166,7 +166,7 @@ doh_config_set() {
   jq ".config.$key = \"$value\"" .doh/project-index.json > temp && mv temp .doh/project-index.json
 }
 
-# Exemple
+# Example
 doh_config_set "scripting.debug_mode" "true"
 ```
 
@@ -176,11 +176,11 @@ doh_config_set "scripting.debug_mode" "true"
 
 **Décision**: **project-index.json étendu** avec section `config`
 
-**Avantages pour T015**:
+**Advantages pour DOH015**:
 
 - Scripts bash plus simples (un seul fichier)
 - Pas de problème de synchronisation
 - Performance optimale
-- Atomicité garantie
+- Atomicité guarantee
 
 Le sacrifice de lisibilité INI est compensé par la simplicité opérationnelle et la robustesse.

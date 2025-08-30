@@ -59,15 +59,15 @@ This separation must be absolute - no information leakage across the wall
 **Files**:
 
 - `CONTRIBUTING.md` - External contributor guide
-    - ✅ "We use TODO.md for tracking"
-    - ❌ "See T048 for details"
+  - ✅ "We use TODO.md for tracking"
+  - ❌ "See DOH048 for details"
 
 ## Enforcement Rules
 
 ### Rule 1: Command Documentation
 
 ```markdown
-❌ WRONG (mixes internal and runtime): "The /doh:init command (similar to T001 skeleton) creates..."
+❌ WRONG (mixes internal and runtime): "The /doh:init command (similar to DOH001 skeleton) creates..."
 
 ✅ CORRECT (clean separation): "The /doh:init command creates your project structure..."
 ```
@@ -83,7 +83,7 @@ This separation must be absolute - no information leakage across the wall
 ### Rule 3: Development References
 
 ```markdown
-❌ WRONG (specific internal task): "This feature (T044) enables natural language..."
+❌ WRONG (specific internal task): "This feature (DOH044) enables natural language..."
 
 ✅ CORRECT (generic reference): "Natural language support is under development..."
 ```
@@ -108,7 +108,7 @@ This separation must be absolute - no information leakage across the wall
 
 ### Violation: Task Number in User Doc
 
-**Found**: "Feature pending (see T020)"  
+**Found**: "Feature pending (see DOH020)"  
 **Fix**: "Feature under development"
 
 ### Violation: Internal Command in Guide

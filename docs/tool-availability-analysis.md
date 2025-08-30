@@ -1,10 +1,10 @@
 # Analysis: Quel outil est le plus répandu?
 
-**Question critique**: Disponibilité des outils de scripting sur les environnements développeurs
+**Question critique**: Disponibilité des outils de scripting sur les environments développeurs
 
 ---
 
-## Analyse de Disponibilité par Environnement
+## Analyse de Disponibilité par Environment
 
 ### **Bash + jq**
 
@@ -28,10 +28,10 @@
 **Disponibilité**: ⭐⭐⭐⭐ (70-80%)
 
 ✅ **Développeurs web**: Très répandu  
-✅ **Projets JavaScript/TypeScript**: Déjà présent  
+✅ **Projects JavaScript/TypeScript**: Déjà présent  
 ✅ **CI/CD moderne**: Souvent disponible  
 ❌ **Serveurs système**: Pas toujours installé  
-❌ **Environnements minimaux**: Absent  
+❌ **Environments minimaux**: Absent  
 ❌ **Containers Alpine**: Souvent absent  
 ❌ **Développeurs backend non-JS**: Variable
 
@@ -56,7 +56,7 @@
 
 ## Enquête Terrain: Disponibilité Réelle
 
-### **Environnements Testés**
+### **Environments Testés**
 
 #### Docker Images Populaires
 
@@ -80,7 +80,7 @@ bash: ✅ jq: ~60% node: ~70% python: ~80%
 # Ubuntu Server instances
 bash: ✅ jq: ~30% node: ~20% python: ✅
 
-# Container services (ECS, GKE, AKS)
+# Container services (ECS, GKE, ASK)
 bash: ✅ jq: Variable node: Variable python: Variable
 ```
 
@@ -121,13 +121,13 @@ Python:       ~80ms  (~80% disponibilité)
 
 ---
 
-## Recommandation Finale
+## Recommendation Finale
 
 ### **Bash + jq est le PLUS répandu** ⭐
 
 **Raisons**:
 
-1. **Disponibilité universelle**: 95% des environnements Linux/macOS
+1. **Disponibilité universelle**: 95% des environments Linux/macOS
 2. **Installation minimale**: jq = 3MB si manquant
 3. **Performance équivalente**: 12ms vs 10ms Node.js (négligeable)
 4. **Zero dependencies**: Pas de runtime complexe

@@ -4,7 +4,7 @@
 
 ---
 
-## Réponse: **Absolument aucun problème!** ✅
+## Réponse: **Absolute aucun problème!** ✅
 
 ### **Format INI Standard**
 
@@ -21,7 +21,7 @@ auto_categorization = true
 ### **Bash Parse INI Naturellement**
 
 ```bash
-# Fonction parse super simple avec awk
+# Function parse super simple avec awk
 get_ini_value() {
     local section="$1" key="$2" file="$3"
 
@@ -39,12 +39,12 @@ threshold=$(get_ini_value "behavior" "epic_graduation_threshold" "config.ini")
 
 ---
 
-## Avantages des Sections INI en Bash
+## Advantages des Sections INI en Bash
 
 ### **1. Organisation Logique** ✅
 
 ```ini
-[project]        # Métadonnées projet
+[project]        # Métadonnées project
 [scripting]      # Préférences scripts
 [sync]           # Config GitHub/GitLab
 [integrations]   # Webhooks, etc.
@@ -72,14 +72,14 @@ performance_tracking = no  # Désactive le tracking
 # Le parsing gère automatiquement:
 - Commentaires (#)
 - Lignes vides
-- Espaces autour des =
+- Escapes autour des =
 - Sections multiples
 - Keys dupliquées (dernière gagne)
 ```
 
 ---
 
-## Exemple Concret - Test Réel
+## Example Concret - Test Réel
 
 ### **config.ini**
 
@@ -137,7 +137,7 @@ JSON (5 calls jq):     ~125ms
 
 ```bash
 # Notre parser gère:
-[section avec espaces]     ❌ Évitable (bonne pratique)
+[section avec escapes]     ❌ Évitable (bonne pratique)
 [section-with-dashes]      ✅ OK
 [section_with_underscores] ✅ OK
 [123numeric]              ✅ OK
@@ -170,7 +170,7 @@ key-with-dashes = ok     ✅ OK
 5. **Commentaires**: Support natif `#`
 6. **Organisation**: Sections logiques parfaites
 
-**Comparaison finale**:
+**Comparison finale**:
 
 - INI + bash = Marriage parfait 💕
 - JSON + bash = Nécessite jq (dépendance)

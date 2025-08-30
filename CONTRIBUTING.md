@@ -216,7 +216,7 @@ The project includes:
 ### Running Tests
 
 ```bash
-make test     # Will run comprehensive tests when T024 is complete
+make test     # Will run comprehensive tests when DOH024 is complete
 make check    # Current quality checks (linting)
 ```
 

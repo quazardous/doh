@@ -4,7 +4,7 @@
 
 ---
 
-## Comparaison Pratique
+## Comparison Pratique
 
 ### **INI Format**
 
@@ -94,7 +94,7 @@ JSON cached (load once):   ~25ms + parsing
 
 ## Analyse Détaillée
 
-### **INI Format: Avantages ✅**
+### **INI Format: Advantages ✅**
 
 - **Bash natif**: Parsing avec sed/awk (outils standard Unix)
 - **Lisible**: Format très human-friendly
@@ -102,7 +102,7 @@ JSON cached (load once):   ~25ms + parsing
 - **Simple**: Structure plate, facile à comprendre
 - **Édition manuelle**: Très facile à éditer
 - **Pas de dépendances**: Fonctionne sans outils externes
-- **Erreur-friendly**: Plus tolérant aux erreurs de syntaxe
+- **Erreur-friendly**: Plus tolérant aux erreurs de syntax
 
 ### **INI Format: Inconvénients ❌**
 
@@ -111,7 +111,7 @@ JSON cached (load once):   ~25ms + parsing
 - **Parsing custom**: Code de parsing à maintenir
 - **Standards variés**: Plusieurs variantes INI
 
-### **JSON Format: Avantages ✅**
+### **JSON Format: Advantages ✅**
 
 - **jq power**: Queries complexes faciles
 - **Types natifs**: boolean, number, string, array
@@ -187,7 +187,7 @@ threshold=$(get_config "behavior" "epic_graduation_threshold")
 
 ---
 
-## Recommandation Finale
+## Recommendation Finale
 
 ### **CHOIX: config.ini** 🏆
 
@@ -205,8 +205,8 @@ threshold=$(get_config "behavior" "epic_graduation_threshold")
 
 ```text
 .doh/
-├── project-index.json    # Données du projet (items, dependencies)
-├── config.ini           # Configuration du projet (préférences)
+├── project-index.json    # Données du project (items, dependencies)
+├── config.ini           # Configuration du project (préférences)
 └── memory/              # Memory system
 ```
 
@@ -218,7 +218,7 @@ threshold=$(get_config "behavior" "epic_graduation_threshold")
 ### **Code d'exemple final**
 
 ```bash
-# Fonction parse_ini simple et robuste
+# Function parse_ini simple et robuste
 # Usage: parse_ini_value "section" "key" "file"
 parse_ini_value() {
     awk -F= -v section="[$1]" -v key="$2" '

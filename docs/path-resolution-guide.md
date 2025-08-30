@@ -1,4 +1,4 @@
-# DOH Path Resolution System (T018)
+# DOH Path Resolution System (DOH018)
 
 ## Overview
 
@@ -297,6 +297,6 @@ uuidgen > .doh/uuid
 
 ---
 
-### T018 Path Resolution System
+### DOH018 Path Resolution System
 
 Robust cross-environment DOH project detection

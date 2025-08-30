@@ -1,9 +1,9 @@
 # AI.md Compilation Guide 🤖
 
-**Purpose**: Guide complet pour compiler et maintenir le fichier `./AI.md` - le guide central pour Claude AI  
+**Purpose**: Guide complete pour compiler et maintenir le fichier `./AI.md` - le guide central pour Claude AI  
 **Target**: Claude AI et développeurs maintenant la documentation  
 **Last Updated**: 2025-08-28  
-**Related Task**: T081 - Documentation tunnel optimization  
+**Related Task**: DD081 - Documentation tunnel optimization  
 **CRITICAL**: AI.md MUST be created at project root (`./AI.md`) NOT in `.claude/` directory
 
 ## 📋 Overview
@@ -11,7 +11,7 @@
 Le fichier `./AI.md` est un guide compilé qui agrège toute l'information critique dispersée dans plusieurs documents
 pour créer une "source unique de vérité" optimisée pour Claude AI.
 
-**🚨 CRITICAL LOCATION REQUIREMENT**: Le fichier `AI.md` DOIT être créé à la racine du projet (`./AI.md`) pour une
+**🚨 CRITICAL LOCATION REQUIREMENT**: Le fichier `AI.md` DOIT être créé à la racine du project (`./AI.md`) pour une
 visibilité maximale, PAS dans le répertoire `.claude/`.
 
 ## 🎯 Compilation Objectives
@@ -19,14 +19,14 @@ visibilité maximale, PAS dans le répertoire `.claude/`.
 ### **Primary Goals**
 
 - **Single Source of Truth**: Toute l'information critique en un seul endroit
-- **AI-Optimized Format**: Structure et langage optimisés pour la compréhension IA
+- **AI-Optimized Format**: Structure et language optimisés pour la compréhension IA
 - **Visual Prominence**: Information critique impossible à manquer
-- **Complete Context**: Contexte complet disponible sans navigation multiple
+- **Complete Context**: Contexte complete disponible sans navigation multiple
 
 ### **Quality Standards**
 
 - Information toujours à jour avec les sources
-- Langage optimisé pour Claude AI (principles T080)
+- Language optimisé pour Claude AI (principles DD080)
 - Signalisation visuelle forte pour information critique
 - Cross-références vers documentation détaillée
 
@@ -81,7 +81,7 @@ Sections to Compile:
 Critical Elements:
 
 - Current Next ID: 082 (MUST be prominently displayed)
-- Shared numbering explanation: T001-T081, E074-E077
+- Shared numbering explanation: DOH001-DD081, EDOH074-EDOH077
 - Task creation protocol (MANDATORY PROCESS section)
 - Epic assignment rules (when to assign vs Epic: None)
 ```
@@ -116,7 +116,7 @@ Critical Elements:
 
 - Command execution protocols
 - Flag inheritance patterns
-- Pipeline integration (T070 linting)
+- Pipeline integration (DD070 linting)
 - AI decision workflows
 ```
 
@@ -179,7 +179,7 @@ Priority Order:
 #### **B. Content Optimization for AI**
 
 ```markdown
-Language Optimization Rules (from T080):
+Language Optimization Rules (from DD080):
 
 - ❌ "Handle appropriately" → ✅ "Execute specific protocol X"
 - ❌ "As needed" → ✅ "When condition Y is true, then Z"
@@ -210,7 +210,7 @@ Decision Tree Format:
 
 - **Next Task ID**: 082 (ALWAYS verify in todo/README.md)
 - **Project Context**: DOH-DEV Internal vs DOH Runtime (default)
-- **Linting Status**: T070 strict enforcement active
+- **Linting Status**: DD070 strict enforcement active
 - **Active Commands**: /dd:commit, /dd:changelog, /dd:next
 
 ## Part 1: ESSENTIAL CONTEXT (Always Read)
@@ -275,11 +275,11 @@ checkpoints)
 **MANDATORY PROCESS**:
 
 1. ✅ **READ todo/README.md FIRST** - Get current Next ID (082)
-2. ✅ **CREATE T082.md** - Use EXACT next number (never arbitrary)
+2. ✅ **CREATE DD082.md** - Use EXACT next number (never arbitrary)
 3. ✅ **UPDATE README.md** - Increment Next ID to 083
-4. ✅ **VERIFY** - No T082.md exists already
+4. ✅ **VERIFY** - No DD082.md exists already
 
-**RECENT ERROR**: T074 used instead of T078 → T079 created to prevent recurrence **PREVENTION**: ALWAYS consult
+**RECENT ERROR**: DD074 used instead of DD078 → DD079 created to prevent recurrence **PREVENTION**: ALWAYS consult
 todo/README.md before task creation
 
 ### PROJECT CONTEXT RULES
@@ -288,7 +288,7 @@ todo/README.md before task creation
 tooling
 
 - Add `**Project**: DOH-DEV Internal` header
-- Use dd-x.x.x versioning (dd-0.1.0.md, dd-0.2.0.md)
+- Use dd-x.x.x versioning (VDD-0.1.0.md, VDD-0.2.0.md)
 
 ### EXTERNAL TOOL ATTRIBUTION - FORBIDDEN
 
@@ -314,7 +314,7 @@ software
 
 ### Quality Standards Protocol
 
-**T070 Strict Linting Enforcement**:
+**DD070 Strict Linting Enforcement**:
 
 - **Default**: Pixel perfect linting (zero errors allowed)
 - **Bypass**: Only with --lenient (warnings) or --no-lint (skip entirely)
@@ -350,13 +350,13 @@ intelligent commit messages
 
 1. Parse flags and task description
 2. Call /dd:changelog with parameters
-3. Handle linting pipeline results (T070)
+3. Handle linting pipeline results (DD070)
 4. Generate intelligent commit message
 5. Execute git operations with appropriate --no-verify usage
 
 ### /dd:changelog - Documentation Updates
 
-**Purpose**: Update documentation, manage archives, enforce quality **New Feature**: T070 AI-powered linting pipeline
+**Purpose**: Update documentation, manage archives, enforce quality **New Feature**: DD070 AI-powered linting pipeline
 integration
 
 **Execution Protocol**:
@@ -369,7 +369,7 @@ integration
 
 ### /dd:next - AI Task Recommendations
 
-**Purpose**: Provide intelligent task recommendations based on analysis **Enhancement**: T073 --internal flag for
+**Purpose**: Provide intelligent task recommendations based on analysis **Enhancement**: DD073 --internal flag for
 DOH-DEV focus
 
 **Project Filtering**:
@@ -441,7 +441,7 @@ For comprehensive information, refer to source documents:
 - [ ] **Read all source files** for changes since last compilation
 - [ ] **Check current Next ID** in todo/README.md
 - [ ] **Verify command status** - which /dd:\* commands are active
-- [ ] **Review recent tasks** for workflow changes (T070, T078, T080, T081)
+- [ ] **Review recent tasks** for workflow changes (DD070, DD078, DD080, DD081)
 
 #### **During Compilation**
 
@@ -521,7 +521,7 @@ Test Questions:
 - [ ] **Information density**: High critical-to-total info ratio
 - [ ] **Findability speed**: Key info locatable in <30 seconds
 - [ ] **Decision support**: Complete context at decision points
-- [ ] **Error prevention**: Processes like T079 numbering prevented
+- [ ] **Error prevention**: Processes like DD079 numbering prevented
 
 ## 🚨 Critical Reminders
 

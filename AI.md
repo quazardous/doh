@@ -10,7 +10,7 @@
 
 - **Next Task ID**: **083** (ALWAYS check todo/README.md before creating tasks)
 - **Current Project Context**: DOH-DEV Internal vs DOH Runtime (use DOH-DEV only for /dd:\* commands)
-- **Linting Mode**: Strict enforcement (T070 AI-powered 4-layer pipeline)
+- **Linting Mode**: Strict enforcement (DD070 AI-powered 4-layer pipeline)
 - **Command Status**: /dd:commit, /dd:changelog, /dd:next, /dd:mkai active + optimized
 - **Language**: Full English for all content (universal compatibility)
 
@@ -26,8 +26,8 @@
    - **Current Next ID: 083** (verify this EVERY TIME before creating tasks)
    - **Shared numbering**: TODOs and Epics use same counter (T### and E### both increment from 083)
 
-2. ✅ **CREATE T083.md** (use EXACT next number from README.md)
-   - **Never use arbitrary numbers** (like T074 instead of T078)
+2. ✅ **CREATE DD083.md** (use EXACT next number from README.md)
+   - **Never use arbitrary numbers** (like DD074 instead of DD078)
    - **Never skip numbers** in sequence
    - **Never reuse old numbers** from archive
 
@@ -35,10 +35,10 @@
    - **This is MANDATORY** after creating any task
    - **Update the line**: `**Next ID**: 084` (increment from 083)
 
-4. ✅ **VERIFY CONSISTENCY** - Ensure no T083.md exists already
+4. ✅ **VERIFY CONSISTENCY** - Ensure no DD083.md exists already
    - **Resolve conflicts** if number collision exists
 
-**RECENT ERROR EXAMPLE**: T074 used instead of T078 → T079 created to analyze this issue  
+**RECENT ERROR EXAMPLE**: DD074 used instead of DD078 → DD079 created to analyze this issue  
 **PREVENTION**: ALWAYS consult `todo/README.md` **Next ID** section before any task creation
 
 ---
@@ -66,7 +66,7 @@
 
 #### Pre-Execution Context Check
 
-- **Verify linting status**: T070 strict enforcement active (4-layer AI-powered pipeline)
+- **Verify linting status**: DD070 strict enforcement active (4-layer AI-powered pipeline)
 - **Identify command variant**: Standard vs --split vs --amend vs --interactive
 - **Parse user flags**: --lenient, --no-lint, --dry-run (inherit to downstream commands)
 - **Check git status**: Staged changes, conflicts, branch status
@@ -90,7 +90,7 @@
 
 3. **Generate intelligent commit message** based on changelog analysis
    - **Use /dd:changelog description**: Maintain consistency between documentation and commit
-   - **Apply message optimization**: T080 principles for clarity and AI comprehension
+   - **Apply message optimization**: DD080 principles for clarity and AI comprehension
    - **Include context markers**: DOH-DEV vs Runtime, task completion indicators
 
 4. **Execute git operations** with appropriate verification control
@@ -102,13 +102,13 @@
    - **Success**: Show commit hash, files changed, next steps
    - **Failure**: Specific error details, retry instructions, manual fix guidance
 
-**Integration Dependencies**: T070 (linting), T080 (optimization), changelog pipeline
+**Integration Dependencies**: DD070 (linting), DD080 (optimization), changelog pipeline
 
 ### 📋 /dd:changelog - DOCUMENTATION UPDATE PROTOCOL 📋
 
 **Execution Workflow**:
 
-1. **Pre-Documentation Linting** (T070 Implementation)
+1. **Pre-Documentation Linting** (DD070 Implementation)
    - **Layer 1**: `make lint-fix` (automated tooling corrections)
    - **Layer 2**: AI-powered analysis and fixes for remaining issues
    - **Layer 3**: Final validation with `make lint`
@@ -172,15 +172,15 @@
 
 - **Purpose**: Internal tooling, /dd:\* commands, developer experience, Claude optimization
 - **Task Header**: `**Project**: DOH-DEV Internal` (REQUIRED when applicable)
-- **Version Files**: `todo/dd-0.1.0.md`, `todo/dd-0.2.0.md` (internal releases)
-- **Examples**: T070 (linting), T078 (lint intelligence), T080 (command optimization), T081 (AI.md)
+- **Version Files**: `todo/VDD-0.1.0.md`, `todo/VDD-0.2.0.md` (internal releases)
+- **Examples**: DD070 (linting), DD078 (lint intelligence), DD080 (command optimization), DD081 (AI.md)
 - **When to Use**: ONLY when enhancing /dd:\* commands or internal Claude/development tooling
 
 #### DOH Runtime (doh-x.x.x versioning) - DEFAULT
 
 - **Purpose**: End-user distribution, public API, runtime functionality, user-facing features
 - **Task Header**: `**Project**: DOH Runtime` (default, can be omitted)
-- **Version Files**: `todo/doh-1.4.0.md`, `todo/doh-1.5.0.md` (public releases)
+- **Version Files**: `todo/VDOH-1.4.0.md`, `todo/doh-1.5.0.md` (public releases)
 - **Examples**: Most tasks unless specifically enhancing internal /dd:\* infrastructure
 
 **Decision Rule**: Use DOH-DEV Internal ONLY when work directly affects /dd:\* command system or Claude development
@@ -301,11 +301,11 @@ experience
 #### Linting Pipeline Failures
 
 - **Symptom**: /dd:changelog or /dd:commit blocked by linting errors
-- **Analysis**: T070 4-layer system detecting issues
+- **Analysis**: DD070 4-layer system detecting issues
 - **Options**:
-    - Fix manually and retry
-    - Use --lenient flag for minor issues
-    - Use --no-lint for emergency bypass (discouraged)
+  - Fix manually and retry
+  - Use --lenient flag for minor issues
+  - Use --no-lint for emergency bypass (discouraged)
 
 #### Project Context Confusion
 

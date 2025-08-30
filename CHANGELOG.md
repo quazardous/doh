@@ -10,169 +10,178 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Added
 
 - Version management system with runtime/dev separation
-    - **STATUS**: ✅ COMPLETED 2025-08-27
+  - **STATUS**: ✅ COMPLETED 2025-08-27
 - CHANGELOG.md for tracking completed features
-    - **STATUS**: ✅ COMPLETED 2025-08-27
+  - **STATUS**: ✅ COMPLETED 2025-08-27
 - VERSION.md for centralized version management
-    - **STATUS**: ✅ COMPLETED 2025-08-27
+  - **STATUS**: ✅ COMPLETED 2025-08-27
 
-### Completed in This Session (2025-08-28)
+### Completed in This Session (2025-08-29)
 
-- **T087** - Simplified Linting Architecture with STRICT Enforcement Rule (DOH-DEV Internal)
-    - **STATUS**: 🔄 ACTIVE 2025-08-28
-    - **Project**: DOH-DEV Internal (dd-x.x.x versioning)
-    - **Components**: Analysis of current dual-linting complexity, design for git-hook-only enforcement with STRICT
-    blocking rule, implementation of `--force` override mechanism for explicit developer control
-    - **Impact**: Removes overly complex linting decision trees from `/dd:commit` pipeline, establishes predictable
-    behavior (linting fails = commit blocked), simplifies developer workflow with clear override path
-    - **Architecture**: Single enforcement point through pre-commit hooks, elimination of AI-powered pipeline linting,
-    clean `--force` flag for bypass scenarios
-- **T054** - DOH Skeleton Memory & Context System
-    - **STATUS**: ✅ COMPLETED 2025-08-28
-    - **Components**: Designed memory persistence layer for `.doh/memory/` structure, created context storage schema for
+- **DD087** - Simplified Linting Architecture with STRICT Enforcement Rule (DOH-DEV Internal)
+  - **STATUS**: ✅ COMPLETED 2025-08-29
+  - **Project**: DOH-DEV Internal (dd-x.x.x versioning)
+  - **Components**: Removed 4-layer AI-powered linting pipeline from `/dd:changelog` (527→89 lines, -83% reduction),
+    implemented STRICT enforcement rule in `/dd:commit` (linting failure = commit blocked, period), created unified
+    script architecture with `dev-tools/scripts/lint-files.sh`, established hybrid architecture for `/dd:lint` command
+    with unified backend + AI enhancement
+  - **Impact**: Dramatically simplified linting workflow from complex dual-system to single enforcement point, reduced
+    `/dd:changelog` complexity by 83% to focus purely on documentation, unified all linting through single backend
+    script, established clear and predictable developer experience
+  - **Architecture**: Single enforcement point through pre-commit hooks only, complete removal of AI-powered pipeline
+    linting, unified script backend for all commands, clean `--force` flag for explicit bypass scenarios
+  - **Files Updated**: `.claude/commands/dd/changelog.md`, `.claude/commands/dd/commit.md`,
+    `.claude/commands/dd/lint.md`, `dev-tools/scripts/lint-files.sh`, `dev-tools/lib/lint-core.sh`,
+    `analysis/DD087-simplified-linting-architecture.md`
+
+### Completed in Previous Session (2025-08-28)
+
+- **DOH054** - DOH Skeleton Memory & Context System
+  - **STATUS**: ✅ COMPLETED 2025-08-28
+  - **Components**: Designed memory persistence layer for `.doh/memory/` structure, created context storage schema for
     project-level patterns and insights, implemented memory update protocols for state management, established session
     continuity mechanisms for command interaction history
-    - **Impact**: Transforms DOH from static templates to intelligent context-aware system, enables persistent project
-    intelligence across Claude sessions, provides foundation for Epic E001 Phase 1 advanced analysis capabilities
+  - **Impact**: Transforms DOH from static templates to intelligent context-aware system, enables persistent project
+    intelligence across Claude sessions, provides foundation for Epic EDOH001 Phase 1 advanced analysis capabilities
 
 ### Completed in Previous Sessions (2025-08-27)
 
-- **T053** - DOH Skeleton Enhancement for Human-Readable Analysis
-    - **STATUS**: ✅ COMPLETED 2025-08-27
-    - **Components**: Enhanced skeleton structure with human-readable analysis templates, project-index.json schema with
+- **DOH053** - DOH Skeleton Enhancement for Human-Readable Analysis
+  - **STATUS**: ✅ COMPLETED 2025-08-27
+  - **Components**: Enhanced skeleton structure with human-readable analysis templates, project-index.json schema with
     natural language insights, memory architecture foundation, and comprehensive analysis output templates
-    - **Impact**: Enables DOH adoption on existing codebases with one-shot human-readable analysis, prioritizes developer
-    understanding over structured data queries, establishes foundation for Epic E001 Phase 1
-- **T040** - Create /doh-sys:changelog command and factorize shared components
-    - **STATUS**: ✅ COMPLETED 2025-08-27
-    - **Components**: Created `/doh-sys:changelog` command with comprehensive documentation pipeline, version analysis,
+  - **Impact**: Enables DOH adoption on existing codebases with one-shot human-readable analysis, prioritizes developer
+    understanding over structured data queries, establishes foundation for Epic EDOH001 Phase 1
+- **DOH040** - Create /doh-sys:changelog command and factorize shared components
+  - **STATUS**: ✅ COMPLETED 2025-08-27
+  - **Components**: Created `/doh-sys:changelog` command with comprehensive documentation pipeline, version analysis,
     TODO completion tracking, and AI-driven optimization system integration
-    - **Impact**: Streamlines development documentation workflow, provides intelligent change analysis, enables automated
+  - **Impact**: Streamlines development documentation workflow, provides intelligent change analysis, enables automated
     changelog maintenance with optimization tracking
-- **T039** - Create /doh-sys:lint command with intelligent auto-fix capabilities
-    - **STATUS**: ✅ COMPLETED 2025-08-27
-    - **Components**: Created `/doh-sys:lint` command with priority-based auto-fix system, smart line wrapping,
+- **DOH039** - Create /doh-sys:lint command with intelligent auto-fix capabilities
+  - **STATUS**: ✅ COMPLETED 2025-08-27
+  - **Components**: Created `/doh-sys:lint` command with priority-based auto-fix system, smart line wrapping,
     progressive error handling, and analysis document preservation policy
-    - **Impact**: Provides standalone intelligent linting, enables targeted quality improvements, maintains semantic
+  - **Impact**: Provides standalone intelligent linting, enables targeted quality improvements, maintains semantic
     content preservation
-- **T038** - Create DOH Pipeline Command for automated TODO/CHANGELOG/Version/Lint/Commit workflow
-    - **STATUS**: ✅ COMPLETED 2025-08-27
-    - **Components**: Created `/doh-sys:commit` command with complete pipeline automation, auto-fix capabilities, error
+- **DOH038** - Create DOH Pipeline Command for automated TODO/CHANGELOG/Version/Lint/Commit workflow
+  - **STATUS**: ✅ COMPLETED 2025-08-27
+  - **Components**: Created `/doh-sys:commit` command with complete pipeline automation, auto-fix capabilities, error
     handling, and integration with existing DOH systems
-    - **Impact**: Streamlines development workflow, reduces manual errors, provides intelligent markdown auto-fixes
-- **T035** - Documentation Navigation & Content Organization (T034 Phase 2)
-    - **STATUS**: ✅ COMPLETED 2025-08-27
-    - **Components**: Enhanced README.md with comprehensive document map, improved navigation between workflow documents,
+  - **Impact**: Streamlines development workflow, reduces manual errors, provides intelligent markdown auto-fixes
+- **DOH035** - Documentation Navigation & Content Organization (DOH034 Phase 2)
+  - **STATUS**: ✅ COMPLETED 2025-08-27
+  - **Components**: Enhanced README.md with comprehensive document map, improved navigation between workflow documents,
     minimal cross-reference policy implementation
-    - **Impact**: Centralized navigation in README.md, reduced documentation complexity, improved user onboarding path
-- **T034** - Documentation Health Check & Content Review
-    - **STATUS**: ✅ COMPLETED 2025-08-27
-    - **Components**: Comprehensive audit of 52 documentation files across 5 directories, analysis of 89 outdated
+  - **Impact**: Centralized navigation in README.md, reduced documentation complexity, improved user onboarding path
+- **DOH034** - Documentation Health Check & Content Review
+  - **STATUS**: ✅ COMPLETED 2025-08-27
+  - **Components**: Comprehensive audit of 52 documentation files across 5 directories, analysis of 89 outdated
     architecture references, prioritized action plan with 3 implementation phases
-    - **Analysis**: `analysis/T034-documentation-health-report.md`
-    - **Impact**: Identified critical 1.4.0 release blockers (architecture inconsistencies), established clear roadmap for
+  - **Analysis**: `analysis/DOH034-documentation-health-report.md`
+  - **Impact**: Identified critical 1.4.0 release blockers (architecture inconsistencies), established clear roadmap for
     documentation improvements, separated urgent fixes from enhancement work
-- **T030** - Fix Critical Architecture References (T034 Phase 1)
-    - **STATUS**: ✅ COMPLETED 2025-08-27
-    - **Components**: Fixed 89 outdated architecture references across CONTRIBUTING.md, docs/architecture.md, README.md,
+- **DOH030** - Fix Critical Architecture References (DOH034 Phase 1)
+  - **STATUS**: ✅ COMPLETED 2025-08-27
+  - **Components**: Fixed 89 outdated architecture references across CONTRIBUTING.md, docs/architecture.md, README.md,
     WORKFLOW.md
-    - **Impact**: Resolved critical 1.4.0 release blockers, established consistent `.claude/doh/` architecture
+  - **Impact**: Resolved critical 1.4.0 release blockers, established consistent `.claude/doh/` architecture
     documentation
-- **T033** - Restore skel/ and templates/ to .claude/doh/ runtime directory
-    - **STATUS**: ✅ COMPLETED 2025-08-27
-    - **Components**: Single source of truth architecture implementation, cleanup of obsolete project root files
-    - **Impact**: DOH commands now have proper runtime access to skeleton and templates, eliminated controlled duplication
+- **DOH033** - Restore skel/ and templates/ to .claude/doh/ runtime directory
+  - **STATUS**: ✅ COMPLETED 2025-08-27
+  - **Components**: Single source of truth architecture implementation, cleanup of obsolete project root files
+  - **Impact**: DOH commands now have proper runtime access to skeleton and templates, eliminated controlled duplication
     strategy
 
-- **T004** - File system structure validation
-    - **STATUS**: ✅ COMPLETED 2025-08-27
-- **T012** - Memory structure implementation (.doh/memory/)
-    - **STATUS**: ✅ COMPLETED 2025-08-27
-- **T012** - Centralized dependency management
-    - **STATUS**: ✅ COMPLETED 2025-08-27
-- **T001** - DOH Skeleton Implementation
-    - **STATUS**: ✅ COMPLETED 2025-08-27
-    - **Components**: Complete `.claude/doh/skel/` structure with project-index.json template, memory directories, Epic #0
+- **DOH004** - File system structure validation
+  - **STATUS**: ✅ COMPLETED 2025-08-27
+- **DOH012** - Memory structure implementation (.doh/memory/)
+  - **STATUS**: ✅ COMPLETED 2025-08-27
+- **DOH012** - Centralized dependency management
+  - **STATUS**: ✅ COMPLETED 2025-08-27
+- **DOH001** - DOH Skeleton Implementation
+  - **STATUS**: ✅ COMPLETED 2025-08-27
+  - **Components**: Complete `.claude/doh/skel/` structure with project-index.json template, memory directories, Epic #0
     template, gitignore patterns, and deployment testing
-    - **Impact**: Enables standardized `/doh:init` and `/doh:analyze` with consistent project initialization
-- **T015** - DOH Configuration File Design
-    - **STATUS**: ✅ COMPLETED 2025-08-27
-    - **Components**: INI format configuration with bash compatibility, config.ini template, project-specific settings
-- **T018** - Project Path Resolution Strategy
-    - **STATUS**: ✅ COMPLETED 2025-08-27
-    - **Components**: Comprehensive path resolution with 7-level priority fallback, UUID-based project identity,
+  - **Impact**: Enables standardized `/doh:init` and `/doh:analyze` with consistent project initialization
+- **DOH015** - DOH Configuration File Design
+  - **STATUS**: ✅ COMPLETED 2025-08-27
+  - **Components**: INI format configuration with bash compatibility, config.ini template, project-specific settings
+- **DOH018** - Project Path Resolution Strategy
+  - **STATUS**: ✅ COMPLETED 2025-08-27
+  - **Components**: Comprehensive path resolution with 7-level priority fallback, UUID-based project identity,
     discovered paths cache, cross-environment compatibility (symlinks, .private, bind mounts), advanced INI parsing APIs
     (doh_config_get/bool/list/int/path), debugging mode (DOH_PATH_DEBUG=1)
-    - **Impact**: Robust cross-environment DOH project detection that preserves user's preferred working directory while
+  - **Impact**: Robust cross-environment DOH project detection that preserves user's preferred working directory while
     handling all common filesystem scenarios
-    - **Impact**: Centralized configuration system for .doh projects with bash-friendly parsing
-- **T016** - DOH Configuration Integration Validation
-    - **STATUS**: ✅ COMPLETED 2025-08-27
-    - **Components**: Unified lib/doh.sh library, auto-detection PROJECT_ROOT, pure bash config extraction
-    - **Impact**: Configuration extraction is now pure bash routine, no AI dependency for config operations
-- **T014** - DOH Data Structure Analysis for Scripting
-    - **STATUS**: ✅ COMPLETED 2025-08-27
-    - **Components**: Complete analysis of 22 DOH operations, bash-scriptability assessment, performance benchmarks
-    - **Impact**: 18/22 operations identified as bash-scriptable with 70-80% token savings potential
-- **T013** - Performance Optimization via Bash Scripts (POC)
-    - **STATUS**: ✅ COMPLETED 2025-08-27
-    - **Components**: get-item.sh, list-tasks.sh, project-stats.sh, unified lib/doh.sh library
-    - **Impact**: 150-500x performance gains measured, 100% token savings for routine operations, POC success
-- **T017** - Bash Routine Expansion Analysis
-    - **STATUS**: ✅ COMPLETED 2025-08-27
-    - **Components**: Complete analysis of next 5 bash routine candidates, ROI prioritization, implementation roadmap
-    - **Impact**: Identified path to 85% token savings coverage with Phase 1-3 implementation plan
-- **T018** - Project Path Resolution Strategy
-    - **STATUS**: ✅ COMPLETED 2025-08-27
-    - **Components**: Design for robust PROJECT_ROOT detection with symlinks, discovered_paths cache, .doh/uuid identity
-    - **Impact**: Comprehensive strategy for cross-environment compatibility (symlinks, encrypted filesystems, mounts)
-- **T025** - Move TODO.md from .claude/doh to project root
-    - **STATUS**: ✅ COMPLETED 2025-08-27
-    - **Components**: TODO.md relocated to project root, all internal references updated across documentation and system
+  - **Impact**: Centralized configuration system for .doh projects with bash-friendly parsing
+- **DOH016** - DOH Configuration Integration Validation
+  - **STATUS**: ✅ COMPLETED 2025-08-27
+  - **Components**: Unified lib/doh.sh library, auto-detection PROJECT_ROOT, pure bash config extraction
+  - **Impact**: Configuration extraction is now pure bash routine, no AI dependency for config operations
+- **DOH014** - DOH Data Structure Analysis for Scripting
+  - **STATUS**: ✅ COMPLETED 2025-08-27
+  - **Components**: Complete analysis of 22 DOH operations, bash-scriptability assessment, performance benchmarks
+  - **Impact**: 18/22 operations identified as bash-scriptable with 70-80% token savings potential
+- **DOH013** - Performance Optimization via Bash Scripts (POC)
+  - **STATUS**: ✅ COMPLETED 2025-08-27
+  - **Components**: get-item.sh, list-tasks.sh, project-stats.sh, unified lib/doh.sh library
+  - **Impact**: 150-500x performance gains measured, 100% token savings for routine operations, POC success
+- **DOH017** - Bash Routine Expansion Analysis
+  - **STATUS**: ✅ COMPLETED 2025-08-27
+  - **Components**: Complete analysis of next 5 bash routine candidates, ROI prioritization, implementation roadmap
+  - **Impact**: Identified path to 85% token savings coverage with Phase 1-3 implementation plan
+- **DOH018** - Project Path Resolution Strategy
+  - **STATUS**: ✅ COMPLETED 2025-08-27
+  - **Components**: Design for robust PROJECT_ROOT detection with symlinks, discovered_paths cache, .doh/uuid identity
+  - **Impact**: Comprehensive strategy for cross-environment compatibility (symlinks, encrypted filesystems, mounts)
+- **DOH025** - Move TODO.md from .claude/doh to project root
+  - **STATUS**: ✅ COMPLETED 2025-08-27
+  - **Components**: TODO.md relocated to project root, all internal references updated across documentation and system
     files
-    - **Impact**: More accessible development tracking, conventional project structure, preparation for DOH self-hosting
-- **T026** - Restructure DOH: Move non-runtime components outside .claude
-    - **STATUS**: ✅ COMPLETED 2025-08-27
-    - **Components**: Migrated docs/, templates/, skel/, analysis/, tests/, README.md, CHANGELOG.md, VERSION.md to project
+  - **Impact**: More accessible development tracking, conventional project structure, preparation for DOH self-hosting
+- **DOH026** - Restructure DOH: Move non-runtime components outside .claude
+  - **STATUS**: ✅ COMPLETED 2025-08-27
+  - **Components**: Migrated docs/, templates/, skel/, analysis/, tests/, README.md, CHANGELOG.md, VERSION.md to project
     root; Updated all hardcoded references in CLAUDE.md, docs/commands.md, docs/doh-dev.md; Validated DOH functionality
-    after restructure; Comprehensive file verification strategy designed for T029 cleanup
-    - **Impact**: Clean separation between development files (project root) and runtime components (.claude/doh/scripts/),
-    preparation for T022 self-hosting, improved project organization, foundation for T032 build process
-- **T028** - Development Environment Setup & Automation
-    - **STATUS**: ✅ COMPLETED 2025-08-27
-    - **Components**: Cross-platform Makefile with intelligent package manager detection, dev-tools/ structure,
+    after restructure; Comprehensive file verification strategy designed for DOH029 cleanup
+  - **Impact**: Clean separation between development files (project root) and runtime components (.claude/doh/scripts/),
+    preparation for DOH022 self-hosting, improved project organization, foundation for DOH032 build process
+- **DOH028** - Development Environment Setup & Automation
+  - **STATUS**: ✅ COMPLETED 2025-08-27
+  - **Components**: Cross-platform Makefile with intelligent package manager detection, dev-tools/ structure,
     package.json for dev dependencies, pre-commit hooks with linter integration, CONTRIBUTING.md, automatic help system
-    - **Impact**: Professional development workflow, one-command setup (make dev-setup), automated quality checks,
-    foundation for T024 testing framework
-- **T031** - Brainstorm skel/ location for /doh:init runtime access
-    - **STATUS**: ✅ COMPLETED 2025-08-27
-    - **Components**: Architecture decision for controlled duplication, analysis of 5 options
+  - **Impact**: Professional development workflow, one-command setup (make dev-setup), automated quality checks,
+    foundation for DOH024 testing framework
+- **DOH031** - Brainstorm skel/ location for /doh:init runtime access
+  - **STATUS**: ✅ COMPLETED 2025-08-27
+  - **Components**: Architecture decision for controlled duplication, analysis of 5 options
     (revert/duplicate/sideload/runtime/hybrid), confirmed /doh:init functionality works with existing setup
-    - **Impact**: Critical architecture decision resolved - maintain .claude/doh/skel/ as single source (no duplication),
-    leads to T032 build process design
+  - **Impact**: Critical architecture decision resolved - maintain .claude/doh/skel/ as single source (no duplication),
+    leads to DOH032 build process design
 
 ### Planned for Next Phase (1.4.0)
 
-- **T037** - Clean up old project references (MrTroove, mkplan) across documentation
-    - **STATUS**: 📋 PENDING - Medium priority documentation accuracy
-    - **Purpose**: Replace outdated project references with generic examples
-    - **Dependencies**: None
-- **T022** - DOH System Self-Hosting Project ⚠️ UNBLOCKED
-    - **STATUS**: 📋 CRITICAL PRIORITY - Foundation for distribution
-    - **Purpose**: Create DOH as standalone project using DOH to manage its own development
-    - **Dependencies**: T026 ✅ (restructuring completed)
-- **T032** - Design DOH Runtime Build Process
-    - **STATUS**: 📋 PROPOSED - Build system architecture
-    - **Purpose**: Implement build process for .claude/doh/ as build directory
-    - **Dependencies**: T031 ✅ (architecture decision completed)
-- **T024** - Comprehensive Testing Framework Implementation
-    - **STATUS**: 📋 PROPOSED - Dual CI/CD + Local system
-    - **Purpose**: Zero-credential CI/CD tests + local Claude testing
-    - **Dependencies**: T028 ✅ (dev environment completed)
-- **T002** - Codebase reverse engineering (`/doh:analyze` command)
-    - **STATUS**: 📋 PLANNED - Target Version 1.5.0
-    - **Purpose**: AI-powered analysis of existing codebases to suggest Epic/PRD structure
-    - **Safety**: Strong warnings for existing .doh projects, --force flag required
+- **DOH037** - Clean up old project references (MrTroove, mkplan) across documentation
+  - **STATUS**: 📋 PENDING - Medium priority documentation accuracy
+  - **Purpose**: Replace outdated project references with generic examples
+  - **Dependencies**: None
+- **DOH022** - DOH System Self-Hosting Project ⚠️ UNBLOCKED
+  - **STATUS**: 📋 CRITICAL PRIORITY - Foundation for distribution
+  - **Purpose**: Create DOH as standalone project using DOH to manage its own development
+  - **Dependencies**: DOH026 ✅ (restructuring completed)
+- **DOH032** - Design DOH Runtime Build Process
+  - **STATUS**: 📋 PROPOSED - Build system architecture
+  - **Purpose**: Implement build process for .claude/doh/ as build directory
+  - **Dependencies**: DOH031 ✅ (architecture decision completed)
+- **DOH024** - Comprehensive Testing Framework Implementation
+  - **STATUS**: 📋 PROPOSED - Dual CI/CD + Local system
+  - **Purpose**: Zero-credential CI/CD tests + local Claude testing
+  - **Dependencies**: DOH028 ✅ (dev environment completed)
+- **DOH002** - Codebase reverse engineering (`/doh:analyze` command)
+  - **STATUS**: 📋 PLANNED - Target Version 1.5.0
+  - **Purpose**: AI-powered analysis of existing codebases to suggest Epic/PRD structure
+  - **Safety**: Strong warnings for existing .doh projects, --force flag required
 
 ---
 
@@ -305,5 +314,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## TODO Mapping
 
-Completed TODOs are tracked with their **T-number** (T001, T002, etc.) for clear traceability between ./TODO.md roadmap
+Completed TODOs are tracked with their **T-number** (DOH001, DOH002, etc.) for clear traceability between ./TODO.md roadmap
 and delivered functionality.

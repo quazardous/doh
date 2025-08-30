@@ -2,7 +2,7 @@
 
 ## Problématique
 
-Les worktrees Git nécessitent le contexte IA (`.claude/`) pour que l'assistant comprenne le projet et le système DOH.
+Les worktrees Git nécessitent le contexte IA (`.claude/`) pour que l'assistant comprenne le project et le système DOH.
 
 ## Solution Architecture
 
@@ -10,15 +10,15 @@ Les worktrees Git nécessitent le contexte IA (`.claude/`) pour que l'assistant 
 
 ```text
 /home/david/Private/dev/projects/
-├── myproject/                      # Projet principal
+├── myproject/                      # Project principal
 │   ├── .claude/                   # Config IA originale
 │   │   ├── doh/                   # Système DOH (specs)
 │   │   ├── commands/              # Commandes Claude
 │   │   └── agents/                # Agents DOH
-│   └── .doh/                      # Contenu projet DOH
+│   └── .doh/                      # Contenu project DOH
 │       ├── project-index.json     # Index unifié
-│       ├── epics/                 # Epics projet
-│       ├── tasks/                 # Tasks projet
+│       ├── epics/                 # Epics project
+│       ├── tasks/                 # Tasks project
 │       └── memory/                # Mémoire persistante
 │
 ├── myproject-epic-auth/            # Worktree pour epic auth
@@ -33,7 +33,7 @@ Les worktrees Git nécessitent le contexte IA (`.claude/`) pour que l'assistant 
 ## ⚠️ Stratégie Recommandée
 
 - **`.doh/` versionné** = Automatiquement dans worktrees via Git (permet divergence)
-- **`.claude/` en symlink** = Partagé entre tous les worktrees (cohérence garantie)
+- **`.claude/` en symlink** = Partagé entre tous les worktrees (cohérence guarantee)
 
 ## Stratégie de Mise en Place
 
@@ -45,7 +45,7 @@ Les worktrees Git nécessitent le contexte IA (`.claude/`) pour que l'assistant 
 
 TYPE=$1  # epic|feature|task
 NAME=$2  # nom-descriptif (ex: auth, login-ui)
-PROJECT_NAME=$(basename $(pwd))  # Détecte nom projet
+PROJECT_NAME=$(basename $(pwd))  # Détecte nom project
 BRANCH="${TYPE}/${NAME}"
 WORKTREE_DIR="../${PROJECT_NAME}-worktree-${TYPE}-${NAME}"
 
@@ -61,14 +61,14 @@ echo "   Claude context: Symlink vers principal (.claude/)"
 echo "   DOH state: Déjà présent via Git (.doh/ versionné)"
 ```
 
-### 2. Avantages de cette Approche
+### 2. Advantages de cette Approach
 
 #### Copie de `.claude/`
 
-- ✅ **Contexte complet** : L'IA a toutes les infos du projet
+- ✅ **Contexte complete** : L'IA a toutes les infos du project
 - ✅ **Isolation** : Modifications locales possibles si nécessaire
 - ✅ **Compatibilité** : Fonctionne même si l'IA ne suit pas les symlinks
-- ✅ **CLAUDE.md présent** : Instructions projet disponibles
+- ✅ **CLAUDE.md présent** : Instructions project disponibles
 
 #### Copie de `.doh/`
 
@@ -90,11 +90,11 @@ git commit -m "[#123] Ajout tasks et mise à jour index pour epic auth"
 git checkout main
 git merge epic/auth
 
-# Résolution conflits si nécessaire
+# Résolution conflicts si nécessaire
 # Typiquement sur project-index.json si counters ont divergé
 git mergetool .doh/project-index.json
 
-# Retour au projet principal
+# Retour au project principal
 cd ../myproject
 git pull  # Récupérer les changements mergés
 git worktree remove ../myproject-epic-auth
@@ -144,7 +144,7 @@ function createWorktreeForTask(taskId) {
   const type = epic.id === 0 ? "fix" : "epic";
   const name = sanitizeName(task.title);
 
-  // Créer worktree avec setup complet
+  // Créer worktree avec setup complete
   execSync(`./scripts/create-doh-worktree.sh ${type} ${name}`);
 
   // Naviguer vers worktree
@@ -161,13 +161,13 @@ function createWorktreeForTask(taskId) {
 
 1. **Isolation Complète** : Chaque worktree peut diverger (code ET organisation DOH)
 2. **Contexte Préservé** : L'IA fonctionne parfaitement
-3. **Merge Standard** : Git gère les conflits sur `.doh/` comme sur le code
+3. **Merge Standard** : Git gère les conflicts sur `.doh/` comme sur le code
 4. **Parallélisation** : Multiple agents sur différents worktrees
 5. **Flexibilité** : Possibilité d'expérimenter avec la structure DOH
 
-## Gérer les Conflits DOH
+## Gérer les Conflicts DOH
 
-### Conflits Typiques
+### Conflicts Typiques
 
 1. **project-index.json counters**
 

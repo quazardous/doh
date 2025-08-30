@@ -1,4 +1,4 @@
-# T034 - Documentation Health Check & Content Review Report
+# DOH034 - Documentation Health Check & Content Review Report
 
 **Analysis Date**: 2025-08-27  
 **DOH Version**: 1.4.0-dev  
@@ -59,8 +59,8 @@ addressed for 1.4.0 release consistency.
 
 | File                            | Purpose              | Status           | Relevance                         |
 | ------------------------------- | -------------------- | ---------------- | --------------------------------- |
-| T014-data-structure-analysis.md | Architecture design  | ⚠️ Some old refs | Archive candidate                 |
-| T017-bash-routine-expansion.md  | Performance analysis | ✅ Good          | **Very current** - Active roadmap |
+| DOH014-data-structure-analysis.md | Architecture design  | ⚠️ Some old refs | Archive candidate                 |
+| DOH017-bash-routine-expansion.md  | Performance analysis | ✅ Good          | **Very current** - Active roadmap |
 
 ### Testing Documentation (/tests - 2 files)
 
@@ -118,7 +118,7 @@ addressed for 1.4.0 release consistency.
 **Files Needing Version Updates**:
 
 - docs/architecture.md:112 - JSON example uses "1.0.0"
-- analysis/T014-data-structure-analysis.md:39 - Example uses "1.0.0"
+- analysis/DOH014-data-structure-analysis.md:39 - Example uses "1.0.0"
 - .claude/commands/doh/agent.md:392 - Example uses "1.0.0"
 
 ---
@@ -355,7 +355,7 @@ The documentation foundation is strong - these improvements will make it excelle
 
 1. **Execute R1 (Architecture Cleanup)** - Address the 89 outdated references
 2. **Execute R2 (Version Consistency)** - Align all version claims
-3. **Coordinate with T030** - CLAUDE.md cleanup works together with this audit
+3. **Coordinate with DOH030** - CLAUDE.md cleanup works together with this audit
 4. **Test documentation** - Verify all examples and commands work as documented
 
-**Status**: T034 analysis complete - Ready for implementation
+**Status**: DOH034 analysis complete - Ready for implementation

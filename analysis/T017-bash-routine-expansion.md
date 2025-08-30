@@ -1,14 +1,14 @@
-# T017 - Bash Routine Expansion Analysis
+# DOH017 - Bash Routine Expansion Analysis
 
 **Status**: ✅ COMPLETED  
 **Date**: 2025-08-27  
-**Purpose**: Identify next batch of high-ROI bash routine candidates based on T013 POC success
+**Purpose**: Identify next batch of high-ROI bash routine candidates based on DOH013 POC success
 
 ---
 
 ## Executive Summary
 
-Based on T013 POC results (150-500x performance gains, 100% token savings), we should prioritize **5 additional bash
+Based on DOH013 POC results (150-500x performance gains, 100% token savings), we should prioritize **5 additional bash
 routines** that cover 85% of remaining high-frequency DOH operations.
 
 **Recommended Implementation Order**:
@@ -25,7 +25,7 @@ routines** that cover 85% of remaining high-frequency DOH operations.
 
 ## Current State Analysis
 
-### T013 POC Results (Baseline)
+### DOH013 POC Results (Baseline)
 
 ✅ **Implemented Scripts** (3):
 
@@ -360,7 +360,7 @@ test_bash_routine() {
 
 ### Regression Testing
 
-- **Existing functionality**: T013 scripts continue working
+- **Existing functionality**: DOH013 scripts continue working
 - **Configuration**: All scripts respect DOH\_\* environment variables
 - **Cross-platform**: Works on different bash versions and OS
 
@@ -409,7 +409,7 @@ test_bash_routine() {
 
 ## Conclusion
 
-T017 analysis confirms that **5 additional bash routines** can achieve 85% token savings coverage with only 11 hours of
+DOH017 analysis confirms that **5 additional bash routines** can achieve 85% token savings coverage with only 11 hours of
 development time. The established lib/doh.sh foundation makes implementation straightforward and consistent.
 
 **Recommended Next Action**: Implement Phase 1 (update-status.sh, count-by-type.sh, validate-structure.sh) as immediate
