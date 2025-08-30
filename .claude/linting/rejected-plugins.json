@@ -1,0 +1,12 @@
+{
+  "rejected": [
+    {
+      "pattern": "long_line_with_conjunction",
+      "rule": "MD013",
+      "tool": "markdownlint",
+      "rejected_at": "2025-08-29T20:33:53+02:00",
+      "reason": "Too complex for current needs",
+      "continue_manual": true
+    }
+  ]
+}
