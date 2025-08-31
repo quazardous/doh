@@ -127,15 +127,16 @@ No shortcuts. No assumptions. No regrets.
 │   ├── context/       # Create, update, and prime context
 │   ├── doh/            # ← Project management commands (this system)
 │   └── testing/       # Prime and execute tests (edit this)
+├── rules/             # Place any rule files you'd like to reference here
+└── scripts/           # Place any script files you'd like to use here
+.doh/
 ├── context/           # Project-wide context files
 ├── epics/             # ← DOH's local workspace (place in .gitignore)
 │   └── [epic-name]/   # Epic and related tasks
 │       ├── epic.md    # Implementation plan
 │       ├── [#].md     # Individual task files
 │       └── updates/   # Work-in-progress updates
-├── prds/              # ← DOH's PRD files
-├── rules/             # Place any rule files you'd like to reference here
-└── scripts/           # Place any script files you'd like to use here
+└── prds/              # ← DOH's PRD files
 ```
 
 ## Workflow Phases
