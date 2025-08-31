@@ -1,4 +1,5 @@
 #!/bin/bash
+source .claude/scripts/doh/lib/dohenv.sh
 
 echo "Initializing..."
 echo ""

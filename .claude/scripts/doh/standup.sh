@@ -1,4 +1,5 @@
 #!/bin/bash
+source .claude/scripts/doh/lib/dohenv.sh
 
 echo "📅 Daily Standup - $(date '+%Y-%m-%d')"
 echo "================================"

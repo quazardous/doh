@@ -1,4 +1,5 @@
-# !/bin/bash
+#!/bin/bash
+source .claude/scripts/doh/lib/dohenv.sh
 # Check if PRD directory exists
 if [ ! -d ".doh/prds" ]; then
   echo "📁 No PRD directory found. Create your first PRD with: /doh:prd-new <feature-name>"

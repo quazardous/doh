@@ -1,4 +1,5 @@
 #!/bin/bash
+source .claude/scripts/doh/lib/dohenv.sh
 
 epic_name="$1"
 
