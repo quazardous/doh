@@ -15,8 +15,11 @@ Reopen a closed issue.
 
 ### 1. Find Local Task File
 
-Search for task file with `github:.*issues/$ARGUMENTS` in frontmatter.
-If not found: "❌ No local task for issue #$ARGUMENTS"
+**First attempt**: Search for task file with `github:.*issues/$ARGUMENTS` in frontmatter.
+**If not found**: Search for task file `$(printf "%03d" $ARGUMENTS).md` in current epic directory.
+**If still not found**: "❌ No local task for issue #$ARGUMENTS"
+
+**Note**: This command works with both GitHub-synced tasks and local-only tasks.
 
 ### 2. Update Local Status
 

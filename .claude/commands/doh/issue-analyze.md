@@ -69,6 +69,7 @@ title: {issue_title}
 analyzed: {current_datetime}
 estimated_hours: {total_hours}
 parallelization_factor: {1.0-5.0}
+file_version: 0.1.0
 ---
 
 # Parallel Work Analysis: Issue #$ARGUMENTS

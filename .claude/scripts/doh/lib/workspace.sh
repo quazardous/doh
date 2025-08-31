@@ -8,10 +8,17 @@
 
 # Get current project ID based on directory
 # Usage: get_current_project_id
+# Returns unique project ID: basename + short hash of absolute path
+# Example: "my-app_abc123ef" for /home/user/work/my-app
 get_current_project_id() {
     local doh_root
     doh_root="$(_find_doh_root)" || return 1
-    basename "$doh_root"
+    
+    local project_name=$(basename "$doh_root")
+    local abs_path=$(realpath "$doh_root")
+    local path_hash=$(echo "$abs_path" | sha256sum | cut -c1-8)
+    
+    echo "${project_name}_${path_hash}"
 }
 
 # Ensure project state directory exists

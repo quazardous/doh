@@ -15,6 +15,7 @@ Break epic into concrete, actionable tasks.
 
 **IMPORTANT:** Before executing this command, read and follow:
 - `.claude/rules/datetime.md` - For getting real current date/time
+- Source the numbering library: `source .claude/scripts/doh/lib/dohenv.sh && source .claude/scripts/doh/lib/workspace.sh && source .claude/scripts/doh/lib/numbering.sh`
 
 ## Preflight Checklist
 
@@ -70,11 +71,12 @@ Task:
     - {list of 3-4 tasks for this batch}
 
     For each task:
-    1. Create file: .doh/epics/$ARGUMENTS/{number}.md
-    2. Use exact format with frontmatter and all sections
-    3. Follow task breakdown from epic
-    4. Set parallel/depends_on fields appropriately
-    5. Number sequentially (001.md, 002.md, etc.)
+    1. Get task number: TASK_NUM=$(get_next_number "task")
+    2. Create file: .doh/epics/$ARGUMENTS/$TASK_NUM.md
+    3. Use exact format with frontmatter and all sections
+    4. Follow task breakdown from epic
+    5. Set parallel/depends_on fields appropriately
+    6. Register task: register_task "$TASK_NUM" "[epic_number]" ".doh/epics/$ARGUMENTS/$TASK_NUM.md" "[Task Title]" "$ARGUMENTS"
 
     Return: List of files created
 ```
@@ -85,13 +87,16 @@ For each task, create a file with this exact structure:
 ```markdown
 ---
 name: [Task Title]
+number: [Task Number from get_next_number]
 status: open
 created: [Current ISO date/time]
 updated: [Current ISO date/time]
 github: [Will be updated when synced to GitHub]
+epic: $ARGUMENTS
 depends_on: []  # List of task numbers this depends on, e.g., [001, 002]
 parallel: true  # Can this run in parallel with other tasks?
 conflicts_with: []  # Tasks that modify same files, e.g., [003, 004]
+file_version: 0.1.0
 ---
 
 # Task: [Task Title]
@@ -128,15 +133,18 @@ Clear, concise description of what needs to be done
 
 ### 3. Task Naming Convention
 Save tasks as: `.doh/epics/$ARGUMENTS/{task_number}.md`
-- Use sequential numbering: 001.md, 002.md, etc.
+- Use numbering from get_next_number: TASK_NUM=$(get_next_number "task"), then $TASK_NUM.md
+- Task numbers are globally sequential across all epics
 - Keep task titles short but descriptive
 
 ### 4. Frontmatter Guidelines
 - **name**: Use a descriptive task title (without "Task:" prefix)
+- **number**: Use the task number from get_next_number "task"
 - **status**: Always start with "open" for new tasks
 - **created**: Get REAL current datetime by running: `date -u +"%Y-%m-%dT%H:%M:%SZ"`
 - **updated**: Use the same real datetime as created for new tasks
 - **github**: Leave placeholder text - will be updated during sync
+- **epic**: Use $ARGUMENTS to reference the parent epic
 - **depends_on**: List task numbers that must complete before this can start (e.g., [001, 002])
 - **parallel**: Set to true if this can run alongside other tasks without conflicts
 - **conflicts_with**: List task numbers that modify the same files (helps coordination)
@@ -189,8 +197,8 @@ When creating tasks with dependencies:
 After creating all tasks, update the epic file by adding this section:
 ```markdown
 ## Tasks Created
-- [ ] 001.md - {Task Title} (parallel: true/false)
-- [ ] 002.md - {Task Title} (parallel: true/false)
+- [ ] {TASK_NUM}.md - {Task Title} (parallel: true/false)
+- [ ] {TASK_NUM}.md - {Task Title} (parallel: true/false)
 - etc.
 
 Total tasks: {count}

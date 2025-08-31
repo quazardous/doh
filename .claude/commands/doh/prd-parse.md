@@ -15,6 +15,7 @@ Convert PRD to technical implementation epic.
 
 **IMPORTANT:** Before executing this command, read and follow:
 - `.claude/rules/datetime.md` - For getting real current date/time
+- Source the numbering library: `source .claude/scripts/doh/lib/dohenv.sh && source .claude/scripts/doh/lib/workspace.sh && source .claude/scripts/doh/lib/numbering.sh`
 
 ## Preflight Checklist
 
@@ -68,11 +69,14 @@ Create the epic file at: `.doh/epics/$ARGUMENTS/epic.md` with this exact structu
 ```markdown
 ---
 name: $ARGUMENTS
+number: $(get_next_number "epic")
 status: backlog
 created: [Current ISO date/time]
 progress: 0%
 prd: .doh/prds/$ARGUMENTS.md
 github: [Will be updated when synced to GitHub]
+target_version: 1.0.0
+file_version: 0.1.0
 ---
 
 # Epic: $ARGUMENTS
@@ -153,12 +157,13 @@ Before saving the epic, verify:
 ### 7. Post-Creation
 
 After successfully creating the epic:
-1. Confirm: "✅ Epic created: .doh/epics/$ARGUMENTS/epic.md"
-2. Show summary of:
+1. Register the epic in the numbering system: `register_epic "$(cat .doh/epics/$ARGUMENTS/epic.md | grep '^number:' | cut -d':' -f2 | xargs)" ".doh/epics/$ARGUMENTS/epic.md" "$ARGUMENTS"`
+2. Confirm: "✅ Epic created: .doh/epics/$ARGUMENTS/epic.md"
+3. Show summary of:
    - Number of task categories identified
    - Key architecture decisions
    - Estimated effort
-3. Suggest next step: "Ready to break down into tasks? Run: /doh:epic-decompose $ARGUMENTS"
+4. Suggest next step: "Ready to break down into tasks? Run: /doh:epic-decompose $ARGUMENTS"
 
 ## Error Recovery
 

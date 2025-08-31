@@ -172,3 +172,7 @@ Failed: auth.test.js (syntax error - line 42)
 - Users know what they're doing
 
 Focus on the happy path, fail gracefully when things go wrong.
+
+## Task-First Development
+
+**NEVER modify code in the main thread without creating a task first.** See `/rules/task-workflow.md` for complete guidelines on task creation, user interruptions, and when direct modifications are allowed.

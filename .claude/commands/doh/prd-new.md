@@ -101,6 +101,7 @@ name: $ARGUMENTS
 description: [Brief one-line description of the PRD]
 status: backlog
 created: [Current ISO date/time]
+file_version: 0.1.0
 ---
 
 # PRD: $ARGUMENTS
