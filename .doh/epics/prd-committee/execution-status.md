@@ -12,14 +12,16 @@ branch: epic/prd-committee
 - Agent-4: Task 004 - Product Owner Agent (Started 00:38) ✅ COMPLETED
 - Agent-5: Task 008 - Committee Session File Structure (Started 00:38) ✅ COMPLETED
 
-## Queued Tasks (Now Ready)
-- Task 005 - Implement 2-round workflow orchestrator (depends on 001-004) ✅ READY
-- Task 007 - Build CTO agent with arbitration logic (depends on 001-004) ✅ READY
+## Active Agents
+- Agent-6: Task 005 - Workflow Orchestrator (Started now) 🔄 LAUNCHING
+- Agent-7: Task 007 - CTO Agent (Started now) 🔄 LAUNCHING
+- Agent-8: Task 006 - Convergence Algorithm (Started now) 🔄 LAUNCHING
+
+## Queued Tasks 
+- Task 010 - Add performance optimization and timeouts (depends on 005)
 
 ## Blocked Tasks
-- Task 006 - Create convergence algorithm system (depends on 005)
 - Task 009 - Modify /doh:prd-new command integration (depends on 005, 006, 007, 008)
-- Task 010 - Add performance optimization and timeouts (depends on 005)
 
 ## Completed Tasks (5/10)
 - ✅ Task 001 - DevOps Architect Agent
