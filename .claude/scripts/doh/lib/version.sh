@@ -157,12 +157,14 @@ increment_version() {
 
 # @description Set/update the project version in VERSION file
 # @arg $1 string New version string to set
-# @stdout Success message with updated version
+# @arg $2 string Optional flag --quiet to suppress success message
+# @stdout Success message with updated version (unless --quiet)
 # @stderr Error messages if version missing, invalid format, not in DOH project, or write failure
 # @exitcode 0 If successful
 # @exitcode 1 If version missing, invalid semver format, not in DOH project, or write failure
 set_project_version() {
     local version="$1"
+    local quiet_flag="${2:-}"
     
     if [[ -z "$version" ]]; then
         echo "Error: Version required" >&2
@@ -188,7 +190,10 @@ set_project_version() {
         return 1
     }
     
-    echo "Project version updated to: $version"
+    # Only show success message if not in quiet mode
+    if [[ "$quiet_flag" != "--quiet" ]]; then
+        echo "Project version updated to: $version"
+    fi
 }
 
 # @description Bump project version by increment level
@@ -211,7 +216,7 @@ bump_project_version() {
     local new_version
     new_version=$(increment_version "$current_version" "$level") || return 1
     
-    set_project_version "$new_version" || return 1
+    set_project_version "$new_version" --quiet || return 1
     
     echo "$new_version"
 }
