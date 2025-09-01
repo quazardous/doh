@@ -7,7 +7,10 @@
 # Source required dependencies
 source "$(dirname "${BASH_SOURCE[0]}")/workspace.sh"
 
-# Get file cache path
+# @description Get file cache path
+# @stdout Path to the file cache CSV file
+# @exitcode 0 If successful
+# @exitcode 1 If unable to get project ID
 get_file_cache_path() {
     local project_id
     project_id="$(get_current_project_id)" || return 1
@@ -15,7 +18,9 @@ get_file_cache_path() {
     echo "$HOME/.doh/projects/$project_id/file_cache.csv"
 }
 
-# Initialize empty file cache
+# @description Initialize empty file cache
+# @arg $1 string Path to the cache file to create
+# @exitcode 0 If successful
 create_empty_file_cache() {
     local cache_file="$1"
     
@@ -28,7 +33,10 @@ create_empty_file_cache() {
     echo "000,epic,.doh/quick/manifest.md,QUICK," >> "$cache_file"
 }
 
-# Ensure file cache exists
+# @description Ensure file cache exists
+# @stdout Path to the ensured cache file
+# @exitcode 0 If successful
+# @exitcode 1 If unable to get or create cache file
 ensure_file_cache() {
     local cache_file
     cache_file="$(get_file_cache_path)" || return 1
@@ -40,10 +48,17 @@ ensure_file_cache() {
     echo "$cache_file"
 }
 
-# Find file by number (with duplicate detection)
+# @description Find file by number (with duplicate detection)
+# @arg $1 string Number to search for
+# @arg $2 string Optional epic name to filter by
+# @stdout CSV line with file information
+# @stderr Error messages and duplicate warnings
+# @exitcode 0 If successful
+# @exitcode 1 If number not found or invalid parameters
+# @exitcode 2 If multiple valid files found (conflict error)
 find_file_by_number() {
     local number="$1"
-    local epic_name="$2"  # Optional: filter by epic name
+    local epic_name="${2:-}"  # Optional: filter by epic name
     
     if [[ -z "$number" ]]; then
         echo "Error: Number parameter required" >&2
@@ -115,13 +130,21 @@ find_file_by_number() {
     echo "$matches" | cut -d',' -f3
 }
 
-# Add entry to file cache (maintains sorted order)
+# @description Add entry to file cache (maintains sorted order)
+# @arg $1 string File number
+# @arg $2 string File type ("epic" or "task")
+# @arg $3 string Relative path to file
+# @arg $4 string Human-readable name
+# @arg $5 string Optional epic name
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If missing required parameters or other error
 add_to_file_cache() {
     local number="$1"
     local type="$2"
     local path="$3" 
     local name="$4"
-    local epic="$5"  # Optional
+    local epic="${5:-}"  # Optional
     
     if [[ -z "$number" || -z "$type" || -z "$path" || -z "$name" ]]; then
         echo "Error: Missing required parameters" >&2
@@ -152,7 +175,12 @@ add_to_file_cache() {
     ) > "$cache_file.tmp" && mv "$cache_file.tmp" "$cache_file"
 }
 
-# Remove entry from file cache
+# @description Remove entry from file cache
+# @arg $1 string Number of entry to remove
+# @arg $2 string Optional path to remove specific number+path combination
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If number parameter missing or other error
 remove_from_file_cache() {
     local number="$1"
     local path="$2"
@@ -175,7 +203,10 @@ remove_from_file_cache() {
     fi
 }
 
-# Rebuild file cache from filesystem
+# @description Rebuild file cache from filesystem
+# @stderr Progress messages
+# @exitcode 0 If successful
+# @exitcode 1 If unable to find project root or create cache
 rebuild_file_cache() {
     local project_root
     project_root="$(_find_doh_root)" || return 1
@@ -226,7 +257,10 @@ rebuild_file_cache() {
     return 0
 }
 
-# Detect and report duplicates
+# @description Detect and report duplicates
+# @stderr Duplicate detection results and warnings
+# @exitcode 0 If no duplicates found
+# @exitcode 1 If duplicates found
 detect_duplicates() {
     local cache_file
     cache_file="$(ensure_file_cache)" || return 1
@@ -256,7 +290,10 @@ detect_duplicates() {
     fi
 }
 
-# Get file cache statistics
+# @description Get file cache statistics
+# @stdout Formatted statistics string
+# @exitcode 0 If successful
+# @exitcode 1 If unable to access cache file
 get_file_cache_stats() {
     local cache_file
     cache_file="$(ensure_file_cache)" || return 1
@@ -277,7 +314,12 @@ File Cache Statistics:
 EOF
 }
 
-# List all files for an epic
+# @description List all files for an epic
+# @arg $1 string Name of the epic to list files for
+# @stdout CSV lines for epic and its tasks
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If epic name missing or cache access error
 list_epic_files() {
     local epic_name="$1"
     

@@ -7,7 +7,10 @@
 source "$(dirname "${BASH_SOURCE[0]}")/workspace.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/numbering.sh"
 
-# Get graph cache path
+# @description Get graph cache path
+# @stdout Path to the graph cache JSON file
+# @exitcode 0 If successful
+# @exitcode 1 If unable to determine project ID
 get_graph_cache_path() {
     local project_id
     project_id="$(get_current_project_id)" || return 1
@@ -15,7 +18,10 @@ get_graph_cache_path() {
     echo "$HOME/.doh/projects/$project_id/graph_cache.json"
 }
 
-# Initialize empty graph cache
+# @description Initialize empty graph cache
+# @arg $1 string Path to the cache file to create
+# @exitcode 0 If successful
+# @exitcode 1 If unable to create cache file
 create_empty_graph_cache() {
     local cache_file="$1"
     
@@ -30,7 +36,11 @@ create_empty_graph_cache() {
 EOF
 }
 
-# Ensure graph cache exists
+# @description Ensure graph cache exists
+# @stdout Path to the ensured cache file
+# @stderr Warning messages if cache needs rebuilding
+# @exitcode 0 If successful
+# @exitcode 1 If unable to create or validate cache
 ensure_graph_cache() {
     local cache_file
     cache_file="$(get_graph_cache_path)" || return 1
@@ -48,7 +58,13 @@ ensure_graph_cache() {
     echo "$cache_file"
 }
 
-# Add relationship to graph cache
+# @description Add relationship to graph cache
+# @arg $1 string Task/epic number
+# @arg $2 string Optional parent number
+# @arg $3 string Optional epic name
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If number parameter missing or cache update fails
 add_relationship() {
     local number="$1"
     local parent_number="$2"  # Optional
@@ -90,7 +106,11 @@ add_relationship() {
     return 0
 }
 
-# Remove relationship from graph cache
+# @description Remove relationship from graph cache
+# @arg $1 string Number whose relationship to remove
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If number parameter missing or cache update fails
 remove_relationship() {
     local number="$1"
     
@@ -116,7 +136,12 @@ remove_relationship() {
     return 0
 }
 
-# Get parent of a number
+# @description Get parent of a number
+# @arg $1 string Number to find parent for
+# @stdout Parent number if found
+# @stderr Error messages
+# @exitcode 0 If parent found
+# @exitcode 1 If number parameter missing or parent not found
 get_parent() {
     local number="$1"
     
@@ -139,7 +164,12 @@ get_parent() {
     return 1
 }
 
-# Get epic of a number
+# @description Get epic of a number
+# @arg $1 string Number to find epic for
+# @stdout Epic name if found
+# @stderr Error messages
+# @exitcode 0 If epic found
+# @exitcode 1 If number parameter missing or epic not found
 get_epic() {
     local number="$1"
     
@@ -162,7 +192,12 @@ get_epic() {
     return 1
 }
 
-# Get all children of a number (search through all relationships)
+# @description Get all children of a number (search through all relationships)
+# @arg $1 string Parent number to find children for
+# @stdout List of child numbers, sorted
+# @stderr Error messages
+# @exitcode 0 If children found
+# @exitcode 1 If parent number parameter missing or no children found
 get_children() {
     local parent_number="$1"
     
@@ -189,7 +224,12 @@ get_children() {
     return 1
 }
 
-# Get all items in an epic
+# @description Get all items in an epic
+# @arg $1 string Epic name to find items for
+# @stdout List of numbers in the epic
+# @stderr Error messages
+# @exitcode 0 If items found
+# @exitcode 1 If epic name parameter missing or no items found
 get_epic_items() {
     local epic_name="$1"
     
@@ -216,7 +256,10 @@ get_epic_items() {
     return 1
 }
 
-# Rebuild graph cache from filesystem
+# @description Rebuild graph cache from filesystem
+# @stderr Progress messages
+# @exitcode 0 If successful
+# @exitcode 1 If unable to find project root or create cache
 rebuild_graph_cache() {
     local project_root
     project_root="$(_find_doh_root)" || return 1
@@ -265,7 +308,10 @@ rebuild_graph_cache() {
     return 0
 }
 
-# Validate graph cache consistency
+# @description Validate graph cache consistency
+# @stderr Progress and validation messages
+# @exitcode 0 If cache is consistent
+# @exitcode 1 If cache has validation warnings
 validate_graph_cache() {
     local cache_file
     cache_file="$(ensure_graph_cache)" || return 1
@@ -315,7 +361,10 @@ validate_graph_cache() {
     fi
 }
 
-# Self-healing: detect and fix cache issues
+# @description Self-healing: detect and fix cache issues
+# @stderr Status messages
+# @exitcode 0 If cache is healthy or successfully healed
+# @exitcode 1 If cache still has issues after healing
 heal_graph_cache() {
     echo "Running graph cache self-healing..." >&2
     
@@ -336,7 +385,10 @@ heal_graph_cache() {
     fi
 }
 
-# Get graph cache statistics
+# @description Get graph cache statistics
+# @stdout Formatted statistics string
+# @exitcode 0 If successful
+# @exitcode 1 If unable to access cache
 get_graph_cache_stats() {
     local cache_file
     cache_file="$(ensure_graph_cache)" || return 1
@@ -357,7 +409,10 @@ Graph Cache Statistics:
 EOF
 }
 
-# Print relationship tree for debugging
+# @description Print relationship tree for debugging
+# @stderr Relationship tree output
+# @exitcode 0 If successful
+# @exitcode 1 If unable to access cache
 print_relationship_tree() {
     local cache_file
     cache_file="$(ensure_graph_cache)" || return 1
@@ -375,7 +430,13 @@ print_relationship_tree() {
     done <<< "$roots"
 }
 
-# Helper function to print tree node recursively
+# @description Helper function to print tree node recursively
+# @internal
+# @arg $1 string Current node number
+# @arg $2 number Current depth level
+# @stderr Tree node output with indentation
+# @exitcode 0 If successful
+# @exitcode 1 If unable to access cache
 _print_tree_node() {
     local number="$1"
     local depth="$2"

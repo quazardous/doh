@@ -19,6 +19,7 @@ source .claude/scripts/doh/lib/version.sh && get_current_version
 
 ## Documentation
 - [Local Versioning Guide](docs/versioning.md) - Detailed versioning specifics for DOH development
+- [Writing Good Scripts](docs/writing-good-scripts.md) - Best practices for shell scripting in DOH project
 
 ---
 

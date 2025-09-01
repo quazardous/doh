@@ -9,8 +9,11 @@ source "$(dirname "${BASH_SOURCE[0]}")/frontmatter.sh"
 # Constants
 readonly VERSION_LIB_VERSION="1.0.0"
 
-# Get current project version from VERSION file at project root
-# Usage: get_current_version
+# @description Get current project version from VERSION file at project root
+# @stdout Current project version string
+# @stderr Error messages if VERSION file is missing, empty, or invalid
+# @exitcode 0 If successful
+# @exitcode 1 If not in DOH project, VERSION file not found, empty, or invalid
 get_current_version() {
     local doh_root
     doh_root="$(_find_doh_root)" || {
@@ -41,8 +44,12 @@ get_current_version() {
     echo "$version"
 }
 
-# Get version from a specific DOH file (epic, task, or PRD)
-# Usage: get_file_version <file_path>
+# @description Get version from a specific DOH file (epic, task, or PRD)
+# @arg $1 string Path to the file to read version from
+# @stdout Version string from file frontmatter
+# @stderr Error messages if file not found or no version field found
+# @exitcode 0 If successful
+# @exitcode 1 If file path missing, file not found, or no version field found
 get_file_version() {
     local file="$1"
     
@@ -72,8 +79,12 @@ get_file_version() {
     echo "$version"
 }
 
-# Set/update the file_version in a DOH file
-# Usage: set_file_version <file_path> <version>
+# @description Set/update the file_version in a DOH file
+# @arg $1 string Path to the file to update
+# @arg $2 string New version string to set
+# @stderr Error messages if parameters missing, file not found, or invalid version format
+# @exitcode 0 If successful
+# @exitcode 1 If parameters missing, file not found, or invalid semver format
 set_file_version() {
     local file="$1"
     local version="$2"
@@ -97,9 +108,13 @@ set_file_version() {
     update_frontmatter_field "$file" "file_version" "$version"
 }
 
-# Increment version (patch, minor, or major)
-# Usage: increment_version <current_version> <level>
-# Level can be: patch, minor, major
+# @description Increment version (patch, minor, or major)
+# @arg $1 string Current version string
+# @arg $2 string Increment level ("patch", "minor", or "major")
+# @stdout New incremented version string
+# @stderr Error messages if parameters missing or invalid increment level
+# @exitcode 0 If successful
+# @exitcode 1 If parameters missing or invalid increment level
 increment_version() {
     local current="$1"
     local level="$2"
@@ -140,8 +155,12 @@ increment_version() {
     echo "${major}.${minor}.${patch}"
 }
 
-# Set/update the project version in VERSION file
-# Usage: set_project_version <version>
+# @description Set/update the project version in VERSION file
+# @arg $1 string New version string to set
+# @stdout Success message with updated version
+# @stderr Error messages if version missing, invalid format, not in DOH project, or write failure
+# @exitcode 0 If successful
+# @exitcode 1 If version missing, invalid semver format, not in DOH project, or write failure
 set_project_version() {
     local version="$1"
     
@@ -172,8 +191,12 @@ set_project_version() {
     echo "Project version updated to: $version"
 }
 
-# Bump project version by increment level
-# Usage: bump_project_version <level>
+# @description Bump project version by increment level
+# @arg $1 string Increment level ("patch", "minor", or "major")
+# @stdout New version string
+# @stderr Error messages if increment level missing or other errors from dependent functions
+# @exitcode 0 If successful
+# @exitcode 1 If increment level missing or errors from dependent functions
 bump_project_version() {
     local level="$1"
     
@@ -193,8 +216,13 @@ bump_project_version() {
     echo "$new_version"
 }
 
-# Bump file version by increment level
-# Usage: bump_file_version <file_path> <level>
+# @description Bump file version by increment level
+# @arg $1 string Path to the file to update
+# @arg $2 string Increment level ("patch", "minor", or "major")
+# @stdout New version string
+# @stderr Error messages if parameters missing or errors from dependent functions
+# @exitcode 0 If successful
+# @exitcode 1 If parameters missing or errors from dependent functions
 bump_file_version() {
     local file="$1"
     local level="$2"
@@ -215,9 +243,13 @@ bump_file_version() {
     echo "$new_version"
 }
 
-# Compare two semver versions
-# Usage: compare_versions <version1> <version2>
-# Returns: 0 if equal, 1 if version1 > version2, 2 if version1 < version2
+# @description Compare two semver versions
+# @arg $1 string First version to compare
+# @arg $2 string Second version to compare
+# @stderr Error messages if two versions not provided
+# @exitcode 0 If versions are equal
+# @exitcode 1 If ver1 > ver2 or parameters missing
+# @exitcode 2 If ver1 < ver2
 compare_versions() {
     local ver1="$1"
     local ver2="$2"
@@ -237,8 +269,10 @@ compare_versions() {
     fi
 }
 
-# Check if a version is valid semver format
-# Usage: validate_version <version>
+# @description Check if a version is valid semver format
+# @arg $1 string Version string to validate
+# @exitcode 0 If valid semver format
+# @exitcode 1 If invalid or empty version string
 validate_version() {
     local version="$1"
     
@@ -250,8 +284,10 @@ validate_version() {
     [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?(\+[a-zA-Z0-9.-]+)?$ ]]
 }
 
-# Get all files with missing file_version field
-# Usage: find_files_missing_version [directory]
+# @description Get all files with missing file_version field
+# @arg $1 string Optional directory to search (default: current directory)
+# @stdout List of files missing file_version field
+# @exitcode 0 Always successful
 find_files_missing_version() {
     local dir="${1:-.}"
     

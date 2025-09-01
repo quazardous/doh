@@ -1,7 +1,8 @@
 ---
 title: DOH Development Versioning Guide
-file_version: 0.1.0
+file_version: 0.2.0
 created: 2025-08-31T19:13:44Z
+updated: 2025-09-01T08:35:20Z
 ---
 
 # DOH Development Versioning Guide
@@ -24,6 +25,8 @@ All new and updated files starting from v0.1.0 include version information to tr
 ### Version Format by File Type
 
 #### Markdown Files (.md)
+
+##### For PRDs, Tasks, Epics
 ```yaml
 ---
 title: Document Title
@@ -31,6 +34,13 @@ file_version: 0.1.0
 created: 2025-08-31T19:13:44Z
 ---
 ```
+
+#### For other Markdown files
+```markdown
+# Document Title
+<!-- File version: 0.1.0 | Created: 2025-08-31 -->
+```
+
 
 #### Shell Scripts (.sh)
 ```bash

@@ -6,7 +6,10 @@
 # Source required dependencies
 source "$(dirname "${BASH_SOURCE[0]}")/message-queue.sh"
 
-# Command: queue status
+# @description Command: queue status
+# @arg $1 string Optional queue name (default: DEFAULT_QUEUE_NAME)
+# @stdout Queue status information and recent messages
+# @exitcode 0 Always successful
 cmd_queue_status() {
     local queue_name="${1:-$DEFAULT_QUEUE_NAME}"
     
@@ -32,7 +35,12 @@ cmd_queue_status() {
     return 0
 }
 
-# Command: queue list
+# @description Command: queue list
+# @arg $1 string Optional queue name (default: DEFAULT_QUEUE_NAME)
+# @arg $2 string Optional status filter (pending, ok, error)
+# @arg $3 string Optional verbose flag (--verbose)
+# @stdout Messages in queue with optional details
+# @exitcode 0 Always successful
 cmd_queue_list() {
     local queue_name="${1:-$DEFAULT_QUEUE_NAME}"
     local status_filter="$2"  # optional: pending, ok, error
@@ -96,7 +104,13 @@ cmd_queue_list() {
     return 0
 }
 
-# Command: queue purge
+# @description Command: queue purge
+# @arg $1 string Optional queue name (default: DEFAULT_QUEUE_NAME)
+# @arg $2 string Optional max age in days (default: 7)
+# @stdin User confirmation for purge operation
+# @stdout Purge progress and confirmation prompts
+# @exitcode 0 If successful or cancelled
+# @exitcode 1 If queue directory access fails
 cmd_queue_purge() {
     local queue_name="${1:-$DEFAULT_QUEUE_NAME}"
     local max_age_days="${2:-7}"
@@ -134,7 +148,13 @@ cmd_queue_purge() {
     return 0
 }
 
-# Command: queue retry
+# @description Command: queue retry
+# @arg $1 string Optional queue name (default: DEFAULT_QUEUE_NAME)
+# @arg $2 string Message ID to retry (required)
+# @stdin User confirmation for processing message
+# @stdout Retry progress and status messages
+# @exitcode 0 If successful
+# @exitcode 1 If invalid parameters or message not found
 cmd_queue_retry() {
     local queue_name="${1:-$DEFAULT_QUEUE_NAME}"
     local message_id="$2"
@@ -186,7 +206,12 @@ cmd_queue_retry() {
     return 0
 }
 
-# Command: queue process
+# @description Command: queue process
+# @arg $1 string Optional queue name (default: DEFAULT_QUEUE_NAME)
+# @arg $2 string Optional message ID (if not provided, processes all pending)
+# @stdout Processing progress and summary statistics
+# @exitcode 0 If successful
+# @exitcode 1 If processing fails
 cmd_queue_process() {
     local queue_name="${1:-$DEFAULT_QUEUE_NAME}"
     local message_id="$2"  # optional: specific message, otherwise process all pending
@@ -231,7 +256,12 @@ cmd_queue_process() {
     return 0
 }
 
-# Command: queue show
+# @description Command: queue show
+# @arg $1 string Optional queue name (default: DEFAULT_QUEUE_NAME)
+# @arg $2 string Message ID to display (required)
+# @stdout Pretty-printed JSON message details
+# @exitcode 0 If successful
+# @exitcode 1 If message not found or invalid parameters
 cmd_queue_show() {
     local queue_name="${1:-$DEFAULT_QUEUE_NAME}"
     local message_id="$2"
@@ -259,7 +289,11 @@ cmd_queue_show() {
     return 0
 }
 
-# Command: queue create (for testing)
+# @description Command: queue create (for testing)
+# @arg $1 string Optional queue name (default: DEFAULT_QUEUE_NAME)
+# @stdout Test message creation progress and ID
+# @exitcode 0 If successful
+# @exitcode 1 If message creation or queuing fails
 cmd_queue_create_test_message() {
     local queue_name="${1:-$DEFAULT_QUEUE_NAME}"
     

@@ -3,8 +3,12 @@
 # DOH Frontmatter Library
 # Handles YAML frontmatter parsing and manipulation in markdown files
 
-# Extract YAML frontmatter from a markdown file
-# Usage: extract_frontmatter <file>
+# @description Extract YAML frontmatter from a markdown file
+# @arg $1 string Path to the markdown file
+# @stdout YAML frontmatter content
+# @stderr Error messages if file not found
+# @exitcode 0 If successful
+# @exitcode 1 If file not found
 extract_frontmatter() {
     local file="$1"
     
@@ -17,8 +21,11 @@ extract_frontmatter() {
     sed -n '1,/^---$/d; /^---$/q; p' "$file"
 }
 
-# Get a specific field value from frontmatter
-# Usage: get_frontmatter_field <file> <field>
+# @description Get a specific field value from frontmatter
+# @arg $1 string Path to the markdown file
+# @arg $2 string Field name to extract
+# @stdout Field value (stripped of quotes)
+# @exitcode 0 Always successful
 get_frontmatter_field() {
     local file="$1"
     local field="$2"
@@ -26,8 +33,13 @@ get_frontmatter_field() {
     extract_frontmatter "$file" | grep "^$field:" | sed "s/^$field: *//" | sed 's/^"\(.*\)"$/\1/' | sed "s/^'\(.*\)'$/\1/"
 }
 
-# Update a specific field in frontmatter
-# Usage: update_frontmatter_field <file> <field> <value>
+# @description Update a specific field in frontmatter
+# @arg $1 string Path to the markdown file
+# @arg $2 string Field name to update
+# @arg $3 string New value for the field
+# @stderr Error messages if file not found
+# @exitcode 0 If successful
+# @exitcode 1 If file not found
 update_frontmatter_field() {
     local file="$1"
     local field="$2"
@@ -72,8 +84,12 @@ update_frontmatter_field() {
     mv "$temp_file" "$file"
 }
 
-# Validate that required fields are present in frontmatter
-# Usage: validate_frontmatter <file> <field1> <field2> ...
+# @description Validate that required fields are present in frontmatter
+# @arg $1 string Path to the markdown file
+# @arg $2+ string List of required field names
+# @stderr Error messages listing missing required fields
+# @exitcode 0 If all fields present
+# @exitcode 1 If any fields missing
 validate_frontmatter() {
     local file="$1"
     shift
@@ -93,8 +109,10 @@ validate_frontmatter() {
     return 0
 }
 
-# Check if frontmatter exists in file
-# Usage: has_frontmatter <file>
+# @description Check if frontmatter exists in file
+# @arg $1 string Path to the markdown file
+# @exitcode 0 If frontmatter exists
+# @exitcode 1 If file not found or no frontmatter
 has_frontmatter() {
     local file="$1"
     

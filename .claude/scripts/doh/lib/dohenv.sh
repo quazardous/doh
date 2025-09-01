@@ -10,7 +10,12 @@ if [[ -n "${DOH_ENV_LOADED:-}" ]]; then
     return 0
 fi
 
-# Find DOH project root (directory containing both .git/ and .doh/)
+# @description Find DOH project root (directory containing both .git/ and .doh/)
+# @internal
+# @stdout Path to DOH project root
+# @stderr Error message if not in DOH project
+# @exitcode 0 If successful
+# @exitcode 1 If not in DOH project
 _find_doh_root() {
     local dir="$PWD"
     while [[ "$dir" != "/" ]]; do
@@ -25,7 +30,12 @@ _find_doh_root() {
     return 1
 }
 
-# Load environment variables from .doh/env
+# @description Load environment variables from .doh/env
+# @internal
+# @stdout No output
+# @stderr Error messages if loading fails
+# @exitcode 0 If successful
+# @exitcode 1 If error condition
 _load_doh_env() {
     local doh_root
     doh_root="$(_find_doh_root)" || return 1

@@ -16,7 +16,9 @@ readonly QUEUE_STATUS_PENDING=""
 readonly QUEUE_STATUS_OK=".ok"
 readonly QUEUE_STATUS_ERROR=".error"
 
-# Generate unique message ID
+# @description Generate unique message ID
+# @stdout Unique message ID string
+# @exitcode 0 If successful
 generate_message_id() {
     local timestamp
     timestamp=$(date +"%Y%m%d_%H%M%S")
@@ -28,7 +30,11 @@ generate_message_id() {
     echo "msg_${timestamp}_${random_part}_$$"
 }
 
-# Get queue directory path
+# @description Get queue directory path
+# @arg $1 string Optional queue name (default: number_conflict)
+# @stdout Path to queue directory
+# @exitcode 0 If successful
+# @exitcode 1 If project ID cannot be retrieved
 get_queue_dir() {
     local queue_name="${1:-$DEFAULT_QUEUE_NAME}"
     
@@ -38,7 +44,11 @@ get_queue_dir() {
     echo "$HOME/.doh/projects/$project_id/queues/$queue_name"
 }
 
-# Ensure queue directory exists
+# @description Ensure queue directory exists
+# @arg $1 string Optional queue name (default: number_conflict)
+# @stdout Path to ensured queue directory
+# @exitcode 0 If successful
+# @exitcode 1 If directory cannot be created
 ensure_queue_dir() {
     local queue_name="${1:-$DEFAULT_QUEUE_NAME}"
     
@@ -53,14 +63,24 @@ ensure_queue_dir() {
     echo "$queue_dir"
 }
 
-# Create renumber message
+# @description Create renumber message
+# @arg $1 string Type of source ("task" or "epic")
+# @arg $2 string Original identifier
+# @arg $3 string Current number
+# @arg $4 string New number
+# @arg $5 string Reason for renumber ("conflict" or "gap_filling")
+# @arg $6 string Optional JSON metadata
+# @stdout JSON message string
+# @stderr Error messages for invalid parameters
+# @exitcode 0 If successful
+# @exitcode 1 If invalid parameters provided
 create_renumber_message() {
     local source_type="$1"      # "task" or "epic"
     local source_id="$2"        # original identifier
     local source_number="$3"    # current number
     local target_number="$4"    # new number
     local reason="$5"           # "conflict" or "gap_filling"
-    local metadata="$6"         # optional JSON metadata
+    local metadata="${6:-}"     # optional JSON metadata
     
     if [[ -z "$source_type" || -z "$source_id" || -z "$source_number" || -z "$target_number" || -z "$reason" ]]; then
         echo "Error: Missing required parameters for renumber message" >&2
@@ -111,7 +131,13 @@ create_renumber_message() {
     echo "$message"
 }
 
-# Queue a message (atomic operation)
+# @description Queue a message (atomic operation)
+# @arg $1 string Name of the queue
+# @arg $2 string JSON message to queue
+# @stdout Message ID if successful
+# @stderr Error messages and confirmation
+# @exitcode 0 If successful
+# @exitcode 1 If invalid parameters or operation fails
 queue_message() {
     local queue_name="$1"
     local message="$2"
@@ -165,12 +191,19 @@ queue_message() {
     echo "$message_id"
 }
 
-# Change message status
+# @description Change message status
+# @arg $1 string Name of the queue
+# @arg $2 string Message ID to update
+# @arg $3 string New status ("", ".ok", or ".error")
+# @arg $4 string Optional error information
+# @stderr Status change confirmation
+# @exitcode 0 On success
+# @exitcode 1 On error
 set_message_status() {
     local queue_name="$1"
     local message_id="$2"
     local status="$3"  # "", ".ok", or ".error"
-    local error_info="$4"  # optional error information
+    local error_info="${4:-}"  # optional error information
     
     if [[ -z "$queue_name" || -z "$message_id" ]]; then
         echo "Error: Queue name and message ID required" >&2
@@ -222,7 +255,13 @@ set_message_status() {
     return 0
 }
 
-# Get message content
+# @description Get message content
+# @arg $1 string Name of the queue
+# @arg $2 string Message ID to retrieve
+# @stdout JSON message content
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If message not found
 get_message() {
     local queue_name="$1"
     local message_id="$2"
@@ -250,7 +289,13 @@ get_message() {
     cat "$message_file"
 }
 
-# List messages by status
+# @description List messages by status
+# @arg $1 string Name of the queue
+# @arg $2 string Optional status filter ("pending", "ok", "error")
+# @stdout List of message IDs and statuses
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If invalid parameters
 list_messages() {
     local queue_name="$1"
     local status_filter="$2"  # optional: "pending", "ok", "error", or empty for all
@@ -308,7 +353,11 @@ list_messages() {
     done | sort
 }
 
-# Count messages by status
+# @description Count messages by status
+# @arg $1 string Name of the queue
+# @arg $2 string Optional status filter
+# @stdout Number of messages
+# @exitcode 0 If successful
 count_messages() {
     local queue_name="$1"
     local status_filter="$2"
@@ -316,7 +365,12 @@ count_messages() {
     list_messages "$queue_name" "$status_filter" | wc -l
 }
 
-# Purge processed messages (ok and error)
+# @description Purge processed messages (ok and error)
+# @arg $1 string Name of the queue
+# @arg $2 string Optional max age in days (default: 7)
+# @stderr Purge operation summary
+# @exitcode 0 On success
+# @exitcode 1 If invalid parameters
 purge_processed_messages() {
     local queue_name="$1"
     local max_age_days="${2:-7}"  # Default: keep for 7 days
@@ -345,7 +399,12 @@ purge_processed_messages() {
     return 0
 }
 
-# Get queue statistics
+# @description Get queue statistics
+# @arg $1 string Name of the queue
+# @stdout Formatted statistics string
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If invalid parameters
 get_queue_stats() {
     local queue_name="$1"
     
@@ -373,7 +432,12 @@ Queue Statistics ($queue_name):
 EOF
 }
 
-# Process a pending message (example implementation)
+# @description Process a pending message (example implementation)
+# @arg $1 string Name of the queue
+# @arg $2 string Message ID to process
+# @stderr Processing status messages
+# @exitcode 0 On success
+# @exitcode 1 On error
 process_message() {
     local queue_name="$1"
     local message_id="$2"
@@ -415,7 +479,11 @@ process_message() {
     return 0
 }
 
-# Validate message format
+# @description Validate message format
+# @arg $1 string JSON message to validate
+# @stderr Error messages for invalid format
+# @exitcode 0 If valid
+# @exitcode 1 If invalid
 validate_message() {
     local message="$1"
     

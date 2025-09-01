@@ -8,8 +8,10 @@
 
 source .claude/scripts/doh/lib/frontmatter.sh
 
-# Check if a task is completed based on various criteria
-# Usage: is_task_completed <task_file>
+# @description Check if a task is completed based on various criteria
+# @arg $1 string Path to the task file
+# @exitcode 0 If task is completed
+# @exitcode 1 If task file not found or not completed
 is_task_completed() {
     local task_file="$1"
     
@@ -31,8 +33,11 @@ is_task_completed() {
     esac
 }
 
-# Get task status from frontmatter
-# Usage: get_task_status <task_file>
+# @description Get task status from frontmatter
+# @arg $1 string Path to the task file
+# @stdout Task status string ("not_found", "unknown", or actual status)
+# @exitcode 0 If successful
+# @exitcode 1 If task file not found
 get_task_status() {
     local task_file="$1"
     
@@ -51,8 +56,12 @@ get_task_status() {
     fi
 }
 
-# List all task files for an epic
-# Usage: list_epic_tasks <epic_name>
+# @description List all task files for an epic
+# @arg $1 string Name of the epic
+# @stdout List of task file paths (sorted)
+# @stderr Error messages if epic not found
+# @exitcode 0 If successful
+# @exitcode 1 If epic directory not found
 list_epic_tasks() {
     local epic_name="$1"
     local epic_dir=".doh/epics/$epic_name"
@@ -66,8 +75,10 @@ list_epic_tasks() {
     find "$epic_dir" -name '[0-9][0-9][0-9].md' | sort
 }
 
-# Calculate completion percentage for an epic
-# Usage: calculate_epic_progress <epic_name>
+# @description Calculate completion percentage for an epic
+# @arg $1 string Name of the epic
+# @stdout Completion percentage (0-100)
+# @exitcode 0 Always successful
 calculate_epic_progress() {
     local epic_name="$1"
     local total_tasks=0
@@ -92,8 +103,11 @@ calculate_epic_progress() {
     echo $(( completed_tasks * 100 / total_tasks ))
 }
 
-# Verify that a task has actually been completed with real work
-# Usage: verify_task_completion <task_file>
+# @description Verify that a task has actually been completed with real work
+# @arg $1 string Path to the task file
+# @stderr Error and warning messages about task completion status
+# @exitcode 0 If verified complete
+# @exitcode 1 If task file not found or not marked as completed
 verify_task_completion() {
     local task_file="$1"
     
@@ -124,8 +138,11 @@ verify_task_completion() {
     return 0
 }
 
-# Get task name from frontmatter
-# Usage: get_task_name <task_file>
+# @description Get task name from frontmatter
+# @arg $1 string Path to the task file
+# @stdout Task name string (fallback to "Unknown Task" if not found)
+# @exitcode 0 If successful
+# @exitcode 1 If task file not found
 get_task_name() {
     local task_file="$1"
     
@@ -145,8 +162,10 @@ get_task_name() {
     echo "${name:-Unknown Task}"
 }
 
-# Check if task can run in parallel
-# Usage: is_task_parallel <task_file>
+# @description Check if task can run in parallel
+# @arg $1 string Path to the task file
+# @exitcode 0 If task can run in parallel
+# @exitcode 1 If task cannot run in parallel
 is_task_parallel() {
     local task_file="$1"
     

@@ -6,10 +6,10 @@
 # NOTE: This library expects DOH environment variables to be already loaded
 # by the calling script via: source .claude/scripts/doh/lib/dohenv.sh
 
-# Get current project ID based on directory
-# Usage: get_current_project_id
-# Returns unique project ID: basename + short hash of absolute path
-# Example: "my-app_abc123ef" for /home/user/work/my-app
+# @description Get current project ID based on directory
+# @stdout Unique project ID: basename + short hash of absolute path
+# @exitcode 0 If successful
+# @exitcode 1 If unable to find DOH root
 get_current_project_id() {
     local doh_root
     doh_root="$(_find_doh_root)" || return 1
@@ -21,8 +21,12 @@ get_current_project_id() {
     echo "${project_name}_${path_hash}"
 }
 
-# Ensure project state directory exists
-# Usage: ensure_project_state_dir [project_id]
+# @description Ensure project state directory exists
+# @arg $1 string Optional project ID (default: current project)
+# @stdout Path to the project state directory
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If unable to determine project ID or create directory
 ensure_project_state_dir() {
     local project_id="${1:-$(get_current_project_id)}"
     
@@ -40,8 +44,12 @@ ensure_project_state_dir() {
     echo "$state_dir"
 }
 
-# Register project in global mapping
-# Usage: register_project_mapping [project_id] [project_path]
+# @description Register project in global mapping
+# @arg $1 string Optional project ID (default: current project)
+# @arg $2 string Optional project path (default: current DOH root)
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If project ID or path missing
 register_project_mapping() {
     local project_id="${1:-$(get_current_project_id)}"
     local project_path="${2:-$(_find_doh_root)}"
@@ -68,8 +76,11 @@ register_project_mapping() {
     fi
 }
 
-# Detect current workspace mode (branch or worktree)
-# Usage: detect_workspace_mode
+# @description Detect current workspace mode (branch or worktree)
+# @stdout "branch" or "worktree"
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If not in a git repository
 detect_workspace_mode() {
     local current_dir="$PWD"
     local git_root
@@ -88,8 +99,11 @@ detect_workspace_mode() {
     fi
 }
 
-# Get workspace state file path
-# Usage: get_workspace_state_file [project_id]
+# @description Get workspace state file path
+# @arg $1 string Optional project ID (default: current project)
+# @stdout Path to the workspace state file
+# @exitcode 0 If successful
+# @exitcode 1 If unable to ensure project state directory
 get_workspace_state_file() {
     local project_id="${1:-$(get_current_project_id)}"
     local state_dir
@@ -98,8 +112,11 @@ get_workspace_state_file() {
     echo "$state_dir/workspace-state.yml"
 }
 
-# Load workspace state from file
-# Usage: load_workspace_state [project_id]
+# @description Load workspace state from file
+# @arg $1 string Optional project ID (default: current project)
+# @stdout YAML workspace state content
+# @exitcode 0 If successful
+# @exitcode 1 If unable to get state file path
 load_workspace_state() {
     local project_id="${1:-$(get_current_project_id)}"
     local state_file
@@ -123,8 +140,12 @@ EOF
     fi
 }
 
-# Save workspace state to file
-# Usage: save_workspace_state <yaml_content> [project_id]
+# @description Save workspace state to file
+# @arg $1 string YAML content to save
+# @arg $2 string Optional project ID (default: current project)
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If unable to acquire lock or write file
 save_workspace_state() {
     local yaml_content="$1"
     local project_id="${2:-$(get_current_project_id)}"
@@ -160,8 +181,13 @@ save_workspace_state() {
     fi
 }
 
-# Choose workspace mode based on task characteristics
-# Usage: choose_workspace_mode <epic_name> [force_mode]
+# @description Choose workspace mode based on task characteristics
+# @arg $1 string Name of the epic being worked on
+# @arg $2 string Optional forced mode ("branch" or "worktree")
+# @stdout Recommended workspace mode
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If another epic is active or unable to load state
 choose_workspace_mode() {
     local epic_name="$1"
     local force_mode="$2"
@@ -194,8 +220,12 @@ choose_workspace_mode() {
     fi
 }
 
-# Check workspace integrity
-# Usage: check_workspace_integrity [project_id]
+# @description Check workspace integrity
+# @arg $1 string Optional project ID (default: current project)
+# @stdout Success message if no issues
+# @stderr Issue descriptions and warnings
+# @exitcode 0 If no issues found
+# @exitcode 1 If integrity issues found
 check_workspace_integrity() {
     local project_id="${1:-$(get_current_project_id)}"
     local issues=()
@@ -244,8 +274,11 @@ check_workspace_integrity() {
     return 0
 }
 
-# Safety prompt before potentially destructive operations
-# Usage: safety_prompt <operation_description>
+# @description Safety prompt before potentially destructive operations
+# @arg $1 string Description of the operation being performed
+# @stderr Warning messages and user prompt
+# @exitcode 0 If user confirms or DOH_FORCE=1
+# @exitcode 1 If user cancels operation
 safety_prompt() {
     local operation="$1"
     
@@ -271,8 +304,12 @@ safety_prompt() {
     esac
 }
 
-# Reset workspace to clean state
-# Usage: reset_workspace [project_id]
+# @description Reset workspace to clean state
+# @arg $1 string Optional project ID (default: current project)
+# @stdout Success message
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If user cancels or unable to save state
 reset_workspace() {
     local project_id="${1:-$(get_current_project_id)}"
     

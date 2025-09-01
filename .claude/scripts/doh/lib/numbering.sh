@@ -12,7 +12,10 @@ readonly NUMBER_FORMAT="%.3d"
 readonly LOCK_TIMEOUT=10
 readonly QUICK_RESERVED_NUMBER="000"
 
-# Registry structure validation
+# @description Registry structure validation
+# @arg $1 string Path to the registry file to validate
+# @exitcode 0 If valid
+# @exitcode 1 If invalid
 validate_registry_structure() {
     local registry_file="$1"
     
@@ -38,7 +41,11 @@ validate_registry_structure() {
     return 0
 }
 
-# Initialize empty registry structure
+# @description Initialize empty registry structure
+# @arg $1 string Path where to create the registry file
+# @arg $2 string Project identifier for initialization
+# @exitcode 0 On success
+# @exitcode 1 On error
 create_empty_registry() {
     local registry_file="$1"
     local project_id="$2"
@@ -75,7 +82,11 @@ EOF
     return 0
 }
 
-# Get registry file path for current project
+# @description Get registry file path for current project
+# @stdout Path to the current project's registry file
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If project ID cannot be determined
 get_registry_path() {
     local project_id
     project_id="$(get_current_project_id)" || {
@@ -87,7 +98,11 @@ get_registry_path() {
     echo "$registry_dir/registers.json"
 }
 
-# Ensure registry exists and is valid
+# @description Ensure registry exists and is valid
+# @stdout Path to the ensured registry file
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If registry cannot be created or validated
 ensure_registry() {
     local registry_file
     registry_file="$(get_registry_path)" || return 1
@@ -109,7 +124,12 @@ ensure_registry() {
     echo "$registry_file"
 }
 
-# Acquire exclusive file lock with timeout
+# @description Acquire exclusive file lock with timeout
+# @arg $1 string File to lock
+# @arg $2 string Optional timeout in seconds (default: LOCK_TIMEOUT)
+# @stderr Error messages for timeout
+# @exitcode 0 On success
+# @exitcode 1 On timeout or error
 acquire_lock() {
     local lock_file="$1"
     local timeout="${2:-$LOCK_TIMEOUT}"
@@ -130,12 +150,17 @@ acquire_lock() {
     return 0
 }
 
-# Release file lock
+# @description Release file lock
+# @exitcode 0 Always successful
 release_lock() {
     exec 200>&-
 }
 
-# Get TASKSEQ file path
+# @description Get TASKSEQ file path
+# @stdout Path to the TASKSEQ file
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If project ID cannot be determined
 get_taskseq_path() {
     local registry_file
     registry_file="$(get_registry_path)" || return 1
@@ -143,7 +168,11 @@ get_taskseq_path() {
     echo "$(dirname "$registry_file")/TASKSEQ"
 }
 
-# Get next sequence number atomically
+# @description Get next sequence number atomically
+# @stdout Next sequence number
+# @stderr Error messages for invalid sequence or update failures
+# @exitcode 0 If successful
+# @exitcode 1 If TASKSEQ file is invalid or update fails
 get_next_sequence() {
     local taskseq_file
     taskseq_file="$(get_taskseq_path)" || return 1
@@ -178,7 +207,11 @@ get_next_sequence() {
     echo "$next_seq"
 }
 
-# Get current sequence number (read-only)
+# @description Get current sequence number (read-only)
+# @stdout Current sequence number
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If project ID cannot be determined
 get_current_sequence() {
     local taskseq_file
     taskseq_file="$(get_taskseq_path)" || return 1
@@ -190,7 +223,12 @@ get_current_sequence() {
     fi
 }
 
-# Get next available number from global sequence
+# @description Get next available number from global sequence
+# @arg $1 string Type of number ("epic" or "task")
+# @stdout Zero-padded 3-digit number
+# @stderr Error messages for invalid type or sequence failures
+# @exitcode 0 If successful
+# @exitcode 1 If invalid type or sequence generation fails
 get_next_number() {
     local type="$1"  # "epic" or "task"
     
@@ -207,12 +245,19 @@ get_next_number() {
     printf "$NUMBER_FORMAT" "$next_number"
 }
 
-# Register epic in central registry
+# @description Register epic in central registry
+# @arg $1 string Epic number (3-digit format)
+# @arg $2 string Relative path to epic file
+# @arg $3 string Human-readable epic name
+# @arg $4 string Optional JSON metadata object
+# @stderr Error messages for missing parameters, lock failures, or registration errors
+# @exitcode 0 On success
+# @exitcode 1 On error
 register_epic() {
     local number="$1"
     local path="$2" 
     local name="$3"
-    local metadata="$4"  # Optional JSON metadata
+    local metadata="${4:-}"  # Optional JSON metadata
     
     if [[ -z "$number" || -z "$path" || -z "$name" ]]; then
         echo "Error: Missing required parameters for epic registration" >&2
@@ -258,14 +303,23 @@ register_epic() {
     return 0
 }
 
-# Register task in central registry
+# @description Register task in central registry
+# @arg $1 string Task number (3-digit format)
+# @arg $2 string Parent epic or task number
+# @arg $3 string Relative path to task file
+# @arg $4 string Human-readable task name
+# @arg $5 string Optional epic name for grouping
+# @arg $6 string Optional JSON metadata object
+# @stderr Error messages for missing parameters, lock failures, or registration errors
+# @exitcode 0 On success
+# @exitcode 1 On error
 register_task() {
     local number="$1"
     local parent_number="$2"  # Can be epic or task number
     local path="$3"
     local name="$4"
-    local epic_name="$5"
-    local metadata="$6"  # Optional JSON metadata
+    local epic_name="${5:-}"
+    local metadata="${6:-}"  # Optional JSON metadata
     
     if [[ -z "$number" || -z "$path" || -z "$name" ]]; then
         echo "Error: Missing required parameters for task registration" >&2
@@ -335,7 +389,12 @@ register_task() {
     return 0
 }
 
-# Validate number availability
+# @description Validate number availability
+# @arg $1 string Number to validate
+# @arg $2 string Type of number ("epic" or "task")
+# @stderr Error messages for missing parameters, already used numbers, invalid format, or reserved numbers
+# @exitcode 0 If available
+# @exitcode 1 If unavailable or invalid
 validate_number() {
     local number="$1"
     local type="$2"  # "epic" or "task"
@@ -378,7 +437,12 @@ validate_number() {
     return 0
 }
 
-# Find entry by number
+# @description Find entry by number
+# @arg $1 string Number to search for
+# @stdout JSON entry data if found
+# @stderr Error messages for missing number parameter
+# @exitcode 0 If entry found
+# @exitcode 1 If entry not found or parameter missing
 find_by_number() {
     local number="$1"
     
@@ -400,7 +464,11 @@ find_by_number() {
     echo "$entry"
 }
 
-# Get registry statistics
+# @description Get registry statistics
+# @stdout Formatted statistics string with current sequence, epic count, task count, and file paths
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If registry cannot be accessed
 get_registry_stats() {
     local registry_file
     registry_file="$(ensure_registry)" || return 1

@@ -8,7 +8,11 @@ source "$(dirname "${BASH_SOURCE[0]}")/numbering.sh"
 
 # Cache refresh and validation functions
 
-# Rebuild file cache from filesystem scan
+# @description Rebuild file cache from filesystem scan
+# @stdout Progress messages during cache rebuild
+# @stderr Error messages if rebuild fails
+# @exitcode 0 If successful
+# @exitcode 1 If error condition
 rebuild_file_cache() {
     local registry_file
     registry_file="$(ensure_registry)" || return 1
@@ -105,7 +109,11 @@ rebuild_file_cache() {
     return 0
 }
 
-# Rebuild graph cache from file relationships
+# @description Rebuild graph cache from file relationships
+# @stdout Progress messages during cache rebuild
+# @stderr Error messages if rebuild fails
+# @exitcode 0 If successful
+# @exitcode 1 If error condition
 rebuild_graph_cache() {
     local registry_file
     registry_file="$(ensure_registry)" || return 1
@@ -176,7 +184,11 @@ rebuild_graph_cache() {
     return 0
 }
 
-# Validate registry consistency with filesystem
+# @description Validate registry consistency with filesystem
+# @stdout Validation progress and results
+# @stderr Error messages for inconsistencies found
+# @exitcode 0 If consistent
+# @exitcode 1 If issues found
 validate_registry_consistency() {
     local registry_file
     registry_file="$(ensure_registry)" || return 1
@@ -243,7 +255,11 @@ validate_registry_consistency() {
     fi
 }
 
-# Self-healing: detect and fix registry issues
+# @description Self-healing: detect and fix registry issues
+# @stdout Progress messages during healing process
+# @stderr Error messages if healing fails
+# @exitcode 0 If successful
+# @exitcode 1 If error condition
 heal_registry() {
     local registry_file
     registry_file="$(ensure_registry)" || return 1
@@ -279,7 +295,11 @@ heal_registry() {
     fi
 }
 
-# Update TASKSEQ to match actual usage
+# @description Update TASKSEQ to match actual usage
+# @stdout Progress messages and final TASKSEQ value
+# @stderr Error messages if synchronization fails
+# @exitcode 0 If successful
+# @exitcode 1 If error condition
 sync_taskseq() {
     local registry_file
     registry_file="$(ensure_registry)" || return 1
@@ -312,7 +332,12 @@ sync_taskseq() {
     return 0
 }
 
-# Registry maintenance command
+# @description Registry maintenance command
+# @arg $1 string Maintenance action to perform (rebuild-cache|validate|heal|sync|full)
+# @stdout Progress messages and results
+# @stderr Error messages and usage information
+# @exitcode 0 If successful
+# @exitcode 1 If error condition
 registry_maintenance() {
     local action="$1"
     
