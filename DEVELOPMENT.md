@@ -17,9 +17,41 @@ cat VERSION
 source .claude/scripts/doh/lib/version.sh && get_current_version
 ```
 
+## Test-Driven Development
+
+DOH uses a lightweight custom test framework for comprehensive testing. The framework provides simple assertions, parallel test execution, and TAP-compatible output.
+
+### Testing Workflow
+```bash
+# Run all tests
+./tests/run.sh
+
+# Run specific test
+./tests/test_launcher.sh tests/unit/test_example.sh
+
+# Run with verbose output
+VERBOSE=true ./tests/run.sh
+```
+
+### Test Directory Structure
+```
+tests/
+├── run.sh                    # Main test runner
+├── test_launcher.sh          # Single test executor
+├── helpers/                  # Test framework and utilities
+│   └── test_framework.sh     # Core test framework
+├── unit/                     # Unit tests
+├── integration/             # Integration tests
+└── fixtures/                # Test data and mocks
+```
+
+**Detailed TDD Guide**: See [DOH TDD Guide](docs/doh-tdd.md) for comprehensive testing patterns and examples.
+
 ## Documentation
 - [Local Versioning Guide](docs/versioning.md) - Detailed versioning specifics for DOH development
 - [Writing Good Scripts](docs/writing-good-scripts.md) - Best practices for shell scripting in DOH project
+- [DOH Data API Guide](docs/doh-data-api.md) - Authoritative API reference for DOH internal data manipulation
+- [DOH TDD Guide](docs/doh-tdd.md) - Comprehensive test-driven development patterns and framework usage
 
 ---
 

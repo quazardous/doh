@@ -23,6 +23,30 @@ Run commands using the format `/doh:command-name`
 
 ## Testing
 
-- Use the existing test framework
-- Check README or search codebase to determine testing approach
-- Run lint and typecheck commands if available
+The DOH project uses a custom lightweight test framework with comprehensive test coverage.
+
+### Running Tests
+```bash
+# Run all tests (recommended)
+./tests/run.sh
+
+# Run specific test file
+./tests/test_launcher.sh tests/unit/test_example.sh
+
+# Debug test issues
+VERBOSE=true ./tests/test_launcher.sh tests/unit/test_example.sh
+```
+
+### Writing Tests
+- Place unit tests in `tests/unit/`
+- Place integration tests in `tests/integration/`
+- Use the test framework functions (prefixed with `_tf_`)
+- Follow existing test patterns in the codebase
+
+### Test Framework Guidelines
+- Always use `./tests/test_launcher.sh` to run individual tests
+- Use `_tf_setup()` and `_tf_teardown()` for test lifecycle
+- All assertion functions return proper exit codes
+- Tests should be isolated and not depend on external state
+
+**Comprehensive Testing Guide**: See [DOH TDD Guide](docs/doh-tdd.md) for detailed patterns and examples.
