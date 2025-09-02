@@ -1,10 +1,19 @@
 #!/bin/bash
 
-# Registry management utilities for DOH numbering system
+# DOH Registers Library
+# Pure library for registry management utilities for DOH numbering system (no automatic execution)
 # Handles JSON operations, cache management, and registry maintenance
 
-# Source numbering library
+# Source core library dependencies
+source "$(dirname "${BASH_SOURCE[0]}")/doh.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/numbering.sh"
+
+# Guard against multiple sourcing
+[[ -n "${DOH_LIB_REGISTERS_LOADED:-}" ]] && return 0
+DOH_LIB_REGISTERS_LOADED=1
+
+# Constants
+readonly REGISTERS_LIB_VERSION="1.0.0"
 
 # Cache refresh and validation functions
 
@@ -13,12 +22,12 @@ source "$(dirname "${BASH_SOURCE[0]}")/numbering.sh"
 # @stderr Error messages if rebuild fails
 # @exitcode 0 If successful
 # @exitcode 1 If error condition
-rebuild_file_cache() {
+registers_rebuild_file_cache() {
     local registry_file
-    registry_file="$(ensure_registry)" || return 1
+    registry_file="$(_numbering_ensure_registry)" || return 1
     
     local project_root
-    project_root="$(_find_doh_root)" || {
+    project_root="$(doh_find_root)" || {
         echo "Error: Not in a DOH project" >&2
         return 1
     }
@@ -26,7 +35,7 @@ rebuild_file_cache() {
     echo "Rebuilding file cache from filesystem..." >&2
     
     # Acquire lock for atomic operation
-    acquire_lock "$registry_file" || return 1
+    _numbering_acquire_lock "$registry_file" || return 1
     
     # Create temporary registry with current global_sequence and graph_cache
     local temp_file=$(mktemp)
@@ -103,7 +112,7 @@ rebuild_file_cache() {
     # Replace registry
     mv "$temp_file" "$registry_file"
     
-    release_lock
+    _numbering_release_lock
     
     echo "File cache rebuilt successfully" >&2
     return 0
@@ -114,17 +123,17 @@ rebuild_file_cache() {
 # @stderr Error messages if rebuild fails
 # @exitcode 0 If successful
 # @exitcode 1 If error condition
-rebuild_graph_cache() {
+registers_rebuild_graph_cache() {
     local registry_file
-    registry_file="$(ensure_registry)" || return 1
+    registry_file="$(_numbering_ensure_registry)" || return 1
     
     local project_root
-    project_root="$(_find_doh_root)" || return 1
+    project_root="$(doh_find_root)" || return 1
     
     echo "Rebuilding graph cache from file relationships..." >&2
     
     # Acquire lock for atomic operation
-    acquire_lock "$registry_file" || return 1
+    _numbering_acquire_lock "$registry_file" || return 1
     
     # Clear existing graph cache
     local temp_file=$(mktemp)
@@ -178,7 +187,7 @@ rebuild_graph_cache() {
     # Replace registry
     mv "$temp_file" "$registry_file"
     
-    release_lock
+    _numbering_release_lock
     
     echo "Graph cache rebuilt successfully" >&2
     return 0
@@ -189,12 +198,12 @@ rebuild_graph_cache() {
 # @stderr Error messages for inconsistencies found
 # @exitcode 0 If consistent
 # @exitcode 1 If issues found
-validate_registry_consistency() {
+registers_validate_consistency() {
     local registry_file
-    registry_file="$(ensure_registry)" || return 1
+    registry_file="$(_numbering_ensure_registry)" || return 1
     
     local project_root
-    project_root="$(_find_doh_root)" || return 1
+    project_root="$(doh_find_root)" || return 1
     
     local errors=0
     
@@ -260,14 +269,14 @@ validate_registry_consistency() {
 # @stderr Error messages if healing fails
 # @exitcode 0 If successful
 # @exitcode 1 If error condition
-heal_registry() {
+registers_heal() {
     local registry_file
-    registry_file="$(ensure_registry)" || return 1
+    registry_file="$(_numbering_ensure_registry)" || return 1
     
     echo "Running registry self-healing..." >&2
     
     # First validate consistency
-    if validate_registry_consistency; then
+    if registers_validate_consistency; then
         echo "Registry is consistent, no healing needed" >&2
         return 0
     fi
@@ -275,18 +284,18 @@ heal_registry() {
     echo "Registry inconsistencies detected, rebuilding caches..." >&2
     
     # Rebuild both caches from filesystem
-    rebuild_file_cache || {
+    registers_rebuild_file_cache || {
         echo "Error: Failed to rebuild file cache" >&2
         return 1
     }
     
-    rebuild_graph_cache || {
+    registers_rebuild_graph_cache || {
         echo "Error: Failed to rebuild graph cache" >&2
         return 1
     }
     
     # Validate again
-    if validate_registry_consistency; then
+    if registers_validate_consistency; then
         echo "Registry healing completed successfully" >&2
         return 0
     else
@@ -300,12 +309,12 @@ heal_registry() {
 # @stderr Error messages if synchronization fails
 # @exitcode 0 If successful
 # @exitcode 1 If error condition
-sync_taskseq() {
+registers_sync_taskseq() {
     local registry_file
-    registry_file="$(ensure_registry)" || return 1
+    registry_file="$(_numbering_ensure_registry)" || return 1
     
     local taskseq_file
-    taskseq_file="$(get_taskseq_path)" || return 1
+    taskseq_file="$(_numbering_get_taskseq_path)" || return 1
     
     echo "Synchronizing TASKSEQ..." >&2
     
@@ -318,15 +327,15 @@ sync_taskseq() {
     fi
     
     # Acquire lock and update TASKSEQ
-    acquire_lock "$taskseq_file" || return 1
+    _numbering_acquire_lock "$taskseq_file" || return 1
     
     echo "$max_number" > "$taskseq_file" || {
-        release_lock
+        _numbering_release_lock
         echo "Error: Failed to update TASKSEQ" >&2
         return 1
     }
     
-    release_lock
+    _numbering_release_lock
     
     echo "TASKSEQ synchronized to: $max_number" >&2
     return 0
@@ -338,25 +347,25 @@ sync_taskseq() {
 # @stderr Error messages and usage information
 # @exitcode 0 If successful
 # @exitcode 1 If error condition
-registry_maintenance() {
+registers_maintenance() {
     local action="$1"
     
     case "$action" in
         "rebuild-cache")
-            rebuild_file_cache && rebuild_graph_cache
+            registers_rebuild_file_cache && registers_rebuild_graph_cache
             ;;
         "validate")
-            validate_registry_consistency
+            registers_validate_consistency
             ;;
         "heal")
-            heal_registry
+            registers_heal
             ;;
         "sync")
-            sync_taskseq
+            registers_sync_taskseq
             ;;
         "full")
             echo "Running full registry maintenance..." >&2
-            heal_registry && sync_taskseq
+            registers_heal && registers_sync_taskseq
             ;;
         *)
             echo "Usage: registry_maintenance {rebuild-cache|validate|heal|sync|full}" >&2

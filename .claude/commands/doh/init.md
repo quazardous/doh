@@ -2,7 +2,7 @@
 allowed-tools: Bash
 ---
 
-Run `bash .claude/scripts/doh/init.sh` using a sub-agent and show me the complete output.
+Run `bash .claude/scripts/doh/helper.sh core init` using a sub-agent and show me the complete output.
 
 - DO NOT truncate.
 - DO NOT collapse.

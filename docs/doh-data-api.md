@@ -2,6 +2,49 @@
 
 > **Quick reference for DOH internal data manipulation functions**
 
+## Library Loading Order
+
+The DOH libraries have interdependencies and must be loaded in the correct order. Here's the dependency hierarchy:
+
+### Dependency Tree
+```
+dohenv.sh (foundation - provides _find_doh_root)
+├── numbering.sh
+├── workspace.sh
+│   └── registers.sh
+│       └── file-cache.sh
+└── frontmatter.sh
+    └── version.sh
+        └── graph-cache.sh (requires workspace + numbering + frontmatter)
+```
+
+### Loading Libraries Correctly
+
+```bash
+# Minimal setup for basic operations
+source .claude/scripts/doh/lib/dohenv.sh       # Always first!
+source .claude/scripts/doh/lib/frontmatter.sh   # For file operations
+
+# Full setup for all operations
+source .claude/scripts/doh/lib/dohenv.sh       # Foundation
+source .claude/scripts/doh/lib/numbering.sh     # Numbering functions
+source .claude/scripts/doh/lib/frontmatter.sh   # File operations
+source .claude/scripts/doh/lib/workspace.sh     # Project management
+source .claude/scripts/doh/lib/version.sh       # Version management
+source .claude/scripts/doh/lib/registers.sh     # Registration system
+source .claude/scripts/doh/lib/file-cache.sh    # File caching
+source .claude/scripts/doh/lib/graph-cache.sh   # Relationship tracking
+```
+
+### Common Issues and Solutions
+
+| Error Message | Cause | Solution |
+|--------------|-------|----------|
+| `_find_doh_root: command not found` | Missing dohenv.sh | Source `dohenv.sh` first |
+| `Error: Not in a DOH project` | Libraries loaded incorrectly | Ensure `dohenv.sh` is sourced |
+| `get_current_project_id: command not found` | Missing workspace.sh | Source `workspace.sh` after `dohenv.sh` |
+| `get_frontmatter_field: command not found` | Missing frontmatter.sh | Source `frontmatter.sh` |
+
 ## File Cache (file-cache.sh)
 
 | Function | Description | Signature |

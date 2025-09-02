@@ -1,7 +1,7 @@
 ---
 name: version-bump
-description: Bump project version with validation, git integration, and release management
-type: bash
+description: Intelligent version bumping with AI analysis, validation, git integration, and release management
+type: hybrid
 parallel_execution: false
 success_exit_code: 0
 timeout: 60000
@@ -15,28 +15,98 @@ Bump project version using semantic versioning rules with comprehensive validati
 
 ## Usage
 ```
-/doh:version-bump <level> [--dry-run] [--no-git] [--no-files] [--message "Release message"]
+/doh:version-bump [level] [options]
 ```
 
 ## Arguments
-- `<level>`: Version increment level (patch, minor, major)
+- `[level]`: Version increment level (patch, minor, major) - optional for analysis mode
+
+## Options
+### Analysis Options
+- `--analyze`: Enable intelligent analysis mode (default: true when no level specified)
+- `--no-analyze`: Skip analysis and perform direct bump (requires level)
+
+### Execution Options
 - `--dry-run`: Show what would change without making changes
-- `--no-git`: Skip git operations (tag, commit, push)
+- `--commit`: Create git commit with changes (default: false)
+- `--no-commit`: Explicitly skip git commit (default behavior)
+- `--tag`: Create git tag (requires --commit, overrides DOH_TAG_BUMP)
+- `--no-tag`: Skip git tag creation (overrides DOH_TAG_BUMP)
 - `--no-files`: Skip updating file_version in DOH files
-- `--message`: Custom release/commit message
+- `--force`: Bypass git staging validation (allow dirty working directory)
+- `--message "text"`: Custom commit/tag message
+
+## Configuration
+Version bump behavior is controlled by `.doh/env`:
+```bash
+# Create git tags during version bumps (default: false)
+DOH_TAG_BUMP=false
+```
+
+## Examples
+
+### Analysis Mode (AI-powered)
+```bash
+# Auto-analyze and suggest appropriate bump type
+/doh:version-bump                    # Analyzes completed tasks → suggests patch/minor/major
+
+# Analyze specific bump for coherence
+/doh:version-bump patch --analyze    # Checks if patch is appropriate for current changes
+/doh:version-bump minor              # Auto-analysis enabled by default
+
+# Analysis-only (no execution)
+/doh:version-bump --dry-run          # Shows analysis + what bump would do
+```
+
+### Direct Script Mode (traditional)
+```bash
+# Bypass analysis - direct bump
+/doh:version-bump patch --no-analyze
+
+# Combined with other options
+/doh:version-bump minor --no-analyze --commit --tag
+```
+
+### Full Workflow Examples
+```bash
+# Interactive workflow: analyze → confirm → execute
+/doh:version-bump                    # 1. Shows analysis
+/doh:version-bump minor --commit     # 2. Execute recommended bump
+
+# One-shot release with validation
+/doh:version-bump minor --commit --tag --analyze
+
+# Force release without analysis
+/doh:version-bump patch --no-analyze --commit --force
+```
+
+## Validation Rules
+- **Clean staging required**: Command fails if git working directory is dirty (unless --force)
+- **No tag without commit**: Cannot use --tag without --commit (fails with error)
+- **Config override**: --tag/--no-tag override DOH_TAG_BUMP setting
+- **Default behavior**: Files-only update (no commit, no git operations)
 
 ## Implementation
+**Cache Optimization**: Only updates cache for the specific version being bumped and its immediate dependents
+
 ```bash
 #!/bin/bash
 source "$(dirname "$0")/../../scripts/doh/lib/version.sh"
 source "$(dirname "$0")/../../scripts/doh/lib/frontmatter.sh"
+source "$(dirname "$0")/../../scripts/doh/lib/dohenv.sh"
 
 # Parse arguments
 level=""
 dry_run=false
-no_git=false
+do_analyze=""  # empty=auto-detect, true=force analysis, false=skip analysis
+do_commit=false
+do_tag=""  # empty=use DOH_TAG_BUMP, true=force tag, false=no tag
 no_files=false
+force_dirty=false
 custom_message=""
+
+# Load DOH environment configuration
+DOH_TAG_BUMP="${DOH_TAG_BUMP:-false}"
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -53,12 +123,36 @@ while [[ $# -gt 0 ]]; do
             dry_run=true
             shift
             ;;
-        --no-git)
-            no_git=true
+        --analyze)
+            do_analyze="true"
+            shift
+            ;;
+        --no-analyze)
+            do_analyze="false"
+            shift
+            ;;
+        --commit)
+            do_commit=true
+            shift
+            ;;
+        --no-commit)
+            do_commit=false
+            shift
+            ;;
+        --tag)
+            do_tag="true"
+            shift
+            ;;
+        --no-tag)
+            do_tag="false"
             shift
             ;;
         --no-files)
             no_files=true
+            shift
+            ;;
+        --force)
+            force_dirty=true
             shift
             ;;
         --message)
@@ -67,15 +161,38 @@ while [[ $# -gt 0 ]]; do
             ;;
         *)
             echo "Error: Unknown argument: $1" >&2
-            echo "Usage: /doh:version-bump <level> [--dry-run] [--no-git] [--no-files] [--message \"Release message\"]"
+            echo "Usage: /doh:version-bump [level] [--analyze] [--no-analyze] [--commit] [--tag] [--no-tag] [--no-files] [--force] [--message \"text\"]"
             exit 1
             ;;
     esac
 done
 
-# Validate required arguments
-if [[ -z "$level" ]]; then
-    echo "Error: Version increment level required (patch, minor, major)" >&2
+# Determine analysis mode
+if [[ -z "$do_analyze" ]]; then
+    # Auto-detect: analyze if no level provided, or if level provided with analysis intent
+    if [[ -z "$level" ]]; then
+        do_analyze="true"  # No level = analysis mode
+    else
+        do_analyze="true"  # Level provided = validation mode (analyze + execute)
+    fi
+fi
+
+# Validate arguments based on mode
+if [[ "$do_analyze" == "false" && -z "$level" ]]; then
+    echo "Error: --no-analyze requires a version level (patch, minor, major)" >&2
+    echo "Use: /doh:version-bump <level> --no-analyze" >&2
+    exit 1
+fi
+
+# Determine final tag behavior
+final_do_tag="$DOH_TAG_BUMP"
+if [[ -n "$do_tag" ]]; then
+    final_do_tag="$do_tag"
+fi
+
+# Validate commit/tag logic
+if [[ "$do_commit" == false && "$final_do_tag" == "true" ]]; then
+    echo "Error: Cannot create git tag without commit. Use --commit with --tag or set --no-tag" >&2
     exit 1
 fi
 
@@ -102,26 +219,32 @@ new_version=$(increment_version "$current_version" "$level") || {
 
 echo "📊 Version bump: $current_version → $new_version ($level)"
 
-# Git validation (if not skipping git operations)
-if [[ "$no_git" == false ]]; then
+# Git validation (if committing or tagging)
+if [[ "$do_commit" == true || "$final_do_tag" == "true" ]]; then
     # Check if git repository exists
     if ! git rev-parse --git-dir >/dev/null 2>&1; then
-        echo "Warning: Not in a git repository, enabling --no-git mode"
-        no_git=true
-    else
-        # Check for uncommitted changes
-        if ! git diff-index --quiet HEAD --; then
-            echo "Warning: Working directory has uncommitted changes"
-            echo "Git status:"
-            git status --porcelain
-            echo ""
-            read -p "Continue anyway? [y/N] " -n 1 -r
-            echo
-            if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-                echo "Aborted by user"
-                exit 1
-            fi
+        echo "Error: Not in a git repository but --commit or --tag requested" >&2
+        echo "Either initialize git or use --no-commit --no-tag" >&2
+        exit 1
+    fi
+    
+    # Strict staging validation - fail if dirty unless --force
+    if ! git diff-index --quiet HEAD --; then
+        echo "Error: Working directory has uncommitted changes" >&2
+        echo "Git status:"
+        git status --porcelain
+        echo ""
+        
+        if [[ "$force_dirty" == true ]]; then
+            echo "⚠️  --force specified, continuing with dirty working directory"
+        else
+            echo "Solutions:"
+            echo "  1. Commit or stash changes: git add . && git commit -m 'prep for version bump'"
+            echo "  2. Use --force to bypass this check"
+            echo "  3. Use --no-commit --no-tag for files-only bump"
+            exit 1
         fi
+    fi
         
         # Check if tag already exists
         if git tag -l | grep -q "^v${new_version}$"; then
@@ -322,8 +445,70 @@ echo "🎉 Release $new_version is ready!"
 /doh:version-bump patch --no-files
 ```
 
+## AI Analysis Implementation
+
+When analysis mode is enabled (`--analyze` or default behavior), the AI component will:
+
+### 1. Task Completion Analysis
+- Scan all completed tasks since last version
+- Categorize changes by type:
+  - **Bug fixes** → suggest `patch`
+  - **New features** → suggest `minor`  
+  - **Breaking changes** → suggest `major`
+- Check for epic completions and milestones
+
+### 2. Version Validation (when level specified)
+- Verify the proposed bump level matches completed work
+- Check if version milestone conditions are met
+- Analyze task dependencies and completion status
+- Warn about potential issues or suggest alternatives
+
+### 3. Analysis Output Format
+```
+🔍 DOH Version Analysis
+=======================
+Current Version: 0.5.0
+Analyzed Period: Since 2025-09-01 (last version)
+
+📊 Completed Work Analysis:
+✅ Bug Fixes (3 tasks):
+  - Task 015: Fix authentication timeout
+  - Task 018: Resolve memory leak in cache
+  - Task 021: Fix version parsing edge case
+
+✅ New Features (1 task):
+  - Task 022: Add AI-powered version analysis
+
+🎯 Recommended Bump: MINOR (0.5.0 → 0.6.0)
+Reason: New feature addition with backward compatibility
+
+⚠️  Version Readiness Check:
+- Version 0.6.0 milestone: 4/5 tasks complete (80%)
+- Blocking task: Task 019 (in_progress)
+- Estimated readiness: 3-5 days
+
+💡 Recommendations:
+1. Complete Task 019 before release
+2. Consider patch release (0.5.1) for bug fixes now
+3. Wait for minor release (0.6.0) when Task 019 complete
+```
+
+### 4. Interactive Confirmation
+For analysis-only mode, the AI will:
+- Present the analysis
+- Show recommended command to execute
+- Allow user to decide on timing and approach
+
+### 5. Validation Mode
+When level is specified with analysis:
+- Compare specified level with AI recommendation
+- Show warnings if mismatch detected
+- Provide reasoning for alternative suggestions
+- Allow override with explicit confirmation
+
 ## Safety Features
 - Pre-validation checks prevent invalid operations
+- AI analysis prevents inappropriate version bumps
 - Dry-run mode for preview without changes
 - Git status verification before operations
 - Tag conflict detection

@@ -1,10 +1,16 @@
 #!/bin/bash
 
-# Core numbering library for DOH project management system
+# DOH Numbering Library
+# Pure library for DOH numbering system (no automatic execution)
 # Provides centralized, conflict-free task and epic number generation
 
-# Source required dependencies
+# Source core library dependencies
+source "$(dirname "${BASH_SOURCE[0]}")/doh.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/workspace.sh"
+
+# Guard against multiple sourcing
+[[ -n "${DOH_LIB_NUMBERING_LOADED:-}" ]] && return 0
+DOH_LIB_NUMBERING_LOADED=1
 
 # Constants
 readonly NUMBERING_VERSION="1.0.0"
@@ -16,7 +22,7 @@ readonly QUICK_RESERVED_NUMBER="000"
 # @arg $1 string Path to the registry file to validate
 # @exitcode 0 If valid
 # @exitcode 1 If invalid
-validate_registry_structure() {
+_numbering_validate_registry_structure() {
     local registry_file="$1"
     
     if [[ ! -f "$registry_file" ]]; then
@@ -46,7 +52,7 @@ validate_registry_structure() {
 # @arg $2 string Project identifier for initialization
 # @exitcode 0 On success
 # @exitcode 1 On error
-create_empty_registry() {
+_numbering_create_empty_registry() {
     local registry_file="$1"
     local project_id="$2"
     
@@ -87,9 +93,9 @@ EOF
 # @stderr Error messages
 # @exitcode 0 If successful
 # @exitcode 1 If project ID cannot be determined
-get_registry_path() {
+_numbering_get_registry_path() {
     local project_id
-    project_id="$(get_current_project_id)" || {
+    project_id="$(workspace_get_current_project_id)" || {
         echo "Error: Could not determine project ID" >&2
         return 1
     }
@@ -103,20 +109,20 @@ get_registry_path() {
 # @stderr Error messages
 # @exitcode 0 If successful
 # @exitcode 1 If registry cannot be created or validated
-ensure_registry() {
+_numbering_ensure_registry() {
     local registry_file
-    registry_file="$(get_registry_path)" || return 1
+    registry_file="$(_numbering_get_registry_path)" || return 1
     
     local project_id
-    project_id="$(get_current_project_id)" || return 1
+    project_id="$(workspace_get_current_project_id)" || return 1
     
     # Create registry if it doesn't exist
     if [[ ! -f "$registry_file" ]]; then
-        create_empty_registry "$registry_file" "$project_id" || return 1
+        _numbering_create_empty_registry "$registry_file" "$project_id" || return 1
     fi
     
     # Validate registry structure
-    if ! validate_registry_structure "$registry_file"; then
+    if ! _numbering_validate_registry_structure "$registry_file"; then
         echo "Error: Invalid registry structure in $registry_file" >&2
         return 1
     fi
@@ -130,7 +136,7 @@ ensure_registry() {
 # @stderr Error messages for timeout
 # @exitcode 0 On success
 # @exitcode 1 On timeout or error
-acquire_lock() {
+_numbering_acquire_lock() {
     local lock_file="$1"
     local timeout="${2:-$LOCK_TIMEOUT}"
     
@@ -152,7 +158,7 @@ acquire_lock() {
 
 # @description Release file lock
 # @exitcode 0 Always successful
-release_lock() {
+_numbering_release_lock() {
     exec 200>&-
 }
 
@@ -161,9 +167,9 @@ release_lock() {
 # @stderr Error messages
 # @exitcode 0 If successful
 # @exitcode 1 If project ID cannot be determined
-get_taskseq_path() {
+_numbering_get_taskseq_path() {
     local registry_file
-    registry_file="$(get_registry_path)" || return 1
+    registry_file="$(_numbering_get_registry_path)" || return 1
     
     echo "$(dirname "$registry_file")/TASKSEQ"
 }
@@ -173,12 +179,12 @@ get_taskseq_path() {
 # @stderr Error messages for invalid sequence or update failures
 # @exitcode 0 If successful
 # @exitcode 1 If TASKSEQ file is invalid or update fails
-get_next_sequence() {
+_numbering_get_next_sequence() {
     local taskseq_file
-    taskseq_file="$(get_taskseq_path)" || return 1
+    taskseq_file="$(_numbering_get_taskseq_path)" || return 1
     
     # Acquire lock for atomic read-increment-write
-    acquire_lock "$taskseq_file" || return 1
+    _numbering_acquire_lock "$taskseq_file" || return 1
     
     local current_seq
     if [[ -f "$taskseq_file" ]]; then
@@ -189,7 +195,7 @@ get_next_sequence() {
     
     # Validate current sequence is a number
     if ! [[ "$current_seq" =~ ^[0-9]+$ ]]; then
-        release_lock
+        _numbering_release_lock
         echo "Error: Invalid TASKSEQ content: $current_seq" >&2
         return 1
     fi
@@ -198,12 +204,12 @@ get_next_sequence() {
     
     # Write new sequence
     echo "$next_seq" > "$taskseq_file" || {
-        release_lock
+        _numbering_release_lock
         echo "Error: Failed to update TASKSEQ file" >&2
         return 1
     }
     
-    release_lock
+    _numbering_release_lock
     echo "$next_seq"
 }
 
@@ -212,9 +218,9 @@ get_next_sequence() {
 # @stderr Error messages
 # @exitcode 0 If successful
 # @exitcode 1 If project ID cannot be determined
-get_current_sequence() {
+numbering_get_current() {
     local taskseq_file
-    taskseq_file="$(get_taskseq_path)" || return 1
+    taskseq_file="$(_numbering_get_taskseq_path)" || return 1
     
     if [[ -f "$taskseq_file" ]]; then
         cat "$taskseq_file" 2>/dev/null || echo "0"
@@ -229,7 +235,7 @@ get_current_sequence() {
 # @stderr Error messages for invalid type or sequence failures
 # @exitcode 0 If successful
 # @exitcode 1 If invalid type or sequence generation fails
-get_next_number() {
+numbering_get_next() {
     local type="$1"  # "epic" or "task"
     
     if [[ "$type" != "epic" && "$type" != "task" ]]; then
@@ -239,7 +245,7 @@ get_next_number() {
     
     # Simply get next sequence number - no need for complex gap management
     local next_number
-    next_number="$(get_next_sequence)" || return 1
+    next_number="$(_numbering_get_next_sequence)" || return 1
     
     # Format as 3-digit zero-padded number
     printf "$NUMBER_FORMAT" "$next_number"
@@ -253,7 +259,7 @@ get_next_number() {
 # @stderr Error messages for missing parameters, lock failures, or registration errors
 # @exitcode 0 On success
 # @exitcode 1 On error
-register_epic() {
+numbering_register_epic() {
     local number="$1"
     local path="$2" 
     local name="$3"
@@ -265,17 +271,17 @@ register_epic() {
     fi
     
     local registry_file
-    registry_file="$(ensure_registry)" || return 1
+    registry_file="$(_numbering_ensure_registry)" || return 1
     
     # Acquire lock for atomic operation
-    acquire_lock "$registry_file" || return 1
+    _numbering_acquire_lock "$registry_file" || return 1
     
     # Check if number is already registered
     local existing_entry
     existing_entry=$(jq -r --arg num "$number" '.file_cache[$num]' "$registry_file")
     
     if [[ "$existing_entry" != "null" ]]; then
-        release_lock
+        _numbering_release_lock
         echo "Error: Number $number is already registered" >&2
         return 1
     fi
@@ -294,12 +300,12 @@ register_epic() {
     jq --arg num "$number" --argjson data "$epic_data" '.file_cache[$num] = $data' "$registry_file" > "$temp_file" && mv "$temp_file" "$registry_file"
     
     if [[ $? -ne 0 ]]; then
-        release_lock
+        _numbering_release_lock
         echo "Error: Failed to register epic $number" >&2
         return 1
     fi
     
-    release_lock
+    _numbering_release_lock
     return 0
 }
 
@@ -313,7 +319,7 @@ register_epic() {
 # @stderr Error messages for missing parameters, lock failures, or registration errors
 # @exitcode 0 On success
 # @exitcode 1 On error
-register_task() {
+numbering_register_task() {
     local number="$1"
     local parent_number="$2"  # Can be epic or task number
     local path="$3"
@@ -327,17 +333,17 @@ register_task() {
     fi
     
     local registry_file
-    registry_file="$(ensure_registry)" || return 1
+    registry_file="$(_numbering_ensure_registry)" || return 1
     
     # Acquire lock for atomic operation
-    acquire_lock "$registry_file" || return 1
+    _numbering_acquire_lock "$registry_file" || return 1
     
     # Check if number is already registered
     local existing_entry
     existing_entry=$(jq -r --arg num "$number" '.file_cache[$num]' "$registry_file")
     
     if [[ "$existing_entry" != "null" ]]; then
-        release_lock
+        _numbering_release_lock
         echo "Error: Number $number is already registered" >&2
         return 1
     fi
@@ -361,7 +367,7 @@ register_task() {
     jq --arg num "$number" --argjson data "$task_data" '.file_cache[$num] = $data' "$registry_file" > "$temp_file" && mv "$temp_file" "$registry_file"
     
     if [[ $? -ne 0 ]]; then
-        release_lock
+        _numbering_release_lock
         echo "Error: Failed to register task $number in file cache" >&2
         return 1
     fi
@@ -379,13 +385,13 @@ register_task() {
         jq --arg num "$number" --argjson data "$graph_data" '.graph_cache[$num] = $data' "$registry_file" > "$temp_file" && mv "$temp_file" "$registry_file"
         
         if [[ $? -ne 0 ]]; then
-            release_lock
+            _numbering_release_lock
             echo "Error: Failed to register task $number in graph cache" >&2
             return 1
         fi
     fi
     
-    release_lock
+    _numbering_release_lock
     return 0
 }
 
@@ -395,7 +401,7 @@ register_task() {
 # @stderr Error messages for missing parameters, already used numbers, invalid format, or reserved numbers
 # @exitcode 0 If available
 # @exitcode 1 If unavailable or invalid
-validate_number() {
+numbering_validate() {
     local number="$1"
     local type="$2"  # "epic" or "task"
     
@@ -405,7 +411,7 @@ validate_number() {
     fi
     
     local registry_file
-    registry_file="$(ensure_registry)" || return 1
+    registry_file="$(_numbering_ensure_registry)" || return 1
     
     # Check if number exists in registry
     local existing_entry
@@ -443,7 +449,7 @@ validate_number() {
 # @stderr Error messages for missing number parameter
 # @exitcode 0 If entry found
 # @exitcode 1 If entry not found or parameter missing
-find_by_number() {
+numbering_find_by_number() {
     local number="$1"
     
     if [[ -z "$number" ]]; then
@@ -452,7 +458,7 @@ find_by_number() {
     fi
     
     local registry_file
-    registry_file="$(ensure_registry)" || return 1
+    registry_file="$(_numbering_ensure_registry)" || return 1
     
     local entry
     entry=$(jq -r --arg num "$number" '.file_cache[$num]' "$registry_file")
@@ -469,12 +475,12 @@ find_by_number() {
 # @stderr Error messages
 # @exitcode 0 If successful
 # @exitcode 1 If registry cannot be accessed
-get_registry_stats() {
+numbering_get_stats() {
     local registry_file
-    registry_file="$(ensure_registry)" || return 1
+    registry_file="$(_numbering_ensure_registry)" || return 1
     
     local current_seq epic_count task_count
-    current_seq="$(get_current_sequence)"
+    current_seq="$(numbering_get_current)"
     epic_count=$(jq -r '.file_cache | to_entries | map(select(.value.type == "epic")) | length' "$registry_file")
     task_count=$(jq -r '.file_cache | to_entries | map(select(.value.type == "task")) | length' "$registry_file")
     
@@ -484,6 +490,7 @@ Registry Statistics:
   Epics: $epic_count
   Tasks: $task_count
   Registry File: $registry_file
-  TASKSEQ File: $(get_taskseq_path)
+  TASKSEQ File: $(_numbering_get_taskseq_path)
 EOF
 }
+

@@ -1,14 +1,18 @@
 #!/bin/bash
-# DOH Version: 0.1.0
-# Created: 2025-09-01T18:40:00Z
 
 # DOH File Headers Library
-# Provides utilities for adding and managing version headers in files
+# Pure library for adding and managing version headers in files (no automatic execution)
 
-# Source required dependencies
-source "$(dirname "${BASH_SOURCE[0]}")/dohenv.sh"
+# Source core library dependencies
 source "$(dirname "${BASH_SOURCE[0]}")/frontmatter.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/version.sh"
+
+# Guard against multiple sourcing
+[[ -n "${DOH_LIB_FILE_HEADERS_LOADED:-}" ]] && return 0
+DOH_LIB_FILE_HEADERS_LOADED=1
+
+# Constants
+readonly FILE_HEADERS_LIB_VERSION="1.0.0"
 
 # @description Add version header to a file based on its type
 # @arg $1 string Path to the file to add header to
@@ -17,7 +21,15 @@ source "$(dirname "${BASH_SOURCE[0]}")/version.sh"
 # @stderr Error messages if file not found or unsupported type
 # @exitcode 0 If successful
 # @exitcode 1 If file not found or error occurred
-add_version_header() {
+# @description Add version header to a file based on its type
+# @public
+# @arg $1 string Path to the file to add header to
+# @arg $2 string Optional version to use (defaults to current project version)
+# @stdout Success message
+# @stderr Error messages if file not found or unsupported type
+# @exitcode 0 If successful
+# @exitcode 1 If file not found or error occurred
+file_headers_add_version() {
     local file="$1"
     local version="${2:-}"
     
@@ -33,7 +45,7 @@ add_version_header() {
     
     # Get current version if not provided
     if [[ -z "$version" ]]; then
-        version=$(get_current_version) || {
+        version=$(version_get_current) || {
             echo "Error: Could not determine current version" >&2
             return 1
         }
@@ -45,7 +57,7 @@ add_version_header() {
     
     # For markdown files, we need special handling to respect existing style
     # For other file types, skip if header already exists
-    if [[ "$extension" != "md" ]] && file_has_version_header "$file"; then
+    if [[ "$extension" != "md" ]] && file_headers_file_has_version "$file"; then
         echo "File already has version header: $file" >&2
         return 0
     fi
@@ -53,19 +65,19 @@ add_version_header() {
     # Add header based on file type
     case "$extension" in
         sh)
-            add_shell_header "$file" "$version" "$created_date"
+            _file_headers_add_shell "$file" "$version" "$created_date"
             ;;
         md)
-            add_markdown_header "$file" "$version" "$created_date"
+            _file_headers_add_markdown "$file" "$version" "$created_date"
             ;;
         py)
-            add_python_header "$file" "$version" "$created_date"
+            _file_headers_add_python "$file" "$version" "$created_date"
             ;;
         js|ts)
-            add_javascript_header "$file" "$version" "$created_date"
+            _file_headers_add_javascript "$file" "$version" "$created_date"
             ;;
         yml|yaml)
-            add_yaml_header "$file" "$version" "$created_date"
+            _file_headers_add_yaml "$file" "$version" "$created_date"
             ;;
         *)
             echo "Warning: Unsupported file type: $extension" >&2
@@ -80,7 +92,12 @@ add_version_header() {
 # @arg $1 string Path to the file to check
 # @exitcode 0 If file has version header
 # @exitcode 1 If file doesn't have version header
-file_has_version_header() {
+# @description Check if file already has a version header
+# @public
+# @arg $1 string Path to the file to check
+# @exitcode 0 If file has version header
+# @exitcode 1 If file doesn't have version header
+file_headers_file_has_version() {
     local file="$1"
     
     # Check for various version header patterns:
@@ -99,7 +116,12 @@ file_has_version_header() {
 # @arg $1 string Path to the markdown file to check
 # @exitcode 0 If file uses HTML comment style
 # @exitcode 1 If file doesn't use HTML comment style
-markdown_uses_html_comments() {
+# @description Check if markdown file already uses HTML comments for versions
+# @private
+# @arg $1 string Path to the markdown file to check
+# @exitcode 0 If file uses HTML comment style
+# @exitcode 1 If file doesn't use HTML comment style
+_file_headers_markdown_uses_html_comments() {
     local file="$1"
     
     if head -n 10 "$file" | grep -q "<!-- DOH Version:" 2>/dev/null; then
@@ -113,7 +135,12 @@ markdown_uses_html_comments() {
 # @arg $1 string Path to file
 # @arg $2 string Version
 # @arg $3 string Created date
-add_shell_header() {
+# @description Add shell script header
+# @private
+# @arg $1 string Path to file
+# @arg $2 string Version
+# @arg $3 string Created date
+_file_headers_add_shell() {
     local file="$1"
     local version="$2"
     local created="$3"
@@ -143,7 +170,12 @@ add_shell_header() {
 # @arg $1 string Path to file
 # @arg $2 string Version
 # @arg $3 string Created date
-add_markdown_header() {
+# @description Add markdown header (respects existing style: frontmatter or HTML comments)
+# @private
+# @arg $1 string Path to file
+# @arg $2 string Version
+# @arg $3 string Created date
+_file_headers_add_markdown() {
     local file="$1"
     local version="$2"
     local created="$3"
@@ -154,7 +186,7 @@ add_markdown_header() {
     # 2. If file already has HTML comments → use HTML comments
     # 3. If file has neither → choose based on file type/location
     
-    if has_frontmatter "$file"; then
+    if frontmatter_has "$file"; then
         # File already has frontmatter - update it safely
         local temp_file=$(mktemp)
         local in_frontmatter=false
@@ -196,7 +228,7 @@ add_markdown_header() {
         done < "$file"
         
         mv "$temp_file" "$file"
-    elif markdown_uses_html_comments "$file"; then
+    elif _file_headers_markdown_uses_html_comments "$file"; then
         # File already uses HTML comments - update them
         local temp_file=$(mktemp)
         local updated_version=false
@@ -247,7 +279,12 @@ add_markdown_header() {
 # @arg $1 string Path to file
 # @arg $2 string Version
 # @arg $3 string Created date
-add_python_header() {
+# @description Add Python header
+# @private
+# @arg $1 string Path to file
+# @arg $2 string Version
+# @arg $3 string Created date
+_file_headers_add_python() {
     local file="$1"
     local version="$2"
     local created="$3"
@@ -277,7 +314,12 @@ add_python_header() {
 # @arg $1 string Path to file
 # @arg $2 string Version
 # @arg $3 string Created date
-add_javascript_header() {
+# @description Add JavaScript/TypeScript header
+# @private
+# @arg $1 string Path to file
+# @arg $2 string Version
+# @arg $3 string Created date
+_file_headers_add_javascript() {
     local file="$1"
     local version="$2"
     local created="$3"
@@ -296,7 +338,12 @@ add_javascript_header() {
 # @arg $1 string Path to file
 # @arg $2 string Version
 # @arg $3 string Created date
-add_yaml_header() {
+# @description Add YAML header
+# @private
+# @arg $1 string Path to file
+# @arg $2 string Version
+# @arg $3 string Created date
+_file_headers_add_yaml() {
     local file="$1"
     local version="$2"
     local created="$3"
@@ -317,11 +364,18 @@ add_yaml_header() {
 # @stderr Error messages for failures
 # @exitcode 0 If all files processed successfully
 # @exitcode 1 If any file failed
-batch_add_headers() {
+# @description Process multiple files to add version headers
+# @public
+# @arg $@ string Paths to files to process
+# @stdout Progress and success messages
+# @stderr Error messages for failures
+# @exitcode 0 If all files processed successfully
+# @exitcode 1 If any file failed
+file_headers_batch_add() {
     local failed=0
     
     for file in "$@"; do
-        if add_version_header "$file"; then
+        if file_headers_add_version "$file"; then
             echo "✓ $file"
         else
             echo "✗ $file" >&2
@@ -335,11 +389,15 @@ batch_add_headers() {
 # @description Find all files missing version headers
 # @arg $1 string Optional directory to search (default: current directory)
 # @stdout List of files missing version headers
-find_files_missing_headers() {
+# @description Find all files missing version headers
+# @public
+# @arg $1 string Optional directory to search (default: current directory)
+# @stdout List of files missing version headers
+file_headers_find_missing_files() {
     local dir="${1:-.}"
     
     find "$dir" -type f \( -name "*.sh" -o -name "*.md" -o -name "*.py" -o -name "*.js" -o -name "*.ts" -o -name "*.yml" -o -name "*.yaml" \) | while read -r file; do
-        if ! file_has_version_header "$file"; then
+        if ! file_headers_file_has_version "$file"; then
             echo "$file"
         fi
     done

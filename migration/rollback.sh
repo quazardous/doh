@@ -4,8 +4,8 @@
 # Restores project state from migration backups
 
 # Source required dependencies
-LIB_DIR="$(dirname "$0")/../lib"
-source "$LIB_DIR/workspace.sh"
+LIB_DIR="$(dirname "$0")/../.claude/scripts/doh/lib"
+source "$LIB_DIR/dohenv.sh"
 
 # Colors for output
 RED='\033[0;31m'

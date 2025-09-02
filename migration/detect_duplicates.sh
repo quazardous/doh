@@ -4,10 +4,10 @@
 # Scans project for number conflicts and builds conflict map
 
 # Source required dependencies
-LIB_DIR="$(dirname "$0")/../lib"
-source "$LIB_DIR/workspace.sh"
+LIB_DIR="$(dirname "$0")/../.claude/scripts/doh/lib"
+source "$LIB_DIR/dohenv.sh"
 source "$LIB_DIR/numbering.sh"
-source "$LIB_DIR/message-queue.sh"
+source "$LIB_DIR/graph-cache.sh"
 
 # Colors for output
 RED='\033[0;31m'

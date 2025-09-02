@@ -19,8 +19,7 @@ Show current workspace state and diagnostic information, or reset corrupted work
 ```bash
 if [[ "$ARGUMENTS" == "--reset" ]]; then
   # Execute reset operation
-  source .claude/scripts/doh/lib/workspace.sh
-  reset_workspace
+  bash .claude/scripts/doh/helper.sh workflow workspace --reset
   exit $?
 fi
 ```
@@ -28,8 +27,8 @@ fi
 ### 2. Load Workspace Libraries
 
 ```bash
-source .claude/scripts/doh/lib/workspace.sh
-source .claude/scripts/doh/lib/task.sh
+# Use helper system instead of direct library sourcing
+bash .claude/scripts/doh/helper.sh workflow workspace
 ```
 
 ### 3. Display Workspace Diagnostic

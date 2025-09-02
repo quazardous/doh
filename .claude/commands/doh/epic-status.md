@@ -2,7 +2,7 @@
 allowed-tools: Bash
 ---
 
-Run `bash .claude/scripts/doh/epic-status.sh $ARGUMENTS` using the bash tool and show me the complete stdout printed to the console.
+Run `bash .claude/scripts/doh/helper.sh epic status $ARGUMENTS` using the bash tool and show me the complete stdout printed to the console.
 
 - DO NOT truncate.
 - DO NOT collapse.

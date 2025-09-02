@@ -15,15 +15,95 @@ Every script should start with a clear header:
 # Dependencies: lib1.sh, lib2.sh
 ```
 
-### Source Dependencies
+### Modern DOH Architecture: Primary Entry Points
 
-Always source required libraries at the top after the header:
+The DOH project provides two primary entry points that should be used instead of direct library sourcing:
+
+## PRIMARY ENTRY POINTS
+
+### 1. Helper Bootstrap (`.claude/scripts/doh/helper.sh`) - **FOR CLI OPERATIONS**
+
+The helper bootstrap is the **primary entry point** for all CLI operations and consolidated functionality:
 
 ```bash
-# Source required dependencies
-LIB_DIR="$(dirname "${BASH_SOURCE[0]}")/../lib"
-source "$LIB_DIR/workspace.sh"
-source "$LIB_DIR/numbering.sh"
+# Source the helper bootstrap - primary CLI entry point
+source ".claude/scripts/doh/helper.sh"
+
+# CLI operations through helper system
+helper_epic_list "active"                    # List active epics
+helper_prd_status "003"                      # Show PRD status  
+helper_workflow_next                         # Show next tasks
+helper_core_init                             # Initialize DOH project
+```
+
+**Key Benefits:**
+- **Dynamic Discovery**: Automatically discovers available helpers
+- **Consolidated Operations**: Groups related functionality
+- **Consistent Interface**: All CLI operations through `helper_domain_action()` pattern
+- **Bootstrap Protection**: Helpers cannot be called directly
+
+### 2. API Helper (`.claude/scripts/doh/api.sh`) - **FOR EXTERNAL SCRIPTS**
+
+The API helper is the **primary entry point** for external scripts and clean function calls:
+
+```bash
+# API calls - primary external entry point
+current_version="$(./.claude/scripts/doh/api.sh version get_current)"
+task_status="$(./.claude/scripts/doh/api.sh task get_status "task.md")"
+
+# Private function access
+version_number="$(./.claude/scripts/doh/api.sh --private version to_number "1.0.0")"
+```
+
+**Key Benefits:**
+- **Clean API**: No function prefixes needed
+- **Automatic Loading**: Handles library dependencies
+- **Error Handling**: Clear messages and proper exit codes
+- **Public/Private**: Access to both public and private functions
+
+## COMMAND FILES: USE API.SH OR HELPER.SH
+
+**CRITICAL RULE**: Command markdown files should use `api.sh` or `helper.sh` instead of directly sourcing libraries.
+
+### ❌ DON'T DO THIS in Command Files:
+
+```bash
+# DON'T: Direct library sourcing in .claude/commands/doh/*.md
+source ".claude/scripts/doh/lib/workspace.sh"
+source ".claude/scripts/doh/lib/numbering.sh"
+next_epic="$(numbering_get_next "epic")"
+```
+
+### ✅ USE THESE PATTERNS INSTEAD:
+
+**For command files - use API helper:**
+```bash
+# ✅ In .claude/commands/doh/some-command.md implementation
+next_epic="$(./.claude/scripts/doh/api.sh numbering get_next "epic")"
+task_status="$(./.claude/scripts/doh/api.sh task get_status "task.md")"
+```
+
+**For CLI operations - use helper bootstrap:**
+```bash
+# ✅ In .claude/commands/doh/some-command.md implementation
+source ".claude/scripts/doh/helper.sh"
+helper_epic_create "new-feature"
+```
+
+### ✅ THESE ARE ALLOWED:
+
+**Libraries can source other libraries:**
+```bash
+# ✅ Inside .claude/scripts/doh/lib/some-library.sh
+source ".claude/scripts/doh/lib/workspace.sh"
+source ".claude/scripts/doh/lib/frontmatter.sh"
+```
+
+**Helpers can source libraries:**
+```bash
+# ✅ Inside .claude/scripts/doh/helper/epic.sh
+source ".claude/scripts/doh/lib/numbering.sh"
+source ".claude/scripts/doh/lib/frontmatter.sh"
 ```
 
 ## Function Documentation
@@ -38,7 +118,7 @@ Use **shdoc** format for documenting functions. This provides comprehensive API 
 # @stdout Zero-padded 3-digit number (e.g., "001")
 # @exitcode 0 If successful
 # @exitcode 1 If invalid type provided
-get_next_number() {
+numbering_get_next() {
     local type="$1"
     
     if [[ "$type" != "epic" && "$type" != "task" ]]; then
@@ -64,7 +144,7 @@ get_next_number() {
 # @exitcode 0 If registration successful
 # @exitcode 1 If invalid parameters provided
 # @exitcode 2 If task number already exists
-register_task() {
+numbering_register_task() {
     local number="$1"
     local parent_number="$2"
     local path="$3"
@@ -187,117 +267,173 @@ fi
 #   4 - File system error
 ```
 
-## Project Structure
+## DOH Architecture: Libraries, Helpers, and API
 
-The DOH project follows a clear organizational pattern that separates different types of scripts and libraries:
+The DOH project follows a modern three-tier architecture:
 
 ### Directory Layout
 
 ```
 doh/
-├── .claude/scripts/doh/          # DOH system scripts
-│   ├── lib/                      # Core reusable libraries  
+├── .claude/scripts/doh/
+│   ├── lib/                      # TIER 1: Core Libraries
 │   │   ├── workspace.sh          # Project structure and paths
 │   │   ├── numbering.sh          # Number generation and registry
 │   │   ├── file-cache.sh         # File metadata caching
 │   │   ├── graph-cache.sh        # Relationship caching
 │   │   ├── frontmatter.sh        # YAML frontmatter parsing
-│   │   ├── message-queue.sh      # Message queue operations
-│   │   └── version.sh            # Version management
-│   ├── helper/                   # CLI wrapper scripts
-│   │   ├── queue-commands.sh     # CLI for queue operations
-│   │   └── doh-numbering.sh      # CLI for numbering (deprecated)
-│   ├── init.sh                   # Regular DOH commands
-│   ├── status.sh                 # (available via /doh:command)
-│   ├── epic-list.sh             
-│   └── ...
-├── migration/                    # Specialized/unusual scripts
-│   ├── migrate.sh               # Database migration tools
-│   ├── deduplicate.sh           # Data cleanup utilities
-│   ├── detect_duplicates.sh     # Analysis scripts
-│   └── rollback.sh              # Recovery operations
-└── tests/                       # Test framework
-    ├── unit/                    # Unit tests
-    ├── integration/             # Integration tests
-    └── helpers/                 # Test framework
+│   │   ├── version.sh            # Version management
+│   │   └── dohenv.sh             # Environment initialization
+│   ├── helper/                   # TIER 2: Helper Bootstrap System
+│   │   ├── core.sh               # System operations (init, help, validate)
+│   │   ├── epic.sh               # Epic management operations
+│   │   ├── prd.sh                # PRD management operations
+│   │   ├── workflow.sh           # Workflow operations (standup, next)
+│   │   └── queue.sh              # Queue management operations
+│   ├── helper.sh                 # Helper bootstrap script
+│   ├── api.sh                    # TIER 3: Clean API Interface
+│   └── *.sh                      # Legacy command scripts
+├── migration/                    # Specialized scripts
+└── tests/                        # Test framework
 ```
+
+### Architecture Tiers
+
+**TIER 1: Libraries** - Pure business logic functions
+- Function naming: `library_function_name()` (e.g., `numbering_get_next()`)
+- Private functions: `_library_function_name()` (e.g., `_numbering_ensure_registry()`)
+- No user interaction, pure input/output
+- Testable and reusable
+
+**TIER 2: Helpers** - CLI interface consolidation
+- Function naming: `helper_domain_action()` (e.g., `helper_epic_list()`)
+- Bootstrap discovery via `helper.sh`
+- Consolidate related CLI operations
+- Handle argument parsing and formatting
+
+**TIER 3: API** - Clean external interface
+- No prefixes needed: `./.claude/scripts/doh/api.sh version get_current`
+- Automatic library loading and dependency resolution
+- Recommended for external usage and scripts
 
 ### Purpose of Each Directory
 
-#### **`.claude/scripts/doh/lib/`** - Core Libraries
-- **Purpose**: Reusable business logic functions
-- **Usage**: Sourced by other scripts and libraries
+#### **TIER 1: Libraries** (`lib/`) - Core Business Logic
+- **Naming**: `library_function()` public, `_library_function()` private
+- **Usage**: Direct sourcing for internal scripts
+- **Examples**: `numbering_get_next()`, `version_compare()`, `frontmatter_get_field()`
 - **Characteristics**:
   - Pure functions with clear inputs/outputs
-  - No direct user interaction
-  - Well-documented with @param/@return
+  - No user interaction or output formatting
+  - Well-documented with shdoc format
   - Testable and mockable
-  - Example: `get_next_number()`, `queue_message()`
+  - Dependency management through explicit sourcing
 
-#### **`.claude/scripts/doh/helper/`** - CLI Helpers/Wrappers  
-- **Purpose**: Command-line interface wrappers around core libraries
-- **Usage**: Called from DOH command system
+#### **TIER 2: Helpers** (`helper/`) - CLI Consolidation
+- **Naming**: `helper_domain_action()` (e.g., `helper_epic_list()`)
+- **Usage**: Via helper bootstrap system (`source helper.sh`)
+- **Discovery**: Dynamic discovery from helper directory
 - **Characteristics**:
-  - Functions prefixed with `cmd_`
+  - Consolidate related CLI operations
   - Handle argument parsing and user interaction
   - Format output for human consumption
-  - Example: `cmd_queue_status()`, `cmd_queue_list()`
+  - Cannot be called directly - must use bootstrap
+  - Example: `helper_prd_status()`, `helper_workflow_standup()`
 
-#### **`.claude/scripts/doh/`** - Regular DOH Commands
-- **Purpose**: Standard DOH functionality available via `/doh:command`
-- **Usage**: Direct execution through DOH system
+#### **TIER 3: API** (`api.sh`) - Clean External Interface
+- **Usage**: `./.claude/scripts/doh/api.sh library function [args]`
+- **Examples**: 
+  - `api.sh version get_current`
+  - `api.sh task is_completed "task.md"`
+  - `api.sh --private version to_number "1.0.0"`
 - **Characteristics**:
-  - Executable scripts
-  - User-facing functionality
-  - Integration with DOH workflow
-  - Example: `init.sh`, `status.sh`, `epic-list.sh`
+  - No function prefixes needed
+  - Automatic library loading and dependency resolution
+  - Clean API for external usage
+  - Supports both public and private function calls
+  - Recommended approach for external scripts
 
-#### **`./migration/`** - Specialized Scripts
-- **Purpose**: Unusual, specialized, or one-time operations
+#### **Legacy Commands** (`.claude/scripts/doh/*.sh`)
+- **Status**: Being migrated to helper system
+- **Usage**: Direct execution through DOH system (`/doh:command`)
+- **Future**: Will be replaced by helper bootstrap calls
+
+#### **Migration Scripts** (`migration/`)
+- **Purpose**: Specialized, one-time, or unusual operations
 - **Usage**: Manual execution for specific scenarios
-- **Characteristics**:
-  - Not part of regular DOH workflow
-  - Complex operations (migrations, analysis, cleanup)
-  - May require special permissions or setup
-  - Example: `migrate.sh`, `deduplicate.sh`
+- **Characteristics**: Not part of regular DOH workflow
 
-## Library Usage
+## Usage Patterns by Tier
 
-### Factorization Principles
-
-1. **Single Responsibility**: Each library handles one domain
-2. **No Duplication**: Common functionality lives in shared libraries
-3. **Clear Dependencies**: Explicit library sourcing and dependency chains
-4. **Proper Separation**: Core logic separate from CLI interfaces
-
-### Using Libraries
+### TIER 1: Direct Library Usage (Internal Scripts)
 
 ```bash
-# Source dependencies in order
-source "$LIB_DIR/workspace.sh"
-source "$LIB_DIR/numbering.sh"  # Depends on workspace.sh
+# Source dependencies explicitly
+source ".claude/scripts/doh/lib/dohenv.sh"
+source ".claude/scripts/doh/lib/workspace.sh"
+source ".claude/scripts/doh/lib/numbering.sh"
 
-# Use library functions
+# Use prefixed library functions
 local project_root
-project_root="$(_find_doh_root)" || {
+project_root="$(doh_find_root)" || {
     echo "Error: Not in DOH project" >&2
     return 1
 }
 
 local next_epic
-next_epic="$(get_next_number "epic")" || {
+next_epic="$(numbering_get_next "epic")" || {
     echo "Error: Could not generate epic number" >&2
     return 1
 }
 ```
 
+### TIER 2: Helper Bootstrap Usage (CLI Scripts)
+
+```bash
+# Source helper bootstrap
+source ".claude/scripts/doh/helper.sh"
+
+# Use helper functions with automatic discovery
+helper_epic_list "active"                    # Lists active epics
+helper_prd_status "003"                      # Shows PRD status
+helper_workflow_next                         # Shows next tasks
+```
+
+### RECOMMENDED: API Helper (External Scripts)
+
+```bash
+# Use API helper - the primary external entry point
+current_version="$(./.claude/scripts/doh/api.sh version get_current)"
+task_status="$(./.claude/scripts/doh/api.sh task get_status "task.md")"
+
+# Private function access
+version_number="$(./.claude/scripts/doh/api.sh --private version to_number "1.0.0")"
+```
+
+### Architecture Principles
+
+1. **Primary Entry Points**: Use `helper.sh` for CLI, `api.sh` for external scripts
+2. **Avoid Direct Sourcing**: Never source libraries directly - use entry points
+3. **Helper Bootstrap**: Consolidates and discovers CLI operations automatically  
+4. **API Simplicity**: Clean interface without function prefixes
+5. **Tier Separation**: Libraries → Helpers → API (no reverse dependencies)
+
 ## Variable Management
 
 ### Naming Conventions
 
+**Functions:**
+- Libraries: `library_function()` (public), `_library_function()` (private)
+- Helpers: `helper_domain_action()`
+- Examples: `numbering_get_next()`, `helper_epic_list()`, `_version_to_number()`
+
+**Variables:**
 - `UPPERCASE` - Global constants and environment variables
 - `lowercase` - Local variables and function parameters
-- `_private` - Internal/private functions (prefix with underscore)
+
+**Files:**
+- Libraries: `library-name.sh` (e.g., `frontmatter.sh`)
+- Helpers: `domain.sh` (e.g., `epic.sh`, `workflow.sh`)
 
 ### Local Variables
 
@@ -335,13 +471,14 @@ export DOH_TEST_MODE="true"
 
 ### Atomic Operations
 
-Use temporary files for atomic updates:
+Use TMPDIR-aware temporary files for atomic updates:
 
 ```bash
 update_config() {
     local config_file="$1"
     local temp_file
     
+    # mktemp automatically respects TMPDIR
     temp_file=$(mktemp) || {
         echo "Error: Could not create temporary file" >&2
         return 1
@@ -357,6 +494,8 @@ update_config() {
     mv "$temp_file" "$config_file"
 }
 ```
+
+**Note**: Always use `mktemp` which respects the `TMPDIR` environment variable. Never hard-code `/tmp/` paths.
 
 ### File Locks
 
@@ -469,17 +608,59 @@ sanitize_filename() {
 
 ### Temporary File Security
 
+**CRITICAL**: Always be TMPDIR aware when creating temporary files or directories.
+
 ```bash
+# ✅ GOOD: TMPDIR-aware temporary file creation
 create_secure_temp() {
     local temp_file
     
-    # Create with restrictive permissions
+    # mktemp respects TMPDIR environment variable
     temp_file=$(mktemp) || return 1
     chmod 600 "$temp_file"
     
     echo "$temp_file"
 }
+
+# ✅ GOOD: TMPDIR-aware temporary directory
+create_temp_dir() {
+    local temp_dir
+    
+    # mktemp -d respects TMPDIR environment variable
+    temp_dir=$(mktemp -d) || return 1
+    chmod 700 "$temp_dir"
+    
+    echo "$temp_dir"
+}
+
+# ✅ GOOD: Explicit TMPDIR with fallback
+create_temp_in_location() {
+    local temp_file
+    local tmpdir="${TMPDIR:-/tmp}"
+    
+    temp_file=$(mktemp -p "$tmpdir") || return 1
+    chmod 600 "$temp_file"
+    
+    echo "$temp_file"
+}
 ```
+
+**❌ DON'T DO THIS:**
+```bash
+# DON'T: Hard-coded /tmp paths (ignores TMPDIR)
+temp_file="/tmp/myapp-$$-$(date +%s)"
+touch "$temp_file"
+
+# DON'T: Hard-coded temporary locations
+temp_dir="/tmp/myapp-work"
+mkdir -p "$temp_dir"
+```
+
+**TMPDIR Best Practices:**
+- Use `mktemp` and `mktemp -d` which automatically respect `TMPDIR`
+- Always set restrictive permissions: `600` for files, `700` for directories
+- Clean up temporary files/directories on script exit
+- Use `${TMPDIR:-/tmp}` pattern when you need explicit TMPDIR access
 
 ## Documentation
 

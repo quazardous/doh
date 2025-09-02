@@ -2,7 +2,7 @@
 allowed-tools: Bash
 ---
 
-Run `bash .claude/scripts/doh/prd-list.sh` using a sub-agent and show me the complete output.
+Run `bash .claude/scripts/doh/helper.sh prd list` using a sub-agent and show me the complete output.
 
 - DO NOT truncate.
 - DO NOT collapse.

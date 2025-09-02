@@ -4,13 +4,12 @@
 # Resolves number conflicts using priority-based renumbering
 
 # Source required dependencies
-LIB_DIR="$(dirname "$0")/../lib"
-source "$LIB_DIR/workspace.sh"
+LIB_DIR="$(dirname "$0")/../.claude/scripts/doh/lib"
+source "$LIB_DIR/dohenv.sh"
 source "$LIB_DIR/numbering.sh"
-source "$LIB_DIR/message-queue.sh"
-source "$LIB_DIR/file-cache.sh"
+source "$LIB_DIR/graph-cache.sh"
 
-MIGRATION_DIR="$(dirname "$0")"
+MIGRATION_DIR="$(dirname "${BASH_SOURCE[0]}")"
 source "$MIGRATION_DIR/detect_duplicates.sh"
 
 # Colors for output

@@ -4,10 +4,10 @@
 # Coordinates detection, deduplication, and validation processes
 
 # Source required dependencies
-LIB_DIR="$(dirname "$0")/../lib"
+LIB_DIR="$(dirname "$0")/../.claude/scripts/doh/lib"
 MIGRATION_DIR="$(dirname "$0")"
 
-source "$LIB_DIR/workspace.sh"
+source "$LIB_DIR/dohenv.sh"
 source "$MIGRATION_DIR/detect_duplicates.sh"
 source "$MIGRATION_DIR/deduplicate.sh"
 source "$MIGRATION_DIR/rollback.sh"

@@ -1,19 +1,29 @@
 #!/bin/bash
 
-# Graph cache for tracking parent/child relationships and dependencies
+# DOH Graph Cache Library
+# Pure library for tracking parent/child relationships and dependencies (no automatic execution)
 # One-way cache: stores parent relationships for fast lookup
 
-# Source required dependencies
+# Source core library dependencies
+source "$(dirname "${BASH_SOURCE[0]}")/doh.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/workspace.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/numbering.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/frontmatter.sh"
+
+# Guard against multiple sourcing
+[[ -n "${DOH_LIB_GRAPH_CACHE_LOADED:-}" ]] && return 0
+DOH_LIB_GRAPH_CACHE_LOADED=1
+
+# Constants
+readonly GRAPH_CACHE_LIB_VERSION="1.0.0"
 
 # @description Get graph cache path
 # @stdout Path to the graph cache JSON file
 # @exitcode 0 If successful
 # @exitcode 1 If unable to determine project ID
-get_graph_cache_path() {
+_graph_cache_get_cache_path() {
     local project_id
-    project_id="$(get_current_project_id)" || return 1
+    project_id="$(workspace_get_current_project_id)" || return 1
     
     echo "$HOME/.doh/projects/$project_id/graph_cache.json"
 }
@@ -22,7 +32,7 @@ get_graph_cache_path() {
 # @arg $1 string Path to the cache file to create
 # @exitcode 0 If successful
 # @exitcode 1 If unable to create cache file
-create_empty_graph_cache() {
+_graph_cache_create_empty_cache() {
     local cache_file="$1"
     
     mkdir -p "$(dirname "$cache_file")"
@@ -30,8 +40,9 @@ create_empty_graph_cache() {
     cat > "$cache_file" << EOF
 {
   "relationships": {},
+  "versions": {},
   "last_updated": "$(date -Iseconds)",
-  "version": "1.0"
+  "version": "1.1"
 }
 EOF
 }
@@ -41,18 +52,18 @@ EOF
 # @stderr Warning messages if cache needs rebuilding
 # @exitcode 0 If successful
 # @exitcode 1 If unable to create or validate cache
-ensure_graph_cache() {
+_graph_cache_ensure_cache() {
     local cache_file
-    cache_file="$(get_graph_cache_path)" || return 1
+    cache_file="$(_graph_cache_get_cache_path)" || return 1
     
     if [[ ! -f "$cache_file" ]]; then
-        create_empty_graph_cache "$cache_file" || return 1
+        _graph_cache_create_empty_cache "$cache_file" || return 1
     fi
     
     # Validate cache structure
     if ! jq -e '.relationships' "$cache_file" >/dev/null 2>&1; then
         echo "Warning: Corrupted graph cache, rebuilding..." >&2
-        create_empty_graph_cache "$cache_file" || return 1
+        _graph_cache_create_empty_cache "$cache_file" || return 1
     fi
     
     echo "$cache_file"
@@ -65,10 +76,10 @@ ensure_graph_cache() {
 # @stderr Error messages
 # @exitcode 0 If successful
 # @exitcode 1 If number parameter missing or cache update fails
-add_relationship() {
-    local number="$1"
-    local parent_number="$2"  # Optional
-    local epic_name="$3"      # Optional
+graph_cache_add_relationship() {
+    local number="${1:-}"
+    local parent_number="${2:-}"  # Optional
+    local epic_name="${3:-}"      # Optional
     
     if [[ -z "$number" ]]; then
         echo "Error: Number parameter required" >&2
@@ -76,7 +87,7 @@ add_relationship() {
     fi
     
     local cache_file
-    cache_file="$(ensure_graph_cache)" || return 1
+    cache_file="$(_graph_cache_ensure_cache)" || return 1
     
     # Build relationship data
     local relationship="{}"
@@ -92,7 +103,7 @@ add_relationship() {
     # Only add if we have meaningful relationship data
     if [[ "$relationship" != "{}" ]]; then
         # Acquire lock for atomic update
-        acquire_lock "$cache_file" || return 1
+        file_cache_acquire_lock "$cache_file" || return 1
         
         local temp_file=$(mktemp)
         jq --arg num "$number" --argjson rel "$relationship" --arg timestamp "$(date -Iseconds)" '
@@ -100,7 +111,7 @@ add_relationship() {
             .last_updated = $timestamp
         ' "$cache_file" > "$temp_file" && mv "$temp_file" "$cache_file"
         
-        release_lock
+        file_cache_release_lock
     fi
     
     return 0
@@ -111,7 +122,7 @@ add_relationship() {
 # @stderr Error messages
 # @exitcode 0 If successful
 # @exitcode 1 If number parameter missing or cache update fails
-remove_relationship() {
+graph_cache_remove_relationship() {
     local number="$1"
     
     if [[ -z "$number" ]]; then
@@ -120,7 +131,7 @@ remove_relationship() {
     fi
     
     local cache_file
-    cache_file="$(ensure_graph_cache)" || return 1
+    cache_file="$(_graph_cache_ensure_cache)" || return 1
     
     # Acquire lock for atomic update
     acquire_lock "$cache_file" || return 1
@@ -131,7 +142,7 @@ remove_relationship() {
         .last_updated = $timestamp
     ' "$cache_file" > "$temp_file" && mv "$temp_file" "$cache_file"
     
-    release_lock
+    file_cache_release_lock
     
     return 0
 }
@@ -142,7 +153,7 @@ remove_relationship() {
 # @stderr Error messages
 # @exitcode 0 If parent found
 # @exitcode 1 If number parameter missing or parent not found
-get_parent() {
+graph_cache_get_parent() {
     local number="$1"
     
     if [[ -z "$number" ]]; then
@@ -151,7 +162,7 @@ get_parent() {
     fi
     
     local cache_file
-    cache_file="$(ensure_graph_cache)" || return 1
+    cache_file="$(_graph_cache_ensure_cache)" || return 1
     
     local parent
     parent=$(jq -r --arg num "$number" '.relationships[$num].parent // empty' "$cache_file")
@@ -170,7 +181,7 @@ get_parent() {
 # @stderr Error messages
 # @exitcode 0 If epic found
 # @exitcode 1 If number parameter missing or epic not found
-get_epic() {
+graph_cache_get_epic() {
     local number="$1"
     
     if [[ -z "$number" ]]; then
@@ -179,7 +190,7 @@ get_epic() {
     fi
     
     local cache_file
-    cache_file="$(ensure_graph_cache)" || return 1
+    cache_file="$(_graph_cache_ensure_cache)" || return 1
     
     local epic
     epic=$(jq -r --arg num "$number" '.relationships[$num].epic // empty' "$cache_file")
@@ -198,7 +209,7 @@ get_epic() {
 # @stderr Error messages
 # @exitcode 0 If children found
 # @exitcode 1 If parent number parameter missing or no children found
-get_children() {
+graph_cache_get_children() {
     local parent_number="$1"
     
     if [[ -z "$parent_number" ]]; then
@@ -207,7 +218,7 @@ get_children() {
     fi
     
     local cache_file
-    cache_file="$(ensure_graph_cache)" || return 1
+    cache_file="$(_graph_cache_ensure_cache)" || return 1
     
     local children
     children=$(jq -r --arg parent "$parent_number" '
@@ -230,7 +241,7 @@ get_children() {
 # @stderr Error messages
 # @exitcode 0 If items found
 # @exitcode 1 If epic name parameter missing or no items found
-get_epic_items() {
+graph_cache_get_epic_items() {
     local epic_name="$1"
     
     if [[ -z "$epic_name" ]]; then
@@ -239,7 +250,7 @@ get_epic_items() {
     fi
     
     local cache_file
-    cache_file="$(ensure_graph_cache)" || return 1
+    cache_file="$(_graph_cache_ensure_cache)" || return 1
     
     local items
     items=$(jq -r --arg epic "$epic_name" '
@@ -260,12 +271,12 @@ get_epic_items() {
 # @stderr Progress messages
 # @exitcode 0 If successful
 # @exitcode 1 If unable to find project root or create cache
-rebuild_graph_cache() {
+graph_cache_rebuild() {
     local project_root
-    project_root="$(_find_doh_root)" || return 1
+    project_root="$(doh_find_root)" || return 1
     
     local cache_file
-    cache_file="$(ensure_graph_cache)" || return 1
+    cache_file="$(_graph_cache_ensure_cache)" || return 1
     
     echo "Rebuilding graph cache..." >&2
     
@@ -278,7 +289,7 @@ rebuild_graph_cache() {
     
     while IFS= read -r file; do
         if [[ -n "$file" && -f "$file" ]]; then
-            local number parent_number epic_name
+            local number="" parent_number="" epic_name=""
             
             # Extract metadata from frontmatter
             number=$(grep -m 1 "^number:" "$file" | cut -d':' -f2- | xargs)
@@ -299,7 +310,7 @@ rebuild_graph_cache() {
             
             # Add relationship if we have useful data
             if [[ -n "$number" && ( -n "$parent_number" || -n "$epic_name" ) ]]; then
-                add_relationship "$number" "$parent_number" "$epic_name"
+                graph_cache_add_relationship "$number" "$parent_number" "$epic_name"
             fi
         fi
     done <<< "$numbered_files"
@@ -312,12 +323,12 @@ rebuild_graph_cache() {
 # @stderr Progress and validation messages
 # @exitcode 0 If cache is consistent
 # @exitcode 1 If cache has validation warnings
-validate_graph_cache() {
+graph_cache_validate() {
     local cache_file
-    cache_file="$(ensure_graph_cache)" || return 1
+    cache_file="$(_graph_cache_ensure_cache)" || return 1
     
     local project_root
-    project_root="$(_find_doh_root)" || return 1
+    project_root="$(doh_find_root)" || return 1
     
     local errors=0
     
@@ -365,18 +376,18 @@ validate_graph_cache() {
 # @stderr Status messages
 # @exitcode 0 If cache is healthy or successfully healed
 # @exitcode 1 If cache still has issues after healing
-heal_graph_cache() {
+graph_cache_heal() {
     echo "Running graph cache self-healing..." >&2
     
-    if validate_graph_cache; then
+    if graph_cache_validate; then
         echo "Graph cache is healthy" >&2
         return 0
     fi
     
     echo "Rebuilding graph cache..." >&2
-    rebuild_graph_cache
+    graph_cache_rebuild
     
-    if validate_graph_cache; then
+    if graph_cache_validate; then
         echo "Graph cache healed successfully" >&2
         return 0
     else
@@ -389,9 +400,9 @@ heal_graph_cache() {
 # @stdout Formatted statistics string
 # @exitcode 0 If successful
 # @exitcode 1 If unable to access cache
-get_graph_cache_stats() {
+graph_cache_get_stats() {
     local cache_file
-    cache_file="$(ensure_graph_cache)" || return 1
+    cache_file="$(_graph_cache_ensure_cache)" || return 1
     
     local total_relationships parent_count epic_count last_updated
     total_relationships=$(jq -r '.relationships | length' "$cache_file")
@@ -413,9 +424,9 @@ EOF
 # @stderr Relationship tree output
 # @exitcode 0 If successful
 # @exitcode 1 If unable to access cache
-print_relationship_tree() {
+graph_cache_print_tree() {
     local cache_file
-    cache_file="$(ensure_graph_cache)" || return 1
+    cache_file="$(_graph_cache_ensure_cache)" || return 1
     
     echo "Relationship Tree:" >&2
     
@@ -425,7 +436,7 @@ print_relationship_tree() {
     
     while IFS= read -r root; do
         if [[ -n "$root" ]]; then
-            _print_tree_node "$root" 0
+            _graph_cache_print_tree_node "$root" 0
         fi
     done <<< "$roots"
 }
@@ -437,12 +448,12 @@ print_relationship_tree() {
 # @stderr Tree node output with indentation
 # @exitcode 0 If successful
 # @exitcode 1 If unable to access cache
-_print_tree_node() {
+_graph_cache_print_tree_node() {
     local number="$1"
     local depth="$2"
     
     local cache_file
-    cache_file="$(ensure_graph_cache)" || return 1
+    cache_file="$(_graph_cache_ensure_cache)" || return 1
     
     # Print indentation
     local indent=""
@@ -462,11 +473,351 @@ _print_tree_node() {
     
     # Print children
     local children
-    children=$(get_children "$number" 2>/dev/null)
+    children=$(graph_cache_get_children "$number" 2>/dev/null)
     
     while IFS= read -r child; do
         if [[ -n "$child" ]]; then
-            _print_tree_node "$child" $((depth + 1))
+            _graph_cache_print_tree_node "$child" $((depth + 1))
         fi
     done <<< "$children"
 }
+
+# ===============================
+# VERSION RELATIONSHIP FUNCTIONS
+# ===============================
+
+# @description Add or update version information in graph cache
+# @arg $1 string Version (e.g., "1.0.0")
+# @arg $2 string JSON string with version data (required_tasks, required_epics, etc.)
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If parameters missing or update failed
+graph_cache_update_version() {
+    local version="${1:-}"
+    local version_data="${2:-}"
+    
+    if [[ -z "$version" || -z "$version_data" ]]; then
+        echo "Error: Version and version data required" >&2
+        return 1
+    fi
+    
+    local cache_file
+    cache_file="$(_graph_cache_ensure_cache)" || return 1
+    
+    # Create temporary file for atomic update
+    local temp_file
+    temp_file=$(mktemp)
+    
+    # Update version data
+    local timestamp=$(date -Iseconds)
+    jq --arg version "$version" --argjson data "$version_data" --arg ts "$timestamp" '
+        .versions[$version] = $data |
+        .last_updated = $ts
+    ' "$cache_file" > "$temp_file"
+    
+    # Atomic replacement
+    mv "$temp_file" "$cache_file"
+}
+
+# @description Get version data from graph cache
+# @arg $1 string Version (e.g., "1.0.0")  
+# @stdout JSON version data if found
+# @stderr Error messages
+# @exitcode 0 If version found
+# @exitcode 1 If version parameter missing or version not found
+graph_cache_get_version() {
+    local version="$1"
+    
+    if [[ -z "$version" ]]; then
+        echo "Error: Version parameter required" >&2
+        return 1
+    fi
+    
+    local cache_file
+    cache_file="$(_graph_cache_ensure_cache)" || return 1
+    
+    local version_data
+    version_data=$(jq -r --arg version "$version" '.versions[$version] // empty' "$cache_file")
+    
+    if [[ -n "$version_data" && "$version_data" != "null" ]]; then
+        echo "$version_data"
+        return 0
+    fi
+    
+    return 1
+}
+
+# @description Get all tasks that block a version
+# @arg $1 string Version (e.g., "1.0.0")
+# @stdout List of task numbers, one per line
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If version parameter missing
+graph_cache_get_version_blocking_tasks() {
+    local version="$1"
+    
+    if [[ -z "$version" ]]; then
+        echo "Error: Version parameter required" >&2
+        return 1
+    fi
+    
+    local version_data
+    version_data=$(graph_cache_get_version "$version" 2>/dev/null)
+    
+    if [[ -n "$version_data" ]]; then
+        echo "$version_data" | jq -r '(.required_tasks // [])[]'
+    fi
+}
+
+# @description Get all versions that a task affects
+# @arg $1 string Task number
+# @stdout List of version numbers, one per line
+# @stderr Error messages
+# @exitcode 0 If task affects versions
+# @exitcode 1 If task parameter missing or no versions affected
+graph_cache_get_task_versions() {
+    local task="$1"
+    
+    if [[ -z "$task" ]]; then
+        echo "Error: Task number required" >&2
+        return 1
+    fi
+    
+    # First, check if task file has target_version field
+    local project_root
+    project_root="$(doh_find_root)" || return 1
+    
+    local task_file
+    task_file=$(find "$project_root/.doh" -name "${task}.md" -type f | head -1)
+    
+    if [[ -f "$task_file" ]]; then
+        local target_version file_version
+        target_version=$(frontmatter_get_field "$task_file" "target_version")
+        file_version=$(frontmatter_get_field "$task_file" "file_version")
+        
+        # Return both target and current file versions
+        if [[ -n "$target_version" ]]; then
+            echo "$target_version"
+        fi
+        if [[ -n "$file_version" && "$file_version" != "$target_version" ]]; then
+            echo "$file_version"
+        fi
+    fi
+    
+    # Also check cache for versions that require this task
+    local cache_file
+    cache_file="$(_graph_cache_ensure_cache)" || return 1
+    
+    # Search all versions for this task
+    local versions
+    versions=$(jq -r --arg task "$task" '
+        .versions | to_entries[] |
+        select(.value.required_tasks // [] | index($task)) |
+        .key
+    ' "$cache_file")
+    
+    if [[ -n "$versions" ]]; then
+        echo "$versions"
+    fi
+    
+    # Return success if we found any versions
+    [[ -n "$target_version" || -n "$versions" ]]
+}
+
+# @description Sync version data from version files to graph cache
+# @stderr Status messages
+# @exitcode 0 If successful
+# @exitcode 1 If sync failed
+graph_cache_sync_version_cache() {
+    echo "Syncing version data to graph cache..." >&2
+    
+    local doh_root
+    doh_root="$(doh_find_root)" || {
+        echo "Error: Not in a DOH project" >&2
+        return 1
+    }
+    
+    local versions_dir="$doh_root/.doh/versions"
+    
+    if [[ ! -d "$versions_dir" ]]; then
+        echo "No versions directory found" >&2
+        return 0
+    fi
+    
+    # Process all version files - placeholder for AI command integration
+    find "$versions_dir" -name "*.md" -type f | while read -r version_file; do
+        local version
+        version=$(basename "$version_file" .md)
+        
+        echo "Processing version $version..." >&2
+        
+        # Find tasks that target this version
+        local task_list=""
+        
+        # Collect task numbers that match this version
+        while IFS= read -r task_file; do
+            if [[ -n "$task_file" ]] && frontmatter_has "$task_file"; then
+                local target_version file_version task_number
+                target_version=$(frontmatter_get_field "$task_file" "target_version")
+                file_version=$(frontmatter_get_field "$task_file" "file_version")
+                task_number=$(frontmatter_get_field "$task_file" "number")
+                
+                if [[ "$target_version" == "$version" || "$file_version" == "$version" ]]; then
+                    if [[ -n "$task_number" ]]; then
+                        if [[ -z "$task_list" ]]; then
+                            task_list="\"$task_number\""
+                        else
+                            task_list="$task_list,\"$task_number\""
+                        fi
+                    fi
+                fi
+            fi
+        done < <(find "$doh_root/.doh" -name "*.md" -type f)
+        
+        # Create version data with actual required tasks
+        local version_data='{
+            "last_synced": "'$(date -Iseconds)'",
+            "source_file": "'$version_file'",
+            "required_tasks": ['$task_list'],
+            "completion_percentage": 0
+        }'
+        
+        graph_cache_update_version "$version" "$version_data"
+    done
+    
+    echo "Version cache sync completed" >&2
+}
+
+# @description Sync specific versions to graph cache (selective update)
+# @arg $@ string List of version numbers to sync (e.g., "1.0.0" "2.0.0")
+# @stderr Status messages
+# @exitcode 0 If successful
+# @exitcode 1 If sync failed
+graph_cache_sync_specific_versions() {
+    if [[ $# -eq 0 ]]; then
+        echo "Error: No versions specified for selective sync" >&2
+        return 1
+    fi
+    
+    echo "Selective version sync for: $*" >&2
+    
+    local doh_root
+    doh_root="$(doh_find_root)" || {
+        echo "Error: Not in a DOH project" >&2
+        return 1
+    }
+    
+    local versions_dir="$doh_root/.doh/versions"
+    
+    if [[ ! -d "$versions_dir" ]]; then
+        echo "No versions directory found" >&2
+        return 0
+    fi
+    
+    # Process only specified versions
+    for version in "$@"; do
+        local version_file="$versions_dir/$version.md"
+        
+        if [[ -f "$version_file" ]]; then
+            echo "Processing version $version..." >&2
+            
+            # AI commands will populate this with real data
+            local version_data='{
+                "last_synced": "'$(date -Iseconds)'",
+                "source_file": "'$version_file'",
+                "required_tasks": [],
+                "completion_percentage": 0,
+                "selective_update": true
+            }'
+            graph_cache_update_version "$version" "$version_data"
+        else
+            echo "Warning: Version file not found: $version_file" >&2
+        fi
+    done
+    
+    echo "Selective version sync completed" >&2
+}
+
+# @description Find versions that reference a specific task
+# @arg $1 string Task number to search for
+# @stdout List of version numbers that reference the task
+# @stderr Status messages
+# @exitcode 0 If successful
+# @exitcode 1 If task parameter missing
+graph_cache_find_versions_for_task() {
+    local task="$1"
+    
+    if [[ -z "$task" ]]; then
+        echo "Error: Task number required" >&2
+        return 1
+    fi
+    
+    # Find all version files that reference this task
+    local project_root
+    project_root="$(doh_find_root)" || return 1
+    
+    local versions_dir="$project_root/.doh/versions"
+    
+    if [[ ! -d "$versions_dir" ]]; then
+        return 0
+    fi
+    
+    find "$versions_dir" -name "*.md" -type f | while read -r version_file; do
+        if grep -q "$task" "$version_file"; then
+            basename "$version_file" .md
+        fi
+    done
+}
+
+# @description Check if a version is ready for release
+# @arg $1 string Version to check (e.g., "1.0.0")
+# @stdout Status: "READY" if all tasks completed, "NOT_READY" or "PENDING" otherwise
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If version parameter missing
+graph_cache_check_version_readiness() {
+    local version="$1"
+    
+    if [[ -z "$version" ]]; then
+        echo "Error: Version parameter required" >&2
+        return 1
+    fi
+    
+    # Find all task files with this version as target_version
+    local project_root
+    project_root="$(doh_find_root)" || return 1
+    
+    if ! command -v get_frontmatter_field > /dev/null 2>&1; then
+        source "$(dirname "${BASH_SOURCE[0]}")/frontmatter.sh"
+    fi
+    
+    local total_tasks=0
+    local completed_tasks=0
+    
+    # Use process substitution to avoid subshell variable issues
+    while IFS= read -r task_file; do
+        if [[ -n "$task_file" ]] && frontmatter_has "$task_file"; then
+            local target_version status
+            target_version=$(frontmatter_get_field "$task_file" "target_version")
+            status=$(frontmatter_get_field "$task_file" "status")
+            
+            if [[ "$target_version" == "$version" ]]; then
+                total_tasks=$((total_tasks + 1))
+                if [[ "$status" == "completed" ]]; then
+                    completed_tasks=$((completed_tasks + 1))
+                fi
+            fi
+        fi
+    done < <(find "$project_root/.doh" -name "*.md" -type f)
+    
+    # Check readiness
+    if [[ $total_tasks -eq 0 ]]; then
+        echo "READY"  # No tasks required
+    elif [[ $completed_tasks -eq $total_tasks ]]; then
+        echo "READY"  # All tasks completed
+    else
+        echo "NOT_READY"  # Some tasks still pending
+    fi
+}
+
+# Duplicate function removed - already renamed above as graph_cache_find_versions_for_task

@@ -149,20 +149,20 @@ test_file_cache_statistics() {
 
 # Graph Cache Tests
 test_graph_cache_initialization() {
-    ensure_graph_cache
+    _graph_cache_ensure_cache
     local graph_file
-    graph_file="$(get_graph_cache_path)"
+    graph_file="$(_graph_cache_get_cache_path)"
     
     _tf_assert_file_exists "$graph_file" "Graph cache should be initialized"
 }
 
 test_graph_cache_relationship_storage() {
-    ensure_graph_cache
+    _graph_cache_ensure_cache
     
     add_relationship "002" "001" "user-auth"
     
     local graph_file
-    graph_file="$(get_graph_cache_path)"
+    graph_file="$(_graph_cache_get_cache_path)"
     
     _tf_assert_file_contains "$graph_file" "002" "Graph should contain task number"
     _tf_assert_file_contains "$graph_file" "001" "Graph should contain parent epic"
@@ -170,7 +170,7 @@ test_graph_cache_relationship_storage() {
 }
 
 test_graph_cache_parent_lookup() {
-    ensure_graph_cache
+    _graph_cache_ensure_cache
     
     add_relationship "002" "001" "user-auth"
     
@@ -181,7 +181,7 @@ test_graph_cache_parent_lookup() {
 }
 
 test_graph_cache_children_lookup() {
-    ensure_graph_cache
+    _graph_cache_ensure_cache
     
     add_relationship "002" "001" "user-auth"
     add_relationship "004" "001" "user-auth"
@@ -194,7 +194,7 @@ test_graph_cache_children_lookup() {
 }
 
 test_graph_cache_epic_lookup() {
-    ensure_graph_cache
+    _graph_cache_ensure_cache
     
     add_relationship "002" "001" "user-auth"
     
@@ -208,7 +208,7 @@ test_graph_cache_epic_lookup() {
 test_cache_integration_file_and_graph() {
     # Test that file cache and graph cache work together
     ensure_file_cache
-    ensure_graph_cache
+    _graph_cache_ensure_cache
     
     # Add entries to both caches
     add_to_file_cache "002" "task" ".doh/epics/user-auth/002.md" "login-task" "user-auth"
@@ -227,7 +227,7 @@ test_cache_integration_file_and_graph() {
 
 test_cache_performance_batch_operations() {
     ensure_file_cache
-    ensure_graph_cache
+    _graph_cache_ensure_cache
     
     # Batch add multiple entries
     local start_time end_time
@@ -251,7 +251,7 @@ test_cache_performance_batch_operations() {
 
 test_cache_consistency_remove_operations() {
     ensure_file_cache
-    ensure_graph_cache
+    _graph_cache_ensure_cache
     
     # Add entries
     add_to_file_cache "002" "task" ".doh/epics/user-auth/002.md" "login-task" "user-auth"
@@ -280,7 +280,7 @@ test_cache_consistency_remove_operations() {
 # Cache Statistics Tests
 test_cache_combined_statistics() {
     ensure_file_cache
-    ensure_graph_cache
+    _graph_cache_ensure_cache
     
     # Add some entries to both caches
     add_to_file_cache "001" "epic" ".doh/epics/user-auth/epic.md" "user-auth" ""

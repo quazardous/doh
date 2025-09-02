@@ -2,7 +2,7 @@
 allowed-tools: Bash
 ---
 
-Run `bash .claude/scripts/doh/epic-list.sh` using a sub-agent and show me the complete output.
+Run `bash .claude/scripts/doh/helper.sh epic list` using a sub-agent and show me the complete output.
 
 - You MUST display the complete output.
 - DO NOT truncate.

@@ -8,7 +8,7 @@
 source "$(dirname "${BASH_SOURCE[0]}")/../helpers/test_framework.sh"
 
 # Source the libraries being tested
-MIGRATION_DIR="$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/migration"
+MIGRATION_DIR="$(dirname "${BASH_SOURCE[0]}")/../../migration"
 LIB_DIR="$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib"
 
 # Check if migration tools exist before sourcing
@@ -296,7 +296,8 @@ test_migration_backup_creation() {
     local backup_path
     backup_path="$(create_migration_backup)"
     
-    _tf_assert_file_exists "$backup_path" "Migration backup should be created"
+    [[ -d "$backup_path" ]]
+    _tf_assert_equals 0 $? "Migration backup should be created"
 }
 
 test_migration_integrity_check() {

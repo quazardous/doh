@@ -173,6 +173,57 @@ Closing task with `/doh:task-close [number]` (or `/doh:issue-close [number]` if 
 - Use suggested `/doh:issue-close` commands  
 - Maintain oversight but rely on agent proactivity
 
+## Task Numbering - Permanent Identifiers
+
+### 11. Core Principle: Task Numbers are Immutable
+**Task numbers are permanent global identifiers that NEVER change**
+
+### 12. Rules for Task Number Management
+- ✅ **Task 024 can move from `epic: versioning` to `epic: quick-epic`**
+- ❌ **Task 024 cannot be renumbered to Task 009**
+- ✅ **Change only the `epic:` field in frontmatter**
+- ❌ **Never renumber tasks when moving between epics**
+- ✅ **File can move to new epic directory (keeping number): `024.md`**
+
+### 13. Process for Moving Tasks Between Epics
+1. **Change `epic:` field** in task frontmatter
+2. **Move file** to new epic directory (keeping original number)
+3. **Update epic documentation** to reflect the change
+4. **Update dependencies** if task numbers are referenced elsewhere
+5. **NEVER change the task number itself**
+
+### 14. Examples of Correct Task Movement
+
+#### ✅ Correct: Task Reassignment
+```yaml
+# Before: .doh/epics/versioning/024.md
+---
+name: Patch detection
+number: 024
+epic: versioning
+---
+
+# After: .doh/epics/quick-epic/024.md  
+---
+name: Patch detection
+number: 024
+epic: quick-epic  # ONLY this changes
+---
+```
+
+#### ❌ Incorrect: Task Renumbering
+```yaml
+# WRONG: Don't renumber when moving
+number: 024 → number: 009  # NEVER DO THIS
+```
+
+### 15. Rationale for Permanent Numbers
+- **Traceability**: Task references in commits, docs remain valid
+- **Audit trail**: History tracking doesn't break
+- **Dependencies**: Other tasks referencing numbers stay consistent
+- **GitHub sync**: Issue numbers must remain stable
+- **Global namespace**: Tasks are project-wide, not epic-specific
+
 ## Implementation Notes
 
 - Use TodoWrite tool to track task creation process
@@ -180,7 +231,10 @@ Closing task with `/doh:task-close [number]` (or `/doh:issue-close [number]` if 
 - Maintain audit trail of all decisions
 - Keep main thread clean and strategic
 - **Agents should proactively manage task lifecycle**
+- **NEVER renumber tasks when changing epics**
 
 ## Remember
 
 The main interactive thread is for **planning and coordination**, not implementation. Let agents handle the code changes within well-defined task boundaries **and proactively manage task completion**.
+
+**Task numbers are permanent identifiers - treat them like database primary keys.**

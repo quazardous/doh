@@ -1,18 +1,23 @@
 #!/bin/bash
 
 # DOH Workspace Management Library
-# Complete workspace detection, safety, persistence, and multi-agent coordination
+# Pure library for workspace detection, safety, persistence, and multi-agent coordination
 
-# NOTE: This library expects DOH environment variables to be already loaded
-# by the calling script via: source .claude/scripts/doh/lib/dohenv.sh
+# Source core library dependencies
+source "$(dirname "${BASH_SOURCE[0]}")/doh.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/dohenv.sh"
+
+# Guard against multiple sourcing
+[[ -n "${DOH_LIB_WORKSPACE_LOADED:-}" ]] && return 0
+DOH_LIB_WORKSPACE_LOADED=1
 
 # @description Get current project ID based on directory
 # @stdout Unique project ID: basename + short hash of absolute path
 # @exitcode 0 If successful
 # @exitcode 1 If unable to find DOH root
-get_current_project_id() {
+workspace_get_current_project_id() {
     local doh_root
-    doh_root="$(_find_doh_root)" || return 1
+    doh_root="$(doh_find_root)" || return 1
     
     local project_name=$(basename "$doh_root")
     local abs_path=$(realpath "$doh_root")
@@ -334,4 +339,101 @@ agent_count: 0
     rm -f "$state_dir/locks/"*.lock 2>/dev/null || true
     
     echo "✅ Workspace state reset for project: $project_id"
+}
+
+# @description Generate comprehensive workspace diagnostic report
+# @arg $1 string Optional --reset flag to reset workspace
+# @stdout Workspace diagnostic report
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If errors encountered
+workspace_diagnostic() {
+    local reset_flag="${1:-}"
+    
+    # Check for reset flag
+    if [[ "$reset_flag" == "--reset" ]]; then
+        reset_workspace
+        return $?
+    fi
+    
+    local doh_root
+    doh_root=$(doh_find_root) || {
+        echo "Error: Not in DOH project" >&2
+        return 1
+    }
+
+    echo "🔧 DOH Workspace Diagnostic"
+    echo "=========================="
+    echo ""
+
+    # Project Information
+    local project_id
+    project_id="$(workspace_get_current_project_id)"
+    echo "Project: $project_id"
+    echo "DOH Global Dir: ${DOH_GLOBAL_DIR:-$HOME/.doh}"
+    echo ""
+
+    # Workspace Mode Detection
+    local current_mode
+    current_mode="$(detect_workspace_mode 2>/dev/null || echo "unknown")"
+    echo "Current Mode: $current_mode"
+    echo ""
+
+    # Workspace State
+    echo "📋 Workspace State:"
+    load_workspace_state | grep -E "^(mode|current_epic|current_branch|current_worktree|agent_count):" | while IFS=': ' read -r key value; do
+        echo "  $key: $value"
+    done
+    echo ""
+
+    # Git Information
+    echo "📚 Git Status:"
+    echo "  Branch: $(git branch --show-current 2>/dev/null || echo "unknown")"
+    echo "  Worktrees:"
+    git worktree list 2>/dev/null | while read -r line; do
+        echo "    $line"
+    done
+    echo ""
+
+    # Workspace Integrity Check
+    echo "🔍 Integrity Check:"
+    if check_workspace_integrity; then
+        echo "  Status: ✅ All checks passed"
+    else
+        echo "  Status: ⚠️ Issues detected"
+        echo ""
+        echo "💡 To fix issues, run: /doh:workspace --reset"
+    fi
+    echo ""
+
+    # Active Tasks Summary
+    echo "📊 Active Tasks:"
+    if [[ -d "$doh_root/.doh/epics" ]]; then
+        local epic_count=0
+        local task_count=0
+        
+        for epic_dir in "$doh_root/.doh/epics"/*/; do
+            [[ ! -d "$epic_dir" ]] && continue
+            local epic_name
+            epic_name="$(basename "$epic_dir")"
+            epic_count=$((epic_count + 1))
+            
+            # Count tasks in this epic
+            while IFS= read -r -d '' task_file; do
+                [[ -f "$task_file" ]] && task_count=$((task_count + 1))
+            done < <(find "$epic_dir" -name "[0-9]*.md" -type f -print0)
+        done
+        
+        echo "  Epics: $epic_count"
+        echo "  Total Tasks: $task_count"
+    else
+        echo "  No epics found"
+    fi
+
+    echo ""
+    echo "🚀 Available Actions:"
+    echo "  /doh:workspace --reset  - Reset workspace state"
+    echo "  /doh:next              - Show next available tasks"
+    echo "  /doh:epic-list         - List all epics"
+    echo "  /doh:status            - Show overall status"
 }

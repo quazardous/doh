@@ -1,19 +1,28 @@
 #!/bin/bash
 
-# Simple number-to-file cache using CSV format
+# DOH File Cache Library
+# Pure library for number-to-file cache management using CSV format (no automatic execution)
 # Format: number,type,path,name,epic
 # Sorted by number for fast lookups and duplicate detection
 
-# Source required dependencies
+# Source core library dependencies
+source "$(dirname "${BASH_SOURCE[0]}")/doh.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/workspace.sh"
+
+# Guard against multiple sourcing
+[[ -n "${DOH_LIB_FILE_CACHE_LOADED:-}" ]] && return 0
+DOH_LIB_FILE_CACHE_LOADED=1
+
+# Constants
+readonly FILE_CACHE_LIB_VERSION="1.0.0"
 
 # @description Get file cache path
 # @stdout Path to the file cache CSV file
 # @exitcode 0 If successful
 # @exitcode 1 If unable to get project ID
-get_file_cache_path() {
+_file_cache_get_path() {
     local project_id
-    project_id="$(get_current_project_id)" || return 1
+    project_id="$(workspace_get_current_project_id)" || return 1
     
     echo "$HOME/.doh/projects/$project_id/file_cache.csv"
 }
@@ -21,7 +30,7 @@ get_file_cache_path() {
 # @description Initialize empty file cache
 # @arg $1 string Path to the cache file to create
 # @exitcode 0 If successful
-create_empty_file_cache() {
+_file_cache_create_empty() {
     local cache_file="$1"
     
     mkdir -p "$(dirname "$cache_file")"
@@ -37,18 +46,19 @@ create_empty_file_cache() {
 # @stdout Path to the ensured cache file
 # @exitcode 0 If successful
 # @exitcode 1 If unable to get or create cache file
-ensure_file_cache() {
+_file_cache_ensure() {
     local cache_file
-    cache_file="$(get_file_cache_path)" || return 1
+    cache_file="$(_file_cache_get_path)" || return 1
     
     if [[ ! -f "$cache_file" ]]; then
-        create_empty_file_cache "$cache_file" || return 1
+        _file_cache_create_empty "$cache_file" || return 1
     fi
     
     echo "$cache_file"
 }
 
 # @description Find file by number (with duplicate detection)
+# @public
 # @arg $1 string Number to search for
 # @arg $2 string Optional epic name to filter by
 # @stdout CSV line with file information
@@ -56,7 +66,7 @@ ensure_file_cache() {
 # @exitcode 0 If successful
 # @exitcode 1 If number not found or invalid parameters
 # @exitcode 2 If multiple valid files found (conflict error)
-find_file_by_number() {
+file_cache_find_file_by_number() {
     local number="$1"
     local epic_name="${2:-}"  # Optional: filter by epic name
     
@@ -66,7 +76,7 @@ find_file_by_number() {
     fi
     
     local cache_file
-    cache_file="$(ensure_file_cache)" || return 1
+    cache_file="$(_file_cache_ensure)" || return 1
     
     # Find all entries with this number (sorted, so they'll be together)
     local matches
@@ -90,7 +100,7 @@ find_file_by_number() {
         # Try to resolve duplicates by checking which files exist
         local valid_matches=""
         local project_root
-        project_root="$(_find_doh_root)" || return 1
+        project_root="$(doh_find_root)" || return 1
         
         while IFS= read -r match; do
             local file_path
@@ -139,7 +149,7 @@ find_file_by_number() {
 # @stderr Error messages
 # @exitcode 0 If successful
 # @exitcode 1 If missing required parameters or other error
-add_to_file_cache() {
+file_cache_add_file() {
     local number="$1"
     local type="$2"
     local path="$3" 
@@ -152,7 +162,7 @@ add_to_file_cache() {
     fi
     
     local cache_file
-    cache_file="$(ensure_file_cache)" || return 1
+    cache_file="$(_file_cache_ensure)" || return 1
     
     # Format the entry
     local entry="$number,$type,$path,$name,${epic:-}"
@@ -181,7 +191,7 @@ add_to_file_cache() {
 # @stderr Error messages
 # @exitcode 0 If successful
 # @exitcode 1 If number parameter missing or other error
-remove_from_file_cache() {
+file_cache_remove_file() {
     local number="$1"
     local path="$2"
     
@@ -191,7 +201,7 @@ remove_from_file_cache() {
     fi
     
     local cache_file
-    cache_file="$(ensure_file_cache)" || return 1
+    cache_file="$(_file_cache_ensure)" || return 1
     
     # Remove matching entries
     if [[ -n "$path" ]]; then
@@ -207,17 +217,17 @@ remove_from_file_cache() {
 # @stderr Progress messages
 # @exitcode 0 If successful
 # @exitcode 1 If unable to find project root or create cache
-rebuild_file_cache() {
+file_cache_rebuild() {
     local project_root
-    project_root="$(_find_doh_root)" || return 1
+    project_root="$(doh_find_root)" || return 1
     
     local cache_file
-    cache_file="$(ensure_file_cache)" || return 1
+    cache_file="$(_file_cache_ensure)" || return 1
     
     echo "Rebuilding file cache..." >&2
     
     # Create fresh cache
-    create_empty_file_cache "$cache_file"
+    _file_cache_create_empty "$cache_file"
     
     # Scan for all numbered files
     local numbered_files
@@ -248,7 +258,7 @@ rebuild_file_cache() {
                     fi
                 fi
                 
-                add_to_file_cache "$number" "$type" "$rel_path" "$name" "$epic"
+                file_cache_add_file "$number" "$type" "$rel_path" "$name" "$epic"
             fi
         fi
     done <<< "$numbered_files"
@@ -261,9 +271,9 @@ rebuild_file_cache() {
 # @stderr Duplicate detection results and warnings
 # @exitcode 0 If no duplicates found
 # @exitcode 1 If duplicates found
-detect_duplicates() {
+file_cache_detect_duplicates() {
     local cache_file
-    cache_file="$(ensure_file_cache)" || return 1
+    cache_file="$(_file_cache_ensure)" || return 1
     
     echo "Detecting duplicate numbers..." >&2
     
@@ -294,9 +304,9 @@ detect_duplicates() {
 # @stdout Formatted statistics string
 # @exitcode 0 If successful
 # @exitcode 1 If unable to access cache file
-get_file_cache_stats() {
+file_cache_get_stats() {
     local cache_file
-    cache_file="$(ensure_file_cache)" || return 1
+    cache_file="$(_file_cache_ensure)" || return 1
     
     local total_files epic_count task_count duplicate_count
     total_files=$(tail -n +2 "$cache_file" | wc -l)
@@ -320,7 +330,7 @@ EOF
 # @stderr Error messages
 # @exitcode 0 If successful
 # @exitcode 1 If epic name missing or cache access error
-list_epic_files() {
+file_cache_list_epic_files() {
     local epic_name="$1"
     
     if [[ -z "$epic_name" ]]; then
@@ -329,7 +339,7 @@ list_epic_files() {
     fi
     
     local cache_file
-    cache_file="$(ensure_file_cache)" || return 1
+    cache_file="$(_file_cache_ensure)" || return 1
     
     # Find all entries for this epic (epic itself + tasks)
     {

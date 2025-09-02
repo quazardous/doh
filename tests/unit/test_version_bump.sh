@@ -4,12 +4,23 @@
 # Tests the comprehensive version bump workflow functionality
 
 # Load test framework
-source "$(dirname "$0")/../test_framework.sh"
+if [[ -n "${_TF_LAUNCHER_EXECUTION:-}" ]]; then
+    # Running through test launcher from project root
+    source "tests/helpers/test_framework.sh"
+else
+    # Running directly from test directory
+    source "$(dirname "$0")/../helpers/test_framework.sh"
+fi
 
 # Load version management libraries
 source ".claude/scripts/doh/lib/dohenv.sh"
 source ".claude/scripts/doh/lib/version.sh"
 source ".claude/scripts/doh/lib/frontmatter.sh"
+
+# Export functions for use in test assertions
+export -f validate_version compare_versions increment_version version_to_number
+export -f version_get_current get_file_version set_file_version set_project_version
+export -f find_files_missing_version bump_file_version version_bump_project
 
 _tf_setup() {
     # Create temporary test environment
@@ -54,14 +65,14 @@ _tf_teardown() {
     fi
 }
 
-test_get_current_version() {
+test_version_get_current() {
     cd "$TEST_DIR"
     
     local version
-    version=$(get_current_version)
+    version=$(version_get_current)
     local exit_code=$?
     
-    _tf_assert_equals 0 $exit_code "get_current_version should succeed"
+    _tf_assert_equals 0 $exit_code "version_get_current should succeed"
     _tf_assert_equals "0.1.0" "$version" "Current version should be 0.1.0"
     
     cd - > /dev/null
@@ -111,14 +122,14 @@ test_set_project_version() {
     cd - > /dev/null
 }
 
-test_bump_project_version() {
+test_version_bump_project() {
     cd "$TEST_DIR"
     
     local new_version
-    new_version=$(bump_project_version "patch")
+    new_version=$(version_bump_project "patch")
     local exit_code=$?
     
-    _tf_assert_equals 0 $exit_code "bump_project_version should succeed"
+    _tf_assert_equals 0 $exit_code "version_bump_project should succeed"
     _tf_assert_equals "0.1.1" "$new_version" "New version should be 0.1.1"
     
     local file_version
@@ -174,11 +185,16 @@ test_bump_file_version() {
 }
 
 test_validate_version() {
-    _tf_assert_command_succeeds validate_version "1.0.0" "Valid semver should pass"
-    _tf_assert_command_succeeds validate_version "0.1.0" "Another valid semver should pass"
-    _tf_assert_command_succeeds validate_version "10.20.30" "Large version numbers should pass"
-    _tf_assert_command_succeeds validate_version "1.0.0-alpha" "Pre-release version should pass"
-    _tf_assert_command_succeeds validate_version "1.0.0+build.1" "Build metadata should pass"
+    validate_version "1.0.0"
+    _tf_assert_equals 0 $? "1.0.0"
+    validate_version "0.1.0"
+    _tf_assert_equals 0 $? "0.1.0"
+    validate_version "10.20.30"
+    _tf_assert_equals 0 $? "10.20.30"
+    validate_version "1.0.0-alpha"
+    _tf_assert_equals 0 $? "1.0.0-alpha"
+    validate_version "1.0.0+build.1"
+    _tf_assert_equals 0 $? "1.0.0+build.1"
     
     _tf_assert_command_fails validate_version "1.0" "Invalid semver should fail"
     _tf_assert_command_fails validate_version "v1.0.0" "Version with prefix should fail"
@@ -187,7 +203,8 @@ test_validate_version() {
 }
 
 test_compare_versions() {
-    _tf_assert_command_succeeds compare_versions "1.0.0" "1.0.0" "Equal versions should return 0"
+    compare_versions "1.0.0" "1.0.0"
+    _tf_assert_equals 0 $? "1.0.0"
     
     compare_versions "2.0.0" "1.0.0"
     _tf_assert_equals 1 $? "Greater version should return 1"
@@ -238,12 +255,12 @@ test_version_bump_workflow() {
     
     # Initial state check
     local initial_version
-    initial_version=$(get_current_version)
+    initial_version=$(version_get_current)
     _tf_assert_equals "0.1.0" "$initial_version" "Initial version should be 0.1.0"
     
     # Bump project version
     local new_version
-    new_version=$(bump_project_version "patch")
+    new_version=$(version_bump_project "patch")
     _tf_assert_equals "0.1.1" "$new_version" "Should bump to 0.1.1"
     
     # Verify VERSION file is updated

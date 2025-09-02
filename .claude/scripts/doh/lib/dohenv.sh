@@ -1,44 +1,25 @@
 #!/bin/bash
 
-# DOH Environment Variables Loader (dotenv for DOH)
-# Usage: source .claude/scripts/doh/lib/dohenv.sh
-# Simply loads .doh/env if it exists and exports DOH_ variables
-# IMPORTANT: should only be sourced by shell scripts (not libraries)
+# DOH Environment Variables Library
+# Pure library for DOH environment management (no automatic execution)
+# Usage: source .claude/scripts/doh/lib/dohenv.sh && dohenv_load
+
+# Source core library dependency
+source "$(dirname "${BASH_SOURCE[0]}")/doh.sh"
 
 # Guard against multiple sourcing
-if [[ -n "${DOH_ENV_LOADED:-}" ]]; then
-    return 0
-fi
-
-# @description Find DOH project root (directory containing both .git/ and .doh/)
-# @internal
-# @stdout Path to DOH project root
-# @stderr Error message if not in DOH project
-# @exitcode 0 If successful
-# @exitcode 1 If not in DOH project
-_find_doh_root() {
-    local dir="$PWD"
-    while [[ "$dir" != "/" ]]; do
-        if [[ -d "$dir/.git" && -d "$dir/.doh" ]]; then
-            echo "$dir"
-            return 0
-        fi
-        dir="$(dirname "$dir")"
-    done
-    echo "❌ Error: Not in a DOH project (no .doh/ directory at git repo root)" >&2
-    echo "Initialize DOH project with: /doh:init" >&2
-    return 1
-}
+[[ -n "${DOH_LIB_DOHENV_LOADED:-}" ]] && return 0
+DOH_LIB_DOHENV_LOADED=1
 
 # @description Load environment variables from .doh/env
-# @internal
+# @public
 # @stdout No output
 # @stderr Error messages if loading fails
 # @exitcode 0 If successful
 # @exitcode 1 If error condition
-_load_doh_env() {
+dohenv_load() {
     local doh_root
-    doh_root="$(_find_doh_root)" || return 1
+    doh_root="$(doh_find_root)" || return 1
     
     # Set default values
     export DOH_GLOBAL_DIR="${DOH_GLOBAL_DIR:-$HOME/.doh}"
@@ -73,8 +54,37 @@ _load_doh_env() {
     export DOH_ENV_LOADED=1
 }
 
-# Initialize
-_load_doh_env
+# @description Check if DOH environment has been loaded
+# @public
+# @stdout No output
+# @stderr No output
+# @exitcode 0 If environment is loaded
+# @exitcode 1 If environment is not loaded
+dohenv_is_loaded() {
+    [[ -n "${DOH_ENV_LOADED:-}" ]]
+}
 
-# Cleanup
-unset -f _load_doh_env
+# @description Get DOH environment variable with fallback
+# @public
+# @arg $1 Variable name (without DOH_ prefix)
+# @arg $2 Default value if variable is not set
+# @stdout Variable value or default
+# @stderr No output
+# @exitcode 0 Always successful
+dohenv_get() {
+    local var_name="DOH_$1"
+    local default_value="$2"
+    echo "${!var_name:-$default_value}"
+}
+
+# @description Internal helper to parse env file line
+# @private
+# @arg $1 Line to parse
+# @stdout No output
+# @stderr No output
+# @exitcode 0 If successful
+_dohenv_parse_line() {
+    local line="$1"
+    # Implementation details for parsing .doh/env lines
+    # This would be used internally by dohenv_load
+}

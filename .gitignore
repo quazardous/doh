@@ -35,3 +35,6 @@ Thumbs.db
 *.swp
 *.bak
 *.tmp
+
+# Temporary files
+.test_temp_*

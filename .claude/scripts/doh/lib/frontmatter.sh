@@ -1,16 +1,22 @@
 #!/bin/bash
 
 # DOH YAML Frontmatter Library with yq
-# Handles YAML frontmatter parsing and manipulation using yq
+# Pure library for YAML frontmatter parsing and manipulation (no automatic execution)
 # File version: 0.1.0 | Created: 2025-09-01
 
+# Source core library dependencies (zero dependencies for this library)
+# Guard against multiple sourcing
+[[ -n "${DOH_LIB_FRONTMATTER_LOADED:-}" ]] && return 0
+DOH_LIB_FRONTMATTER_LOADED=1
+
 # @description Extract YAML frontmatter from a markdown file
+# @public
 # @arg $1 string Path to the markdown file
 # @stdout YAML frontmatter content
 # @stderr Error messages if file not found
 # @exitcode 0 If successful
 # @exitcode 1 If file not found
-extract_frontmatter() {
+frontmatter_extract() {
     local file="$1"
     
     if [[ ! -f "$file" ]]; then
@@ -23,11 +29,12 @@ extract_frontmatter() {
 }
 
 # @description Get a specific field value from frontmatter using yq
+# @public
 # @arg $1 string Path to the markdown file
 # @arg $2 string Field name to extract (supports nested with dot notation)
 # @stdout Field value
 # @exitcode 0 Always successful
-get_frontmatter_field() {
+frontmatter_get_field() {
     local file="$1"
     local field="$2"
     
@@ -37,7 +44,7 @@ get_frontmatter_field() {
     fi
     
     local frontmatter_content
-    frontmatter_content=$(extract_frontmatter "$file")
+    frontmatter_content=$(frontmatter_extract "$file")
     
     if [[ -z "$frontmatter_content" ]]; then
         echo ""
@@ -49,104 +56,111 @@ get_frontmatter_field() {
 }
 
 # @description Update a specific field in frontmatter using yq
+# @public
 # @arg $1 string Path to the markdown file
 # @arg $2 string Field name to update (supports nested with dot notation)
 # @arg $3 string New value for the field
 # @stderr Error messages if file not found
 # @exitcode 0 If successful
 # @exitcode 1 If file not found
-update_frontmatter_field() {
+frontmatter_update_field() {
     local file="$1"
     local field="$2"
     local value="$3"
-    local temp_file="${file}.tmp"
     
     if [[ ! -f "$file" ]]; then
         echo "Error: File not found: $file" >&2
         return 1
     fi
     
-    # Check if file has frontmatter
-    if ! has_frontmatter "$file"; then
-        echo "Error: File has no frontmatter: $file" >&2
+    if [[ ! "$file" =~ \.md$ ]]; then
+        echo "Error: Only markdown files (.md) are supported" >&2
         return 1
     fi
     
-    local frontmatter_content updated_frontmatter
-    frontmatter_content=$(extract_frontmatter "$file")
+    # Create temporary file
+    local temp_file
+    temp_file=$(mktemp)
     
-    # Update field using yq
+    # Extract frontmatter
+    local frontmatter_content
+    frontmatter_content=$(frontmatter_extract "$file")
+    
+    if [[ -z "$frontmatter_content" ]]; then
+        echo "Error: No frontmatter found in $file" >&2
+        rm "$temp_file"
+        return 1
+    fi
+    
+    # Update field using yq and save to temp
+    local updated_frontmatter
     updated_frontmatter=$(echo "$frontmatter_content" | yq eval ".${field} = \"${value}\"" -)
     
-    # Reconstruct the file with updated frontmatter
+    # Reconstruct file
     {
         echo "---"
         echo "$updated_frontmatter"
         echo "---"
-        # Get everything after the closing --- of frontmatter
-        awk '/^---$/ {count++; if (count==2) print_rest=1; next} print_rest {print}' "$file"
+        # Extract content after second ---
+        sed -n '/^---$/,/^---$/{/^---$/d; p}' "$file" | tail -n +2
+        sed '1,/^---$/d; /^---$/,$d' "$file"
     } > "$temp_file"
     
     # Replace original file
     mv "$temp_file" "$file"
 }
 
-# @description Validate that required fields are present in frontmatter
+# @description Validate frontmatter syntax using yq
+# @public
 # @arg $1 string Path to the markdown file
-# @arg $2+ string List of required field names
-# @stderr Error messages listing missing required fields
-# @exitcode 0 If all fields present
-# @exitcode 1 If any fields missing
-validate_frontmatter() {
+# @stderr Error messages if invalid YAML
+# @exitcode 0 If valid frontmatter
+# @exitcode 1 If invalid or missing frontmatter
+frontmatter_validate() {
     local file="$1"
-    shift
-    local missing_fields=()
     
-    for field in "$@"; do
-        local value
-        value=$(get_frontmatter_field "$file" "$field")
-        if [[ -z "$value" ]]; then
-            missing_fields+=("$field")
-        fi
-    done
-    
-    if [[ ${#missing_fields[@]} -gt 0 ]]; then
-        echo "Error: Missing required fields in $file: ${missing_fields[*]}" >&2
+    if [[ ! -f "$file" ]]; then
+        echo "Error: File not found: $file" >&2
         return 1
     fi
     
-    return 0
+    local frontmatter_content
+    frontmatter_content=$(frontmatter_extract "$file")
+    
+    if [[ -z "$frontmatter_content" ]]; then
+        echo "Error: No frontmatter found" >&2
+        return 1
+    fi
+    
+    # Test with yq - will fail if invalid YAML
+    echo "$frontmatter_content" | yq eval '.' - >/dev/null 2>&1
 }
 
-# @description Check if frontmatter exists in file
+# @description Check if a file has frontmatter
+# @public
 # @arg $1 string Path to the markdown file
-# @exitcode 0 If frontmatter exists
-# @exitcode 1 If file not found or no frontmatter
-has_frontmatter() {
+# @exitcode 0 If file has frontmatter
+# @exitcode 1 If no frontmatter or file not found
+frontmatter_has() {
     local file="$1"
     
     if [[ ! -f "$file" ]]; then
         return 1
     fi
     
-    # Check if file starts with --- and has exactly two --- lines (opening and closing)
-    if head -1 "$file" | grep -q "^---$"; then
-        local count
-        count=$(grep -c "^---$" "$file")
-        [[ "$count" -ge 2 ]]
-    else
-        return 1
-    fi
+    # Check if file starts with ---
+    head -n 1 "$file" | grep -q "^---$"
 }
 
-# @description Add a field to frontmatter (or update if exists) using yq
+# @description Add a new field to frontmatter
+# @public
 # @arg $1 string Path to the markdown file
-# @arg $2 string Field name (supports nested with dot notation)
-# @arg $3 string Field value
+# @arg $2 string Field name to add (supports nested with dot notation)
+# @arg $3 string Value for the field
 # @stderr Error messages if file not found
 # @exitcode 0 If successful
-# @exitcode 1 If file not found
-add_frontmatter_field() {
+# @exitcode 1 If file not found or error
+frontmatter_add_field() {
     local file="$1"
     local field="$2"
     local value="$3"
@@ -156,238 +170,247 @@ add_frontmatter_field() {
         return 1
     fi
     
-    # If file has no frontmatter, create it
-    if ! has_frontmatter "$file"; then
-        local content temp_file="${file}.tmp"
-        content=$(cat "$file")
-        
-        {
-            echo "---"
-            echo "${field}: \"${value}\""
-            echo "---"
-            echo "$content"
-        } > "$temp_file"
-        
-        mv "$temp_file" "$file"
-        return 0
-    fi
-    
-    # Use update function for existing frontmatter
-    update_frontmatter_field "$file" "$field" "$value"
+    # Use update_field since yq will create field if it doesn't exist
+    frontmatter_update_field "$file" "$field" "$value"
 }
 
-# @description Remove a field from frontmatter using yq
+# @description Remove a field from frontmatter
+# @public
 # @arg $1 string Path to the markdown file
-# @arg $2 string Field name to remove
+# @arg $2 string Field name to remove (supports nested with dot notation)
 # @stderr Error messages if file not found
 # @exitcode 0 If successful
 # @exitcode 1 If file not found
-remove_frontmatter_field() {
+frontmatter_remove_field() {
     local file="$1"
     local field="$2"
-    local temp_file="${file}.tmp"
     
     if [[ ! -f "$file" ]]; then
         echo "Error: File not found: $file" >&2
         return 1
     fi
     
-    if ! has_frontmatter "$file"; then
-        return 0  # Nothing to remove
+    # Create temporary file
+    local temp_file
+    temp_file=$(mktemp)
+    
+    # Extract frontmatter
+    local frontmatter_content
+    frontmatter_content=$(frontmatter_extract "$file")
+    
+    if [[ -z "$frontmatter_content" ]]; then
+        echo "Error: No frontmatter found in $file" >&2
+        rm "$temp_file"
+        return 1
     fi
     
-    local frontmatter_content updated_frontmatter
-    frontmatter_content=$(extract_frontmatter "$file")
-    
     # Remove field using yq
+    local updated_frontmatter
     updated_frontmatter=$(echo "$frontmatter_content" | yq eval "del(.${field})" -)
     
-    # Reconstruct the file
+    # Reconstruct file
     {
         echo "---"
         echo "$updated_frontmatter"
         echo "---"
-        awk '/^---$/ {count++; if (count==2) print_rest=1; next} print_rest {print}' "$file"
+        # Extract content after frontmatter
+        sed -n '/^---$/,/^---$/{/^---$/d; p}' "$file" | tail -n +2
+        sed '1,/^---$/d; /^---$/,$d' "$file"
     } > "$temp_file"
     
+    # Replace original file
     mv "$temp_file" "$file"
 }
 
-# @description Get all field names from frontmatter using yq
+# @description Get all fields from frontmatter
+# @public
 # @arg $1 string Path to the markdown file
-# @stdout List of field names, one per line
+# @stdout Field names (one per line)
 # @exitcode 0 Always successful
-get_frontmatter_fields() {
+frontmatter_get_fields() {
     local file="$1"
     
-    if [[ ! -f "$file" ]] || ! has_frontmatter "$file"; then
-        return 0
+    if [[ ! -f "$file" ]]; then
+        return
     fi
     
     local frontmatter_content
-    frontmatter_content=$(extract_frontmatter "$file")
+    frontmatter_content=$(frontmatter_extract "$file")
     
+    if [[ -z "$frontmatter_content" ]]; then
+        return
+    fi
+    
+    # Get all keys using yq
     echo "$frontmatter_content" | yq eval 'keys | .[]' -
 }
 
-# @description Pretty print frontmatter using yq
+# @description Pretty print frontmatter in a readable format
+# @public
 # @arg $1 string Path to the markdown file
-# @stdout Formatted YAML frontmatter
-# @exitcode 0 If successful
-# @exitcode 1 If file not found or no frontmatter
-pretty_print_frontmatter() {
+# @stdout Formatted frontmatter
+# @exitcode 0 Always successful
+frontmatter_pretty_print() {
     local file="$1"
     
-    if [[ ! -f "$file" ]] || ! has_frontmatter "$file"; then
-        echo "Error: File not found or no frontmatter: $file" >&2
-        return 1
+    if [[ ! -f "$file" ]]; then
+        echo "File not found: $file"
+        return
     fi
     
     local frontmatter_content
-    frontmatter_content=$(extract_frontmatter "$file")
+    frontmatter_content=$(frontmatter_extract "$file")
     
+    if [[ -z "$frontmatter_content" ]]; then
+        echo "No frontmatter found"
+        return
+    fi
+    
+    # Pretty print using yq
     echo "$frontmatter_content" | yq eval '.' -
 }
 
-# @description Merge frontmatter from another file using yq
-# @arg $1 string Path to target markdown file
-# @arg $2 string Path to source markdown file (to merge from)
-# @stderr Error messages if files not found
+# @description Merge frontmatter from one file into another
+# @public
+# @arg $1 string Source file (to copy from)
+# @arg $2 string Target file (to merge into)
+# @stderr Error messages
 # @exitcode 0 If successful
-# @exitcode 1 If files not found
-merge_frontmatter() {
-    local target_file="$1"
-    local source_file="$2"
-    local temp_file="${target_file}.tmp"
+# @exitcode 1 If error
+frontmatter_merge() {
+    local source_file="$1"
+    local target_file="$2"
     
-    if [[ ! -f "$target_file" || ! -f "$source_file" ]]; then
-        echo "Error: Both files must exist" >&2
+    if [[ ! -f "$source_file" ]]; then
+        echo "Error: Source file not found: $source_file" >&2
         return 1
     fi
     
-    if ! has_frontmatter "$target_file" || ! has_frontmatter "$source_file"; then
-        echo "Error: Both files must have frontmatter" >&2
+    if [[ ! -f "$target_file" ]]; then
+        echo "Error: Target file not found: $target_file" >&2
         return 1
     fi
     
-    local target_frontmatter source_frontmatter merged_frontmatter
-    target_frontmatter=$(extract_frontmatter "$target_file")
-    source_frontmatter=$(extract_frontmatter "$source_file")
+    local source_frontmatter target_frontmatter
+    source_frontmatter=$(frontmatter_extract "$source_file")
+    target_frontmatter=$(frontmatter_extract "$target_file")
     
-    # Merge using yq (source overwrites target for conflicting keys)
-    merged_frontmatter=$(echo "$target_frontmatter" | yq eval-all '. * load("'"$(mktemp)"'")' - <(echo "$source_frontmatter"))
+    if [[ -z "$source_frontmatter" ]]; then
+        echo "Error: No frontmatter in source file" >&2
+        return 1
+    fi
     
-    # Reconstruct target file with merged frontmatter
+    if [[ -z "$target_frontmatter" ]]; then
+        echo "Error: No frontmatter in target file" >&2
+        return 1
+    fi
+    
+    # Merge using yq (source fields take precedence)
+    local merged_frontmatter
+    merged_frontmatter=$(yq eval-all '. as $item ireduce ({}; . * $item)' <(echo "$target_frontmatter") <(echo "$source_frontmatter"))
+    
+    # Update target file
+    local temp_file
+    temp_file=$(mktemp)
+    
     {
         echo "---"
         echo "$merged_frontmatter"
         echo "---"
-        awk '/^---$/ {count++; if (count==2) print_rest=1; next} print_rest {print}' "$target_file"
+        # Extract content after frontmatter from target file
+        sed '1,/^---$/d; /^---$/,$d' "$target_file"
     } > "$temp_file"
     
     mv "$temp_file" "$target_file"
 }
 
-# @description Create a markdown file with frontmatter using yq
-# @arg $1 string Path to new markdown file
-# @arg $2+ string Field=value pairs for frontmatter
-# @stderr Error messages if creation fails
+# @description Create a new markdown file with frontmatter
+# @public
+# @arg $1 string Path to the new file
+# @arg $2 string YAML frontmatter content
+# @arg $3 string Markdown content (optional)
+# @stderr Error messages
 # @exitcode 0 If successful
-# @exitcode 1 If creation failed
-create_markdown_with_frontmatter() {
+# @exitcode 1 If error
+frontmatter_create_markdown() {
     local file="$1"
-    shift
+    local frontmatter="$2"
+    local content="${3:-}"
     
-    if [[ -z "$file" ]]; then
-        echo "Error: Output file path required" >&2
+    if [[ -f "$file" ]]; then
+        echo "Error: File already exists: $file" >&2
         return 1
     fi
     
-    # Start with empty YAML object
-    local yaml_content="{}"
+    # Validate frontmatter YAML
+    if ! echo "$frontmatter" | yq eval '.' - >/dev/null 2>&1; then
+        echo "Error: Invalid YAML frontmatter" >&2
+        return 1
+    fi
     
-    # Add each field using yq
-    for field_value in "$@"; do
-        if [[ "$field_value" == *"="* ]]; then
-            local field="${field_value%%=*}"
-            local value="${field_value#*=}"
-            yaml_content=$(echo "$yaml_content" | yq eval ".${field} = \"${value}\"" -)
-        fi
-    done
-    
-    # Create the file
+    # Create file
     {
         echo "---"
-        echo "$yaml_content"
+        echo "$frontmatter"
         echo "---"
-        echo ""
-        echo "# Document"
-        echo ""
-        echo "Content here."
+        if [[ -n "$content" ]]; then
+            echo
+            echo "$content"
+        fi
     } > "$file"
 }
 
 # @description Query frontmatter with complex yq expressions
+# @public
 # @arg $1 string Path to the markdown file
 # @arg $2 string yq query expression
 # @stdout Query result
-# @exitcode 0 If successful
-query_frontmatter() {
+# @exitcode 0 Always successful
+frontmatter_query() {
     local file="$1"
     local query="$2"
     
-    if [[ ! -f "$file" ]] || ! has_frontmatter "$file"; then
-        echo ""
+    if [[ ! -f "$file" ]]; then
         return
     fi
     
     local frontmatter_content
-    frontmatter_content=$(extract_frontmatter "$file")
+    frontmatter_content=$(frontmatter_extract "$file")
     
+    if [[ -z "$frontmatter_content" ]]; then
+        return
+    fi
+    
+    # Execute query using yq
     echo "$frontmatter_content" | yq eval "$query" -
 }
 
-# @description Update multiple fields at once using yq
+# @description Update multiple fields in frontmatter at once
+# @public
 # @arg $1 string Path to the markdown file
-# @arg $2+ string Field=value pairs to update
-# @stderr Error messages if file not found
+# @arg $... string Field=value pairs
+# @stderr Error messages
 # @exitcode 0 If successful
-# @exitcode 1 If file not found
-bulk_update_frontmatter() {
+# @exitcode 1 If error
+frontmatter_bulk_update() {
     local file="$1"
     shift
-    local temp_file="${file}.tmp"
     
     if [[ ! -f "$file" ]]; then
         echo "Error: File not found: $file" >&2
         return 1
     fi
     
-    if ! has_frontmatter "$file"; then
-        echo "Error: File has no frontmatter: $file" >&2
-        return 1
-    fi
-    
-    local frontmatter_content updated_frontmatter
-    frontmatter_content=$(extract_frontmatter "$file")
-    updated_frontmatter="$frontmatter_content"
-    
-    # Apply each update using yq
-    for field_value in "$@"; do
-        if [[ "$field_value" == *"="* ]]; then
-            local field="${field_value%%=*}"
-            local value="${field_value#*=}"
-            updated_frontmatter=$(echo "$updated_frontmatter" | yq eval ".${field} = \"${value}\"" -)
+    # Process each field=value pair
+    for pair in "$@"; do
+        if [[ "$pair" =~ ^([^=]+)=(.*)$ ]]; then
+            local field="${BASH_REMATCH[1]}"
+            local value="${BASH_REMATCH[2]}"
+            frontmatter_update_field "$file" "$field" "$value"
+        else
+            echo "Error: Invalid field=value format: $pair" >&2
+            return 1
         fi
     done
-    
-    # Reconstruct the file
-    {
-        echo "---"
-        echo "$updated_frontmatter"
-        echo "---"
-        awk '/^---$/ {count++; if (count==2) print_rest=1; next} print_rest {print}' "$file"
-    } > "$temp_file"
-    
-    mv "$temp_file" "$file"
 }
+
