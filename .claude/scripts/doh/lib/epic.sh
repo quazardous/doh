@@ -25,7 +25,7 @@ epic_get_status() {
 
     # Get DOH root directory
     local doh_root
-    doh_root=$(doh_find_root) || {
+    doh_root=$(doh_project_dir) || {
         echo "Error: Not in a DOH project" >&2
         return 1
     }
@@ -141,7 +141,7 @@ epic_get_status() {
 # @exitcode 1 If error occurred
 epic_list() {
     local doh_root
-    doh_root=$(doh_find_root) || {
+    doh_root=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
@@ -198,7 +198,7 @@ epic_show() {
     fi
 
     local doh_root
-    doh_root=$(doh_find_root) || {
+    doh_root=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
@@ -251,7 +251,7 @@ epic_get_tasks() {
     fi
 
     local doh_root
-    doh_root=$(doh_find_root) || {
+    doh_root=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }

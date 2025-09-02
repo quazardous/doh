@@ -24,7 +24,7 @@ _file_cache_get_path() {
     local project_id
     project_id="$(workspace_get_current_project_id)" || return 1
     
-    echo "$HOME/.doh/projects/$project_id/file_cache.csv"
+    echo "$(doh_global_dir)/projects/$project_id/file_cache.csv"
 }
 
 # @description Initialize empty file cache
@@ -100,7 +100,7 @@ file_cache_find_file_by_number() {
         # Try to resolve duplicates by checking which files exist
         local valid_matches=""
         local project_root
-        project_root="$(doh_find_root)" || return 1
+        project_root="$(doh_project_dir)" || return 1
         
         while IFS= read -r match; do
             local file_path
@@ -219,7 +219,7 @@ file_cache_remove_file() {
 # @exitcode 1 If unable to find project root or create cache
 file_cache_rebuild() {
     local project_root
-    project_root="$(doh_find_root)" || return 1
+    project_root="$(doh_project_dir)" || return 1
     
     local cache_file
     cache_file="$(_file_cache_ensure)" || return 1

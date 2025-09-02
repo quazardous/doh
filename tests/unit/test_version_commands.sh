@@ -3,34 +3,27 @@
 # DOH Version Commands Test Suite  
 # Tests version management commands and their integration
 
-# Load test framework
-if [[ -n "${_TF_LAUNCHER_EXECUTION:-}" ]]; then
-    # Running through test launcher from project root
-    source "tests/helpers/test_framework.sh"
-else
-    # Running directly from test directory
-    source "$(dirname "$0")/../helpers/test_framework.sh"
-fi
+# Source the framework and helpers
+source "$(dirname "${BASH_SOURCE[0]}")/../helpers/test_framework.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../helpers/doh_fixtures.sh"
 
-# Load version management libraries
-source ".claude/scripts/doh/lib/dohenv.sh"
-source ".claude/scripts/doh/lib/version.sh"
-source ".claude/scripts/doh/lib/frontmatter.sh"
-
-# Export functions for use in test assertions
-export -f find_version_inconsistencies list_versions
+# Source the libraries being tested
+LIB_DIR="$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib"
+source "$LIB_DIR/dohenv.sh"
+source "$LIB_DIR/version.sh"
+source "$LIB_DIR/frontmatter.sh"
 
 _tf_setup() {
-    # Create temporary test environment
-    TEST_DIR=$(mktemp -d)
-    cd "$TEST_DIR"
-    
-    # Initialize basic DOH structure
-    mkdir -p .doh/{versions,epics,tasks} .git
-    echo "0.1.0" > VERSION
-    
-    # Create version files
-    cat > .doh/versions/0.1.0.md << 'EOF'
+    # Use the DOH_PROJECT_DIR set by test launcher, just create the structure
+    if [[ -n "$DOH_PROJECT_DIR" ]]; then
+        # Create the project structure using fixture
+        _tff_create_version_test_project "$(dirname "$DOH_PROJECT_DIR")"
+        
+        # Add additional files for version commands testing
+        mkdir -p "$DOH_PROJECT_DIR/versions"
+        
+        # Create version files
+        cat > "$DOH_PROJECT_DIR/versions/0.1.0.md" << 'EOF'
 ---
 version: 0.1.0
 type: initial
@@ -41,48 +34,27 @@ created: 2025-09-01T10:00:00Z
 
 Initial version of the project.
 EOF
-    
-    # Create test epic with version
-    cat > .doh/epics/001.md << 'EOF'
+
+    cat > "$DOH_PROJECT_DIR/versions/0.2.0.md" << 'EOF'
 ---
-name: test-epic
-number: 001
-status: open
-file_version: 0.1.0
-target_version: 0.2.0
+version: 0.2.0
+type: minor
+created: 2025-09-02T10:00:00Z
 ---
 
-# Test Epic
-Test epic for version testing.
-EOF
-    
-    # Create test task with version
-    cat > .doh/epics/002.md << 'EOF'
----
-name: test-task
-number: 002
-epic: test-epic
-status: open
-file_version: 0.1.0
-target_version: 0.2.0
----
+# Version 0.2.0 - Minor Release
 
-# Test Task
-Test task for version testing.
+Minor version update.
 EOF
-    
-    cd - > /dev/null
 }
 
 _tf_teardown() {
-    # Cleanup test directory
-    if [[ -n "$TEST_DIR" && -d "$TEST_DIR" ]]; then
-        rm -rf "$TEST_DIR"
-    fi
+    # Cleanup is handled by test launcher
+    :
 }
 
 test_version_get_current() {
-    cd "$TEST_DIR"
+    cd "$(dirname "$DOH_PROJECT_DIR")"
     
     local version
     version=$(version_get_current)
@@ -95,7 +67,7 @@ test_version_get_current() {
 }
 
 test_version_set_project() {
-    cd "$TEST_DIR"
+    cd "$$(dirname "$DOH_PROJECT_DIR")"
     
     version_set_project "0.2.0" > /dev/null
     local exit_code=$?
@@ -110,7 +82,7 @@ test_version_set_project() {
 }
 
 test_bump_project_version_patch() {
-    cd "$TEST_DIR"
+    cd "$$(dirname "$DOH_PROJECT_DIR")"
     
     local new_version
     new_version=$(bump_project_version "patch")
@@ -127,7 +99,7 @@ test_bump_project_version_patch() {
 }
 
 test_bump_project_version_minor() {
-    cd "$TEST_DIR"
+    cd "$$(dirname "$DOH_PROJECT_DIR")"
     
     local new_version
     new_version=$(bump_project_version "minor")
@@ -140,7 +112,7 @@ test_bump_project_version_minor() {
 }
 
 test_bump_project_version_major() {
-    cd "$TEST_DIR"
+    cd "$$(dirname "$DOH_PROJECT_DIR")"
     
     local new_version
     new_version=$(bump_project_version "major")
@@ -153,7 +125,7 @@ test_bump_project_version_major() {
 }
 
 test_version_find_missing_files() {
-    cd "$TEST_DIR"
+    cd "$$(dirname "$DOH_PROJECT_DIR")"
     
     # Create file without version
     cat > .doh/epics/no_version.md << 'EOF'
@@ -186,7 +158,7 @@ EOF
 }
 
 test_version_file_operations() {
-    cd "$TEST_DIR"
+    cd "$$(dirname "$DOH_PROJECT_DIR")"
     
     # Test getting file version
     local version
@@ -207,7 +179,7 @@ test_version_file_operations() {
 }
 
 test_version_file_bump() {
-    cd "$TEST_DIR"
+    cd "$$(dirname "$DOH_PROJECT_DIR")"
     
     # Test bumping file version
     local new_version
@@ -226,7 +198,7 @@ test_version_file_bump() {
 }
 
 test_version_consistency_check() {
-    cd "$TEST_DIR"
+    cd "$$(dirname "$DOH_PROJECT_DIR")"
     
     # Set inconsistent versions
     version_set_project "0.3.0" > /dev/null
@@ -248,7 +220,7 @@ test_version_consistency_check() {
 }
 
 test_version_list_operations() {
-    cd "$TEST_DIR"
+    cd "$$(dirname "$DOH_PROJECT_DIR")"
     
     # Create additional version files
     cat > .doh/versions/0.2.0.md << 'EOF'
@@ -274,5 +246,4 @@ EOF
     cd - > /dev/null
 }
 
-# Run all tests
-_tf_run_tests
+# Tests are run by the test launcher

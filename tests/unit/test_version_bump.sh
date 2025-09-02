@@ -12,15 +12,56 @@ else
     source "$(dirname "$0")/../helpers/test_framework.sh"
 fi
 
-# Load version management libraries
-source ".claude/scripts/doh/lib/dohenv.sh"
-source ".claude/scripts/doh/lib/version.sh"
-source ".claude/scripts/doh/lib/frontmatter.sh"
+# Get the project root directory for API calls
+if [[ -n "${_TF_LAUNCHER_EXECUTION:-}" ]]; then
+    # Running through test launcher from project root
+    DOH_API_PATH="$(pwd)/.claude/scripts/doh/api.sh"
+else
+    # Running directly from test directory - find project root
+    DOH_API_PATH="$(cd "$(dirname "$0")/../.." && pwd)/.claude/scripts/doh/api.sh"
+fi
 
-# Export functions for use in test assertions
-export -f validate_version compare_versions increment_version version_to_number
-export -f version_get_current get_file_version set_file_version set_project_version
-export -f find_files_missing_version bump_file_version version_bump_project
+# Use DOH API for version functions
+version_validate() {
+    "$DOH_API_PATH" version validate "$@"
+}
+version_compare() {
+    "$DOH_API_PATH" version compare "$@"  
+}
+version_increment() {
+    "$DOH_API_PATH" version increment "$@"
+}
+version_get_current() {
+    "$DOH_API_PATH" version get_current "$@"
+}
+version_get_file() {
+    "$DOH_API_PATH" version get_file "$@"
+}
+version_set_file() {
+    "$DOH_API_PATH" version set_file "$@"
+}
+version_set_project() {
+    "$DOH_API_PATH" version set_project "$@"
+}
+version_find_missing_files() {
+    "$DOH_API_PATH" version find_missing_files "$@"
+}
+version_bump_file() {
+    "$DOH_API_PATH" version bump_file "$@"
+}
+version_bump_project() {
+    "$DOH_API_PATH" version bump_project "$@"
+}
+
+# Legacy function names for compatibility
+validate_version() { version_validate "$@"; }
+compare_versions() { version_compare "$@"; }
+increment_version() { version_increment "$@"; }
+get_file_version() { version_get_file "$@"; }
+set_file_version() { version_set_file "$@"; }
+set_project_version() { version_set_project "$@"; }
+find_files_missing_version() { version_find_missing_files "$@"; }
+bump_file_version() { version_bump_file "$@"; }
 
 _tf_setup() {
     # Create temporary test environment

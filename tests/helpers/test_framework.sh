@@ -256,7 +256,16 @@ _tf_create_temp_dir() {
 }
 
 _tf_create_temp_file() {
-    mktemp -t doh_test_XXXXXX
+    local extension="${1:-}"
+    local temp_file=$(mktemp -t doh_test_XXXXXX)
+    
+    if [[ -n "$extension" ]]; then
+        local new_file="${temp_file}${extension}"
+        mv "$temp_file" "$new_file"
+        echo "$new_file"
+    else
+        echo "$temp_file"
+    fi
 }
 
 _tf_cleanup_temp() {

@@ -22,7 +22,7 @@ readonly VERSION_LIB_VERSION="1.0.0"
 # @exitcode 1 If not in DOH project, VERSION file not found, empty, or invalid
 version_get_current() {
     local doh_root
-    doh_root="$(doh_find_root)" || {
+    doh_root="$(doh_project_dir)" || {
         echo "Error: Not in a DOH project" >&2
         return 1
     }
@@ -200,7 +200,7 @@ version_set_project() {
     fi
     
     local doh_root
-    doh_root="$(doh_find_root)" || {
+    doh_root="$(doh_project_dir)" || {
         echo "Error: Not in a DOH project" >&2
         return 1
     }
@@ -355,7 +355,7 @@ version_validate() {
 # @exitcode 1 If not in DOH project
 version_find_missing_files() {
     local doh_root
-    doh_root="$(doh_find_root)" || return 1
+    doh_root="$(doh_project_dir)" || return 1
     
     # Find markdown files in DOH directory structure
     find "$doh_root" -name "*.md" -type f | while read -r file; do
@@ -380,7 +380,7 @@ version_find_missing_files() {
 # @exitcode 1 If not in DOH project
 version_find_inconsistencies() {
     local doh_root
-    doh_root="$(doh_find_root)" || return 1
+    doh_root="$(doh_project_dir)" || return 1
     
     # Find markdown files and check for version issues
     find "$doh_root" -name "*.md" -type f | while read -r file; do
@@ -407,7 +407,7 @@ version_find_inconsistencies() {
 # @exitcode 1 If not in DOH project
 version_list() {
     local doh_root
-    doh_root="$(doh_find_root)" || return 1
+    doh_root="$(doh_project_dir)" || return 1
     
     # Collect all versions from markdown files
     {

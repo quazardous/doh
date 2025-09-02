@@ -41,7 +41,7 @@ get_queue_dir() {
     local project_id
     project_id="$(get_current_project_id)" || return 1
     
-    echo "$HOME/.doh/projects/$project_id/queues/$queue_name"
+    echo "$(doh_global_dir)/projects/$project_id/queues/$queue_name"
 }
 
 # @description Ensure queue directory exists

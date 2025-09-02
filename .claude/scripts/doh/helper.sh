@@ -13,7 +13,10 @@ show_usage() {
 DOH Helper Bootstrap
 
 USAGE:
-    helper.sh <helper_name> <function_name> [arguments...]
+    helper.sh [--no-env] <helper_name> <function_name> [arguments...]
+
+FLAGS:
+    --no-env    Skip automatic DOH environment loading
 
 EXAMPLES:
     helper.sh epic show data-api-sanity
@@ -47,16 +50,40 @@ For more details on available functions, use:
 EOF
 }
 
+# Parse flags
+LOAD_ENV=true
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --help)
+            show_usage
+            exit 0
+            ;;
+        --no-env)
+            LOAD_ENV=false
+            shift
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
+
 # Validate arguments
 if [[ $# -lt 2 ]]; then
-    if [[ $# -eq 1 && "$1" == "--help" ]]; then
-        show_usage
-        exit 0
-    fi
     echo "Error: Missing required arguments" >&2
-    echo "Usage: helper.sh <helper_name> <function_name> [arguments...]" >&2
+    echo "Usage: helper.sh [--no-env] <helper_name> <function_name> [arguments...]" >&2
     echo "Run 'helper.sh --help' for more information" >&2
     exit 1
+fi
+
+# Load DOH environment by default
+if [[ "$LOAD_ENV" == "true" ]]; then
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    if [[ -f "$script_dir/lib/dohenv.sh" ]]; then
+        source "$script_dir/lib/dohenv.sh"
+        dohenv_load 2>/dev/null || true  # Don't fail if environment loading fails
+    fi
 fi
 
 # Extract parameters

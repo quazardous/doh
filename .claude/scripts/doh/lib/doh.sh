@@ -8,17 +8,37 @@
 [[ -n "${DOH_LIB_CORE_LOADED:-}" ]] && return 0
 DOH_LIB_CORE_LOADED=1
 
-# @description Find DOH project root (directory containing both .git/ and .doh/)
+# @description Get DOH global directory with fallback
+# @public  
+# @stdout DOH global directory path
+# @exitcode 0 Always successful
+doh_global_dir() {
+    echo "${DOH_GLOBAL_DIR:-$HOME/.doh}"
+}
+
+# @description Get DOH project .doh directory path
 # @public
-# @stdout Path to DOH project root
+# @stdout Path to DOH project .doh directory
 # @stderr Error message if not in DOH project
 # @exitcode 0 If successful
 # @exitcode 1 If not in DOH project
-doh_find_root() {
+doh_project_dir() {
+    # If DOH_PROJECT_DIR is set, it should point directly to the .doh directory
+    if [[ -n "${DOH_PROJECT_DIR:-}" ]]; then
+        if [[ -d "$DOH_PROJECT_DIR" ]]; then
+            echo "$DOH_PROJECT_DIR"
+            return 0
+        else
+            echo "❌ Error: DOH_PROJECT_DIR set to '$DOH_PROJECT_DIR' but directory not found" >&2
+            return 1
+        fi
+    fi
+    
+    # Otherwise, search up the directory tree from current location
     local dir="$PWD"
     while [[ "$dir" != "/" ]]; do
         if [[ -d "$dir/.git" && -d "$dir/.doh" ]]; then
-            echo "$dir"
+            echo "$dir/.doh"
             return 0
         fi
         dir="$(dirname "$dir")"
@@ -28,6 +48,17 @@ doh_find_root() {
     return 1
 }
 
+# @description Get DOH project root (relative to library location)
+# @public
+# @stdout Path to DOH project root
+# @stderr No error output
+# @exitcode 0 Always successful
+doh_project_root() {
+    # Library is at .claude/scripts/doh/lib/doh.sh
+    # Project root is ../../.. from library location
+    dirname "$(dirname "$(dirname "$(dirname "${BASH_SOURCE[0]}")")")"
+}
+
 # @description Check if we're in a valid DOH project
 # @public
 # @stdout No output
@@ -35,7 +66,7 @@ doh_find_root() {
 # @exitcode 0 If in DOH project
 # @exitcode 1 If not in DOH project
 doh_validate_project() {
-    doh_find_root >/dev/null 2>&1
+    doh_project_root >/dev/null 2>&1
 }
 
 # @description Get DOH project root or exit with error
@@ -46,6 +77,6 @@ doh_validate_project() {
 # @exitcode 1 If not in DOH project (exits)
 doh_require_project() {
     local root
-    root=$(doh_find_root) || exit 1
+    root=$(doh_project_root) || exit 1
     echo "$root"
 }

@@ -11,21 +11,44 @@ set -eo pipefail
 
 # Get script directory for relative paths
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DOH_ROOT="$(cd "$SCRIPT_DIR/../../../.." && pwd)"
+DOH_PROJECT_DIR="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 
-# Parse private flag
+# Parse flags
 PRIVATE_CALL=false
-if [[ "$1" == "--private" ]]; then
-    PRIVATE_CALL=true
-    shift
-fi
+LOAD_ENV=true
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --private)
+            PRIVATE_CALL=true
+            shift
+            ;;
+        --no-env)
+            LOAD_ENV=false
+            shift
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
 
 # Validate arguments
 if [[ $# -lt 2 ]]; then
-    echo "Usage: $0 [--private] <library> <function> [args...]" >&2
+    echo "Usage: $0 [--private] [--no-env] <library> <function> [args...]" >&2
     echo "Available libraries: doh, dohenv, frontmatter, version, numbering, workspace, task, etc." >&2
-    echo "Use --private flag to call private functions (prefixed with _library_)" >&2
+    echo "Flags:" >&2
+    echo "  --private   Call private functions (prefixed with _library_)" >&2
+    echo "  --no-env    Skip automatic DOH environment loading" >&2
     exit 1
+fi
+
+# Load DOH environment by default
+if [[ "$LOAD_ENV" == "true" ]]; then
+    if [[ -f "$SCRIPT_DIR/lib/dohenv.sh" ]]; then
+        source "$SCRIPT_DIR/lib/dohenv.sh"
+        dohenv_load 2>/dev/null || true  # Don't fail if environment loading fails
+    fi
 fi
 
 LIBRARY="$1"
@@ -33,7 +56,7 @@ FUNCTION="$2"
 shift 2
 
 # Define library path
-LIB_PATH="$DOH_ROOT/.claude/scripts/doh/lib/${LIBRARY}.sh"
+LIB_PATH="$SCRIPT_DIR/lib/${LIBRARY}.sh"
 
 # Check if library exists
 if [[ ! -f "$LIB_PATH" ]]; then

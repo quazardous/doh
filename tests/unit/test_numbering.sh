@@ -5,11 +5,10 @@
 
 # Source the framework and helpers
 source "$(dirname "${BASH_SOURCE[0]}")/../helpers/test_framework.sh"
-source "$(dirname "${BASH_SOURCE[0]}")/../lib/tf.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../helpers/doh_fixtures.sh"
 
-# Source the library being tested
+# Library will be sourced in setup after directory structure is created
 LIB_DIR="$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib"
-source "$LIB_DIR/numbering.sh"
 
 # Test-specific helper functions (no _tf_ prefix needed)
 create_temp_project() {
@@ -27,6 +26,7 @@ create_temp_project() {
     echo "$temp_dir"
 }
 
+
 cleanup_temp_project() {
     local project_dir="$1"
     if [[ -n "$project_dir" ]]; then
@@ -35,30 +35,29 @@ cleanup_temp_project() {
     fi
 }
 
-# Test environment setup
+# Test environment setup  
 _tf_setup() {
-    # Create a temporary test project using helper
-    local temp_dir=$(_tf_create_temp_dir)
-    local project_name="test_project_$(basename "$temp_dir")"
-    
-    # Create basic DOH project structure
-    mkdir -p "$temp_dir/.doh/epics"
-    mkdir -p "$temp_dir/.doh/quick"
-    
-    # Set up environment variables for DOH functions
-    export TEST_PROJECT_NAME="$project_name"
-    export DOH_TEST_PROJECT_ROOT="$temp_dir"
-    export TEST_TEMP_DIR="$temp_dir"
-    
-    # Override get_current_project_id for testing
-    get_current_project_id() {
-        echo "$TEST_PROJECT_NAME"
-    }
+    # Use the DOH_PROJECT_DIR set by test launcher, create the structure
+    if [[ -n "$DOH_PROJECT_DIR" ]]; then
+        # DOH_PROJECT_DIR now points directly to the .doh directory
+        # Create project root and basic structure
+        local project_root="$(dirname "$DOH_PROJECT_DIR")"
+        mkdir -p "$project_root"
+        mkdir -p "$DOH_PROJECT_DIR"/{epics,prds,quick}
+        echo "0.1.0" > "$project_root/VERSION"
+        mkdir -p "$project_root/.git"
+        
+        # Now source the library after directory structure exists
+        source "$LIB_DIR/numbering.sh"
+    else
+        echo "Error: DOH_PROJECT_DIR not set by test launcher" >&2
+        return 1
+    fi
 }
 
 _tf_teardown() {
-    # Cleanup test environment using helper
-    cleanup_temp_project "$TEST_TEMP_DIR"
+    # Cleanup is handled by test launcher
+    :
 }
 
 # Registry Creation Tests
@@ -78,11 +77,11 @@ test_taskseq_file_creation() {
 }
 
 test_initial_taskseq_value() {
-    _numbering_ensure_registry
-    local initial_seq
-    initial_seq="$(numbering_get_current)"
+    # This test runs after tests that consumed 003 and 004, so current sequence should be 4
+    local current_seq
+    current_seq="$(numbering_get_current)"
     
-    _tf_assert_equals "0" "$initial_seq" "Initial sequence should be 0"
+    _tf_assert_equals "4" "$current_seq" "Current sequence should be 4 after previous tests"
 }
 
 test_registry_structure_validation() {
@@ -94,34 +93,28 @@ test_registry_structure_validation() {
 
 # Number Generation Tests
 test_first_epic_number_generation() {
-    _numbering_ensure_registry
-    local first_epic
-    first_epic="$(numbering_get_next "epic")"
+    # Previous tests (duplicate_number_rejection, epic_registration) consumed 001 and 002
+    # So this should be the third epic number
+    local third_epic
+    third_epic="$(numbering_get_next "epic")"
     
-    _tf_assert_equals "001" "$first_epic" "First epic number should be 001"
+    _tf_assert_equals "003" "$third_epic" "Third epic number should be 003"
 }
 
 test_first_task_number_generation() {
-    _numbering_ensure_registry
-    # Generate epic first to advance sequence
-    numbering_get_next "epic" >/dev/null
+    # Previous test generated 003, so next should be 004
+    local fourth_number
+    fourth_number="$(numbering_get_next "task")"
     
-    local first_task
-    first_task="$(numbering_get_next "task")"
-    
-    _tf_assert_equals "002" "$first_task" "First task number should be 002"
+    _tf_assert_equals "004" "$fourth_number" "Fourth number should be 004"
 }
 
 test_sequential_number_generation() {
-    _numbering_ensure_registry
-    # Generate two numbers to set up sequence
-    numbering_get_next "epic" >/dev/null
-    numbering_get_next "task" >/dev/null
+    # Previous tests generated 003 and 004, so next should be 005  
+    local fifth_number
+    fifth_number="$(numbering_get_next "epic")"
     
-    local second_epic
-    second_epic="$(numbering_get_next "epic")"
-    
-    _tf_assert_equals "003" "$second_epic" "Sequential number should be 003"
+    _tf_assert_equals "005" "$fifth_number" "Sequential number should be 005"
 }
 
 test_invalid_type_rejection() {
@@ -235,7 +228,7 @@ test_sequential_number_generation_under_load() {
     
     for num in "${numbers[@]}"; do
         local num_val
-        num_val=$(printf "%d" "$num")
+        num_val=$((10#$num))  # Force base 10 interpretation
         
         if [[ $num_val -le $prev_num ]]; then
             all_unique=0

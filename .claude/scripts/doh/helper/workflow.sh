@@ -85,7 +85,7 @@ helper_workflow_search() {
     fi
     
     local doh_root
-    doh_root=$(doh_find_root) || {
+    doh_root=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }

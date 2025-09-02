@@ -21,7 +21,7 @@ readonly VALIDATION_LIB_VERSION="1.0.0"
 # @exitcode 1 If system has issues
 validation_validate_system() {
     local doh_root
-    doh_root=$(doh_find_root) || {
+    doh_root=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
@@ -170,7 +170,7 @@ validation_validate_system() {
 # @exitcode 1 If critical directories missing
 validation_check_directories() {
     local doh_root
-    doh_root=$(doh_find_root) || {
+    doh_root=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
@@ -210,7 +210,7 @@ validation_check_directories() {
 # @exitcode 1 If files have invalid or missing frontmatter
 validation_check_frontmatter() {
     local doh_root
-    doh_root=$(doh_find_root) || {
+    doh_root=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
@@ -246,7 +246,7 @@ validation_check_frontmatter() {
 # @exitcode 1 If broken references found
 validation_check_references() {
     local doh_root
-    doh_root=$(doh_find_root) || {
+    doh_root=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }

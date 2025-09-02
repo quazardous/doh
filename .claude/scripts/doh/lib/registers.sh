@@ -27,7 +27,7 @@ registers_rebuild_file_cache() {
     registry_file="$(_numbering_ensure_registry)" || return 1
     
     local project_root
-    project_root="$(doh_find_root)" || {
+    project_root="$(doh_project_dir)" || {
         echo "Error: Not in a DOH project" >&2
         return 1
     }
@@ -128,7 +128,7 @@ registers_rebuild_graph_cache() {
     registry_file="$(_numbering_ensure_registry)" || return 1
     
     local project_root
-    project_root="$(doh_find_root)" || return 1
+    project_root="$(doh_project_dir)" || return 1
     
     echo "Rebuilding graph cache from file relationships..." >&2
     
@@ -203,7 +203,7 @@ registers_validate_consistency() {
     registry_file="$(_numbering_ensure_registry)" || return 1
     
     local project_root
-    project_root="$(doh_find_root)" || return 1
+    project_root="$(doh_project_dir)" || return 1
     
     local errors=0
     

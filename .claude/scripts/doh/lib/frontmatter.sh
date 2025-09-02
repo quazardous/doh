@@ -101,9 +101,8 @@ frontmatter_update_field() {
         echo "---"
         echo "$updated_frontmatter"
         echo "---"
-        # Extract content after second ---
-        sed -n '/^---$/,/^---$/{/^---$/d; p}' "$file" | tail -n +2
-        sed '1,/^---$/d; /^---$/,$d' "$file"
+        # Extract content after frontmatter (everything after the closing ---)
+        awk '/^---$/{c++} c==2{getline; print; while((getline) > 0) print}' "$file"
     } > "$temp_file"
     
     # Replace original file
@@ -118,6 +117,8 @@ frontmatter_update_field() {
 # @exitcode 1 If invalid or missing frontmatter
 frontmatter_validate() {
     local file="$1"
+    shift  # Remove file parameter, rest are required fields
+    local required_fields=("$@")
     
     if [[ ! -f "$file" ]]; then
         echo "Error: File not found: $file" >&2
@@ -133,7 +134,24 @@ frontmatter_validate() {
     fi
     
     # Test with yq - will fail if invalid YAML
-    echo "$frontmatter_content" | yq eval '.' - >/dev/null 2>&1
+    if ! echo "$frontmatter_content" | yq eval '.' - >/dev/null 2>&1; then
+        echo "Error: Invalid YAML syntax in frontmatter" >&2
+        return 1
+    fi
+    
+    # Validate required fields if specified
+    if [[ ${#required_fields[@]} -gt 0 ]]; then
+        for field in "${required_fields[@]}"; do
+            local value
+            value=$(echo "$frontmatter_content" | yq eval ".$field" - 2>/dev/null)
+            if [[ "$value" == "null" || -z "$value" ]]; then
+                echo "Error: Required field '$field' is missing or empty" >&2
+                return 1
+            fi
+        done
+    fi
+    
+    return 0
 }
 
 # @description Check if a file has frontmatter
@@ -148,8 +166,17 @@ frontmatter_has() {
         return 1
     fi
     
-    # Check if file starts with ---
-    head -n 1 "$file" | grep -q "^---$"
+    # Check if file starts with --- and has a closing ---
+    if ! head -n 1 "$file" | grep -q "^---$"; then
+        return 1
+    fi
+    
+    # Look for closing --- delimiter (skip the first line which is opening ---)
+    if ! tail -n +2 "$file" | grep -q "^---$"; then
+        return 1
+    fi
+    
+    return 0
 }
 
 # @description Add a new field to frontmatter

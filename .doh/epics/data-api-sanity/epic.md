@@ -31,7 +31,7 @@ Establish robust, self-contained DOH Data API libraries by refactoring core depe
 
 ### Core Library Refactoring
 - Create new `doh.sh` as the foundational core library with essential functions
-- Move `_find_doh_root` → `doh_find_root` from `dohenv.sh` to `doh.sh`
+- Move `_find_doh_root` → `doh_project_dir` from `dohenv.sh` to `doh.sh`
 - Refactor ALL libraries to be no-op when sourced (no automatic execution or side effects)
 - Update `dohenv.sh` to source `doh.sh` and provide explicit load functions
 - Implement source guards to prevent duplicate loading across all libraries
@@ -40,8 +40,8 @@ Establish robust, self-contained DOH Data API libraries by refactoring core depe
 
 ### Function Naming Standards
 - **Private Functions**: Prefix with `_{lib_name}_` (e.g., `_doh_internal_helper`, `_version_validate_input`)
-- **Public API Functions**: Prefix with `{lib_name}_` (e.g., `doh_find_root`, `version_get_current`, `dohenv_load`)
-- **Breaking Change**: Rename `_find_doh_root` → `doh_find_root` (becomes public API with library prefix)
+- **Public API Functions**: Prefix with `{lib_name}_` (e.g., `doh_project_dir`, `version_get_current`, `dohenv_load`)
+- **Breaking Change**: Rename `_find_doh_root` → `doh_project_dir` (becomes public API with library prefix)
 - Apply naming convention consistently across all libraries during refactoring
 
 ### Library Function Prefixes
@@ -82,7 +82,7 @@ graph-cache.sh     doh.sh, dohenv.sh, workspace.sh, numbering.sh, frontmatter.sh
 
 ### Phase 1: Core Foundation (Breaking Changes)
 - Create new `doh.sh` core library
-- Move `_find_doh_root` → `doh_find_root` from `dohenv.sh` to `doh.sh`
+- Move `_find_doh_root` → `doh_project_dir` from `dohenv.sh` to `doh.sh`
 - Refactor ALL libraries to be no-op when sourced (remove any automatic execution)
 - Update `dohenv.sh` to source `doh.sh` as dependency and provide explicit initialization functions
 - Add source guards to prevent duplicate library loading
@@ -184,7 +184,7 @@ High-level task categories that will be created:
 - Coordination with ongoing development to avoid conflicts
 
 ### Critical Path Items
-1. Create `doh.sh` core library and move `doh_find_root` function
+1. Create `doh.sh` core library and move `doh_project_dir` function
 2. Update `dohenv.sh` to depend on `doh.sh` 
 3. Library dependency resolution and testing
 4. Command API migration (largest effort)

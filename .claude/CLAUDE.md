@@ -21,6 +21,48 @@ Using the test-runner agent ensures:
 - All issues are properly surfaced
 - No approval dialogs interrupt the workflow
 
+## DOH API ENFORCEMENT
+
+### MANDATORY: Always use DOH API and Helper Scripts
+
+**For DOH library functions:**
+```bash
+# ✅ CORRECT: Use DOH API
+./.claude/scripts/doh/api.sh <library> <function> [args...]
+
+# ❌ WRONG: Direct library sourcing  
+source .claude/scripts/doh/lib/library.sh && library_function
+```
+
+**For DOH commands and workflows:**
+```bash
+# ✅ CORRECT: Use DOH helper
+./.claude/scripts/doh/helper.sh <helper> <command> [args...]
+
+# ❌ WRONG: Direct script execution
+./.claude/scripts/doh/some-script.sh
+```
+
+**Rules:**
+- **NEVER source DOH libraries directly** - always use `api.sh`
+- **NEVER call DOH scripts directly** - always use `helper.sh` 
+- This applies to ALL contexts: commands, tests, automation, development
+- Both mainstream development and agent operations must follow this pattern
+
+**Examples:**
+```bash
+# Numbering operations
+./.claude/scripts/doh/api.sh numbering get_next "epic"
+./.claude/scripts/doh/api.sh numbering register_epic "205" "path" "name"
+
+# PRD operations  
+./.claude/scripts/doh/helper.sh prd list
+./.claude/scripts/doh/helper.sh prd status
+
+# Workspace operations
+./.claude/scripts/doh/api.sh workspace get_current_project_id
+```
+
 ## Philosophy
 
 ### Error Handling

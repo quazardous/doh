@@ -20,7 +20,7 @@ helper_prd_list() {
     echo ""
 
     local doh_root
-    doh_root=$(doh_find_root) || {
+    doh_root=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }

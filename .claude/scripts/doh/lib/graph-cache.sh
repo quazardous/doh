@@ -25,7 +25,7 @@ _graph_cache_get_cache_path() {
     local project_id
     project_id="$(workspace_get_current_project_id)" || return 1
     
-    echo "$HOME/.doh/projects/$project_id/graph_cache.json"
+    echo "$(doh_global_dir)/projects/$project_id/graph_cache.json"
 }
 
 # @description Initialize empty graph cache
@@ -273,7 +273,7 @@ graph_cache_get_epic_items() {
 # @exitcode 1 If unable to find project root or create cache
 graph_cache_rebuild() {
     local project_root
-    project_root="$(doh_find_root)" || return 1
+    project_root="$(doh_project_dir)" || return 1
     
     local cache_file
     cache_file="$(_graph_cache_ensure_cache)" || return 1
@@ -328,7 +328,7 @@ graph_cache_validate() {
     cache_file="$(_graph_cache_ensure_cache)" || return 1
     
     local project_root
-    project_root="$(doh_find_root)" || return 1
+    project_root="$(doh_project_dir)" || return 1
     
     local errors=0
     
@@ -585,7 +585,7 @@ graph_cache_get_task_versions() {
     
     # First, check if task file has target_version field
     local project_root
-    project_root="$(doh_find_root)" || return 1
+    project_root="$(doh_project_dir)" || return 1
     
     local task_file
     task_file=$(find "$project_root/.doh" -name "${task}.md" -type f | head -1)
@@ -632,7 +632,7 @@ graph_cache_sync_version_cache() {
     echo "Syncing version data to graph cache..." >&2
     
     local doh_root
-    doh_root="$(doh_find_root)" || {
+    doh_root="$(doh_project_dir)" || {
         echo "Error: Not in a DOH project" >&2
         return 1
     }
@@ -702,7 +702,7 @@ graph_cache_sync_specific_versions() {
     echo "Selective version sync for: $*" >&2
     
     local doh_root
-    doh_root="$(doh_find_root)" || {
+    doh_root="$(doh_project_dir)" || {
         echo "Error: Not in a DOH project" >&2
         return 1
     }
@@ -754,7 +754,7 @@ graph_cache_find_versions_for_task() {
     
     # Find all version files that reference this task
     local project_root
-    project_root="$(doh_find_root)" || return 1
+    project_root="$(doh_project_dir)" || return 1
     
     local versions_dir="$project_root/.doh/versions"
     
@@ -785,7 +785,7 @@ graph_cache_check_version_readiness() {
     
     # Find all task files with this version as target_version
     local project_root
-    project_root="$(doh_find_root)" || return 1
+    project_root="$(doh_project_dir)" || return 1
     
     if ! command -v get_frontmatter_field > /dev/null 2>&1; then
         source "$(dirname "${BASH_SOURCE[0]}")/frontmatter.sh"

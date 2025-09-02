@@ -24,7 +24,7 @@ reporting_generate_standup() {
     local target_date="${1:-$(date +%Y-%m-%d)}"
     
     local doh_root
-    doh_root=$(doh_find_root) || {
+    doh_root=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
@@ -186,7 +186,7 @@ reporting_generate_epic_summary() {
     fi
 
     local doh_root
-    doh_root=$(doh_find_root) || {
+    doh_root=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
@@ -306,7 +306,7 @@ reporting_get_recent_activity() {
     local days="${1:-7}"
     
     local doh_root
-    doh_root=$(doh_find_root) || {
+    doh_root=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }

@@ -30,7 +30,7 @@ project_get_status() {
 
     # Get DOH root directory
     local doh_root
-    doh_root=$(doh_find_root) || {
+    doh_root=$(doh_project_dir) || {
         echo "Error: Not in a DOH project" >&2
         return 1
     }
@@ -103,7 +103,7 @@ project_get_status() {
 # @exitcode 1 If not in DOH project
 project_get_summary() {
     local doh_root
-    doh_root=$(doh_find_root) || {
+    doh_root=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
@@ -144,7 +144,7 @@ project_get_recent_activity() {
     local days="${1:-7}"
     
     local doh_root
-    doh_root=$(doh_find_root) || {
+    doh_root=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
@@ -177,7 +177,7 @@ project_get_recent_activity() {
 # @exitcode 0 If successful
 project_get_health() {
     local doh_root
-    doh_root=$(doh_find_root) || {
+    doh_root=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }

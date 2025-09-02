@@ -17,7 +17,7 @@ DOH_LIB_WORKSPACE_LOADED=1
 # @exitcode 1 If unable to find DOH root
 workspace_get_current_project_id() {
     local doh_root
-    doh_root="$(doh_find_root)" || return 1
+    doh_root="$(doh_project_dir)" || return 1
     
     local project_name=$(basename "$doh_root")
     local abs_path=$(realpath "$doh_root")
@@ -40,7 +40,7 @@ ensure_project_state_dir() {
         return 1
     fi
     
-    local state_dir="$DOH_GLOBAL_DIR/projects/$project_id"
+    local state_dir="$(doh_global_dir)/projects/$project_id"
     
     mkdir -p "$state_dir"
     mkdir -p "$state_dir/logs"
@@ -64,7 +64,7 @@ register_project_mapping() {
         return 1
     fi
     
-    local projects_file="$DOH_GLOBAL_DIR/projects/PROJECTS.txt"
+    local projects_file="$(doh_global_dir)/projects/PROJECTS.txt"
     local project_entry="$project_id:$project_path"
     
     # Create file if it doesn't exist
@@ -357,7 +357,7 @@ workspace_diagnostic() {
     fi
     
     local doh_root
-    doh_root=$(doh_find_root) || {
+    doh_root=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
@@ -370,7 +370,7 @@ workspace_diagnostic() {
     local project_id
     project_id="$(workspace_get_current_project_id)"
     echo "Project: $project_id"
-    echo "DOH Global Dir: ${DOH_GLOBAL_DIR:-$HOME/.doh}"
+    echo "DOH Global Dir: $(doh_global_dir)"
     echo ""
 
     # Workspace Mode Detection

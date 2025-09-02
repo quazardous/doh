@@ -15,14 +15,16 @@ DOH_LIB_DOHENV_LOADED=1
 # @public
 # @stdout No output
 # @stderr Error messages if loading fails
-# @exitcode 0 If successful
+# @exitcode 0 If successful  
 # @exitcode 1 If error condition
+# 
+# Environment variable priority (highest to lowest):
+# 1. Existing environment variables (export DOH_VAR=value)
+# 2. .doh/env file (project-specific configuration) 
+# 3. Default values (built-in fallbacks)
 dohenv_load() {
     local doh_root
-    doh_root="$(doh_find_root)" || return 1
-    
-    # Set default values
-    export DOH_GLOBAL_DIR="${DOH_GLOBAL_DIR:-$HOME/.doh}"
+    doh_root="$(doh_project_dir)" || return 1
     
     # Load custom config from .doh/env if it exists
     local env_file="$doh_root/.doh/env"
@@ -45,10 +47,16 @@ dohenv_load() {
                     value="$HOME/${value#~/}"
                 fi
                 
-                export "$key=$value"
+                # Only set if not already defined (respect existing env vars)
+                if [[ -z "${!key:-}" ]]; then
+                    export "$key=$value"
+                fi
             fi
         done < "$env_file"
     fi
+
+    # DOH_GLOBAL_DIR will not be set if not defined -> we use $(doh_global_dir) that can set the default
+    ## export DOH_GLOBAL_DIR="${DOH_GLOBAL_DIR:-$HOME/.doh}"
     
     # Mark environment as loaded
     export DOH_ENV_LOADED=1

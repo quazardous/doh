@@ -24,7 +24,7 @@ workflow_get_next() {
     local epic_filter="${1:-}"
     
     local doh_root
-    doh_root=$(doh_find_root) || {
+    doh_root=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
@@ -99,7 +99,7 @@ workflow_get_in_progress() {
     local epic_filter="${1:-}"
     
     local doh_root
-    doh_root=$(doh_find_root) || {
+    doh_root=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
@@ -164,7 +164,7 @@ workflow_get_blocked() {
     local epic_filter="${1:-}"
     
     local doh_root
-    doh_root=$(doh_find_root) || {
+    doh_root=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
@@ -260,7 +260,7 @@ workflow_transition_status() {
     esac
     
     local doh_root
-    doh_root=$(doh_find_root) || {
+    doh_root=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }

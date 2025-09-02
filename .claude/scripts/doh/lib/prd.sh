@@ -22,7 +22,7 @@ readonly PRD_LIB_VERSION="1.0.0"
 prd_get_status() {
     # Get DOH root directory
     local doh_root
-    doh_root=$(doh_find_root) || {
+    doh_root=$(doh_project_dir) || {
         echo "Error: Not in a DOH project" >&2
         return 1
     }
@@ -125,7 +125,7 @@ prd_get_count() {
     local status_filter="${1:-}"
     
     local doh_root
-    doh_root=$(doh_find_root) || {
+    doh_root=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
@@ -168,7 +168,7 @@ prd_list_by_status() {
     local status_filter="${1:-}"
     
     local doh_root
-    doh_root=$(doh_find_root) || {
+    doh_root=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
@@ -210,7 +210,7 @@ prd_list() {
     local status_filter="${1:-}"
     
     local doh_root
-    doh_root=$(doh_find_root) || {
+    doh_root=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }

@@ -113,28 +113,37 @@ Create comprehensive audit of isolation requirements:
 
 ## Isolation Candidate Variables (Initial Audit)
 
-### Primary Candidates:
-1. **`DOH_GLOBAL_DIR`** - Root DOH directory (already exists, needs test override)
-2. **`DOH_WORKSPACE_PROJECT_ID`** - Override project ID calculation for predictable test paths
-3. **`DOH_NUMBERING_REGISTRY_DIR`** - Registry JSON files (`registers.json`, `TASKSEQ`)
-4. **`DOH_FILE_CACHE_DIR`** - CSV file cache (`file_cache.csv`)
-5. **`DOH_GRAPH_CACHE_DIR`** - JSON relationship cache (`graph_cache.json`) 
-6. **`DOH_MESSAGE_QUEUE_DIR`** - Message queue files (`queues/$queue_name/`)
+### Simplified Isolation Strategy:
 
-### Library Analysis:
-- **workspace.sh**: Project directories, state files, locks, mapping registry
-- **numbering.sh**: Registry JSON, sequence files → `~/.doh/projects/$project_id/`
-- **file-cache.sh**: CSV cache → `~/.doh/projects/$project_id/file_cache.csv`
-- **graph-cache.sh**: JSON cache → `~/.doh/projects/$project_id/graph_cache.json`
-- **message-queue.sh**: Queue directories → `~/.doh/projects/$project_id/queues/`
+**Primary Variable:**
+1. **`DOH_GLOBAL_DIR`** - Root DOH directory (already exists, just needs test override)
 
-### Optimization Insight:
-Most libraries use pattern: `$HOME/.doh/projects/$project_id/filename`
-**Simple approach**: Override `DOH_GLOBAL_DIR` + `DOH_WORKSPACE_PROJECT_ID` achieves 90% isolation.
+**Special Cases Only:**
+2. **`DOH_WORKSPACE_PROJECT_ID`** - Override project ID calculation when `DOH_GLOBAL_DIR` alone insufficient
 
-### Phase 2: Library Enhancement
-- Implement environment variable overrides in all libraries
-- Standardize function naming (`workspace_get_current_project_id` pattern)
+### Rationale:
+All DOH libraries use pattern: `$DOH_GLOBAL_DIR/projects/$project_id/filename`
+
+**Test isolation approach:**
+```bash
+# Test framework creates: DOH_GLOBAL_DIR="$(mktemp -d)"
+# Example result: DOH_GLOBAL_DIR="/tmp/tmp.xvf2K9mP3L"  
+# All data goes to: /tmp/tmp.xvf2K9mP3L/projects/doh_abc123/
+# Clean: rm -rf "$DOH_GLOBAL_DIR"
+```
+
+**Benefits:**
+- **Minimal complexity**: Single environment variable for 90% of cases
+- **Existing infrastructure**: `DOH_GLOBAL_DIR` already implemented in `dohenv.sh`
+- **Complete isolation**: Tests cannot touch real `~/.doh/` directory
+- **Secure temp directories**: `mktemp -d` ensures unique, safe temporary directories
+- **Easy cleanup**: Remove single temp directory cleans all test artifacts
+- **No conflicts**: Multiple test runs won't interfere with each other
+
+### Phase 2: Library Enhancement  
+- Verify `DOH_GLOBAL_DIR` usage is consistent across all libraries
+- Standardize function naming inconsistencies (`workspace_get_current_project_id` pattern)
+- Add `DOH_WORKSPACE_PROJECT_ID` override only where needed for special cases
 - Add library documentation for override variables
 
 ### Phase 3: Test Framework Integration

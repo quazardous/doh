@@ -5,11 +5,27 @@
 
 # Source the framework
 source "$(dirname "$0")/../helpers/test_framework.sh" 2>/dev/null || source "../helpers/test_framework.sh" 2>/dev/null || source "tests/helpers/test_framework.sh"
-source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/frontmatter.sh"
+
+# Use DOH API for frontmatter functions
+frontmatter_extract() {
+    ./.claude/scripts/doh/api.sh frontmatter extract "$@"
+}
+frontmatter_get_field() {
+    ./.claude/scripts/doh/api.sh frontmatter get_field "$@"
+}
+frontmatter_update_field() {
+    ./.claude/scripts/doh/api.sh frontmatter update_field "$@"
+}
+frontmatter_has() {
+    ./.claude/scripts/doh/api.sh frontmatter has "$@"
+}
+frontmatter_validate() {
+    ./.claude/scripts/doh/api.sh frontmatter validate "$@"
+}
 
 # Test frontmatter extraction from valid files
 test_frontmatter_extract_basic() {
-    local test_file=$(_tf_create_temp_file)
+    local test_file=$(_tf_create_temp_file ".md")
     
     cat > "$test_file" << 'EOF'
 ---
@@ -43,7 +59,7 @@ EOF
 
 # Test frontmatter extraction with empty frontmatter
 test_frontmatter_extract_empty() {
-    local test_file=$(_tf_create_temp_file)
+    local test_file=$(_tf_create_temp_file ".md")
     
     cat > "$test_file" << 'EOF'
 ---
@@ -63,7 +79,7 @@ EOF
 
 # Test frontmatter extraction with no frontmatter
 test_frontmatter_extract_none() {
-    local test_file=$(_tf_create_temp_file)
+    local test_file=$(_tf_create_temp_file ".md")
     
     cat > "$test_file" << 'EOF'
 # No Frontmatter
@@ -80,7 +96,7 @@ EOF
 
 # Test getting specific fields with various formats
 test_frontmatter_get_field_comprehensive() {
-    local test_file=$(_tf_create_temp_file)
+    local test_file=$(_tf_create_temp_file ".md")
     
     cat > "$test_file" << 'EOF'
 ---
@@ -114,7 +130,7 @@ EOF
 
 # Test updating existing frontmatter fields
 test_frontmatter_update_field_existing() {
-    local test_file=$(_tf_create_temp_file)
+    local test_file=$(_tf_create_temp_file ".md")
     
     cat > "$test_file" << 'EOF'
 ---
@@ -145,7 +161,7 @@ EOF
 
 # Test adding new frontmatter fields
 test_frontmatter_update_field_new() {
-    local test_file=$(_tf_create_temp_file)
+    local test_file=$(_tf_create_temp_file ".md")
     
     cat > "$test_file" << 'EOF'
 ---
@@ -167,7 +183,7 @@ EOF
 
 # Test updating file with no frontmatter
 test_frontmatter_update_field_no_frontmatter() {
-    local test_file=$(_tf_create_temp_file)
+    local test_file=$(_tf_create_temp_file ".md")
     
     cat > "$test_file" << 'EOF'
 # Document without frontmatter
@@ -183,7 +199,7 @@ EOF
 
 # Test frontmatter validation
 test_frontmatter_validate_comprehensive() {
-    local test_file=$(_tf_create_temp_file)
+    local test_file=$(_tf_create_temp_file ".md")
     
     cat > "$test_file" << 'EOF'
 ---
@@ -213,9 +229,9 @@ EOF
 
 # Test frontmatter_has detection
 test_frontmatter_has_comprehensive() {
-    local test_file_with=$(_tf_create_temp_file)
-    local test_file_without=$(_tf_create_temp_file)
-    local test_file_partial=$(_tf_create_temp_file)
+    local test_file_with=$(_tf_create_temp_file ".md")
+    local test_file_without=$(_tf_create_temp_file ".md")
+    local test_file_partial=$(_tf_create_temp_file ".md")
     
     # File with frontmatter
     cat > "$test_file_with" << 'EOF'
@@ -261,7 +277,7 @@ EOF
 
 # Test complex frontmatter with nested structures
 test_complex_frontmatter_handling() {
-    local test_file=$(_tf_create_temp_file)
+    local test_file=$(_tf_create_temp_file ".md")
     
     cat > "$test_file" << 'EOF'
 ---
@@ -330,7 +346,7 @@ test_version_integration_comprehensive() {
     # Source version library
     source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/version.sh"
     
-    local test_file=$(_tf_create_temp_file)
+    local test_file=$(_tf_create_temp_file ".md")
     
     cat > "$test_file" << 'EOF'
 ---
@@ -368,7 +384,7 @@ EOF
 
 # Test whitespace and special character handling
 test_whitespace_and_special_chars() {
-    local test_file=$(_tf_create_temp_file)
+    local test_file=$(_tf_create_temp_file ".md")
     
     cat > "$test_file" << 'EOF'
 ---
@@ -400,7 +416,7 @@ EOF
 
 # Test large frontmatter performance
 test_large_frontmatter_performance() {
-    local test_file=$(_tf_create_temp_file)
+    local test_file=$(_tf_create_temp_file ".md")
     
     # Create file with many frontmatter fields
     {

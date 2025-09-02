@@ -48,6 +48,37 @@ cd "$PROJECT_ROOT"
 # Set environment variable to indicate proper test execution through launcher
 export _TF_LAUNCHER_EXECUTION="true"
 
+# Set up DOH test isolation using secure temporary directory
+
+export DOH_TEST_CLEANUP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/doh.XXXXXX")"
+export DOH_GLOBAL_DIR="${DOH_TEST_CLEANUP_DIR}/global_doh"
+export DOH_PROJECT_DIR="${DOH_TEST_CLEANUP_DIR}/project_doh"
+if [[ "${DOH_TEST_DEBUG:-false}" == "true" ]]; then
+    echo "DEBUG: DOH_GLOBAL_DIR = '$DOH_GLOBAL_DIR'"
+    echo "DEBUG: DOH_PROJECT_DIR = '$DOH_PROJECT_DIR'"
+fi
+
+# Load DOH environment with isolation in place
+if [[ -f "$PROJECT_ROOT/.claude/scripts/doh/lib/dohenv.sh" ]]; then
+    source "$PROJECT_ROOT/.claude/scripts/doh/lib/dohenv.sh"
+    dohenv_load 2>/dev/null || true
+fi
+
+# Cleanup function for test isolation
+cleanup_test_isolation() {
+    if [[ "${DOH_TEST_DEBUG:-false}" == "true" ]]; then
+        echo "DEBUG: Preserving temp directory: $DOH_TEST_CLEANUP_DIR" >&2
+        return
+    fi
+    if [[ -n "${DOH_TEST_CLEANUP_DIR:-}" && -d "$DOH_TEST_CLEANUP_DIR" ]]; then
+        rm -rf "$DOH_TEST_CLEANUP_DIR"
+    fi
+    unset DOH_GLOBAL_DIR DOH_TEST_CLEANUP_DIR
+}
+
+# Ensure cleanup happens on exit
+trap cleanup_test_isolation EXIT
+
 # Source the test framework to ensure it's available
 source "$TEST_FRAMEWORK"
 

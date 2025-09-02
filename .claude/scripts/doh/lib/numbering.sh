@@ -100,7 +100,7 @@ _numbering_get_registry_path() {
         return 1
     }
     
-    local registry_dir="$HOME/.doh/projects/$project_id"
+    local registry_dir="$(doh_global_dir)/projects/$project_id"
     echo "$registry_dir/registers.json"
 }
 

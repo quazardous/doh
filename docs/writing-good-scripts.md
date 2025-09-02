@@ -375,7 +375,7 @@ source ".claude/scripts/doh/lib/numbering.sh"
 
 # Use prefixed library functions
 local project_root
-project_root="$(doh_find_root)" || {
+project_root="$(doh_project_dir)" || {
     echo "Error: Not in DOH project" >&2
     return 1
 }
