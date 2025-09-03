@@ -67,9 +67,13 @@ _tf_run_single_test() {
     local result=0
     
     if [[ "${VERBOSE:-false}" == "true" ]]; then
-        "$SCRIPT_DIR/test_launcher.sh" "$test_file" || result=$?
+        VERBOSE=true "$SCRIPT_DIR/test_launcher.sh" "$test_file" || result=$?
     else
-        "$SCRIPT_DIR/test_launcher.sh" "$test_file" 2>/dev/null || result=$?
+        # Capture only the final summary line for minimal output
+        local output
+        output=$(VERBOSE=false "$SCRIPT_DIR/test_launcher.sh" "$test_file" 2>/dev/null) || result=$?
+        # Extract just the final test result line
+        echo "$output" | tail -1
     fi
     
     local end_time=$(date +%s)
@@ -151,13 +155,13 @@ _tf_run_tests_sequential() {
 
 # Logging functions
 _tf_log_info() {
-    if [[ "${QUIET:-false}" != "true" ]]; then
+    if [[ "${QUIET:-false}" != "true" && "${VERBOSE:-false}" == "true" ]]; then
         echo -e "${BLUE:-}[INFO]${NC:-} $*"
     fi
 }
 
 _tf_log_success() {
-    if [[ "${QUIET:-false}" != "true" ]]; then
+    if [[ "${QUIET:-false}" != "true" && "${VERBOSE:-false}" == "true" ]]; then
         echo -e "${GREEN:-}[SUCCESS]${NC:-} $*"
     fi
 }
@@ -206,20 +210,29 @@ _tf_print_summary() {
     local failed="$3"
     local duration="$4"
     
-    echo
-    _tf_log_info "Test Summary:"
-    _tf_log_info "  Total: $total"
-    _tf_log_info "  Passed: $passed"
-    _tf_log_info "  Failed: $failed"
-    _tf_log_info "  Duration: ${duration}s"
-    
-    if [[ $failed -eq 0 ]]; then
-        _tf_log_success "All tests passed!"
-        return 0
+    if [[ "${VERBOSE:-false}" == "true" ]]; then
+        echo
+        _tf_log_info "Test Summary:"
+        _tf_log_info "  Total: $total"
+        _tf_log_info "  Passed: $passed"
+        _tf_log_info "  Failed: $failed"
+        _tf_log_info "  Duration: ${duration}s"
+        
+        if [[ $failed -eq 0 ]]; then
+            _tf_log_success "All tests passed!"
+        else
+            _tf_log_error "$failed test(s) failed"
+        fi
     else
-        _tf_log_error "$failed test(s) failed"
-        return 1
+        # Compact summary for non-verbose mode
+        if [[ $failed -eq 0 ]]; then
+            echo "✅ $passed/$total tests passed (${duration}s)"
+        else
+            echo "❌ $passed/$total tests passed, $failed failed (${duration}s)"
+        fi
     fi
+    
+    return $failed
 }
 
 # Framework help (moved from test_framework.sh to avoid being picked up as a test)

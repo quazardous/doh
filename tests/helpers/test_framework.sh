@@ -10,6 +10,22 @@ declare -g _TF_TEST_PASSED=0
 declare -g _TF_TEST_FAILED=0
 declare -g _TF_TEST_CURRENT=""
 
+# Check VERBOSE flag - defaults to true for compatibility
+_TF_VERBOSE="${VERBOSE:-true}"
+
+# Logging functions controlled by VERBOSE flag
+_tf_log() {
+    if [[ "$_TF_VERBOSE" == "true" ]]; then
+        echo "$@"
+    fi
+}
+
+_tf_debug() {
+    if [[ "$_TF_VERBOSE" == "true" ]]; then
+        echo "DEBUG: $*" >&2
+    fi
+}
+
 # Colors for output (only if terminal supports it)
 if [[ -t 1 ]]; then
     _TF_RED='\033[0;31m'
@@ -28,7 +44,7 @@ fi
 # Initialize test suite
 _tf_test_suite_start() {
     local suite_name="${1:-Test Suite}"
-    echo "# Starting $suite_name"
+    echo "# Starting $suite_name"  # TAP output - always show
     _TF_TEST_COUNT=0
     _TF_TEST_PASSED=0
     _TF_TEST_FAILED=0

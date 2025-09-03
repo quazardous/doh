@@ -7,13 +7,13 @@ source "$(dirname "$0")/../helpers/test_framework.sh" 2>/dev/null || source "../
 
 # Test environment variable visibility
 test_environment_variables() {
-    echo "=== ENVIRONMENT DEBUG ==="
-    echo "DOH_GLOBAL_DIR: ${DOH_GLOBAL_DIR:-<not set>}"
-    echo "DOH_TEST_CLEANUP_DIR: ${DOH_TEST_CLEANUP_DIR:-<not set>}"
-    echo "_TF_LAUNCHER_EXECUTION: ${_TF_LAUNCHER_EXECUTION:-<not set>}"
-    echo "HOME: $HOME"
-    echo "PWD: $PWD"
-    echo "=========================="
+    _tf_log "=== ENVIRONMENT DEBUG ==="
+    _tf_log "DOH_GLOBAL_DIR: ${DOH_GLOBAL_DIR:-<not set>}"
+    _tf_log "DOH_TEST_CLEANUP_DIR: ${DOH_TEST_CLEANUP_DIR:-<not set>}"
+    _tf_log "_TF_LAUNCHER_EXECUTION: ${_TF_LAUNCHER_EXECUTION:-<not set>}"
+    _tf_log "HOME: $HOME"
+    _tf_log "PWD: $PWD"
+    _tf_log "=========================="
     
     _tf_assert_true "Environment debug output shown" 0
 }

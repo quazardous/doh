@@ -90,11 +90,13 @@ test_doh_project_dir_function() {
 
 # Test direct epic listing (in test environment)
 test_direct_epic_listing() {
-    echo "DEBUG: DOH_PROJECT_DIR: $DOH_PROJECT_DIR"
-    echo "DEBUG: Contents of test epics directory:"
-    ls -la "$DOH_PROJECT_DIR/epics/" | head -10
+    _tf_debug "DOH_PROJECT_DIR: $DOH_PROJECT_DIR"
+    _tf_debug "Contents of test epics directory:"
+    if [[ "$_TF_VERBOSE" == "true" ]]; then
+        ls -la "$DOH_PROJECT_DIR/epics/" | head -10
+    fi
     
-    echo "DEBUG: Epic directories found in test environment:"
+    _tf_debug "Epic directories found in test environment:"
     for dir in "$DOH_PROJECT_DIR/epics"/*/; do
         if [[ -d "$dir" ]]; then
             echo "  - $dir"
@@ -111,33 +113,33 @@ test_direct_epic_listing() {
 
 # Test what helper_epic_list actually does
 test_helper_epic_list_debug() {
-    echo "DEBUG: Testing helper_epic_list function in test environment..."
+    _tf_debug "Testing helper_epic_list function in test environment..."
     
     # Check doh_project_dir output
     local doh_root
     doh_root=$(./.claude/scripts/doh/api.sh doh project_dir 2>&1)
     local exit_code=$?
-    echo "DEBUG: doh_project_dir returned: '$doh_root' (exit code: $exit_code)"
+    _tf_debug "doh_project_dir returned: '$doh_root' (exit code: $exit_code)"
     
     # Check if epics directory exists from helper perspective
     local epics_dir="$doh_root/.doh/epics"
-    echo "DEBUG: Looking for epics in: $epics_dir"
+    _tf_debug "Looking for epics in: $epics_dir"
     
     if [[ -d "$epics_dir" ]]; then
-        echo "DEBUG: Epics directory exists"
-        echo "DEBUG: Contents:"
+        _tf_debug "Epics directory exists"
+        _tf_debug "Contents:"
         ls -la "$epics_dir" | head -10
     else
-        echo "DEBUG: Epics directory does not exist at expected path"
+        _tf_debug "Epics directory does not exist at expected path"
     fi
     
     # Verify doh_project_dir returns DOH_PROJECT_DIR (.doh directory path)
     if [[ "$doh_root" == "$DOH_PROJECT_DIR" ]]; then
-        echo "DEBUG: ✓ doh_project_dir correctly returns DOH_PROJECT_DIR (.doh directory)"
+        _tf_debug "✓ doh_project_dir correctly returns DOH_PROJECT_DIR (.doh directory)"
     else
-        echo "DEBUG: ✗ doh_project_dir path mismatch:"
-        echo "DEBUG:   Expected: $DOH_PROJECT_DIR"
-        echo "DEBUG:   Got: $doh_root"
+        _tf_debug "✗ doh_project_dir path mismatch:"
+        _tf_debug "  Expected: $DOH_PROJECT_DIR"
+        _tf_debug "  Got: $doh_root"
     fi
     
     _tf_assert_true "Debug completed" "true"
@@ -145,24 +147,24 @@ test_helper_epic_list_debug() {
 
 # Test helper call with debug
 test_epic_list_helper_call() {
-    echo "DEBUG: Calling ./.claude/scripts/doh/helper.sh epic list in test environment..."
+    _tf_debug "Calling ./.claude/scripts/doh/helper.sh epic list in test environment..."
     
     local result
     result=$(./.claude/scripts/doh/helper.sh epic list 2>&1)
     local exit_code=$?
     
-    echo "DEBUG: Helper exit code: $exit_code"
-    echo "DEBUG: Helper output:"
+    _tf_debug "Helper exit code: $exit_code"
+    _tf_debug "Helper output:"
     echo "$result"
     
     _tf_assert_equals "Helper should execute without errors" "0" "$exit_code"
     
     # The helper should now find the test epics we created
     if echo "$result" | grep -q "No epics directory found"; then
-        echo "DEBUG: ✗ Helper still reports no epics directory - this indicates the issue persists"
+        _tf_debug "✗ Helper still reports no epics directory - this indicates the issue persists"
         _tf_assert_true "Helper should find test epics, not report 'no epics directory'" "false"
     else
-        echo "DEBUG: ✓ Helper found epics (or produced different output)"
+        _tf_debug "✓ Helper found epics (or produced different output)"
         _tf_assert_true "Helper produces output other than 'no epics directory'" "true"
     fi
 }
