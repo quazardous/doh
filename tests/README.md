@@ -41,6 +41,34 @@ tests/
 ./tests/run.sh tests/unit/test_example.sh
 ```
 
+## Important: Test Launcher Requirement
+
+**⚠️ Tests must be executed through the test launcher system and cannot be run directly.**
+
+Test files are designed to:
+- Be executed only through `./tests/run.sh` or `./tests/test_launcher.sh`
+- Prevent direct execution with `_tf_direct_execution_error`
+- Ensure proper test environment setup and isolation
+
+**❌ This will NOT work:**
+```bash
+bash tests/unit/test_example.sh        # Direct execution blocked
+./tests/unit/test_example.sh           # Direct execution blocked
+```
+
+**✅ Use these methods instead:**
+```bash
+./tests/run.sh                         # Run all tests
+./tests/run.sh tests/unit/test_example.sh  # Run specific test
+./tests/test_launcher.sh tests/unit/test_example.sh  # Individual test launcher
+```
+
+This ensures proper:
+- Test isolation and cleanup
+- Environment variable management
+- Consistent execution context
+- Framework dependency loading
+
 ## Test Organization
 
 ### Unit Tests (`tests/unit/`)
@@ -135,7 +163,7 @@ test_my_function() {
     local result=$(my_function "$input")
     
     # Assert
-    _tf_assert_equals "expected" "$result" "Function should return expected value"
+    _tf_assert_equals "Function should return expected value" "expected" "$result"
 }
 
 # Prevent direct execution - tests must run through launcher
@@ -151,15 +179,58 @@ fi
 - `_tf_teardown()` - Called after each test function
 
 #### Assertion Functions
-- `_tf_assert_equals <expected> <actual> [message]`
-- `_tf_assert_not_equals <expected> <actual> [message]`
-- `_tf_assert_true <condition> [message]`
-- `_tf_assert_false <condition> [message]`
-- `_tf_assert_contains <haystack> <needle> [message]`
-- `_tf_assert_file_exists <file> [message]`
-- `_tf_assert_file_contains <file> <content> [message]`
-- `_tf_assert_command_succeeds <command> [message]`
-- `_tf_assert_command_fails <command> [message]`
+
+**Message-First Pattern**: All assertion functions use a **message-first** parameter pattern for consistency.
+
+- `_tf_assert_equals <message> <expected> <actual>` - Assert two values are equal
+- `_tf_assert_not_equals <message> <expected> <actual>` - Assert two values are different  
+- `_tf_assert_true <message> <condition>` - Assert condition is true
+- `_tf_assert_false <message> <condition>` - Assert condition is false
+- `_tf_assert_contains <message> <haystack> <needle>` - Assert haystack contains needle
+- `_tf_assert_file_exists <message> <file>` - Assert file exists
+- `_tf_assert_file_contains <message> <file> <content>` - Assert file contains content
+- `_tf_assert <message> <command> [args...]` - Assert command succeeds (exit code 0)
+- `_tf_assert_not <message> <command> [args...]` - Assert command fails (exit code != 0)
+
+#### Testing Exit Codes - Best Practices
+
+**For testing commands/functions directly:**
+```bash
+# ✅ CORRECT: Test command execution directly  
+_tf_assert "Should succeed with valid input" my_function "valid_input"
+_tf_assert_not "Should fail with invalid input" my_function "invalid_input"
+
+# ✅ CORRECT: Test complex commands with pipes
+_tf_assert "Should find pattern in data" bash -c 'echo "$data" | grep -q "pattern"'
+```
+
+**For testing stored exit codes:**
+```bash  
+# ✅ CORRECT: When you need to capture exit code for other reasons
+local result=$(my_function "input")
+local exit_code=$?
+_tf_assert_equals "Function should succeed" 0 $exit_code
+
+# ✅ CORRECT: When testing specific non-zero exit codes
+my_function "bad_input"
+local exit_code=$?
+_tf_assert_equals "Should return specific error code" 2 $exit_code
+```
+
+**Common patterns to avoid:**
+```bash
+# ❌ WRONG: Using $? after command execution
+my_function "input"
+_tf_assert "Function should succeed" $?  # Use _tf_assert with command directly
+
+# ❌ WRONG: Unnecessary exit code capture for simple success/failure
+local result=$(my_function "input") 
+local exit_code=$?
+_tf_assert_equals "Function should succeed" 0 $exit_code  # Use _tf_assert instead
+
+# ❌ WRONG: Message not first
+_tf_assert_equals 0 $exit_code "Function should succeed"  # Message should be first
+```
 
 #### Utility Functions
 - `_tf_create_temp_dir` - Create temporary directory
@@ -192,7 +263,7 @@ test_my_function() {
     local result=$(my_function "$input")
     
     # Assert
-    _tf_assert_equals "expected_output" "$result" "Function should transform input correctly"
+    _tf_assert_equals "Function should transform input correctly" "expected_output" "$result"
 }
 ```
 
@@ -204,7 +275,7 @@ test_file_processing() {
     
     process_file "$test_file"
     
-    _tf_assert_file_contains "$test_file" "processed" "File should be processed"
+    _tf_assert_file_contains "File should be processed" "$test_file" "processed"
     _tf_cleanup_temp "$test_file"
 }
 ```
@@ -212,8 +283,8 @@ test_file_processing() {
 #### Testing Commands
 ```bash
 test_command_behavior() {
-    _tf_assert_command_succeeds "my_command --valid-flag" "Should accept valid flag"
-    _tf_assert_command_fails "my_command --invalid-flag" "Should reject invalid flag"
+    _tf_assert "Should accept valid flag" my_command --valid-flag
+    _tf_assert_not "Should reject invalid flag" my_command --invalid-flag
 }
 ```
 

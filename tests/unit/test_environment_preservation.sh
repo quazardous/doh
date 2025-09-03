@@ -31,8 +31,8 @@ EOF
     # Mock doh_project_dir to return our temp directory
     _tf_with_mock "doh_project_dir" "echo $temp_dir" dohenv_load
     
-    _tf_assert_equals "/tmp/from_doh_env" "${DOH_GLOBAL_DIR:-}" "DOH_GLOBAL_DIR should be set from .doh/env when not pre-existing"
-    _tf_assert_equals "from_doh_env" "${DOH_TEST_VAR:-}" "DOH_TEST_VAR should be set from .doh/env"
+    _tf_assert_equals "DOH_GLOBAL_DIR should be set from .doh/env when not pre-existing" "/tmp/from_doh_env" "${DOH_GLOBAL_DIR:-}"
+    _tf_assert_equals "DOH_TEST_VAR should be set from .doh/env" "from_doh_env" "${DOH_TEST_VAR:-}"
     
     # Restore original DOH_GLOBAL_DIR for test isolation
     if [[ -n "$original_doh_global" ]]; then
@@ -64,12 +64,12 @@ EOF
     _tf_with_mock "doh_project_dir" "echo $temp_dir" dohenv_load
     
     # Existing variables should be preserved
-    _tf_assert_equals "/tmp/existing_value" "$DOH_GLOBAL_DIR" "Existing DOH_GLOBAL_DIR should be preserved"
-    _tf_assert_equals "existing_value" "$DOH_TEST_VAR" "Existing DOH_TEST_VAR should be preserved" 
-    _tf_assert_equals "existing_value" "$DOH_PRIORITY_TEST" "Existing DOH_PRIORITY_TEST should be preserved"
+    _tf_assert_equals "Existing DOH_GLOBAL_DIR should be preserved" "/tmp/existing_value" "$DOH_GLOBAL_DIR"
+    _tf_assert_equals "Existing DOH_TEST_VAR should be preserved" "existing_value" "$DOH_TEST_VAR" 
+    _tf_assert_equals "Existing DOH_PRIORITY_TEST should be preserved" "existing_value" "$DOH_PRIORITY_TEST"
     
     # New variables should be set from .doh/env
-    _tf_assert_equals "from_doh_env" "${DOH_NEW_VAR:-}" "New DOH_NEW_VAR should be set from .doh/env"
+    _tf_assert_equals "New DOH_NEW_VAR should be set from .doh/env" "from_doh_env" "${DOH_NEW_VAR:-}"
     
     # Cleanup
     unset DOH_GLOBAL_DIR DOH_TEST_VAR DOH_PRIORITY_TEST DOH_NEW_VAR
@@ -84,8 +84,8 @@ test_api_script_respects_environment() {
     local result
     result=$(./.claude/scripts/doh/api.sh dohenv is_loaded 2>/dev/null && echo "SUCCESS" || echo "FAILED")
     
-    _tf_assert_equals "SUCCESS" "$result" "API script should work with custom DOH_GLOBAL_DIR"
-    _tf_assert_equals "/tmp/test_isolation" "$DOH_GLOBAL_DIR" "DOH_GLOBAL_DIR should remain unchanged after API call"
+    _tf_assert_equals "API script should work with custom DOH_GLOBAL_DIR" "SUCCESS" "$result"
+    _tf_assert_equals "DOH_GLOBAL_DIR should remain unchanged after API call" "/tmp/test_isolation" "$DOH_GLOBAL_DIR"
     
     # Cleanup
     unset DOH_GLOBAL_DIR
@@ -101,7 +101,7 @@ test_helper_script_respects_environment() {
     # Call helper script
     ./.claude/scripts/doh/helper.sh prd help >/dev/null 2>&1 || true
     
-    _tf_assert_equals "$original_value" "$DOH_GLOBAL_DIR" "Helper script should preserve DOH_GLOBAL_DIR"
+    _tf_assert_equals "Helper script should preserve DOH_GLOBAL_DIR" "$original_value" "$DOH_GLOBAL_DIR"
     
     # Cleanup
     unset DOH_GLOBAL_DIR
@@ -125,8 +125,8 @@ EOF
     _tf_with_mock "doh_project_dir" "echo $temp_dir" dohenv_load  
     _tf_with_mock "doh_project_dir" "echo $temp_dir" dohenv_load
     
-    _tf_assert_equals "/tmp/first_value" "$DOH_GLOBAL_DIR" "Multiple loads should not overwrite existing DOH_GLOBAL_DIR"
-    _tf_assert_equals "should_be_set" "${DOH_NEW_VAR:-}" "New variable should be set on first load"
+    _tf_assert_equals "Multiple loads should not overwrite existing DOH_GLOBAL_DIR" "/tmp/first_value" "$DOH_GLOBAL_DIR"
+    _tf_assert_equals "New variable should be set on first load" "should_be_set" "${DOH_NEW_VAR:-}"
     
     # Cleanup
     unset DOH_GLOBAL_DIR DOH_NEW_VAR
@@ -157,13 +157,13 @@ EOF
     # Load environment
     _tf_with_mock "doh_project_dir" "echo $temp_dir" dohenv_load
     
-    _tf_assert_equals "/tmp/path with spaces/test" "${DOH_TEST_PATH:-}" "Paths with spaces should work"
-    _tf_assert_equals "value with quotes" "${DOH_TEST_QUOTES:-}" "Quoted values should work"
-    _tf_assert_equals "single quoted value" "${DOH_TEST_SINGLE:-}" "Single quoted values should work"
-    _tf_assert_contains "${DOH_TILDE_PATH:-}" "$HOME" "Tilde should be expanded to HOME"
-    _tf_assert_equals "value:with:colons" "${DOH_TEST_COLON:-}" "Colons in values should work"
-    _tf_assert_equals "value=with=equals" "${DOH_TEST_EQUALS:-}" "Equals signs in values should work"
-    _tf_assert_equals "" "${invalid_var:-}" "Invalid variable names should be ignored"
+    _tf_assert_equals "Paths with spaces should work" "/tmp/path with spaces/test" "${DOH_TEST_PATH:-}"
+    _tf_assert_equals "Quoted values should work" "value with quotes" "${DOH_TEST_QUOTES:-}"
+    _tf_assert_equals "Single quoted values should work" "single quoted value" "${DOH_TEST_SINGLE:-}"
+    _tf_assert_contains "Tilde should be expanded to HOME" "${DOH_TILDE_PATH:-}" "$HOME"
+    _tf_assert_equals "Colons in values should work" "value:with:colons" "${DOH_TEST_COLON:-}"
+    _tf_assert_equals "Equals signs in values should work" "value=with=equals" "${DOH_TEST_EQUALS:-}"
+    _tf_assert_equals "Invalid variable names should be ignored" "" "${invalid_var:-}"
     
     # Cleanup
     unset DOH_TEST_PATH DOH_TEST_QUOTES DOH_TEST_SINGLE DOH_TILDE_PATH DOH_TEST_COLON DOH_TEST_EQUALS
@@ -185,13 +185,13 @@ test_battle_test_concurrent_environments() {
     (
         export DOH_TEST_VAR="process1_override"
         _tf_with_mock "doh_project_dir" "echo $temp_dir1" dohenv_load
-        _tf_assert_equals "process1_override" "$DOH_TEST_VAR" "Process 1 should preserve its environment"
+        _tf_assert_equals "Process 1 should preserve its environment" "process1_override" "$DOH_TEST_VAR"
     )
     
     (
         export DOH_TEST_VAR="process2_override"  
         _tf_with_mock "doh_project_dir" "echo $temp_dir2" dohenv_load
-        _tf_assert_equals "process2_override" "$DOH_TEST_VAR" "Process 2 should preserve its environment"
+        _tf_assert_equals "Process 2 should preserve its environment" "process2_override" "$DOH_TEST_VAR"
     )
     
     # Cleanup
@@ -210,11 +210,11 @@ test_isolation_simulation() {
     # Load DOH environment (should not overwrite our isolation)
     dohenv_load 2>/dev/null || true
     
-    _tf_assert_contains "$DOH_GLOBAL_DIR" "/tmp" "DOH_GLOBAL_DIR should remain our test directory"
-    _tf_assert_equals "test_project_123" "$DOH_WORKSPACE_PROJECT_ID" "Test project ID should be preserved"
+    _tf_assert_contains "DOH_GLOBAL_DIR should remain our test directory" "$DOH_GLOBAL_DIR" "/tmp"
+    _tf_assert_equals "Test project ID should be preserved" "test_project_123" "$DOH_WORKSPACE_PROJECT_ID"
     
     # Verify isolation directory exists
-    _tf_assert_command_succeeds "test -d '$DOH_GLOBAL_DIR'" "Isolation directory should exist"
+    _tf_assert "Isolation directory should exist" test -d "$DOH_GLOBAL_DIR"
     
     # Cleanup test isolation
     rm -rf "$DOH_GLOBAL_DIR"
@@ -242,3 +242,7 @@ test_battle_test_concurrent_environments
 test_isolation_simulation
 
 _tf_test_suite_end
+# Run tests if script executed directly
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    _tf_direct_execution_error
+fi

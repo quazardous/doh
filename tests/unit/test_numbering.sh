@@ -65,7 +65,7 @@ test_registry_file_creation() {
     local registry_file
     registry_file="$(_numbering_ensure_registry)"
     
-    _tf_assert_file_exists "$registry_file" "Registry file should be created"
+    _tf_assert_file_exists "Registry file should be created" "$registry_file"
 }
 
 test_taskseq_file_creation() {
@@ -73,7 +73,7 @@ test_taskseq_file_creation() {
     local taskseq_file
     taskseq_file="$(_numbering_get_taskseq_path)"
     
-    _tf_assert_file_exists "$taskseq_file" "TASKSEQ file should be created"
+    _tf_assert_file_exists "TASKSEQ file should be created" "$taskseq_file"
 }
 
 test_initial_taskseq_value() {
@@ -81,14 +81,14 @@ test_initial_taskseq_value() {
     local current_seq
     current_seq="$(numbering_get_current)"
     
-    _tf_assert_equals "4" "$current_seq" "Current sequence should be 4 after previous tests"
+    _tf_assert_equals "Current sequence should be 4 after previous tests" "4" "$current_seq"
 }
 
 test_registry_structure_validation() {
     local registry_file
     registry_file="$(_numbering_ensure_registry)"
     
-    _tf_assert_command_succeeds "_numbering_validate_registry_structure '$registry_file'" "Registry structure should be valid"
+    _tf_assert "Registry structure should be valid" _numbering_validate_registry_structure "$registry_file"
 }
 
 # Number Generation Tests
@@ -98,7 +98,7 @@ test_first_epic_number_generation() {
     local third_epic
     third_epic="$(numbering_get_next "epic")"
     
-    _tf_assert_equals "003" "$third_epic" "Third epic number should be 003"
+    _tf_assert_equals "Third epic number should be 003" "003" "$third_epic"
 }
 
 test_first_task_number_generation() {
@@ -106,7 +106,7 @@ test_first_task_number_generation() {
     local fourth_number
     fourth_number="$(numbering_get_next "task")"
     
-    _tf_assert_equals "004" "$fourth_number" "Fourth number should be 004"
+    _tf_assert_equals "Fourth number should be 004" "004" "$fourth_number"
 }
 
 test_sequential_number_generation() {
@@ -114,13 +114,13 @@ test_sequential_number_generation() {
     local next_number
     next_number="$(numbering_get_next "epic")"
     
-    _tf_assert_equals "006" "$next_number" "Sequential number should be 006"
+    _tf_assert_equals "Sequential number should be 006" "006" "$next_number"
 }
 
 test_invalid_type_rejection() {
     _numbering_ensure_registry
     
-    _tf_assert_command_fails "numbering_get_next 'invalid'" "Should reject invalid type"
+    _tf_assert_not "Should reject invalid type" numbering_get_next 'invalid'
 }
 
 # Registration Tests
@@ -129,7 +129,7 @@ test_epic_registration() {
     local epic_number
     epic_number="$(numbering_get_next "epic")"
     
-    _tf_assert_command_succeeds "numbering_register_epic '$epic_number' '.doh/epics/test-epic/epic.md' 'test-epic'" "Epic registration should succeed"
+    _tf_assert "Epic registration should succeed" numbering_register_epic "$epic_number" '.doh/epics/test-epic/epic.md' 'test-epic'
 }
 
 test_task_registration() {
@@ -140,7 +140,7 @@ test_task_registration() {
     
     numbering_register_epic "$epic_number" ".doh/epics/test-epic/epic.md" "test-epic"
     
-    _tf_assert_command_succeeds "numbering_register_task '$task_number' '$epic_number' '.doh/epics/test-epic/$task_number.md' 'test-task' 'test-epic'" "Task registration should succeed"
+    _tf_assert "Task registration should succeed" numbering_register_task "$task_number" "$epic_number" ".doh/epics/test-epic/$task_number.md" 'test-task' 'test-epic'
 }
 
 test_duplicate_number_rejection() {
@@ -152,7 +152,7 @@ test_duplicate_number_rejection() {
     numbering_register_epic "$epic_number" ".doh/epics/test-epic/epic.md" "test-epic"
     
     # Try to register duplicate
-    _tf_assert_command_fails "numbering_register_epic '$epic_number' '.doh/epics/duplicate/epic.md' 'duplicate'" "Should reject duplicate number"
+    _tf_assert_not "Should reject duplicate number" numbering_register_epic "$epic_number" '.doh/epics/duplicate/epic.md' 'duplicate'
 }
 
 test_numbering_find_by_number() {
@@ -165,20 +165,20 @@ test_numbering_find_by_number() {
     local found_epic
     found_epic="$(numbering_find_by_number "$epic_number")"
     
-    _tf_assert_contains "$found_epic" "test-epic" "Should find registered epic"
+    _tf_assert_contains "Should find registered epic" "$found_epic" "test-epic"
 }
 
 # Validation Tests  
 test_valid_number_validation() {
     _numbering_ensure_registry
     
-    _tf_assert_command_succeeds "numbering_validate '999' 'epic'" "Should accept valid number"
+    _tf_assert "Should accept valid number" numbering_validate '999' 'epic'
 }
 
 test_negative_number_rejection() {
     _numbering_ensure_registry
     
-    _tf_assert_command_fails "numbering_validate '-1' 'epic'" "Should reject negative number"
+    _tf_assert_not "Should reject negative number" numbering_validate '-1' 'epic'
 }
 
 test_used_number_rejection() {
@@ -188,13 +188,13 @@ test_used_number_rejection() {
     
     numbering_register_epic "$epic_number" ".doh/epics/test-epic/epic.md" "test-epic"
     
-    _tf_assert_command_fails "numbering_validate '$epic_number' 'task'" "Should reject already used number"
+    _tf_assert_not "Should reject already used number" numbering_validate "$epic_number" 'task'
 }
 
 test_quick_number_protection() {
     _numbering_ensure_registry
     
-    _tf_assert_command_fails "numbering_validate '000' 'epic'" "Should protect QUICK reserved number"
+    _tf_assert_not "Should protect QUICK reserved number" numbering_validate '000' 'epic'
 }
 
 # Statistics Tests
@@ -203,9 +203,9 @@ test_registry_statistics() {
     local stats
     stats="$(numbering_get_stats)"
     
-    _tf_assert_contains "$stats" "Current Sequence:" "Statistics should include sequence"
-    _tf_assert_contains "$stats" "Epics:" "Statistics should include epic count"
-    _tf_assert_contains "$stats" "Tasks:" "Statistics should include task count"
+    _tf_assert_contains "Statistics should include sequence" "$stats" "Current Sequence:"
+    _tf_assert_contains "Statistics should include epic count" "$stats" "Epics:"
+    _tf_assert_contains "Statistics should include task count" "$stats" "Tasks:"
 }
 
 # Concurrent Access Simulation Tests
@@ -237,7 +237,7 @@ test_sequential_number_generation_under_load() {
         prev_num=$num_val
     done
     
-    _tf_assert_equals "1" "$all_unique" "Numbers should be properly sequential: ${numbers[*]}"
+    _tf_assert_equals "Numbers should be properly sequential: ${numbers[*]}" "1" "$all_unique"
 }
 
 # Run tests if script executed directly

@@ -106,74 +106,74 @@ _tf_teardown() {
 # Duplicate Detection Tests
 test_duplicate_detection_epics() {
     if ! command -v detect_duplicates >/dev/null 2>&1; then
-        _tf_assert_true "true" "Skipping - detect_duplicates function not available"
+        _tf_assert_true "Skipping - detect_duplicates function not available" "true"
         return
     fi
     
     local duplicates
     duplicates="$(detect_duplicates "epic")"
     
-    _tf_assert_contains "$duplicates" "user-auth" "Should detect duplicate epics"
-    _tf_assert_contains "$duplicates" "duplicate-auth" "Should detect both duplicate epics"
+    _tf_assert_contains "Should detect duplicate epics" "$duplicates" "user-auth"
+    _tf_assert_contains "Should detect both duplicate epics" "$duplicates" "duplicate-auth"
 }
 
 test_duplicate_detection_tasks() {
     if ! command -v detect_duplicates >/dev/null 2>&1; then
-        _tf_assert_true "true" "Skipping - detect_duplicates function not available"
+        _tf_assert_true "Skipping - detect_duplicates function not available" "true"
         return
     fi
     
     local duplicates
     duplicates="$(detect_duplicates "task")"
     
-    _tf_assert_contains "$duplicates" "003" "Should detect duplicate task content"
-    _tf_assert_contains "$duplicates" "004" "Should detect both duplicate tasks"
+    _tf_assert_contains "Should detect duplicate task content" "$duplicates" "003"
+    _tf_assert_contains "Should detect both duplicate tasks" "$duplicates" "004"
 }
 
 test_duplicate_detection_by_content() {
     if ! command -v detect_content_duplicates >/dev/null 2>&1; then
-        _tf_assert_true "true" "Skipping - detect_content_duplicates function not available"
+        _tf_assert_true "Skipping - detect_content_duplicates function not available" "true"
         return
     fi
     
     local content_duplicates
     content_duplicates="$(detect_content_duplicates)"
     
-    _tf_assert_contains "$content_duplicates" "Login Form Implementation" "Should detect duplicate content"
+    _tf_assert_contains "Should detect duplicate content" "$content_duplicates" "Login Form Implementation"
 }
 
 test_duplicate_detection_by_metadata() {
     if ! command -v detect_metadata_duplicates >/dev/null 2>&1; then
-        _tf_assert_true "true" "Skipping - detect_metadata_duplicates function not available"
+        _tf_assert_true "Skipping - detect_metadata_duplicates function not available" "true"
         return
     fi
     
     local metadata_duplicates
     metadata_duplicates="$(detect_metadata_duplicates)"
     
-    _tf_assert_contains "$metadata_duplicates" "User authentication system" "Should detect duplicate descriptions"
+    _tf_assert_contains "Should detect duplicate descriptions" "$metadata_duplicates" "User authentication system"
 }
 
 # Deduplication Tests
 test_deduplication_dry_run() {
     if ! command -v deduplicate_dry_run >/dev/null 2>&1; then
-        _tf_assert_true "true" "Skipping - deduplicate_dry_run function not available"
+        _tf_assert_true "Skipping - deduplicate_dry_run function not available" "true"
         return
     fi
     
     local dry_run_result
     dry_run_result="$(deduplicate_dry_run)"
     
-    _tf_assert_contains "$dry_run_result" "would merge" "Dry run should show potential merges"
+    _tf_assert_contains "Dry run should show potential merges" "$dry_run_result" "would merge"
     
     # Original files should still exist
-    _tf_assert_file_exists "$DOH_TEST_PROJECT_ROOT/.doh/epics/user-auth/epic.md" "Original file should exist after dry run"
-    _tf_assert_file_exists "$DOH_TEST_PROJECT_ROOT/.doh/epics/duplicate-auth/epic.md" "Duplicate file should exist after dry run"
+    _tf_assert_file_exists "Original file should exist after dry run" "$DOH_TEST_PROJECT_ROOT/.doh/epics/user-auth/epic.md"
+    _tf_assert_file_exists "Duplicate file should exist after dry run" "$DOH_TEST_PROJECT_ROOT/.doh/epics/duplicate-auth/epic.md"
 }
 
 test_deduplication_execution() {
     if ! command -v execute_deduplication >/dev/null 2>&1; then
-        _tf_assert_true "true" "Skipping - execute_deduplication function not available"
+        _tf_assert_true "Skipping - execute_deduplication function not available" "true"
         return
     fi
     
@@ -183,37 +183,37 @@ test_deduplication_execution() {
     local dedup_result
     dedup_result="$(execute_deduplication)"
     
-    _tf_assert_command_succeeds "echo '$dedup_result'" "Deduplication should execute successfully"
+    _tf_assert "Deduplication should execute successfully" echo '$dedup_result'
 }
 
 test_deduplication_merge_strategy() {
     if ! command -v merge_duplicates >/dev/null 2>&1; then
-        _tf_assert_true "true" "Skipping - merge_duplicates function not available"
+        _tf_assert_true "Skipping - merge_duplicates function not available" "true"
         return
     fi
     
     local merge_result
     merge_result="$(merge_duplicates "user-auth" "duplicate-auth")"
     
-    _tf_assert_command_succeeds "echo '$merge_result'" "Should merge duplicate epics"
+    _tf_assert "Should merge duplicate epics" echo '$merge_result'
 }
 
 # Rollback Tests  
 test_rollback_preparation() {
     if ! command -v prepare_rollback >/dev/null 2>&1; then
-        _tf_assert_true "true" "Skipping - prepare_rollback function not available"
+        _tf_assert_true "Skipping - prepare_rollback function not available" "true"
         return
     fi
     
     local rollback_info
     rollback_info="$(prepare_rollback)"
     
-    _tf_assert_contains "$rollback_info" "snapshot" "Should prepare rollback snapshot"
+    _tf_assert_contains "Should prepare rollback snapshot" "$rollback_info" "snapshot"
 }
 
 test_rollback_execution() {
     if ! command -v execute_rollback >/dev/null 2>&1; then
-        _tf_assert_true "true" "Skipping - execute_rollback function not available"
+        _tf_assert_true "Skipping - execute_rollback function not available" "true"
         return
     fi
     
@@ -225,34 +225,34 @@ test_rollback_execution() {
     echo "# Modified content" > "$DOH_TEST_PROJECT_ROOT/.doh/epics/user-auth/epic.md"
     
     # Execute rollback
-    _tf_assert_command_succeeds "execute_rollback '$rollback_id'" "Should rollback changes successfully"
+    _tf_assert "Should rollback changes successfully" execute_rollback "$rollback_id"
 }
 
 test_rollback_validation() {
     if ! command -v validate_rollback >/dev/null 2>&1; then
-        _tf_assert_true "true" "Skipping - validate_rollback function not available"
+        _tf_assert_true "Skipping - validate_rollback function not available" "true"
         return
     fi
     
     local validation_result
     validation_result="$(validate_rollback)"
     
-    _tf_assert_contains "$validation_result" "valid" "Rollback state should be valid"
+    _tf_assert_contains "Rollback state should be valid" "$validation_result" "valid"
 }
 
 # Migration Workflow Tests
 test_full_migration_workflow() {
     if ! command -v run_migration_workflow >/dev/null 2>&1; then
-        _tf_assert_true "true" "Skipping - run_migration_workflow function not available"
+        _tf_assert_true "Skipping - run_migration_workflow function not available" "true"
         return
     fi
     
     local workflow_result
     workflow_result="$(run_migration_workflow --dry-run)"
     
-    _tf_assert_contains "$workflow_result" "detection" "Workflow should include detection phase"
-    _tf_assert_contains "$workflow_result" "deduplication" "Workflow should include deduplication phase"
-    _tf_assert_contains "$workflow_result" "validation" "Workflow should include validation phase"
+    _tf_assert_contains "Workflow should include detection phase" "$workflow_result" "detection"
+    _tf_assert_contains "Workflow should include deduplication phase" "$workflow_result" "deduplication"
+    _tf_assert_contains "Workflow should include validation phase" "$workflow_result" "validation"
 }
 
 test_migration_conflict_resolution() {
@@ -276,20 +276,20 @@ status: closed
 EOF
     
     if ! command -v resolve_conflicts >/dev/null 2>&1; then
-        _tf_assert_true "true" "Skipping - resolve_conflicts function not available"
+        _tf_assert_true "Skipping - resolve_conflicts function not available" "true"
         return
     fi
     
     local resolution_result
     resolution_result="$(resolve_conflicts)"
     
-    _tf_assert_command_succeeds "echo '$resolution_result'" "Should resolve conflicts"
+    _tf_assert "Should resolve conflicts" echo '$resolution_result'
 }
 
 # Migration Safety Tests
 test_migration_backup_creation() {
     if ! command -v create_migration_backup >/dev/null 2>&1; then
-        _tf_assert_true "true" "Skipping - create_migration_backup function not available"
+        _tf_assert_true "Skipping - create_migration_backup function not available" "true"
         return
     fi
     
@@ -297,19 +297,19 @@ test_migration_backup_creation() {
     backup_path="$(create_migration_backup)"
     
     [[ -d "$backup_path" ]]
-    _tf_assert_equals 0 $? "Migration backup should be created"
+    _tf_assert_equals "Migration backup should be created" 0 $?
 }
 
 test_migration_integrity_check() {
     if ! command -v check_migration_integrity >/dev/null 2>&1; then
-        _tf_assert_true "true" "Skipping - check_migration_integrity function not available"
+        _tf_assert_true "Skipping - check_migration_integrity function not available" "true"
         return
     fi
     
     local integrity_result
     integrity_result="$(check_migration_integrity)"
     
-    _tf_assert_contains "$integrity_result" "intact" "Migration integrity should be intact"
+    _tf_assert_contains "Migration integrity should be intact" "$integrity_result" "intact"
 }
 
 # Run tests if script executed directly

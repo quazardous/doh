@@ -15,18 +15,18 @@ test_environment_variables() {
     echo "PWD: $PWD"
     echo "=========================="
     
-    _tf_assert_true 0 "Environment debug output shown"
+    _tf_assert_true "Environment debug output shown" 0
 }
 
 test_doh_global_dir_set() {
-    _tf_assert_not_equals "" "${DOH_GLOBAL_DIR:-}" "DOH_GLOBAL_DIR should be set"
-    _tf_assert_contains "$DOH_GLOBAL_DIR" "/tmp" "DOH_GLOBAL_DIR should be a temp directory"
+    _tf_assert_not_equals "DOH_GLOBAL_DIR should be set" "${DOH_GLOBAL_DIR:-}" ""
+    _tf_assert_contains "DOH_GLOBAL_DIR should be a temp directory" "$DOH_GLOBAL_DIR" "/tmp"
 }
 
 test_isolation_directory_exists() {
     # DOH libraries should create directories as needed
     # This test ensures the path is set correctly
-    _tf_assert_not_equals "" "${DOH_GLOBAL_DIR:-}" "Isolation directory path should be set"
+    _tf_assert_not_equals "Isolation directory path should be set" "" "${DOH_GLOBAL_DIR:-}"
 }
 
 test_can_write_to_isolation_dir() {
@@ -35,13 +35,13 @@ test_can_write_to_isolation_dir() {
     
     local test_file="$DOH_GLOBAL_DIR/test_write.txt"
     echo "test content" > "$test_file"
-    _tf_assert_file_exists "$test_file" "Should be able to write to isolation directory"
-    _tf_assert_file_contains "$test_file" "test content" "File should contain test content"
+    _tf_assert_file_exists "Should be able to write to isolation directory" "$test_file"
+    _tf_assert_file_contains "File should contain test content" "$test_file" "test content"
 }
 
 test_isolation_vs_real_doh() {
     local real_doh_dir="$HOME/.doh"
-    _tf_assert_not_equals "$DOH_GLOBAL_DIR" "$real_doh_dir" "Isolation dir should not be real ~/.doh"
+    _tf_assert_not_equals "Isolation dir should not be real ~/.doh" "$DOH_GLOBAL_DIR" "$real_doh_dir"
 }
 
 # Run tests
@@ -54,3 +54,7 @@ test_can_write_to_isolation_dir
 test_isolation_vs_real_doh
 
 _tf_test_suite_end
+# Run tests if script executed directly
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    _tf_direct_execution_error
+fi

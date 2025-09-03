@@ -51,8 +51,8 @@ _tf_teardown() {
 # Test that test environment was set up correctly
 test_test_environment_setup() {
     # Verify we created the test epics
-    _tf_assert_file_exists "$DOH_PROJECT_DIR/epics/data-api-sanity/epic.md" "data-api-sanity epic should exist"
-    _tf_assert_file_exists "$DOH_PROJECT_DIR/epics/test-driven-dev/epic.md" "test-driven-dev epic should exist"
+    _tf_assert_file_exists "data-api-sanity epic should exist" "$DOH_PROJECT_DIR/epics/data-api-sanity/epic.md"
+    _tf_assert_file_exists "test-driven-dev epic should exist" "$DOH_PROJECT_DIR/epics/test-driven-dev/epic.md"
 }
 
 # Test that epic helper can parse epic metadata
@@ -63,9 +63,9 @@ test_epic_metadata_parsing() {
     status=$(grep "^status:" "$DOH_PROJECT_DIR/epics/data-api-sanity/epic.md" | head -1 | sed 's/^status: *//')
     progress=$(grep "^progress:" "$DOH_PROJECT_DIR/epics/data-api-sanity/epic.md" | head -1 | sed 's/^progress: *//')
     
-    _tf_assert_equals "$name" "data-api-sanity" "Should parse epic name correctly"
-    _tf_assert_equals "$status" "active" "Should parse epic status correctly"  
-    _tf_assert_equals "$progress" "25%" "Should parse epic progress correctly"
+    _tf_assert_equals "Should parse epic name correctly" "data-api-sanity" "$name"
+    _tf_assert_equals "Should parse epic status correctly" "active" "$status"  
+    _tf_assert_equals "Should parse epic progress correctly" "25%" "$progress"
 }
 
 # Test that epic helper finds the correct number of epics
@@ -73,7 +73,7 @@ test_epic_count() {
     local epic_count
     epic_count=$(ls -d "$DOH_PROJECT_DIR/epics"/*/ 2>/dev/null | wc -l)
     
-    _tf_assert_equals "$epic_count" "2" "Should find exactly 2 test epics (found $epic_count)"
+    _tf_assert_equals "Should find exactly 2 test epics (found $epic_count)" "2" "$epic_count"
 }
 
 # Test doh_project_dir function returns test environment .doh path
@@ -82,10 +82,10 @@ test_doh_project_dir_function() {
     result=$(./.claude/scripts/doh/api.sh doh project_dir 2>&1)
     local exit_code=$?
     
-    _tf_assert_equals "$exit_code" "0" "doh_project_dir should work (output: $result)"
+    _tf_assert_equals "doh_project_dir should work (output: $result)" "0" "$exit_code"
     
     # Verify it returns the DOH_PROJECT_DIR (which IS the .doh directory in test environment)
-    _tf_assert_equals "$result" "$DOH_PROJECT_DIR" "doh_project_dir should return DOH_PROJECT_DIR (.doh directory path)"
+    _tf_assert_equals "doh_project_dir should return DOH_PROJECT_DIR (.doh directory path)" "$DOH_PROJECT_DIR" "$result"
 }
 
 # Test direct epic listing (in test environment)
@@ -106,7 +106,7 @@ test_direct_epic_listing() {
         fi
     done
     
-    _tf_assert_true "true" "Direct listing completed"
+    _tf_assert_true "Direct listing completed" "true"
 }
 
 # Test what helper_epic_list actually does
@@ -140,7 +140,7 @@ test_helper_epic_list_debug() {
         echo "DEBUG:   Got: $doh_root"
     fi
     
-    _tf_assert_true "true" "Debug completed"
+    _tf_assert_true "Debug completed" "true"
 }
 
 # Test helper call with debug
@@ -155,19 +155,19 @@ test_epic_list_helper_call() {
     echo "DEBUG: Helper output:"
     echo "$result"
     
-    _tf_assert_equals "$exit_code" "0" "Helper should execute without errors"
+    _tf_assert_equals "Helper should execute without errors" "0" "$exit_code"
     
     # The helper should now find the test epics we created
     if echo "$result" | grep -q "No epics directory found"; then
         echo "DEBUG: ✗ Helper still reports no epics directory - this indicates the issue persists"
-        _tf_assert_true "false" "Helper should find test epics, not report 'no epics directory'"
+        _tf_assert_true "Helper should find test epics, not report 'no epics directory'" "false"
     else
         echo "DEBUG: ✓ Helper found epics (or produced different output)"
-        _tf_assert_true "true" "Helper produces output other than 'no epics directory'"
+        _tf_assert_true "Helper produces output other than 'no epics directory'" "true"
     fi
 }
 
 # Main test execution
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    _tf_run_tests
+    _tf_direct_execution_error
 fi

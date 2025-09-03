@@ -26,9 +26,9 @@ test_doh_paths() {
     
     echo "DEBUG: Expected project root (parent of DOH_PROJECT_DIR) = '$(dirname "$DOH_PROJECT_DIR")'"
     
-    _tf_assert_true "true" "Debug paths completed"
+    _tf_assert_true "Debug paths completed" "true"
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    _tf_run_tests
+    _tf_direct_execution_error
 fi

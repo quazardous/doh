@@ -23,31 +23,31 @@ _tf_teardown() {
 
 # Test functions must start with "test_"
 test_basic_assertions() {
-    # String equality
-    _tf_assert_equals "hello" "hello" "Strings should match"
-    _tf_assert_not_equals "hello" "world" "Different strings"
+    # String equality - message-first pattern
+    _tf_assert_equals "Strings should match" "hello" "hello"
+    _tf_assert_not_equals "Different strings" "world" "hello"
     
-    # Boolean assertions
-    _tf_assert_true "true" "Should be true"
-    _tf_assert_false "false" "Should be false"
+    # Boolean assertions - message-first pattern
+    _tf_assert_true "Should be true" "true"
+    _tf_assert_false "Should be false" "false"
 }
 
 test_string_operations() {
-    # String contains
-    _tf_assert_contains "hello world" "world" "Should contain substring"
-    _tf_assert_contains "$TEST_DATA" "sample" "Should contain test data"
+    # String contains - message-first pattern
+    _tf_assert_contains "Should contain substring" "hello world" "world"
+    _tf_assert_contains "Should contain test data" "$TEST_DATA" "sample"
 }
 
 test_file_operations() {
-    # File assertions
-    _tf_assert_file_exists "$TEMP_FILE" "Temp file should exist"
-    _tf_assert_file_contains "$TEMP_FILE" "test content" "File should have content"
+    # File assertions - message-first pattern
+    _tf_assert_file_exists "Temp file should exist" "$TEMP_FILE"
+    _tf_assert_file_contains "File should have content" "$TEMP_FILE" "test content"
 }
 
 test_command_execution() {
-    # Command success/failure
-    _tf_assert_command_succeeds "echo 'success'" "Echo should work"
-    _tf_assert_command_fails "false" "False command should fail"
+    # Command success/failure - message-first pattern (already correct)
+    _tf_assert "Echo should work" echo 'success'
+    _tf_assert_not "False command should fail" false
 }
 
 # Required: Run tests when script executed directly

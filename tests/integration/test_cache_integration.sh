@@ -89,7 +89,7 @@ test_file_cache_initialization() {
     local cache_file
     cache_file="$(_file_cache_get_path)"
     
-    _tf_assert_file_exists "$cache_file" "File cache should be initialized"
+    _tf_assert_file_exists "File cache should be initialized" "$cache_file"
 }
 
 test_file_cache_add_entry() {
@@ -101,7 +101,7 @@ test_file_cache_add_entry() {
     local cache_file
     cache_file="$(_file_cache_get_path)"
     
-    _tf_assert_file_contains "$cache_file" "user-auth" "Cache should contain epic name"
+    _tf_assert_file_contains "Cache should contain epic name" "$cache_file" "user-auth"
 
 }
 test_file_cache_find_entry() {
@@ -114,7 +114,7 @@ test_file_cache_find_entry() {
     local found_path
     found_path="$(file_cache_find_file_by_number "001")"
     
-    _tf_assert_contains "$found_path" ".doh/epics/user-auth/epic.md" "Should find cached entry by number"
+    _tf_assert_contains "Should find cached entry by number" "$found_path" ".doh/epics/user-auth/epic.md"
 }
 
 test_file_cache_remove_entry() {
@@ -130,7 +130,7 @@ test_file_cache_remove_entry() {
     cache_file="$(_file_cache_get_path)"
     
     # Should not contain the removed entry
-    _tf_assert_command_fails "grep -q '001.*user-auth' '$cache_file'" "Entry should be removed from cache"
+    _tf_assert_not "Entry should be removed from cache" grep -q '001.*user-auth' '$cache_file'
 }
 
 test_file_cache_statistics() {
@@ -143,7 +143,7 @@ test_file_cache_statistics() {
     local stats
     stats="$(file_cache_get_stats)"
     
-    _tf_assert_contains "$stats" "File Cache Statistics" "Should show cache statistics"
+    _tf_assert_contains "Should show cache statistics" "$stats" "File Cache Statistics"
 }
 
 # Graph Cache Tests
@@ -152,7 +152,7 @@ test_graph_cache_initialization() {
     local graph_file
     graph_file="$(_graph_cache_get_cache_path)"
     
-    _tf_assert_file_exists "$graph_file" "Graph cache should be initialized"
+    _tf_assert_file_exists "Graph cache should be initialized" "$graph_file"
 }
 
 test_graph_cache_relationship_storage() {
@@ -163,9 +163,9 @@ test_graph_cache_relationship_storage() {
     local graph_file
     graph_file="$(_graph_cache_get_cache_path)"
     
-    _tf_assert_file_contains "$graph_file" "002" "Graph should contain task number"
-    _tf_assert_file_contains "$graph_file" "001" "Graph should contain parent epic"
-    _tf_assert_file_contains "$graph_file" "user-auth" "Graph should contain epic name"
+    _tf_assert_file_contains "Graph should contain task number" "$graph_file" "002"
+    _tf_assert_file_contains "Graph should contain parent epic" "$graph_file" "001"
+    _tf_assert_file_contains "Graph should contain epic name" "$graph_file" "user-auth"
 }
 
 test_graph_cache_parent_lookup() {
@@ -176,7 +176,7 @@ test_graph_cache_parent_lookup() {
     local parent
     parent="$(graph_cache_get_parent "002")"
     
-    _tf_assert_equals "001" "$parent" "Should retrieve cached parent relationship"
+    _tf_assert_equals "Should retrieve cached parent relationship" "001" "$parent"
 }
 
 test_graph_cache_children_lookup() {
@@ -188,8 +188,8 @@ test_graph_cache_children_lookup() {
     local children
     children="$(graph_cache_get_children "001")"
     
-    _tf_assert_contains "$children" "002" "Should find child task 002"
-    _tf_assert_contains "$children" "004" "Should find child task 004"
+    _tf_assert_contains "Should find child task 002" "$children" "002"
+    _tf_assert_contains "Should find child task 004" "$children" "004"
 }
 
 test_graph_cache_epic_lookup() {
@@ -200,7 +200,7 @@ test_graph_cache_epic_lookup() {
     local epic
     epic="$(graph_cache_get_epic "002")"
     
-    _tf_assert_equals "user-auth" "$epic" "Should retrieve cached epic relationship"
+    _tf_assert_equals "Should retrieve cached epic relationship" "user-auth" "$epic"
 }
 
 # Integration Tests
@@ -219,9 +219,9 @@ test_cache_integration_file_and_graph() {
     parent="$(graph_cache_get_parent "002")"
     epic="$(graph_cache_get_epic "002")"
     
-    _tf_assert_contains "$found_path" ".doh/epics/user-auth/002.md" "File cache should contain task path"
-    _tf_assert_equals "001" "$parent" "Graph cache should contain parent relationship"
-    _tf_assert_equals "user-auth" "$epic" "Graph cache should contain epic relationship"
+    _tf_assert_contains "File cache should contain task path" "$found_path" ".doh/epics/user-auth/002.md"
+    _tf_assert_equals "Graph cache should contain parent relationship" "001" "$parent"
+    _tf_assert_equals "Graph cache should contain epic relationship" "user-auth" "$epic"
 }
 
 test_cache_performance_batch_operations() {
@@ -245,7 +245,7 @@ test_cache_performance_batch_operations() {
     local duration=$((end_time - start_time))
     
     # Should complete quickly (under 5 seconds for this small set)
-    _tf_assert_command_succeeds "test $duration -lt 5" "Batch cache operations should complete quickly"
+    _tf_assert "Batch cache operations should complete quickly" test $duration -lt 5
 }
 
 test_cache_consistency_remove_operations() {
@@ -261,8 +261,8 @@ test_cache_consistency_remove_operations() {
     found_path="$(file_cache_find_file_by_number "002")"
     parent="$(graph_cache_get_parent "002")"
     
-    _tf_assert_contains "$found_path" ".doh/epics/user-auth/002.md" "Should be cached initially"
-    _tf_assert_equals "001" "$parent" "Parent should be cached initially"
+    _tf_assert_contains "Should be cached initially" "$found_path" ".doh/epics/user-auth/002.md"
+    _tf_assert_equals "Parent should be cached initially" "001" "$parent"
     
     # Remove entries
     file_cache_remove_file "002" ".doh/epics/user-auth/002.md"
@@ -272,8 +272,8 @@ test_cache_consistency_remove_operations() {
     found_path="$(file_cache_find_file_by_number "002" 2>/dev/null || echo "")"
     parent="$(graph_cache_get_parent "002" 2>/dev/null || echo "")"
     
-    _tf_assert_equals "" "$found_path" "File cache should be cleared after removal"
-    _tf_assert_equals "" "$parent" "Graph cache should be cleared after removal"
+    _tf_assert_equals "File cache should be cleared after removal" "" "$found_path"
+    _tf_assert_equals "Graph cache should be cleared after removal" "" "$parent"
 }
 
 # Cache Statistics Tests
@@ -291,8 +291,8 @@ test_cache_combined_statistics() {
     file_stats="$(file_cache_get_stats)"
     graph_stats="$(graph_cache_get_stats)"
     
-    _tf_assert_contains "$file_stats" "File Cache Statistics" "Should show file cache statistics"
-    _tf_assert_contains "$graph_stats" "Graph Cache Statistics" "Should show graph cache statistics"
+    _tf_assert_contains "Should show file cache statistics" "$file_stats" "File Cache Statistics"
+    _tf_assert_contains "Should show graph cache statistics" "$graph_stats" "Graph Cache Statistics"
 }
 
 # Run tests if script executed directly

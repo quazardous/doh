@@ -90,7 +90,7 @@ _tf_teardown() {
 # Core version functionality tests
 test_version_core_functions() {
     if [[ -z "${TEST_DIR:-}" ]]; then
-        _tf_assert_true "false" "TEST_DIR not set - setup failed"
+        _tf_assert_true "TEST_DIR not set - setup failed" "false"
         return 1
     fi
     cd "$TEST_DIR"
@@ -100,13 +100,13 @@ test_version_core_functions() {
     # Test getting current version
     local version
     version=$(version_get_current)
-    _tf_assert_equals "0.1.0" "$version" "Should get current project version"
+    _tf_assert_equals "Should get current project version" "0.1.0" "$version"
     
     # Test setting project version
     version_set_current "0.2.0" > /dev/null
     local new_version
     new_version=$(version_get_current)
-    _tf_assert_equals "0.2.0" "$new_version" "Should set project version"
+    _tf_assert_equals "Should set project version" "0.2.0" "$new_version"
     
     # Reset for other tests
     version_set_current "0.1.0" > /dev/null
@@ -122,19 +122,19 @@ test_version_bump_operations() {
     # Test patch bump
     local patch_version
     patch_version=$(version_bump_current "patch")
-    _tf_assert_equals "0.1.1" "$patch_version" "Should bump patch version"
+    _tf_assert_equals "Should bump patch version" "0.1.1" "$patch_version"
     
     # Reset and test minor bump
     version_set_current "0.1.0" > /dev/null
     local minor_version
     minor_version=$(version_bump_current "minor")
-    _tf_assert_equals "0.2.0" "$minor_version" "Should bump minor version"
+    _tf_assert_equals "Should bump minor version" "0.2.0" "$minor_version"
     
     # Reset and test major bump
     version_set_current "0.1.0" > /dev/null
     local major_version
     major_version=$(version_bump_current "major")
-    _tf_assert_equals "1.0.0" "$major_version" "Should bump major version"
+    _tf_assert_equals "Should bump major version" "1.0.0" "$major_version"
     
     cd - > /dev/null
 }
@@ -147,18 +147,18 @@ test_file_version_operations() {
     # Test getting file version
     local file_version
     file_version=$(version_get_file ".doh/epics/001.md")
-    _tf_assert_equals "0.1.0" "$file_version" "Should get file version"
+    _tf_assert_equals "Should get file version" "0.1.0" "$file_version"
     
     # Test setting file version
     version_set_file ".doh/epics/001.md" "0.3.0" > /dev/null
     local new_file_version
     new_file_version=$(version_get_file ".doh/epics/001.md")
-    _tf_assert_equals "0.3.0" "$new_file_version" "Should set file version"
+    _tf_assert_equals "Should set file version" "0.3.0" "$new_file_version"
     
     # Test bumping file version
     local bumped_version
     bumped_version=$(version_bump_file ".doh/epics/002.md" "minor")
-    _tf_assert_equals "0.2.0" "$bumped_version" "Should bump file version"
+    _tf_assert_equals "Should bump file version" "0.2.0" "$bumped_version"
     
     cd - > /dev/null
 }
@@ -259,9 +259,9 @@ test_version_workflow_integration() {
     local final_file2_version
     final_file2_version=$(version_get_file ".doh/epics/002.md")
     
-    _tf_assert_equals "$new_version" "$final_project_version" "Project version should match"
-    _tf_assert_equals "$new_version" "$final_file1_version" "File 1 version should match"
-    _tf_assert_equals "$new_version" "$final_file2_version" "File 2 version should match"
+    _tf_assert_equals "Project version should match" "$new_version" "$final_project_version"
+    _tf_assert_equals "File 1 version should match" "$new_version" "$final_file1_version"
+    _tf_assert_equals "File 2 version should match" "$new_version" "$final_file2_version"
     
     echo "✅ PASS: Complete version workflow successful"
     

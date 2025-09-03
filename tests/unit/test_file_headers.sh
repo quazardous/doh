@@ -398,3 +398,7 @@ assert_greater_than() {
         _tf_fail "$message - Expected $actual > $expected"
     fi
 }
+# Run tests if script executed directly
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    _tf_direct_execution_error
+fi

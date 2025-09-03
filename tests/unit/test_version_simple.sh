@@ -1,6 +1,6 @@
 #!/bin/bash
-# Simplified version commands test
-# Tests core version commands step by step
+# Simplified version management test
+# Tests core version operations step by step
 # File version: 0.1.0 | Created: 2025-09-03
 
 # Source the framework and libraries

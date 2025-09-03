@@ -43,38 +43,38 @@ _tf_teardown() {
 test_version_validate_valid() {
     # Test valid semantic versions
     version_validate "0.0.1"
-    _tf_assert_equals 0 $? "0.0.1"
+    _tf_assert_equals "0.0.1" 0 $?
     version_validate "1.0.0"  
-    _tf_assert_equals 0 $? "1.0.0"
+    _tf_assert_equals "1.0.0" 0 $?
     version_validate "10.20.30"
-    _tf_assert_equals 0 $? "10.20.30"
+    _tf_assert_equals "10.20.30" 0 $?
     version_validate "1.0.0-alpha"
-    _tf_assert_equals 0 $? "1.0.0-alpha"
+    _tf_assert_equals "1.0.0-alpha" 0 $?
     version_validate "1.0.0-alpha.1"
-    _tf_assert_equals 0 $? "1.0.0-alpha.1"
+    _tf_assert_equals "1.0.0-alpha.1" 0 $?
     version_validate "1.0.0+build"
-    _tf_assert_equals 0 $? "1.0.0+build"
+    _tf_assert_equals "1.0.0+build" 0 $?
     version_validate "1.0.0-alpha+build"
-    _tf_assert_equals 0 $? "1.0.0-alpha+build"
+    _tf_assert_equals "1.0.0-alpha+build" 0 $?
     version_validate "2.0.0-rc.1+exp.sha.5114f85"
-    _tf_assert_equals 0 $? "2.0.0-rc.1+exp.sha.5114f85"
+    _tf_assert_equals "2.0.0-rc.1+exp.sha.5114f85" 0 $?
 }
 
 test_version_validate_invalid() {
     # Test invalid versions
-    _tf_assert_command_fails version_validate "" "Empty version"
-    _tf_assert_command_fails version_validate "1" "Single number"
-    _tf_assert_command_fails version_validate "1.0" "Two numbers"
-    _tf_assert_command_fails version_validate "1.0.0.0" "Four numbers"
-    _tf_assert_command_fails version_validate "v1.0.0" "Version with prefix"
-    _tf_assert_command_fails version_validate "1.0.0-" "Trailing dash"
-    _tf_assert_command_fails version_validate "1.0.0+" "Trailing plus"
-    _tf_assert_command_fails version_validate "01.0.0" "Leading zero"
-    _tf_assert_command_fails version_validate "1.00.0" "Leading zero in minor"
-    _tf_assert_command_fails version_validate "1.0.00" "Leading zero in patch"
-    _tf_assert_command_fails version_validate "1.0.0-" "Empty pre-release"
-    _tf_assert_command_fails version_validate "1.0.0+" "Empty build metadata"
-    _tf_assert_command_fails version_validate "a.b.c" "Non-numeric versions"
+    _tf_assert_not "Empty version" version_validate ""
+    _tf_assert_not "Single number" version_validate "1"
+    _tf_assert_not "Two numbers" version_validate "1.0"
+    _tf_assert_not "Four numbers" version_validate "1.0.0.0"
+    _tf_assert_not "Version with prefix" version_validate "v1.0.0"
+    _tf_assert_not "Trailing dash" version_validate "1.0.0-"
+    _tf_assert_not "Trailing plus" version_validate "1.0.0+"
+    _tf_assert_not "Leading zero" version_validate "01.0.0"
+    _tf_assert_not "Leading zero in minor" version_validate "1.00.0"
+    _tf_assert_not "Leading zero in patch" version_validate "1.0.00"
+    _tf_assert_not "Empty pre-release" version_validate "1.0.0-"
+    _tf_assert_not "Empty build metadata" version_validate "1.0.0+"
+    _tf_assert_not "Non-numeric versions" version_validate "a.b.c"
 }
 
 test_version_compare() {
@@ -82,42 +82,42 @@ test_version_compare() {
     
     # Equal versions
     version_compare "1.0.0" "1.0.0"
-    _tf_assert_equals 0 $? "Equal versions should return 0"
+    _tf_assert_equals "Equal versions should return 0" 0 $?
     
     # First version greater
     version_compare "2.0.0" "1.0.0"
-    _tf_assert_equals 1 $? "Greater major should return 1"
+    _tf_assert_equals "Greater major should return 1" 1 $?
     
     version_compare "1.1.0" "1.0.0"
-    _tf_assert_equals 1 $? "Greater minor should return 1"
+    _tf_assert_equals "Greater minor should return 1" 1 $?
     
     version_compare "1.0.1" "1.0.0"
-    _tf_assert_equals 1 $? "Greater patch should return 1"
+    _tf_assert_equals "Greater patch should return 1" 1 $?
     
     # First version lesser
     version_compare "1.0.0" "2.0.0"
-    _tf_assert_equals 2 $? "Lesser major should return 2"
+    _tf_assert_equals "Lesser major should return 2" 2 $?
     
     version_compare "1.0.0" "1.1.0"
-    _tf_assert_equals 2 $? "Lesser minor should return 2"
+    _tf_assert_equals "Lesser minor should return 2" 2 $?
     
     version_compare "1.0.0" "1.0.1"
-    _tf_assert_equals 2 $? "Lesser patch should return 2"
+    _tf_assert_equals "Lesser patch should return 2" 2 $?
 }
 
 test_version_compare_prerelease() {
     # Pre-release versions
     version_compare "1.0.0-alpha" "1.0.0"
-    _tf_assert_equals 2 $? "Pre-release should be less than release"
+    _tf_assert_equals "Pre-release should be less than release" 2 $?
     
     version_compare "1.0.0" "1.0.0-alpha"
-    _tf_assert_equals 1 $? "Release should be greater than pre-release"
+    _tf_assert_equals "Release should be greater than pre-release" 1 $?
     
     version_compare "1.0.0-alpha" "1.0.0-beta"
-    _tf_assert_equals 2 $? "Alpha should be less than beta"
+    _tf_assert_equals "Alpha should be less than beta" 2 $?
     
     version_compare "1.0.0-alpha.1" "1.0.0-alpha.2"
-    _tf_assert_equals 2 $? "Alpha.1 should be less than alpha.2"
+    _tf_assert_equals "Alpha.1 should be less than alpha.2" 2 $?
 }
 
 test_version_increment() {
@@ -125,19 +125,19 @@ test_version_increment() {
     local result
     
     result=$(version_increment "0.1.0" "patch")
-    _tf_assert_equals "0.1.1" "$result" "Patch increment"
+    _tf_assert_equals "Patch increment" "0.1.1" "$result"
     
     result=$(version_increment "0.1.5" "minor")
-    _tf_assert_equals "0.2.0" "$result" "Minor increment resets patch"
+    _tf_assert_equals "Minor increment resets patch" "0.2.0" "$result"
     
     result=$(version_increment "1.5.3" "major")
-    _tf_assert_equals "2.0.0" "$result" "Major increment resets minor and patch"
+    _tf_assert_equals "Major increment resets minor and patch" "2.0.0" "$result"
     
     result=$(version_increment "1.0.0-alpha" "patch")
-    _tf_assert_equals "1.0.1" "$result" "Patch increment removes pre-release"
+    _tf_assert_equals "Patch increment removes pre-release" "1.0.1" "$result"
     
     result=$(version_increment "1.0.0+build" "patch")
-    _tf_assert_equals "1.0.1" "$result" "Patch increment removes build metadata"
+    _tf_assert_equals "Patch increment removes build metadata" "1.0.1" "$result"
 }
 
 test_version_increment_invalid() {
@@ -145,13 +145,13 @@ test_version_increment_invalid() {
     local result
     
     result=$(version_increment "invalid" "patch" 2>/dev/null)
-    _tf_assert_equals 1 $? "Invalid version should fail"
+    _tf_assert_equals "Invalid version should fail" 1 $?
     
     result=$(version_increment "1.0.0" "invalid" 2>/dev/null)
-    _tf_assert_equals 1 $? "Invalid increment type should fail"
+    _tf_assert_equals "Invalid increment type should fail" 1 $?
     
     result=$(version_increment "" "patch" 2>/dev/null)
-    _tf_assert_equals 1 $? "Empty version should fail"
+    _tf_assert_equals "Empty version should fail" 1 $?
 }
 
 test_version_precedence() {
@@ -163,9 +163,11 @@ test_version_precedence() {
         local next="${versions[i+1]}"
         
         version_compare "$current" "$next"
-        _tf_assert_equals 2 $? "$current should be less than $next"
+        _tf_assert_equals "$current should be less than $next" 2 $?
     done
 }
 
-# Run all tests
-_tf_run_tests
+# Run tests if script executed directly
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    _tf_direct_execution_error
+fi

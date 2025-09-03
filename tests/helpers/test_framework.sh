@@ -73,9 +73,9 @@ _tf_test_result() {
 
 # Core assertion functions
 _tf_assert_equals() {
-    local expected="$1"
-    local actual="$2"
-    local message="${3:-Values should be equal}"
+    local message="$1"
+    local expected="$2"
+    local actual="$3"
     
     if [[ "$expected" == "$actual" ]]; then
         _tf_test_result "ok" "$message"
@@ -85,9 +85,9 @@ _tf_assert_equals() {
 }
 
 _tf_assert_not_equals() {
-    local expected="$1"
-    local actual="$2"
-    local message="${3:-Values should not be equal}"
+    local message="$1"
+    local expected="$2"
+    local actual="$3"
     
     if [[ "$expected" != "$actual" ]]; then
         _tf_test_result "ok" "$message"
@@ -97,8 +97,8 @@ _tf_assert_not_equals() {
 }
 
 _tf_assert_true() {
-    local condition="$1"
-    local message="${2:-Condition should be true}"
+    local message="$1"
+    local condition="$2"
     
     if [[ "$condition" == "true" ]] || [[ "$condition" == "0" ]]; then
         _tf_test_result "ok" "$message"
@@ -107,9 +107,32 @@ _tf_assert_true() {
     fi
 }
 
+_tf_assert() {
+    local message="$1"
+    shift
+    
+    if ("$@") &>/dev/null; then
+        _tf_test_result "ok" "$message"
+    else
+        local exit_code=$?
+        _tf_test_result "not ok" "$message" "Command failed with exit code $exit_code: $*"
+    fi
+}
+
+_tf_assert_not() {
+    local message="$1"
+    shift
+    
+    if ! ("$@") &>/dev/null; then
+        _tf_test_result "ok" "$message"
+    else
+        _tf_test_result "not ok" "$message" "Command succeeded but was expected to fail: $*"
+    fi
+}
+
 _tf_assert_false() {
-    local condition="$1"
-    local message="${2:-Condition should be false}"
+    local message="$1"
+    local condition="$2"
     
     if [[ "$condition" == "false" ]] || [[ "$condition" != "0" && "$condition" != "true" ]]; then
         _tf_test_result "ok" "$message"
@@ -119,9 +142,9 @@ _tf_assert_false() {
 }
 
 _tf_assert_contains() {
-    local haystack="$1"
-    local needle="$2"
-    local message="${3:-String should contain substring}"
+    local message="$1"
+    local haystack="$2"
+    local needle="$3"
     
     if [[ "$haystack" =~ $needle ]]; then
         _tf_test_result "ok" "$message"
@@ -131,8 +154,8 @@ _tf_assert_contains() {
 }
 
 _tf_assert_file_exists() {
-    local file="$1"
-    local message="${2:-File should exist}"
+    local message="$1"
+    local file="$2"
     
     if [[ -f "$file" ]]; then
         _tf_test_result "ok" "$message"
@@ -142,9 +165,9 @@ _tf_assert_file_exists() {
 }
 
 _tf_assert_file_contains() {
-    local file="$1"
-    local content="$2"
-    local message="${3:-File should contain content}"
+    local message="$1"
+    local file="$2"
+    local content="$3"
     
     if [[ ! -f "$file" ]]; then
         _tf_test_result "not ok" "$message" "File '$file' does not exist"
@@ -158,28 +181,7 @@ _tf_assert_file_contains() {
     fi
 }
 
-_tf_assert_command_succeeds() {
-    local cmd="$1"
-    local message="${2:-Command should succeed}"
-    
-    if (eval "$cmd") &>/dev/null; then
-        _tf_test_result "ok" "$message"
-    else
-        local exit_code=$?
-        _tf_test_result "not ok" "$message" "Command '$cmd' failed with exit code $exit_code"
-    fi
-}
 
-_tf_assert_command_fails() {
-    local cmd="$1"
-    local message="${2:-Command should fail}"
-    
-    if ! (eval "$cmd") &>/dev/null; then
-        _tf_test_result "ok" "$message"
-    else
-        _tf_test_result "not ok" "$message" "Command '$cmd' succeeded but was expected to fail"
-    fi
-}
 
 # Test discovery and execution
 _tf_run_test_function() {
@@ -357,9 +359,8 @@ _tf_direct_execution_error() {
 # Export functions if sourced
 if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
     export -f _tf_test_suite_start _tf_test_suite_end
-    export -f _tf_assert_equals _tf_assert_not_equals _tf_assert_true _tf_assert_false
+    export -f _tf_assert_equals _tf_assert_not_equals _tf_assert_true _tf_assert_false _tf_assert _tf_assert_not
     export -f _tf_assert_contains _tf_assert_file_exists _tf_assert_file_contains
-    export -f _tf_assert_command_succeeds _tf_assert_command_fails
     export -f _tf_run_test_function _tf_run_test_file
     export -f _tf_create_temp_dir _tf_create_temp_file _tf_cleanup_temp _tf_with_mock
     export -f _tf_log_info _tf_log_success _tf_log_error _tf_log_warn _tf_log_debug _tf_log_trace

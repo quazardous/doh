@@ -15,20 +15,20 @@ test_logging_functions() {
     _tf_log_trace "This is a trace message - only shown when DOH_TEST_DEBUG=true"
     
     # Test that functions exist and are callable
-    _tf_assert_command_succeeds "declare -f _tf_log_info" "log_info function should exist"
-    _tf_assert_command_succeeds "declare -f _tf_log_error" "log_error function should exist"
-    _tf_assert_command_succeeds "declare -f _tf_log_debug" "log_debug function should exist"
-    _tf_assert_command_succeeds "declare -f _tf_log_trace" "log_trace function should exist"
+    _tf_assert "log_info function should exist" declare -f _tf_log_info
+    _tf_assert "log_error function should exist" declare -f _tf_log_error
+    _tf_assert "log_debug function should exist" declare -f _tf_log_debug
+    _tf_assert "log_trace function should exist" declare -f _tf_log_trace
 }
 
 test_verbose_behavior() {
     _tf_log_debug "This debug message will only appear in verbose mode"
-    _tf_assert_true "true" "Verbose logging test completed"
+    _tf_assert_true "Verbose logging test completed" true
 }
 
 test_trace_behavior() {
     _tf_log_trace "This trace message will only appear with DOH_TEST_DEBUG=true"
-    _tf_assert_true "true" "Trace logging test completed"
+    _tf_assert_true "Trace logging test completed" true
 }
 
 # Run the test if script executed directly

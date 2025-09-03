@@ -35,13 +35,13 @@ _tf_teardown() {
 test_valid_number_validation() {
     _numbering_ensure_registry
     
-    _tf_assert_command_succeeds "numbering_validate '999' 'epic'" "Should accept valid number"
+    _tf_assert "Should accept valid number" numbering_validate '999' 'epic'
 }
 
 test_negative_number_rejection() {
     _numbering_ensure_registry
     
-    _tf_assert_command_fails "numbering_validate '-1' 'epic'" "Should reject negative number"
+    _tf_assert_not "Should reject negative number" numbering_validate '-1' 'epic'
 }
 
 test_used_number_rejection() {
@@ -51,13 +51,13 @@ test_used_number_rejection() {
     
     numbering_register_epic "$epic_number" ".doh/epics/test-epic/epic.md" "test-epic"
     
-    _tf_assert_command_fails "numbering_validate '$epic_number' 'task'" "Should reject already used number"
+    _tf_assert_not "Should reject already used number" numbering_validate "$epic_number" 'task'
 }
 
 test_quick_number_protection() {
     _numbering_ensure_registry
     
-    _tf_assert_command_fails "numbering_validate '000' 'epic'" "Should protect QUICK reserved number"
+    _tf_assert_not "Should protect QUICK reserved number" numbering_validate '000' 'epic'
 }
 
 # Run tests if script executed directly

@@ -236,19 +236,19 @@ Basic test structure:
         local result=$(my_function "$input")
         
         # Assert
-        _tf_assert_equals "expected" "$result" "Function should return expected value"
+        _tf_assert_equals "$result" "Function should return expected value" "expected"
     }
 
 Available assertions:
-    _tf_assert_equals <expected> <actual> [message]
-    _tf_assert_not_equals <expected> <actual> [message]
-    _tf_assert_true <condition> [message]
-    _tf_assert_false <condition> [message]
-    _tf_assert_contains <haystack> <needle> [message]
-    _tf_assert_file_exists <file> [message]
-    _tf_assert_file_contains <file> <content> [message]
-    _tf_assert_command_succeeds <command> [message]
-    _tf_assert_command_fails <command> [message]
+    _tf_assert_equals <message> <expected> <actual>
+    _tf_assert_not_equals <message> <expected> <actual>
+    _tf_assert_true <message> <condition>
+    _tf_assert_false <message> <condition>
+    _tf_assert_contains <message> <haystack> <needle>
+    _tf_assert_file_exists <message> <file>
+    _tf_assert_file_contains <message> <file> <content>
+    _tf_assert <message> <command> [args...]
+    _tf_assert_not <message> <command> [args...]
 
 Test lifecycle:
     setup()      - Called before each test

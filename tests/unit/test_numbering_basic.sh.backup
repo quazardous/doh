@@ -38,7 +38,7 @@ test_registry_file_creation() {
     local registry_file
     registry_file="$(_numbering_ensure_registry)"
     
-    _tf_assert_file_exists "Registry file should be created" "$registry_file"
+    _tf_assert_file_exists "$registry_file" "Registry file should be created"
 }
 
 test_taskseq_file_creation() {
@@ -46,7 +46,7 @@ test_taskseq_file_creation() {
     local taskseq_file
     taskseq_file="$(_numbering_get_taskseq_path)"
     
-    _tf_assert_file_exists "TASKSEQ file should be created" "$taskseq_file"
+    _tf_assert_file_exists "$taskseq_file" "TASKSEQ file should be created"
 }
 
 test_initial_taskseq_value() {
@@ -54,7 +54,7 @@ test_initial_taskseq_value() {
     local initial_seq
     initial_seq="$(numbering_get_current)"
     
-    _tf_assert_equals "Initial sequence should be 0" "0" "$initial_seq"
+    _tf_assert_equals "0" "$initial_seq" "Initial sequence should be 0"
 }
 
 test_registry_structure_validation() {
@@ -70,9 +70,9 @@ test_registry_statistics() {
     local stats
     stats="$(numbering_get_stats)"
     
-    _tf_assert_contains "Statistics should include sequence" "$stats" "Current Sequence:"
-    _tf_assert_contains "Statistics should include epic count" "$stats" "Epics:"
-    _tf_assert_contains "Statistics should include task count" "$stats" "Tasks:"
+    _tf_assert_contains "$stats" "Current Sequence:" "Statistics should include sequence"
+    _tf_assert_contains "$stats" "Epics:" "Statistics should include epic count"
+    _tf_assert_contains "$stats" "Tasks:" "Statistics should include task count"
 }
 
 # Run tests if script executed directly

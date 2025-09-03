@@ -34,7 +34,7 @@ test_queue_initialization() {
     local queue_dir
     queue_dir="$(queue_ensure_dir "$DOH_TEST_QUEUE_NAME")"
     
-    _tf_assert_command_succeeds "test -d '$queue_dir'" "Queue directory should be created"
+    _tf_assert "Queue directory should be created" test -d "$queue_dir"
 }
 
 test_message_creation() {
@@ -42,10 +42,10 @@ test_message_creation() {
     local message
     message="$(queue_create_renumber_message "task" "test_task" "001" "002" "conflict")"
     
-    _tf_assert_command_succeeds "test -n '$message'" "Should create renumber message"
+    _tf_assert "Should create renumber message" test -n "$message"
     
     # Validate message format
-    _tf_assert_command_succeeds "queue_validate_message '$message'" "Message should be valid"
+    _tf_assert "Message should be valid" queue_validate_message "$message"
 }
 
 test_queue_add_message() {
@@ -58,13 +58,13 @@ test_queue_add_message() {
     local message_id
     message_id="$(queue_add_message "$DOH_TEST_QUEUE_NAME" "$message")"
     
-    _tf_assert_command_succeeds "test -n '$message_id'" "Message ID should be generated"
+    _tf_assert "Message ID should be generated" test -n "$message_id"
     
     # Check message was queued
     local queue_dir
     queue_dir="$(queue_get_dir "$DOH_TEST_QUEUE_NAME")"
     
-    _tf_assert_file_exists "$queue_dir/$message_id.json" "Message file should be created"
+    _tf_assert_file_exists "Message file should be created" "$queue_dir/$message_id.json"
 }
 
 test_queue_get_message() {
@@ -81,8 +81,8 @@ test_queue_get_message() {
     local retrieved_message
     retrieved_message="$(queue_get_message "$DOH_TEST_QUEUE_NAME" "$message_id")"
     
-    _tf_assert_command_succeeds "test -n '$retrieved_message'" "Should retrieve queued message"
-    _tf_assert_contains "$retrieved_message" "test_epic" "Message should contain epic identifier"
+    _tf_assert "Should retrieve queued message" test -n "$retrieved_message"
+    _tf_assert_contains "Message should contain epic identifier" "$retrieved_message" "test_epic"
 }
 
 test_queue_list_messages() {
@@ -101,8 +101,8 @@ test_queue_list_messages() {
     local messages
     messages="$(queue_list_messages "$DOH_TEST_QUEUE_NAME" "pending")"
     
-    _tf_assert_contains "$messages" "$id1" "Should list first message"
-    _tf_assert_contains "$messages" "$id2" "Should list second message"
+    _tf_assert_contains "Should list first message" "$messages" "$id1"
+    _tf_assert_contains "Should list second message" "$messages" "$id2"
 }
 
 test_message_status_change() {
@@ -116,13 +116,13 @@ test_message_status_change() {
     message_id="$(queue_add_message "$DOH_TEST_QUEUE_NAME" "$message")"
     
     # Change status to OK
-    _tf_assert_command_succeeds "queue_set_message_status '$DOH_TEST_QUEUE_NAME' '$message_id' '.ok'" "Should set message status to OK"
+    _tf_assert "Should set message status to OK" queue_set_message_status "$DOH_TEST_QUEUE_NAME" "$message_id" '.ok'
     
     # Check message appears in OK list
     local ok_messages
     ok_messages="$(queue_list_messages "$DOH_TEST_QUEUE_NAME" "ok")"
     
-    _tf_assert_contains "$ok_messages" "$message_id" "Message should appear in OK list"
+    _tf_assert_contains "Message should appear in OK list" "$ok_messages" "$message_id"
 }
 
 test_queue_process_message() {
@@ -136,13 +136,13 @@ test_queue_process_message() {
     message_id="$(queue_add_message "$DOH_TEST_QUEUE_NAME" "$message")"
     
     # Process the message
-    _tf_assert_command_succeeds "queue_process_message '$DOH_TEST_QUEUE_NAME' '$message_id'" "Should process message"
+    _tf_assert "Should process message" queue_process_message "$DOH_TEST_QUEUE_NAME" "$message_id"
     
     # Check message is marked as processed
     local ok_messages
     ok_messages="$(queue_list_messages "$DOH_TEST_QUEUE_NAME" "ok")"
     
-    _tf_assert_contains "$ok_messages" "$message_id" "Processed message should be marked as OK"
+    _tf_assert_contains "Processed message should be marked as OK" "$ok_messages" "$message_id"
 }
 
 test_queue_statistics() {
@@ -160,9 +160,9 @@ test_queue_statistics() {
     local stats
     stats="$(queue_get_stats "$DOH_TEST_QUEUE_NAME")"
     
-    _tf_assert_contains "$stats" "Queue Statistics" "Stats should include header"
-    _tf_assert_contains "$stats" "Pending:" "Stats should include pending count"
-    _tf_assert_contains "$stats" "Total:" "Stats should include total count"
+    _tf_assert_contains "Stats should include header" "$stats" "Queue Statistics"
+    _tf_assert_contains "Stats should include pending count" "$stats" "Pending:"
+    _tf_assert_contains "Stats should include total count" "$stats" "Total:"
 }
 
 test_queue_purge_processed() {
@@ -179,7 +179,7 @@ test_queue_purge_processed() {
     queue_set_message_status "$DOH_TEST_QUEUE_NAME" "$message_id" ".ok"
     
     # Test purge function (should not purge recent messages)
-    _tf_assert_command_succeeds "queue_purge_processed '$DOH_TEST_QUEUE_NAME' 0" "Should run purge function"
+    _tf_assert "Should run purge function" queue_purge_processed "$DOH_TEST_QUEUE_NAME" 0
 }
 
 # Run tests if script executed directly

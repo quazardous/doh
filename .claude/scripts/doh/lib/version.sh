@@ -132,7 +132,7 @@ version_increment() {
     # Parse version components (strip build metadata first)
     local clean_version="${version%%+*}"  # Remove build metadata
     local major minor patch prerelease
-    if [[ "$clean_version" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)(-([a-zA-Z0-9.-]+))?$ ]]; then
+    if [[ "$clean_version" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-([a-zA-Z0-9.-]+))?$ ]]; then
         major="${BASH_REMATCH[1]}"
         minor="${BASH_REMATCH[2]}"
         patch="${BASH_REMATCH[3]}"
@@ -279,7 +279,7 @@ _version_to_number() {
     version="${version%%+*}"
     
     # Extract major.minor.patch and ignore prerelease for comparison
-    if [[ "$version" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
+    if [[ "$version" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*) ]]; then
         local major="${BASH_REMATCH[1]}"
         local minor="${BASH_REMATCH[2]}"
         local patch="${BASH_REMATCH[3]}"
@@ -391,8 +391,8 @@ version_validate() {
     local version="$1"
     local explode="${2:-false}"
     
-    # Check basic semver pattern with optional build metadata
-    if [[ "$version" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)(-([a-zA-Z0-9.-]+))?(\+([a-zA-Z0-9.-]+))?$ ]]; then
+    # Check basic semver pattern with optional build metadata (no leading zeros)
+    if [[ "$version" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-([a-zA-Z0-9.-]+))?(\+([a-zA-Z0-9.-]+))?$ ]]; then
         if [[ "$explode" == "true" || "$explode" == "explode" ]]; then
             local major="${BASH_REMATCH[1]}"
             local minor="${BASH_REMATCH[2]}"

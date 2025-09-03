@@ -138,7 +138,7 @@ test_version_release_workflow() {
     # Step 1: Validate current project state
     local current_version
     current_version=$(version_get_current)
-    _tf_assert_equals "0.1.0" "$current_version" "Initial version should be 0.1.0"
+    _tf_assert_equals "Initial version should be 0.1.0" "0.1.0" "$current_version"
     
     # Step 2: Complete tasks (mark as completed)
     frontmatter_update_field ".doh/epics/002.md" "status" "completed" > /dev/null
@@ -147,12 +147,12 @@ test_version_release_workflow() {
     # Step 3: Check epic readiness for version bump
     local epic_status
     epic_status=$(frontmatter_get_field ".doh/epics/001.md" "status")
-    _tf_assert_equals "in_progress" "$epic_status" "Epic should still be in progress"
+    _tf_assert_equals "Epic should still be in progress" "in_progress" "$epic_status"
     
     # Step 4: Bump project version (minor release)
     local new_version
     new_version=$(version_bump_current "minor")
-    _tf_assert_equals "0.2.0" "$new_version" "Should bump to target version 0.2.0"
+    _tf_assert_equals "Should bump to target version 0.2.0" "0.2.0" "$new_version"
     
     # Step 5: Create version milestone file
     cat > .doh/versions/0.2.0.md << 'EOF'
@@ -189,11 +189,11 @@ EOF
     # Step 7: Verify all files have consistent versions
     local prd_version
     prd_version=$(version_get_file ".doh/prds/core-features.md")
-    _tf_assert_equals "$new_version" "$prd_version" "PRD version should be updated"
+    _tf_assert_equals "PRD version should be updated" "$new_version" "$prd_version"
     
     local epic_version
     epic_version=$(version_get_file ".doh/epics/001.md")
-    _tf_assert_equals "$new_version" "$epic_version" "Epic version should be updated"
+    _tf_assert_equals "Epic version should be updated" "$new_version" "$epic_version"
     
     # Step 8: Mark epic as completed
     frontmatter_update_field ".doh/epics/001.md" "status" "completed" > /dev/null
@@ -201,7 +201,7 @@ EOF
     # Step 9: Verify no version inconsistencies
     local inconsistencies
     inconsistencies=$(find_version_inconsistencies 2>/dev/null || echo "")
-    _tf_assert_equals "" "$inconsistencies" "Should have no version inconsistencies after release"
+    _tf_assert_equals "Should have no version inconsistencies after release" "" "$inconsistencies"
     
     cd - > /dev/null
 }
@@ -214,15 +214,15 @@ test_version_hierarchy_inheritance() {
     # Test PRD -> Epic -> Task version inheritance
     local prd_target
     prd_target=$(frontmatter_get_field ".doh/prds/core-features.md" "target_version")
-    _tf_assert_equals "1.0.0" "$prd_target" "PRD should have target version 1.0.0"
+    _tf_assert_equals "PRD should have target version 1.0.0" "1.0.0" "$prd_target"
     
     local epic_target
     epic_target=$(frontmatter_get_field ".doh/epics/001.md" "target_version")
-    _tf_assert_equals "0.2.0" "$epic_target" "Epic should have its own target version"
+    _tf_assert_equals "Epic should have its own target version" "0.2.0" "$epic_target"
     
     local task_target
     task_target=$(frontmatter_get_field ".doh/epics/002.md" "target_version")
-    _tf_assert_equals "0.2.0" "$task_target" "Task should inherit epic target version"
+    _tf_assert_equals "Task should inherit epic target version" "0.2.0" "$task_target"
     
     cd - > /dev/null
 }
@@ -236,7 +236,7 @@ test_version_dependency_tracking() {
     local task_deps
     task_deps=$(frontmatter_get_field ".doh/epics/003.md" "depends_on")
     echo "$task_deps" | grep -q "002"
-    _tf_assert_equals 0 $? "Task 003 should depend on task 002"
+    _tf_assert_equals "Task 003 should depend on task 002" 0 $?
     
     # Verify dependency versions are consistent
     local dep_version
@@ -244,7 +244,7 @@ test_version_dependency_tracking() {
     local dependent_version
     dependent_version=$(version_get_file ".doh/epics/003.md")
     
-    _tf_assert_equals "$dep_version" "$dependent_version" "Dependent tasks should have consistent versions"
+    _tf_assert_equals "Dependent tasks should have consistent versions" "$dep_version" "$dependent_version"
     
     cd - > /dev/null
 }
@@ -268,7 +268,7 @@ EOF
     # Bump to major version
     local major_version
     major_version=$(version_bump_current "major")
-    _tf_assert_equals "1.0.0" "$major_version" "Should bump to major version 1.0.0"
+    _tf_assert_equals "Should bump to major version 1.0.0" "1.0.0" "$major_version"
     
     # Create major version milestone
     cat > .doh/versions/1.0.0.md << 'EOF'
@@ -294,11 +294,11 @@ See docs/migration-1.0.md for detailed migration instructions.
 EOF
     
     # Verify version file was created
-    _tf_assert_file_exists ".doh/versions/1.0.0.md" "Major version file should be created"
+    _tf_assert_file_exists "Major version file should be created" ".doh/versions/1.0.0.md"
     
     local version_type
     version_type=$(frontmatter_get_field ".doh/versions/1.0.0.md" "type")
-    _tf_assert_equals "major" "$version_type" "Version type should be major"
+    _tf_assert_equals "Version type should be major" "major" "$version_type"
     
     cd - > /dev/null
 }
@@ -318,14 +318,14 @@ test_version_rollback_scenario() {
     
     local new_version
     new_version=$(version_get_current)
-    _tf_assert_equals "0.2.0" "$new_version" "Version should be bumped to 0.2.0"
+    _tf_assert_equals "Version should be bumped to 0.2.0" "0.2.0" "$new_version"
     
     # Simulate rollback need (restore from backup)
     cp VERSION.backup VERSION
     
     local rolled_back_version
     rolled_back_version=$(version_get_current)
-    _tf_assert_equals "$initial_version" "$rolled_back_version" "Version should be rolled back"
+    _tf_assert_equals "Version should be rolled back" "$initial_version" "$rolled_back_version"
     
     # Cleanup
     rm -f VERSION.backup
@@ -356,14 +356,15 @@ test_concurrent_version_operations() {
     # Verify both operations succeeded
     local version1
     version1=$(version_get_file ".doh/epics/002.md")
-    _tf_assert_equals "0.3.0" "$version1" "Concurrent version update 1 should succeed"
+    _tf_assert_equals "Concurrent version update 1 should succeed" "0.3.0" "$version1"
     
     local version2
     version2=$(version_get_file ".doh/epics/003.md")
-    _tf_assert_equals "0.3.0" "$version2" "Concurrent version update 2 should succeed"
+    _tf_assert_equals "Concurrent version update 2 should succeed" "0.3.0" "$version2"
     
     cd - > /dev/null
 }
 
-# Run all tests
-_tf_run_tests
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    _tf_direct_execution_error
+fi

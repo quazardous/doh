@@ -39,12 +39,12 @@ _tf_teardown() {
 # Test basic number format validation
 test_number_format_validation() {
     # Test valid number formats
-    _tf_assert_command_succeeds "[[ '001' =~ ^[0-9]{3}$ ]]" "Should accept 3-digit format"
-    _tf_assert_command_succeeds "[[ '999' =~ ^[0-9]{3}$ ]]" "Should accept valid numbers"
+    _tf_assert "Should accept 3-digit format" sh -c "[[ '001' =~ ^[0-9]{3}$ ]]"
+    _tf_assert "Should accept valid numbers" sh -c "[[ '999' =~ ^[0-9]{3}$ ]]"
     
     # Test invalid formats
-    _tf_assert_command_fails "[[ '1' =~ ^[0-9]{3}$ ]]" "Should reject single digit"
-    _tf_assert_command_fails "[[ 'abc' =~ ^[0-9]{3}$ ]]" "Should reject non-numeric"
+    _tf_assert_not "Should reject single digit" sh -c "[[ '1' =~ ^[0-9]{3}$ ]]"
+    _tf_assert_not "Should reject non-numeric" sh -c "[[ 'abc' =~ ^[0-9]{3}$ ]]"
 }
 
 test_sequential_number_generation() {
@@ -53,13 +53,13 @@ test_sequential_number_generation() {
     local next_seq=$((current_seq + 1))
     local formatted_next=$(printf "%03d" $next_seq)
     
-    _tf_assert_equals "006" "$formatted_next" "Should format next number correctly"
+    _tf_assert_equals "Should format next number correctly" "006" "$formatted_next"
 }
 
 test_doh_directory_structure() {
     # Test that we can create basic DOH structure
-    _tf_assert_file_exists ".doh/PROJECT_ID" "Project ID file should exist"
-    _tf_assert_command_succeeds "test -d '.doh'" "DOH directory should exist"
+    _tf_assert_file_exists "Project ID file should exist" ".doh/PROJECT_ID"
+    _tf_assert "DOH directory should exist" test -d ".doh"
 }
 
 test_file_creation_patterns() {
@@ -67,8 +67,8 @@ test_file_creation_patterns() {
     local test_file=".doh/TEST_REGISTRY"
     echo "test_entry" > "$test_file"
     
-    _tf_assert_file_exists "$test_file" "Should create registry file"
-    _tf_assert_file_contains "$test_file" "test_entry" "Should write to registry"
+    _tf_assert_file_exists "Should create registry file" "$test_file"
+    _tf_assert_file_contains "Should write to registry" "$test_file" "test_entry"
 }
 
 test_number_uniqueness_check() {
@@ -85,7 +85,7 @@ test_number_uniqueness_check() {
         fi
     done
     
-    _tf_assert_false "$is_used" "Number 003 should not be in used list"
+    _tf_assert_false "Number 003 should not be in used list" "$is_used"
     
     # Test used number
     test_number="001"
@@ -97,7 +97,7 @@ test_number_uniqueness_check() {
         fi
     done
     
-    _tf_assert_true "$is_used" "Number 001 should be in used list"
+    _tf_assert_true "Number 001 should be in used list" "$is_used"
 }
 
 # Prevent direct execution - tests must run through launcher

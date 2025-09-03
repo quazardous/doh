@@ -46,13 +46,13 @@ EOF
     
     # Check that we get the expected frontmatter content
     echo "$result" | grep -q "name: Test Document"
-    _tf_assert_true $? "Frontmatter contains name field"
+    _tf_assert_true "Frontmatter contains name field" $?
     
     echo "$result" | grep -q "version: 1.0.0"
-    _tf_assert_true $? "Frontmatter contains version field"
+    _tf_assert_true "Frontmatter contains version field" $?
     
     echo "$result" | grep -q "tags:"
-    _tf_assert_true $? "Frontmatter contains complex structures"
+    _tf_assert_true "Frontmatter contains complex structures" $?
     
     _tf_cleanup_temp "$test_file"
 }
@@ -72,7 +72,7 @@ EOF
     local result
     result=$(frontmatter_extract "$test_file")
     
-    _tf_assert_equals "" "$result" "Empty frontmatter extraction"
+    _tf_assert_equals "Empty frontmatter extraction" "" "$result"
     
     _tf_cleanup_temp "$test_file"
 }
@@ -89,7 +89,7 @@ EOF
     local result
     result=$(frontmatter_extract "$test_file")
     
-    _tf_assert_equals "" "$result" "No frontmatter extraction"
+    _tf_assert_equals "No frontmatter extraction" "" "$result"
     
     _tf_cleanup_temp "$test_file"
 }
@@ -114,16 +114,16 @@ space_value: " "
 # Content
 EOF
 
-    _tf_assert_equals "Test Task" "$(frontmatter_get_field "$test_file" "name")" "Get name field"
-    _tf_assert_equals "42" "$(frontmatter_get_field "$test_file" "number")" "Get number field"
-    _tf_assert_equals "in_progress" "$(frontmatter_get_field "$test_file" "status")" "Get status field"
-    _tf_assert_equals "2025-09-01T10:00:00Z" "$(frontmatter_get_field "$test_file" "created")" "Get timestamp field"
-    _tf_assert_equals "A test task with quotes" "$(frontmatter_get_field "$test_file" "description")" "Get quoted field"
-    _tf_assert_equals "single quotes" "$(frontmatter_get_field "$test_file" "single_quoted")" "Get single quoted field"
-    _tf_assert_equals "plain text" "$(frontmatter_get_field "$test_file" "no_quotes")" "Get unquoted field"
-    _tf_assert_equals "" "$(frontmatter_get_field "$test_file" "empty_value")" "Get empty quoted field"
-    _tf_assert_equals " " "$(frontmatter_get_field "$test_file" "space_value")" "Get space-only quoted field"
-    _tf_assert_equals "" "$(frontmatter_get_field "$test_file" "nonexistent")" "Get nonexistent field"
+    _tf_assert_equals "Get name field" "Test Task" "$(frontmatter_get_field "$test_file" "name")"
+    _tf_assert_equals "Get number field" "42" "$(frontmatter_get_field "$test_file" "number")"
+    _tf_assert_equals "Get status field" "in_progress" "$(frontmatter_get_field "$test_file" "status")"
+    _tf_assert_equals "Get timestamp field" "2025-09-01T10:00:00Z" "$(frontmatter_get_field "$test_file" "created")"
+    _tf_assert_equals "Get quoted field" "A test task with quotes" "$(frontmatter_get_field "$test_file" "description")"
+    _tf_assert_equals "Get single quoted field" "single quotes" "$(frontmatter_get_field "$test_file" "single_quoted")"
+    _tf_assert_equals "Get unquoted field" "plain text" "$(frontmatter_get_field "$test_file" "no_quotes")"
+    _tf_assert_equals "Get empty quoted field" "" "$(frontmatter_get_field "$test_file" "empty_value")"
+    _tf_assert_equals "Get space-only quoted field" " " "$(frontmatter_get_field "$test_file" "space_value")"
+    _tf_assert_equals "Get nonexistent field" "" "$(frontmatter_get_field "$test_file" "nonexistent")"
     
     _tf_cleanup_temp "$test_file"
 }
@@ -146,15 +146,15 @@ EOF
     # Update existing field
     frontmatter_update_field "$test_file" "status" "published"
     
-    _tf_assert_equals "published" "$(frontmatter_get_field "$test_file" "status")" "Update existing field"
-    _tf_assert_equals "Original Name" "$(frontmatter_get_field "$test_file" "name")" "Other fields unchanged"
-    _tf_assert_equals "1.0.0" "$(frontmatter_get_field "$test_file" "version")" "Version field unchanged"
+    _tf_assert_equals "Update existing field" "published" "$(frontmatter_get_field "$test_file" "status")"
+    _tf_assert_equals "Other fields unchanged" "Original Name" "$(frontmatter_get_field "$test_file" "name")"
+    _tf_assert_equals "Version field unchanged" "1.0.0" "$(frontmatter_get_field "$test_file" "version")"
     
     # Verify content preserved  
     local content
     content=$(awk '/^---$/ {count++; if (count==2) print_rest=1; next} print_rest {print}' "$test_file")
     echo "$content" | grep -q "# Test Content"
-    _tf_assert_true $? "Content preserved after update"
+    _tf_assert_true "Content preserved after update" $?
     
     _tf_cleanup_temp "$test_file"
 }
@@ -175,8 +175,8 @@ EOF
     # Add new field
     frontmatter_update_field "$test_file" "author" "Test Author"
     
-    _tf_assert_equals "Test Author" "$(frontmatter_get_field "$test_file" "author")" "New field added"
-    _tf_assert_equals "Test Document" "$(frontmatter_get_field "$test_file" "name")" "Existing fields preserved"
+    _tf_assert_equals "New field added" "Test Author" "$(frontmatter_get_field "$test_file" "author")"
+    _tf_assert_equals "Existing fields preserved" "Test Document" "$(frontmatter_get_field "$test_file" "name")"
     
     _tf_cleanup_temp "$test_file"
 }
@@ -192,7 +192,7 @@ EOF
 
     # This should fail gracefully
     frontmatter_update_field "$test_file" "new_field" "value" 2>/dev/null
-    _tf_assert_false $? "Correctly fails when no frontmatter exists"
+    _tf_assert_false "Correctly fails when no frontmatter exists" $?
     
     _tf_cleanup_temp "$test_file"
 }
@@ -214,15 +214,15 @@ EOF
 
     # Test with all required fields present
     frontmatter_validate "$test_file" "name" "number" "status"
-    _tf_assert_true $? "Validation passes with all required fields present"
+    _tf_assert_true "Validation passes with all required fields present" $?
     
     # Test with missing required field
     frontmatter_validate "$test_file" "name" "missing_field" "status" 2>/dev/null
-    _tf_assert_false $? "Validation fails with missing required fields"
+    _tf_assert_false "Validation fails with missing required fields" $?
     
     # Test with no required fields
     frontmatter_validate "$test_file"
-    _tf_assert_true $? "Validation passes with no required fields"
+    _tf_assert_true "Validation passes with no required fields" $?
     
     _tf_cleanup_temp "$test_file"
 }
@@ -258,17 +258,17 @@ name: Test
 EOF
 
     frontmatter_has "$test_file_with"
-    _tf_assert_true $? "Correctly detects frontmatter presence"
+    _tf_assert_true "Correctly detects frontmatter presence" $?
     
     frontmatter_has "$test_file_without"
-    _tf_assert_false $? "Correctly detects frontmatter absence"
+    _tf_assert_false "Correctly detects frontmatter absence" $?
     
     frontmatter_has "$test_file_partial"
-    _tf_assert_false $? "Correctly rejects incomplete frontmatter"
+    _tf_assert_false "Correctly rejects incomplete frontmatter" $?
     
     # Test with nonexistent file
     frontmatter_has "/nonexistent/file.md"
-    _tf_assert_false $? "Correctly handles nonexistent file"
+    _tf_assert_false "Correctly handles nonexistent file" $?
     
     _tf_cleanup_temp "$test_file_with"
     _tf_cleanup_temp "$test_file_without"
@@ -299,22 +299,22 @@ config:
 EOF
 
     # Test basic field extraction still works
-    _tf_assert_equals "Complex Document" "$(frontmatter_get_field "$test_file" "name")" "Complex: basic field"
+    _tf_assert_equals "Complex: basic field" "Complex Document" "$(frontmatter_get_field "$test_file" "name")"
     
     # Test that we can extract simple array field (though parsing is basic)
     local depends_result
     depends_result=$(frontmatter_get_field "$test_file" "depends_on")
-    _tf_assert_equals "[]" "$depends_result" "Complex: empty array field"
+    _tf_assert_equals "Complex: empty array field" "[]" "$depends_result"
     
     # Update a field and verify structure is preserved
     frontmatter_update_field "$test_file" "name" "Updated Complex Document"
-    _tf_assert_equals "Updated Complex Document" "$(frontmatter_get_field "$test_file" "name")" "Complex: field updated"
+    _tf_assert_equals "Complex: field updated" "Updated Complex Document" "$(frontmatter_get_field "$test_file" "name")"
     
     # Verify complex structure is still present in raw frontmatter
     local raw_frontmatter
     raw_frontmatter=$(frontmatter_extract "$test_file")
     echo "$raw_frontmatter" | grep -q "author: John Doe"
-    _tf_assert_true $? "Complex: nested structure preserved"
+    _tf_assert_true "Complex: nested structure preserved" $?
     
     _tf_cleanup_temp "$test_file"
 }
@@ -325,20 +325,20 @@ test_error_handling_comprehensive() {
     
     # Test frontmatter_extract with nonexistent file
     frontmatter_extract "$nonexistent_file" 2>/dev/null
-    _tf_assert_false $? "frontmatter_extract fails for nonexistent file"
+    _tf_assert_false "frontmatter_extract fails for nonexistent file" $?
     
     # Test frontmatter_get_field with nonexistent file
     local result
     result=$(frontmatter_get_field "$nonexistent_file" "field" 2>/dev/null)
-    _tf_assert_equals "" "$result" "frontmatter_get_field returns empty for nonexistent file"
+    _tf_assert_equals "frontmatter_get_field returns empty for nonexistent file" "" "$result"
     
     # Test frontmatter_update_field with nonexistent file
     frontmatter_update_field "$nonexistent_file" "field" "value" 2>/dev/null
-    _tf_assert_false $? "frontmatter_update_field fails for nonexistent file"
+    _tf_assert_false "frontmatter_update_field fails for nonexistent file" $?
     
     # Test frontmatter_validate with nonexistent file
     frontmatter_validate "$nonexistent_file" "field" 2>/dev/null
-    _tf_assert_false $? "frontmatter_validate fails for nonexistent file"
+    _tf_assert_false "frontmatter_validate fails for nonexistent file" $?
 }
 
 # Test version library integration
@@ -361,23 +361,23 @@ EOF
     # Test version library can read our frontmatter
     local file_version
     file_version=$(version_get_file "$test_file")
-    _tf_assert_equals "1.2.3" "$file_version" "Version library reads file_version"
+    _tf_assert_equals "Version library reads file_version" "1.2.3" "$file_version"
     
     # Test setting version
     version_set_file "$test_file" "1.3.0"
     local updated_version
     updated_version=$(version_get_file "$test_file")
-    _tf_assert_equals "1.3.0" "$updated_version" "Version library updates file_version"
+    _tf_assert_equals "Version library updates file_version" "1.3.0" "$updated_version"
     
     # Test version bump functionality
     local bumped_version
     bumped_version=$(version_bump_file "$test_file" "patch")
-    _tf_assert_equals "1.3.1" "$bumped_version" "Version library bumps file_version"
+    _tf_assert_equals "Version library bumps file_version" "1.3.1" "$bumped_version"
     
     # Verify file content preserved through version operations
     local content
     content=$(frontmatter_get_field "$test_file" "name")
-    _tf_assert_equals "Version Test" "$content" "Content preserved through version operations"
+    _tf_assert_equals "Content preserved through version operations" "Version Test" "$content"
     
     _tf_cleanup_temp "$test_file"
 }
@@ -401,15 +401,15 @@ colon_in_value: "http://example.com:8080"
 EOF
 
     # Test field extraction handles extra whitespace correctly
-    _tf_assert_equals "Test With Spaces" "$(frontmatter_get_field "$test_file" "name")" "Whitespace: trim field value"
-    _tf_assert_equals "  Text with leading/trailing spaces  " "$(frontmatter_get_field "$test_file" "description")" "Whitespace: preserve quoted spaces"
-    _tf_assert_equals "" "$(frontmatter_get_field "$test_file" "empty_value")" "Whitespace: empty quoted value"
-    _tf_assert_equals " " "$(frontmatter_get_field "$test_file" "space_only")" "Whitespace: space-only quoted value"
-    _tf_assert_equals "http://example.com:8080" "$(frontmatter_get_field "$test_file" "colon_in_value")" "Special chars: colon in value"
+    _tf_assert_equals "Whitespace: trim field value" "Test With Spaces" "$(frontmatter_get_field "$test_file" "name")"
+    _tf_assert_equals "Whitespace: preserve quoted spaces" "  Text with leading/trailing spaces  " "$(frontmatter_get_field "$test_file" "description")"
+    _tf_assert_equals "Whitespace: empty quoted value" "" "$(frontmatter_get_field "$test_file" "empty_value")"
+    _tf_assert_equals "Whitespace: space-only quoted value" " " "$(frontmatter_get_field "$test_file" "space_only")"
+    _tf_assert_equals "Special chars: colon in value" "http://example.com:8080" "$(frontmatter_get_field "$test_file" "colon_in_value")"
     
     # Test updating preserves proper formatting
     frontmatter_update_field "$test_file" "name" "Updated Name"
-    _tf_assert_equals "Updated Name" "$(frontmatter_get_field "$test_file" "name")" "Whitespace: update works correctly"
+    _tf_assert_equals "Whitespace: update works correctly" "Updated Name" "$(frontmatter_get_field "$test_file" "name")"
     
     _tf_cleanup_temp "$test_file"
 }
@@ -436,19 +436,20 @@ test_large_frontmatter_performance() {
     result=$(frontmatter_get_field "$test_file" "field_50")
     end_time=$(date +%s%N)
     
-    _tf_assert_equals "value_50" "$result" "Performance: find field in large frontmatter"
+    _tf_assert_equals "Performance: find field in large frontmatter" "value_50" "$result"
     
     # Basic performance check (should take less than 1 second)
     local duration_ms=$(( (end_time - start_time) / 1000000 ))
     if [[ $duration_ms -lt 1000 ]]; then
-        _tf_assert_true 0 "Performance: operation completed in reasonable time (${duration_ms}ms)"
+        _tf_assert_true "Performance: operation completed in reasonable time (${duration_ms}ms)" 0
     else
-        _tf_assert_false 0 "Performance: operation took too long (${duration_ms}ms)"
+        _tf_assert_false "Performance: operation took too long (${duration_ms}ms)" 0
     fi
     
     _tf_cleanup_temp "$test_file"
 }
 
-# Run the comprehensive test suite
-echo "Running comprehensive frontmatter library tests..."
-_tf_run_test_file "$0"
+# Run tests if script executed directly
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    _tf_direct_execution_error
+fi

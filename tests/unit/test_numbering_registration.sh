@@ -52,7 +52,7 @@ test_epic_registration() {
     local epic_number
     epic_number="$(numbering_get_next "epic")"
     
-    _tf_assert_command_succeeds "numbering_register_epic '$epic_number' '.doh/epics/test-epic/epic.md' 'test-epic'" "Epic registration should succeed"
+    _tf_assert "Epic registration should succeed" numbering_register_epic "$epic_number" '.doh/epics/test-epic/epic.md' 'test-epic'
 }
 
 test_task_registration() {
@@ -63,7 +63,7 @@ test_task_registration() {
     
     numbering_register_epic "$epic_number" ".doh/epics/test-epic/epic.md" "test-epic"
     
-    _tf_assert_command_succeeds "numbering_register_task '$task_number' '$epic_number' '.doh/epics/test-epic/$task_number.md' 'test-task' 'test-epic'" "Task registration should succeed"
+    _tf_assert "Task registration should succeed" numbering_register_task "$task_number" "$epic_number" ".doh/epics/test-epic/$task_number.md" 'test-task' 'test-epic'
 }
 
 test_duplicate_number_rejection() {
@@ -75,7 +75,7 @@ test_duplicate_number_rejection() {
     numbering_register_epic "$epic_number" ".doh/epics/test-epic/epic.md" "test-epic"
     
     # Try to register duplicate
-    _tf_assert_command_fails "numbering_register_epic '$epic_number' '.doh/epics/duplicate/epic.md' 'duplicate'" "Should reject duplicate number"
+    _tf_assert_not "Should reject duplicate number" numbering_register_epic "$epic_number" '.doh/epics/duplicate/epic.md' 'duplicate'
 }
 
 test_numbering_find_by_number() {
@@ -88,7 +88,7 @@ test_numbering_find_by_number() {
     local found_epic
     found_epic="$(numbering_find_by_number "$epic_number")"
     
-    _tf_assert_contains "$found_epic" "test-epic" "Should find registered epic"
+    _tf_assert_contains "Should find registered epic" "$found_epic" "test-epic"
 }
 
 # Run tests if script executed directly

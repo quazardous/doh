@@ -441,3 +441,180 @@ frontmatter_bulk_update() {
     done
 }
 
+# @description Ensure a file has frontmatter, add minimal frontmatter with created timestamp if missing
+# @public
+# @arg $1 string Path to the markdown file (must exist)
+# @arg $2 string Optional created timestamp (ISO format), defaults to file creation time
+# @stdout No output on success
+# @stderr Error messages
+# @exitcode 0 If successful or frontmatter already exists
+# @exitcode 1 If file not found or error
+frontmatter_assert() {
+    local file="$1"
+    local created_date="${2:-}"
+    
+    if [[ ! -f "$file" ]]; then
+        echo "Error: File not found: $file" >&2
+        return 1
+    fi
+    
+    # Add minimal frontmatter if missing
+    if ! frontmatter_has "$file"; then
+        # Determine created timestamp
+        local created_timestamp
+        if [[ -n "$created_date" ]]; then
+            created_timestamp="$created_date"
+        else
+            # Use file creation time (birth time if available, otherwise modification time)
+            if stat -c %W "$file" &>/dev/null && [[ "$(stat -c %W "$file")" != "0" ]]; then
+                # Linux with birth time support
+                created_timestamp=$(date -d "@$(stat -c %W "$file")" -Iseconds)
+            elif stat -f %B "$file" &>/dev/null 2>&1; then
+                # macOS birth time
+                created_timestamp=$(date -r "$(stat -f %B "$file")" -Iseconds)
+            else
+                # Fallback to modification time
+                created_timestamp=$(date -r "$file" -Iseconds)
+            fi
+        fi
+        
+        # Create temporary file
+        local temp_file
+        temp_file=$(mktemp)
+        
+        # Add frontmatter at the beginning, then append original content
+        cat > "$temp_file" << EOF
+---
+created: $created_timestamp
+---
+EOF
+        echo >> "$temp_file"  # Add blank line after frontmatter
+        cat "$file" >> "$temp_file"  # Append original content
+        
+        # Replace original file with temporary file
+        mv "$temp_file" "$file"
+    fi
+}
+
+# @description Update multiple fields in frontmatter with intelligent auto-injection
+# @public
+# @arg $1 string Path to the markdown file (must exist, use touch to create)
+# @arg $... string Options and Field:value pairs
+# @option --auto-number Auto-generate number field if not provided
+# @stdout Complete frontmatter YAML content after updates
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If error
+frontmatter_update_many() {
+    local file="$1"
+    shift
+    
+    local auto_number=false
+    local field_pairs=()
+    
+    # Parse arguments for flags and field pairs
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --auto-number)
+                auto_number=true
+                shift
+                ;;
+            *)
+                field_pairs+=("$1")
+                shift
+                ;;
+        esac
+    done
+    
+    # Check if file exists
+    if [[ ! -f "$file" ]]; then
+        echo "Error: File not found: $file" >&2
+        return 1
+    fi
+    
+    # Check which auto-fields are already provided
+    local has_file_version=false
+    local has_created=false
+    local has_updated=false
+    local has_number=false
+    local created_for_assert=""
+    
+    for pair in "${field_pairs[@]}"; do
+        if [[ "$pair" =~ ^file_version: ]]; then
+            has_file_version=true
+        elif [[ "$pair" =~ ^created:(.*)$ ]]; then
+            has_created=true
+            created_for_assert="${BASH_REMATCH[1]}"
+        elif [[ "$pair" =~ ^updated: ]]; then
+            has_updated=true
+        elif [[ "$pair" =~ ^number: ]]; then
+            has_number=true
+        fi
+    done
+    
+    # Ensure file has frontmatter with created timestamp
+    if [[ "$has_created" == true ]]; then
+        frontmatter_assert "$file" "$created_for_assert"
+    else
+        frontmatter_assert "$file"
+    fi
+    
+    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    local api_script="$script_dir/../api.sh"
+    local current_timestamp=$(date -Iseconds)
+    
+    # Auto-inject file_version if not provided
+    if [[ "$has_file_version" == false ]] && [[ -x "$api_script" ]]; then
+        local current_version
+        current_version=$("$api_script" version get_current 2>/dev/null)
+        if [[ -n "$current_version" ]]; then
+            frontmatter_update_field "$file" "file_version" "$current_version"
+        fi
+    fi
+    
+    # Auto-inject created timestamp if not provided and field doesn't exist
+    if [[ "$has_created" == false ]]; then
+        local existing_created
+        existing_created=$(frontmatter_get_field "$file" "created")
+        if [[ -z "$existing_created" || "$existing_created" == "null" ]]; then
+            frontmatter_update_field "$file" "created" "$current_timestamp"
+        fi
+    fi
+    
+    # Auto-inject updated timestamp (always updated)
+    if [[ "$has_updated" == false ]]; then
+        frontmatter_update_field "$file" "updated" "$current_timestamp"
+    fi
+    
+    # Auto-inject number if requested and not provided
+    if [[ "$auto_number" == true ]] && [[ "$has_number" == false ]] && [[ -x "$api_script" ]]; then
+        local next_number
+        next_number=$("$api_script" numbering get_next "task" 2>/dev/null)
+        if [[ -n "$next_number" ]]; then
+            frontmatter_update_field "$file" "number" "$next_number"
+        fi
+    fi
+    
+    # Remove temporary placeholder if it exists (legacy cleanup)
+    local temp_value
+    temp_value=$(frontmatter_get_field "$file" "temp")
+    if [[ "$temp_value" == "placeholder" ]]; then
+        frontmatter_remove_field "$file" "temp"
+    fi
+    
+    # Process each field:value pair
+    for pair in "${field_pairs[@]}"; do
+        if [[ "$pair" =~ ^([^:]+):(.*)$ ]]; then
+            local field="${BASH_REMATCH[1]}"
+            local value="${BASH_REMATCH[2]}"
+            frontmatter_update_field "$file" "$field" "$value"
+        else
+            echo "Error: Invalid field:value format: $pair" >&2
+            return 1
+        fi
+    done
+    
+    # Output the complete frontmatter on stdout
+    frontmatter_extract "$file"
+}
+

@@ -115,8 +115,8 @@ test_version_get_current() {
     version=$(version_get_current)
     local exit_code=$?
     
-    _tf_assert_equals 0 $exit_code "version_get_current should succeed"
-    _tf_assert_equals "0.1.0" "$version" "Current version should be 0.1.0"
+    _tf_assert_equals "version_get_current should succeed" 0 $exit_code
+    _tf_assert_equals "Current version should be 0.1.0" "0.1.0" "$version"
     
     cd - > /dev/null
 }
@@ -125,21 +125,21 @@ test_increment_version_patch() {
     local result
     result=$(version_increment "0.1.0" "patch")
     
-    _tf_assert_equals "0.1.1" "$result" "Patch increment should work"
+    _tf_assert_equals "Patch increment should work" "0.1.1" "$result"
 }
 
 test_increment_version_minor() {
     local result
     result=$(version_increment "0.1.0" "minor")
     
-    _tf_assert_equals "0.2.0" "$result" "Minor increment should work"
+    _tf_assert_equals "Minor increment should work" "0.2.0" "$result"
 }
 
 test_increment_version_major() {
     local result
     result=$(version_increment "0.1.0" "major")
     
-    _tf_assert_equals "1.0.0" "$result" "Major increment should work"
+    _tf_assert_equals "Major increment should work" "1.0.0" "$result"
 }
 
 test_increment_version_invalid() {
@@ -147,7 +147,7 @@ test_increment_version_invalid() {
     result=$(version_increment "0.1.0" "invalid" 2>/dev/null)
     local exit_code=$?
     
-    _tf_assert_equals 1 $exit_code "Invalid increment level should fail"
+    _tf_assert_equals "Invalid increment level should fail" 1 $exit_code
 }
 
 test_version_set_current() {
@@ -156,11 +156,11 @@ test_version_set_current() {
     version_set_current "0.2.0" > /dev/null
     local exit_code=$?
     
-    _tf_assert_equals 0 $exit_code "version_set_current should succeed"
+    _tf_assert_equals "version_set_current should succeed" 0 $exit_code
     
     local new_version
     new_version=$(cat VERSION)
-    _tf_assert_equals "0.2.0" "$new_version" "VERSION file should be updated"
+    _tf_assert_equals "VERSION file should be updated" "0.2.0" "$new_version"
     
     cd - > /dev/null
 }
@@ -172,12 +172,12 @@ test_version_bump_current() {
     new_version=$(version_bump_current "patch")
     local exit_code=$?
     
-    _tf_assert_equals 0 $exit_code "version_bump_current should succeed"
-    _tf_assert_equals "0.1.1" "$new_version" "New version should be 0.1.1"
+    _tf_assert_equals "version_bump_current should succeed" 0 $exit_code
+    _tf_assert_equals "New version should be 0.1.1" "0.1.1" "$new_version"
     
     local file_version
     file_version=$(cat VERSION)
-    _tf_assert_equals "0.1.1" "$file_version" "VERSION file should contain new version"
+    _tf_assert_equals "VERSION file should contain new version" "0.1.1" "$file_version"
     
     cd - > /dev/null
 }
@@ -189,8 +189,8 @@ test_get_file_version() {
     version=$(version_get_file ".doh/test.md")
     local exit_code=$?
     
-    _tf_assert_equals 0 $exit_code "version_get_file should succeed"
-    _tf_assert_equals "0.1.0" "$version" "File version should be 0.1.0"
+    _tf_assert_equals "version_get_file should succeed" 0 $exit_code
+    _tf_assert_equals "File version should be 0.1.0" "0.1.0" "$version"
     
     cd - > /dev/null
 }
@@ -201,11 +201,11 @@ test_set_file_version() {
     version_set_file ".doh/test.md" "0.2.0" > /dev/null
     local exit_code=$?
     
-    _tf_assert_equals 0 $exit_code "version_set_file should succeed"
+    _tf_assert_equals "version_set_file should succeed" 0 $exit_code
     
     local new_version
     new_version=$(version_get_file ".doh/test.md")
-    _tf_assert_equals "0.2.0" "$new_version" "File version should be updated to 0.2.0"
+    _tf_assert_equals "File version should be updated to 0.2.0" "0.2.0" "$new_version"
     
     cd - > /dev/null
 }
@@ -217,43 +217,43 @@ test_bump_file_version() {
     new_version=$(version_bump_file ".doh/another.md" "minor")
     local exit_code=$?
     
-    _tf_assert_equals 0 $exit_code "version_bump_file should succeed"
-    _tf_assert_equals "0.2.0" "$new_version" "New file version should be 0.2.0"
+    _tf_assert_equals "version_bump_file should succeed" 0 $exit_code
+    _tf_assert_equals "New file version should be 0.2.0" "0.2.0" "$new_version"
     
     local file_version
     file_version=$(version_get_file ".doh/another.md")
-    _tf_assert_equals "0.2.0" "$file_version" "File should contain new version"
+    _tf_assert_equals "File should contain new version" "0.2.0" "$file_version"
     
     cd - > /dev/null
 }
 
 test_validate_version() {
     version_validate "1.0.0"
-    _tf_assert_equals 0 $? "1.0.0"
+    _tf_assert_equals "1.0.0" 0 $?
     version_validate "0.1.0"
-    _tf_assert_equals 0 $? "0.1.0"
+    _tf_assert_equals "0.1.0" 0 $?
     version_validate "10.20.30"
-    _tf_assert_equals 0 $? "10.20.30"
+    _tf_assert_equals "10.20.30" 0 $?
     version_validate "1.0.0-alpha"
-    _tf_assert_equals 0 $? "1.0.0-alpha"
+    _tf_assert_equals "1.0.0-alpha" 0 $?
     version_validate "1.0.0+build.1"
-    _tf_assert_equals 0 $? "1.0.0+build.1"
+    _tf_assert_equals "1.0.0+build.1" 0 $?
     
-    _tf_assert_command_fails version_validate "1.0" "Invalid semver should fail"
-    _tf_assert_command_fails version_validate "v1.0.0" "Version with prefix should fail"
-    _tf_assert_command_fails version_validate "1.0.0.0" "Four-part version should fail"
-    _tf_assert_command_fails version_validate "" "Empty version should fail"
+    _tf_assert_not "Invalid semver should fail" version_validate "1.0"
+    _tf_assert_not "Version with prefix should fail" version_validate "v1.0.0"
+    _tf_assert_not "Four-part version should fail" version_validate "1.0.0.0"
+    _tf_assert_not "Empty version should fail" version_validate ""
 }
 
 test_compare_versions() {
     version_compare "1.0.0" "1.0.0"
-    _tf_assert_equals 0 $? "1.0.0"
+    _tf_assert_equals "1.0.0" 0 $?
     
     version_compare "2.0.0" "1.0.0"
-    _tf_assert_equals 1 $? "Greater version should return 1"
+    _tf_assert_equals "Greater version should return 1" 1 $?
     
     version_compare "1.0.0" "2.0.0"
-    _tf_assert_equals 2 $? "Lesser version should return 2"
+    _tf_assert_equals "Lesser version should return 2" 2 $?
 }
 
 test_find_files_missing_version() {
@@ -281,11 +281,11 @@ EOF
     
     # Should find the file with frontmatter but no version
     echo "$missing_files" | grep -q "no_version.md"
-    _tf_assert_equals 0 $? "Should find files missing version field"
+    _tf_assert_equals "Should find files missing version field" 0 $?
     
     # Should not find files without frontmatter
     echo "$missing_files" | grep -q "no_frontmatter.md"
-    _tf_assert_equals 1 $? "Should not find files without frontmatter"
+    _tf_assert_equals "Should not find files without frontmatter" 1 $?
     
     cd - > /dev/null
 }
@@ -299,17 +299,17 @@ test_version_bump_workflow() {
     # Initial state check
     local initial_version
     initial_version=$(version_get_current)
-    _tf_assert_equals "0.1.0" "$initial_version" "Initial version should be 0.1.0"
+    _tf_assert_equals "Initial version should be 0.1.0" "0.1.0" "$initial_version"
     
     # Bump project version
     local new_version
     new_version=$(version_bump_current "patch")
-    _tf_assert_equals "0.1.1" "$new_version" "Should bump to 0.1.1"
+    _tf_assert_equals "Should bump to 0.1.1" "0.1.1" "$new_version"
     
     # Verify VERSION file is updated
     local file_content
     file_content=$(cat VERSION)
-    _tf_assert_equals "0.1.1" "$file_content" "VERSION file should contain new version"
+    _tf_assert_equals "VERSION file should contain new version" "0.1.1" "$file_content"
     
     # Update file versions to match
     version_set_file ".doh/test.md" "$new_version" > /dev/null
@@ -318,14 +318,16 @@ test_version_bump_workflow() {
     # Verify file versions are updated
     local test_file_version
     test_file_version=$(version_get_file ".doh/test.md")
-    _tf_assert_equals "$new_version" "$test_file_version" "Test file version should be updated"
+    _tf_assert_equals "Test file version should be updated" "$new_version" "$test_file_version"
     
     local another_file_version
     another_file_version=$(version_get_file ".doh/another.md")
-    _tf_assert_equals "$new_version" "$another_file_version" "Another file version should be updated"
+    _tf_assert_equals "Another file version should be updated" "$new_version" "$another_file_version"
     
     cd - > /dev/null
 }
 
-# Run all tests
-_tf_run_tests
+# Run tests if script executed directly
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    _tf_direct_execution_error
+fi

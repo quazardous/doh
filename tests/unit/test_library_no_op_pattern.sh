@@ -40,7 +40,7 @@ test_libraries_are_no_op() {
         fi
     done
     
-    _tf_assert_equals "${#failed_libs[@]}" "0" "All $lib_count libraries should be no-op when sourced. Failed: ${failed_libs[*]}"
+    _tf_assert_equals "All $lib_count libraries should be no-op when sourced. Failed: ${failed_libs[*]}" "0" "${#failed_libs[@]}"
 }
 
 # Test that all libraries have proper source guards
@@ -56,39 +56,39 @@ test_libraries_have_source_guards() {
         fi
     done
     
-    _tf_assert_equals "${#missing_guards[@]}" "0" "All libraries should have source guards. Missing: ${missing_guards[*]}"
+    _tf_assert_equals "All libraries should have source guards. Missing: ${missing_guards[*]}" "0" "${#missing_guards[@]}"
 }
 
 # Test core library doh.sh has no dependencies
 test_doh_core_has_no_dependencies() {
     local doh_lib="$TEST_LIB_DIR/doh.sh"
     
-    _tf_assert_file_exists "$doh_lib" "doh.sh should exist"
+    _tf_assert_file_exists "doh.sh should exist" "$doh_lib"
     
     # Check that doh.sh doesn't source any other DOH libraries
     local source_lines
     source_lines=$(grep "^source.*\.sh" "$doh_lib" 2>/dev/null | wc -l)
     
-    _tf_assert_equals "$source_lines" "0" "doh.sh should have zero dependencies (foundational library)"
+    _tf_assert_equals "doh.sh should have zero dependencies (foundational library)" "0" "$source_lines"
 }
 
 # Test that dohenv.sh properly sources doh.sh
 test_dohenv_sources_doh() {
     local dohenv_lib="$TEST_LIB_DIR/dohenv.sh"
     
-    _tf_assert_file_exists "$dohenv_lib" "dohenv.sh should exist"
-    _tf_assert_file_contains "$dohenv_lib" 'source.*doh\.sh' "dohenv.sh should source doh.sh"
+    _tf_assert_file_exists "dohenv.sh should exist" "$dohenv_lib"
+    _tf_assert_file_contains "dohenv.sh should source doh.sh" "$dohenv_lib" 'source.*doh\.sh'
 }
 
 # Test that libraries only source dependencies they actually use
 test_libraries_have_minimal_dependencies() {
     # queue.sh should source doh.sh (uses doh_global_dir)
-    _tf_assert_file_contains "$TEST_LIB_DIR/queue.sh" 'source.*doh\.sh' "queue.sh should source doh.sh (uses doh_global_dir)"
+    _tf_assert_file_contains "queue.sh should source doh.sh (uses doh_global_dir)" "$TEST_LIB_DIR/queue.sh" 'source.*doh\.sh'
     
     # frontmatter.sh should have minimal dependencies (standalone)
     local fm_deps
     fm_deps=$(grep "^source.*\.sh" "$TEST_LIB_DIR/frontmatter.sh" 2>/dev/null | wc -l)
-    _tf_assert_equals "$fm_deps" "0" "frontmatter.sh should be standalone (zero dependencies)"
+    _tf_assert_equals "frontmatter.sh should be standalone (zero dependencies)" "0" "$fm_deps"
 }
 
 # Test that all libraries can be sourced in isolation  
@@ -104,7 +104,7 @@ test_libraries_can_source_independently() {
         fi
     done
     
-    _tf_assert_equals "${#failed_libs[@]}" "0" "All libraries should source independently. Failed: ${failed_libs[*]}"
+    _tf_assert_equals "All libraries should source independently. Failed: ${failed_libs[*]}" "0" "${#failed_libs[@]}"
 }
 
 # Test core functions work after sourcing doh.sh
@@ -129,10 +129,10 @@ test_doh_core_functions_work() {
         echo 'success'
     " 2>/dev/null)
     
-    _tf_assert_equals "$test_result" "success" "doh.sh core functions should work correctly"
+    _tf_assert_equals "doh.sh core functions should work correctly" "success" "$test_result"
 }
 
 # Main test execution
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    _tf_run_tests
+    _tf_direct_execution_error
 fi

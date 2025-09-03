@@ -52,7 +52,7 @@ test_first_epic_number_generation() {
     local first_epic
     first_epic="$(numbering_get_next "epic")"
     
-    _tf_assert_equals "001" "$first_epic" "First epic number should be 001"
+    _tf_assert_equals "First epic number should be 001" "001" "$first_epic"
 }
 
 test_first_task_number_generation() {
@@ -64,7 +64,7 @@ test_first_task_number_generation() {
     local first_task
     first_task="$(numbering_get_next "task")"
     
-    _tf_assert_equals "002" "$first_task" "First task number should be 002"
+    _tf_assert_equals "First task number should be 002" "002" "$first_task"
 }
 
 test_sequential_number_generation() {
@@ -77,11 +77,11 @@ test_sequential_number_generation() {
     local third_number
     third_number="$(numbering_get_next "epic")"
     
-    _tf_assert_equals "003" "$third_number" "Sequential number should be 003"
+    _tf_assert_equals "Sequential number should be 003" "003" "$third_number"
 }
 
 test_invalid_type_rejection() {
-    _tf_assert_command_fails "numbering_get_next 'invalid'" "Should reject invalid type"
+    _tf_assert_not "Should reject invalid type" numbering_get_next 'invalid'
 }
 
 # Concurrent Access Simulation Tests
@@ -98,8 +98,10 @@ test_sequential_number_generation_under_load() {
     local expected_sequence="001 002 003 004 005"
     local actual_sequence="${numbers[*]}"
     
-    _tf_assert_equals "$expected_sequence" "$actual_sequence" "Numbers should be properly sequential: 001 002 003 004 005"
+    _tf_assert_equals "Numbers should be properly sequential: 001 002 003 004 005" "$expected_sequence" "$actual_sequence"
 }
 
-# Run the tests
-_tf_run_all_tests
+# Run tests if script executed directly
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    _tf_direct_execution_error
+fi

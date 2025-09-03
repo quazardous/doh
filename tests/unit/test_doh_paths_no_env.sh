@@ -50,21 +50,21 @@ test_doh_project_dir_equals_root_plus_doh() {
     echo "DEBUG: doh_project_dir() = '$project_dir' (exit: $dir_exit)"
     echo "DEBUG: Expected doh_project_dir = '$project_root/.doh'"
     
-    _tf_assert_equals "$root_exit" "0" "doh_project_root should succeed"
-    _tf_assert_equals "$dir_exit" "0" "doh_project_dir should succeed"
+    _tf_assert_equals "doh_project_root should succeed" "0" "$root_exit"
+    _tf_assert_equals "doh_project_dir should succeed" "0" "$dir_exit"
     
     # Verify doh_project_dir = doh_project_root/.doh
     local expected_dir="$project_root/.doh"
-    _tf_assert_equals "$project_dir" "$expected_dir" "doh_project_dir should equal doh_project_root/.doh"
+    _tf_assert_equals "doh_project_dir should equal doh_project_root/.doh" "$expected_dir" "$project_dir"
 }
 
 # Test that DOH env vars are actually unset
 test_doh_env_vars_unset() {
-    _tf_assert_equals "${DOH_PROJECT_DIR:-unset}" "unset" "DOH_PROJECT_DIR should be unset"
-    _tf_assert_equals "${DOH_GLOBAL_DIR:-unset}" "unset" "DOH_GLOBAL_DIR should be unset"
-    _tf_assert_equals "${DOH_TEST_CLEANUP_DIR:-unset}" "unset" "DOH_TEST_CLEANUP_DIR should be unset"
+    _tf_assert_equals "DOH_PROJECT_DIR should be unset" "unset" "${DOH_PROJECT_DIR:-unset}"
+    _tf_assert_equals "DOH_GLOBAL_DIR should be unset" "unset" "${DOH_GLOBAL_DIR:-unset}"
+    _tf_assert_equals "DOH_TEST_CLEANUP_DIR should be unset" "unset" "${DOH_TEST_CLEANUP_DIR:-unset}"
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    _tf_run_tests
+    _tf_direct_execution_error
 fi
