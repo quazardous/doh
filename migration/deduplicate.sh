@@ -5,6 +5,7 @@
 
 # Source required dependencies
 LIB_DIR="$(dirname "$0")/../.claude/scripts/doh/lib"
+source "$LIB_DIR/workspace.sh"
 source "$LIB_DIR/dohenv.sh"
 source "$LIB_DIR/numbering.sh"
 source "$LIB_DIR/graph-cache.sh"
@@ -30,7 +31,7 @@ create_migration_backup() {
     project_root="$(_find_doh_root)" || return 1
     
     local project_id timestamp
-    project_id="$(get_current_project_id)" || return 1
+    project_id="$(workspace_get_current_project_id)" || return 1
     timestamp=$(date +"%Y%m%d_%H%M%S")
     
     local backup_dir="$HOME/.doh/projects/$project_id/backups/migration_$timestamp"
@@ -397,7 +398,7 @@ generate_migration_report() {
     local queue_name="$2"
     
     local project_id timestamp
-    project_id="$(get_current_project_id)" || return 1
+    project_id="$(workspace_get_current_project_id)" || return 1
     timestamp=$(date +"%Y%m%d_%H%M%S")
     
     local report_file="$HOME/.doh/projects/$project_id/migration_report_$timestamp.json"

@@ -15,7 +15,7 @@ Convert PRD to technical implementation epic.
 
 **IMPORTANT:** Before executing this command, read and follow:
 - `.claude/rules/datetime.md` - For getting real current date/time
-- Source the numbering library: `source .claude/scripts/doh/lib/dohenv.sh && source .claude/scripts/doh/lib/workspace.sh && source .claude/scripts/doh/lib/numbering.sh`
+- Use DOH API for numbering operations: `./.claude/scripts/doh/api.sh numbering get_next "epic"`
 
 ## Preflight Checklist
 
@@ -69,7 +69,7 @@ Create the epic file at: `.doh/epics/$ARGUMENTS/epic.md` with this exact structu
 ```markdown
 ---
 name: $ARGUMENTS
-number: $(get_next_number "epic")
+number: $(./.claude/scripts/doh/api.sh numbering get_next "epic")
 status: backlog
 created: [Current ISO date/time]
 progress: 0%
@@ -157,7 +157,7 @@ Before saving the epic, verify:
 ### 7. Post-Creation
 
 After successfully creating the epic:
-1. Register the epic in the numbering system: `register_epic "$(cat .doh/epics/$ARGUMENTS/epic.md | grep '^number:' | cut -d':' -f2 | xargs)" ".doh/epics/$ARGUMENTS/epic.md" "$ARGUMENTS"`
+1. Register the epic in the numbering system: `./.claude/scripts/doh/api.sh numbering register_epic "$(./.claude/scripts/doh/api.sh frontmatter get_field ".doh/epics/$ARGUMENTS/epic.md" "number")" ".doh/epics/$ARGUMENTS/epic.md" "$ARGUMENTS"`
 2. Confirm: "✅ Epic created: .doh/epics/$ARGUMENTS/epic.md"
 3. Show summary of:
    - Number of task categories identified

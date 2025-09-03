@@ -91,9 +91,7 @@ DOH_TAG_BUMP=false
 
 ```bash
 #!/bin/bash
-source "$(dirname "$0")/../../scripts/doh/lib/version.sh"
-source "$(dirname "$0")/../../scripts/doh/lib/frontmatter.sh"
-source "$(dirname "$0")/../../scripts/doh/lib/dohenv.sh"
+# Use DOH API instead of direct library sourcing
 
 # Parse arguments
 level=""
@@ -206,7 +204,7 @@ doh_root="$(_find_doh_root)" || {
 }
 
 # Get current version
-current_version=$(get_current_version) || {
+current_version=$(./.claude/scripts/doh/api.sh version get_current) || {
     echo "Error: Could not determine current version" >&2
     exit 1
 }
@@ -263,10 +261,10 @@ if [[ "$dry_run" == true ]]; then
     
     if [[ "$no_files" == false ]]; then
         echo "  2. Update file_version in DOH files:"
-        find_files_missing_version . | head -5 | while read -r file; do
+        ./.claude/scripts/doh/api.sh version find_files_without_file_version | head -5 | while read -r file; do
             echo "     - $file"
         done
-        file_count=$(find_files_missing_version . | wc -l)
+        file_count=$(./.claude/scripts/doh/api.sh version find_files_without_file_version | wc -l)
         if [[ $file_count -gt 5 ]]; then
             echo "     ... and $((file_count - 5)) more files"
         fi
@@ -315,11 +313,11 @@ if [[ "$no_files" == false ]]; then
     
     if [[ -n "$doh_files" ]]; then
         while IFS= read -r file; do
-            if has_frontmatter "$file"; then
-                current_file_version=$(get_frontmatter_field "$file" "file_version")
+            if ./.claude/scripts/doh/api.sh frontmatter has "$file"; then
+                current_file_version=$(./.claude/scripts/doh/api.sh frontmatter get_field "$file" "file_version")
                 # Only update if file has a version field or if it's missing
                 if [[ -n "$current_file_version" ]] || [[ -z "$current_file_version" ]]; then
-                    if set_file_version "$file" "$new_version" 2>/dev/null; then
+                    if ./.claude/scripts/doh/api.sh version set_file "$file" "$new_version" 2>/dev/null; then
                         updated_files+=("$file")
                         echo "  ✅ Updated: $(basename "$file")"
                     fi

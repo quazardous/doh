@@ -51,8 +51,10 @@ echo ""
 
 # Workspace State
 echo "📋 Workspace State:"
-load_workspace_state | grep -E "^(mode|current_epic|current_branch|current_worktree|agent_count):" | while IFS=': ' read -r key value; do
-  echo "  $key: $value"
+# Get workspace state fields using DOH API
+for field in mode current_epic current_branch current_worktree agent_count; do
+  value=$(./.claude/scripts/doh/api.sh workspace get_field "$field")
+  echo "  $field: $value"
 done
 echo ""
 

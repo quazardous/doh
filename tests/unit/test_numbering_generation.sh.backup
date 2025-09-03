@@ -19,8 +19,8 @@ _tf_setup() {
     local project_name="test_project_$(basename "$DOH_PROJECT_DIR")"
     export TEST_PROJECT_NAME="$project_name"
     
-    # Override workspace_get_current_project_id for testing
-    workspace_get_current_project_id() {
+    # Override get_current_project_id for testing
+    get_current_project_id() {
         echo "$TEST_PROJECT_NAME"
     }
 }
@@ -28,26 +28,11 @@ _tf_setup() {
 _tf_teardown() {
     # Cleanup test environment
     unset TEST_PROJECT_NAME
-    unset -f workspace_get_current_project_id
-}
-
-# Helper to reset numbering sequence and registry
-_tf_reset_numbering() {
-    local taskseq_file="$(_numbering_get_taskseq_path)"
-    if [[ -f "$taskseq_file" ]]; then
-        echo "0" > "$taskseq_file"
-    fi
-    
-    # Also reset the registry
-    local registry_file="$(_numbering_get_registry_path)"
-    if [[ -f "$registry_file" ]]; then
-        rm -f "$registry_file"
-    fi
+    unset -f get_current_project_id
 }
 
 # Number Generation Tests
 test_first_epic_number_generation() {
-    _tf_reset_numbering
     _numbering_ensure_registry
     local first_epic
     first_epic="$(numbering_get_next "epic")"
@@ -56,11 +41,7 @@ test_first_epic_number_generation() {
 }
 
 test_first_task_number_generation() {
-    _tf_reset_numbering
-    _numbering_ensure_registry
-    # Generate first number to get to sequence 1
-    numbering_get_next "epic" >/dev/null  # 001
-    # Now the task should get 002
+    # Previous test already generated 001, so next should be 002
     local first_task
     first_task="$(numbering_get_next "task")"
     
@@ -68,12 +49,7 @@ test_first_task_number_generation() {
 }
 
 test_sequential_number_generation() {
-    _tf_reset_numbering
-    _numbering_ensure_registry
-    # Generate two numbers to get to sequence 2
-    numbering_get_next "epic" >/dev/null  # 001
-    numbering_get_next "task" >/dev/null  # 002
-    # Now next should be 003
+    # Previous tests generated 001 and 002, so next should be 003
     local third_number
     third_number="$(numbering_get_next "epic")"
     
@@ -86,20 +62,36 @@ test_invalid_type_rejection() {
 
 # Concurrent Access Simulation Tests
 test_sequential_number_generation_under_load() {
-    _tf_reset_numbering
-    _numbering_ensure_registry
-    
     local numbers=()
-    # Generate first 5 numbers and verify they are sequential
+    local start_seq
+    start_seq="$(numbering_get_current)"
+    
+    # Generate multiple numbers quickly
     for i in {1..5}; do
-        numbers+=("$(numbering_get_next "epic")")
+        local num
+        num="$(numbering_get_next "task")"
+        numbers+=("$num")
     done
     
-    local expected_sequence="001 002 003 004 005"
-    local actual_sequence="${numbers[*]}"
+    # Check all numbers are unique and sequential
+    local prev_num=$start_seq
+    local all_unique=1
     
-    _tf_assert_equals "$expected_sequence" "$actual_sequence" "Numbers should be properly sequential: 001 002 003 004 005"
+    for num in "${numbers[@]}"; do
+        local num_val
+        num_val=$((10#$num))  # Force base 10 interpretation
+        
+        if [[ $num_val -le $prev_num ]]; then
+            all_unique=0
+            break
+        fi
+        prev_num=$num_val
+    done
+    
+    _tf_assert_equals "1" "$all_unique" "Numbers should be properly sequential: ${numbers[*]}"
 }
 
-# Run the tests
-_tf_run_all_tests
+# Run tests if script executed directly
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    _tf_direct_execution_error
+fi

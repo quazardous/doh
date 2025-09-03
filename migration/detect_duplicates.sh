@@ -5,6 +5,7 @@
 
 # Source required dependencies
 LIB_DIR="$(dirname "$0")/../.claude/scripts/doh/lib"
+source "$LIB_DIR/workspace.sh"
 source "$LIB_DIR/dohenv.sh"
 source "$LIB_DIR/numbering.sh"
 source "$LIB_DIR/graph-cache.sh"
@@ -368,7 +369,7 @@ save_conflict_report() {
     
     if [[ -z "$output_file" ]]; then
         local project_id
-        project_id="$(get_current_project_id)" || return 1
+        project_id="$(workspace_get_current_project_id)" || return 1
         
         local timestamp
         timestamp=$(date +"%Y%m%d_%H%M%S")

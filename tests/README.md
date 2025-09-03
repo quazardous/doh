@@ -325,9 +325,13 @@ The `test_launcher.sh` automatically sets up environment variables for isolated 
 - **`DOH_GLOBAL_DIR`**: Points to a temporary global directory for DOH workspace data, ensuring tests don't interfere with real workspace configurations and caches
 - **`_TF_LAUNCHER_EXECUTION`**: Flag indicating the test is running through the launcher (used by tests to adjust paths and behavior)
 
+**Isolation Granularity**: These variables are set **once per test file**, not per test function. All test functions within a single test file share the same isolated environment.
+
 These variables ensure complete test isolation:
 - **DOH_PROJECT_DIR**: Isolates versioned project data (PRDs, epics, tasks, config)
 - **DOH_GLOBAL_DIR**: Isolates non-versioned workspace data (caches, logs, user settings)
+- **Between test files**: Complete isolation with separate temp directories
+- **Within test file**: Shared environment allows state accumulation across test functions
 
 When writing tests that use DOH API functions, you don't need to manually set these variables - the launcher handles this automatically:
 
@@ -341,6 +345,56 @@ test_version_operations() {
     _tf_assert_equals "1.0.0" "$result" "Version should be updated in test environment"
 }
 ```
+
+### Test Isolation Granularity
+
+**Important:** Test isolation operates at the **test file level**, not per test function.
+
+- **Per test file**: Each test file gets its own isolated temporary directories (`DOH_GLOBAL_DIR`, `DOH_PROJECT_DIR`)
+- **Shared within file**: All test functions within a single test file share the same temporary directories and state
+
+This means:
+```bash
+# File: test_example.sh
+test_first_operation() {
+    # Creates state: sequence = 1
+    local result=$(numbering_get_next "epic")  # Gets 001
+}
+
+test_second_operation() {
+    # Continues from previous state: sequence = 1
+    local result=$(numbering_get_next "task")  # Gets 002, NOT 001
+}
+```
+
+**For independent test functions**, use a reset helper:
+```bash
+# Helper to reset shared state between test functions
+_tf_reset_state() {
+    # Reset numbering sequence
+    local taskseq_file="$(_numbering_get_taskseq_path)"
+    [[ -f "$taskseq_file" ]] && echo "0" > "$taskseq_file"
+    
+    # Reset registry  
+    local registry_file="$(_numbering_get_registry_path)"
+    [[ -f "$registry_file" ]] && rm -f "$registry_file"
+}
+
+test_first_operation() {
+    _tf_reset_state  # Start fresh
+    local result=$(numbering_get_next "epic")  # Always gets 001
+}
+
+test_second_operation() {
+    _tf_reset_state  # Start fresh  
+    local result=$(numbering_get_next "epic")  # Also gets 001
+}
+```
+
+This granularity:
+- **Prevents pollution** between test files 
+- **Allows state accumulation** within a test file when needed
+- **Enables predictable test function behavior** with reset helpers
 
 ### DOH Project Setup Helper
 

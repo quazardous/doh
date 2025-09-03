@@ -35,43 +35,30 @@ Launch parallel agents to work on epic tasks in a shared branch.
 
 ## Instructions
 
-### 1. Create or Enter Branch
-
-Follow `/rules/branch-operations.md`:
+### 1. Validate Prerequisites and Create Branch
 
 ```bash
-# Check for uncommitted changes
-if [ -n "$(git status --porcelain)" ]; then
-  echo "❌ You have uncommitted changes. Please commit or stash them before starting an epic."
+# Validate epic prerequisites (checks epic exists, GitHub sync, uncommitted changes)
+./.claude/scripts/doh/helper.sh epic validate_prerequisites $ARGUMENTS || exit 1
+
+# Create or switch to epic branch with proper git operations
+./.claude/scripts/doh/helper.sh epic create_or_enter_branch $ARGUMENTS || exit 1
+```
+
+### 2. Identify Ready Tasks
+
+```bash
+# Identify ready tasks using dependency analysis
+ready_tasks=$(./.claude/scripts/doh/helper.sh epic identify_ready_tasks $ARGUMENTS)
+
+if [[ $? -ne 0 ]]; then
+  echo "⚠️ No ready tasks found. Review task dependencies and status."
   exit 1
 fi
 
-# If branch doesn't exist, create it
-if ! git branch -a | grep -q "epic/$ARGUMENTS"; then
-  git checkout main
-  git pull origin main
-  git checkout -b epic/$ARGUMENTS
-  git push -u origin epic/$ARGUMENTS
-  echo "✅ Created branch: epic/$ARGUMENTS"
-else
-  git checkout epic/$ARGUMENTS
-  git pull origin epic/$ARGUMENTS
-  echo "✅ Using existing branch: epic/$ARGUMENTS"
-fi
+echo "Ready tasks identified for parallel execution:"
+echo "$ready_tasks"
 ```
-
-### 2. Identify Ready Issues
-
-Read all task files in `.doh/epics/$ARGUMENTS/`:
-- Parse frontmatter for `status`, `depends_on`, `parallel` fields
-- Check GitHub issue status if needed
-- Build dependency graph
-
-Categorize issues:
-- **Ready**: No unmet dependencies, not started
-- **Blocked**: Has unmet dependencies
-- **In Progress**: Already being worked on
-- **Complete**: Finished
 
 ### 3. Analyze Ready Issues
 

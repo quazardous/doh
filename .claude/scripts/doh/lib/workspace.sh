@@ -5,7 +5,6 @@
 
 # Source core library dependencies
 source "$(dirname "${BASH_SOURCE[0]}")/doh.sh"
-source "$(dirname "${BASH_SOURCE[0]}")/dohenv.sh"
 
 # Guard against multiple sourcing
 [[ -n "${DOH_LIB_WORKSPACE_LOADED:-}" ]] && return 0
@@ -33,7 +32,7 @@ workspace_get_current_project_id() {
 # @exitcode 0 If successful
 # @exitcode 1 If unable to determine project ID or create directory
 ensure_project_state_dir() {
-    local project_id="${1:-$(get_current_project_id)}"
+    local project_id="${1:-$(workspace_get_current_project_id)}"
     
     if [[ -z "$project_id" ]]; then
         echo "Error: Could not determine project ID" >&2
@@ -56,7 +55,7 @@ ensure_project_state_dir() {
 # @exitcode 0 If successful
 # @exitcode 1 If project ID or path missing
 register_project_mapping() {
-    local project_id="${1:-$(get_current_project_id)}"
+    local project_id="${1:-$(workspace_get_current_project_id)}"
     local project_path="${2:-$(_find_doh_root)}"
     
     if [[ -z "$project_id" || -z "$project_path" ]]; then
@@ -110,7 +109,7 @@ detect_workspace_mode() {
 # @exitcode 0 If successful
 # @exitcode 1 If unable to ensure project state directory
 get_workspace_state_file() {
-    local project_id="${1:-$(get_current_project_id)}"
+    local project_id="${1:-$(workspace_get_current_project_id)}"
     local state_dir
     
     state_dir="$(ensure_project_state_dir "$project_id")" || return 1
@@ -123,7 +122,7 @@ get_workspace_state_file() {
 # @exitcode 0 If successful
 # @exitcode 1 If unable to get state file path
 load_workspace_state() {
-    local project_id="${1:-$(get_current_project_id)}"
+    local project_id="${1:-$(workspace_get_current_project_id)}"
     local state_file
     
     state_file="$(get_workspace_state_file "$project_id")" || return 1
@@ -153,7 +152,7 @@ EOF
 # @exitcode 1 If unable to acquire lock or write file
 save_workspace_state() {
     local yaml_content="$1"
-    local project_id="${2:-$(get_current_project_id)}"
+    local project_id="${2:-$(workspace_get_current_project_id)}"
     local state_file
     
     state_file="$(get_workspace_state_file "$project_id")" || return 1
@@ -232,7 +231,7 @@ choose_workspace_mode() {
 # @exitcode 0 If no issues found
 # @exitcode 1 If integrity issues found
 check_workspace_integrity() {
-    local project_id="${1:-$(get_current_project_id)}"
+    local project_id="${1:-$(workspace_get_current_project_id)}"
     local issues=()
     
     # Load workspace state
@@ -316,7 +315,7 @@ safety_prompt() {
 # @exitcode 0 If successful
 # @exitcode 1 If user cancels or unable to save state
 reset_workspace() {
-    local project_id="${1:-$(get_current_project_id)}"
+    local project_id="${1:-$(workspace_get_current_project_id)}"
     
     safety_prompt "Reset workspace state for project: $project_id" || return 1
     

@@ -2,6 +2,7 @@
 # DOH Test Framework Internal Library
 # Internal functions for run.sh and test_launcher.sh
 # File version: 0.1.0 | Created: 2025-09-01
+# NOT TO BE SOURCED BY TESTS THEMSELVES
 
 # Test file discovery and filtering
 _tf_find_test_files() {

@@ -78,11 +78,11 @@ echo "Merging epic/$ARGUMENTS to main..."
 git merge epic/$ARGUMENTS --no-ff -m "Merge epic: $ARGUMENTS
 
 Completed features:
-$(cd .doh/epics/$ARGUMENTS && ls *.md | grep -E '^[0-9]+' | while read f; do
-  echo "- $(grep '^name:' $f | cut -d: -f2)"
+$(./.claude/scripts/doh/api.sh task list_epic_tasks "$ARGUMENTS" | while read f; do
+  echo "- $(./.claude/scripts/doh/api.sh frontmatter get_field "$f" "name")"
 done)
 
-Closes epic #$(grep 'github:' .doh/epics/$ARGUMENTS/epic.md | grep -oE '#[0-9]+')"
+Closes epic #$(./.claude/scripts/doh/api.sh frontmatter get_field ".doh/epics/$ARGUMENTS/epic.md" "github" | sed 's/[^0-9]//g')"
 ```
 
 ### 5. Handle Merge Conflicts
@@ -141,14 +141,14 @@ echo "✅ Epic archived: .doh/epics/archived/$ARGUMENTS"
 Close related issues:
 ```bash
 # Get issue numbers from epic
-epic_issue=$(grep 'github:' .doh/epics/archived/$ARGUMENTS/epic.md | grep -oE '[0-9]+$')
+epic_issue=$(./.claude/scripts/doh/api.sh frontmatter get_field ".doh/epics/archived/$ARGUMENTS/epic.md" "github" | sed 's/[^0-9]//g')
 
 # Close epic issue
 gh issue close $epic_issue -c "Epic completed and merged to main"
 
 # Close task issues
 for task_file in .doh/epics/archived/$ARGUMENTS/[0-9]*.md; do
-  issue_num=$(grep 'github:' $task_file | grep -oE '[0-9]+$')
+  issue_num=$(./.claude/scripts/doh/api.sh frontmatter get_field "$task_file" "github" | grep -oE '[0-9]+')
   if [ ! -z "$issue_num" ]; then
     gh issue close $issue_num -c "Completed in epic merge"
   fi

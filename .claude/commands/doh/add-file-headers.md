@@ -26,7 +26,7 @@ Add DOH version headers to files based on their file type. Supports multiple fil
 ## Implementation
 ```bash
 #!/bin/bash
-source "$(dirname "$0")/../../scripts/doh/lib/file-headers.sh"
+# Use DOH API instead of direct library sourcing
 
 # Parse arguments
 files=()
@@ -52,7 +52,7 @@ done
 
 if [[ "$batch_mode" == true ]]; then
     echo "Finding files missing version headers..."
-    missing_files=$(find_files_missing_headers)
+    missing_files=$(./.claude/scripts/doh/helper.sh file-headers find_missing)
     
     if [[ -z "$missing_files" ]]; then
         echo "All files already have version headers!"
@@ -65,7 +65,7 @@ if [[ "$batch_mode" == true ]]; then
     echo "Adding headers..."
     
     while IFS= read -r file; do
-        add_version_header "$file" "$version"
+        ./.claude/scripts/doh/helper.sh file-headers add_header "$file" "$version"
     done <<< "$missing_files"
 else
     if [[ ${#files[@]} -eq 0 ]]; then
@@ -74,7 +74,7 @@ else
     fi
     
     for file in "${files[@]}"; do
-        add_version_header "$file" "$version"
+        ./.claude/scripts/doh/helper.sh file-headers add_header "$file" "$version"
     done
 fi
 ```

@@ -103,6 +103,37 @@ tests/
 
 **Detailed TDD Guide**: See [DOH TDD Guide](docs/doh-tdd.md) for comprehensive testing patterns and examples.
 
+### Test Coverage Requirements
+
+**MANDATORY**: Create permanent tests for all architectural changes, core functionality, and library modifications that provide meaningful coverage and prevent regressions.
+
+**When to Write Tests**:
+- ✅ **Core library changes** (e.g., dependency management, API refactoring)  
+- ✅ **Breaking changes** (e.g., function renames, behavior modifications)
+- ✅ **Critical functionality** (e.g., version management, file operations)
+- ✅ **Integration points** (e.g., library sourcing, command workflows)
+- ✅ **Bug fixes** that could regress
+
+**When Tests Are Optional**:
+- ⚪ Simple configuration changes
+- ⚪ Documentation updates  
+- ⚪ Trivial one-line fixes
+- ⚪ Cosmetic improvements
+
+**Test Quality Standards**:
+- Tests must be **verbose and descriptive** to aid debugging
+- Tests must **reflect real usage patterns**, not just exercise code
+- Tests must be **designed to catch actual problems**, not just achieve coverage
+- Tests should **fail meaningfully** when functionality breaks
+
+**Example**: Task 025 (library no-op pattern) required a comprehensive test suite covering:
+- All 18 libraries source without side effects
+- Proper dependency chains are maintained  
+- Source guards prevent duplicate loading
+- Core functions remain operational after refactoring
+
+This prevented regressions and validated the architectural changes were working correctly.
+
 ## Refactoring Policy
 
 ### No Wrapper Functions

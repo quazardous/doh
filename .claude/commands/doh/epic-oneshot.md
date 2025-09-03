@@ -21,14 +21,14 @@ Check that epic exists and hasn't been processed:
 test -f .doh/epics/$ARGUMENTS/epic.md || echo "❌ Epic not found. Run: /doh:prd-parse $ARGUMENTS"
 
 # Check for existing tasks
-if ls .doh/epics/$ARGUMENTS/[0-9]*.md 2>/dev/null | grep -q .; then
+if ./.claude/scripts/doh/api.sh task list_epic_tasks "$ARGUMENTS" | grep -q .; then
   echo "⚠️ Tasks already exist. This will create duplicates."
   echo "Delete existing tasks or use /doh:epic-sync instead."
   exit 1
 fi
 
 # Check if already synced
-if grep -q "github:" .doh/epics/$ARGUMENTS/epic.md; then
+if ./.claude/scripts/doh/api.sh frontmatter get_field ".doh/epics/$ARGUMENTS/epic.md" "github" | grep -q "^#"; then
   echo "⚠️ Epic already synced to GitHub."
   echo "Use /doh:epic-sync to update."
   exit 1

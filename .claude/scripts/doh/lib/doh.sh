@@ -47,8 +47,8 @@ doh_project_dir() {
 # @exitcode 0 Always successful
 doh_project_root() {
     # Library is at .claude/scripts/doh/lib/doh.sh
-    # Project root is ../../.. from library location
-    dirname "$(dirname "$(dirname "$(dirname "${BASH_SOURCE[0]}")")")"
+    # Project root is ../../../.. from library location
+    dirname "$(dirname "$(dirname "$(dirname "$(dirname "${BASH_SOURCE[0]}")")")")"
 }
 
 # @description Check if we're in a valid DOH project

@@ -4,8 +4,13 @@
 # File-based queue with atomic operations and status tracking
 
 # Source required dependencies
+source "$(dirname "${BASH_SOURCE[0]}")/doh.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/workspace.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/numbering.sh"
+
+# Guard against multiple sourcing
+[[ -n "${DOH_LIB_QUEUE_LOADED:-}" ]] && return 0
+DOH_LIB_QUEUE_LOADED=1
 
 # Constants
 readonly QUEUE_VERSION="1.0"
@@ -39,7 +44,7 @@ queue_get_dir() {
     local queue_name="${1:-$DEFAULT_QUEUE_NAME}"
     
     local project_id
-    project_id="$(get_current_project_id)" || return 1
+    project_id="$(workspace_get_current_project_id)" || return 1
     
     echo "$(doh_global_dir)/projects/$project_id/queues/$queue_name"
 }

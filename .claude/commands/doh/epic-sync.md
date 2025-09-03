@@ -18,7 +18,7 @@ Push epic and tasks to GitHub as issues.
 test -f .doh/epics/$ARGUMENTS/epic.md || echo "❌ Epic not found. Run: /doh:prd-parse $ARGUMENTS"
 
 # Count task files
-ls .doh/epics/$ARGUMENTS/*.md 2>/dev/null | grep -v epic.md | wc -l
+./.claude/scripts/doh/api.sh task list_epic_tasks ".doh/epics/$ARGUMENTS" | wc -l
 ```
 
 If no tasks found: "❌ No tasks to sync. Run: /doh:epic-decompose $ARGUMENTS"
@@ -130,7 +130,7 @@ fi
 
 Count task files to determine strategy:
 ```bash
-task_count=$(ls .doh/epics/$ARGUMENTS/[0-9][0-9][0-9].md 2>/dev/null | wc -l)
+task_count=$(./.claude/scripts/doh/api.sh task list_epic_tasks ".doh/epics/$ARGUMENTS" | wc -l)
 ```
 
 ### For Small Batches (< 5 tasks): Sequential Creation
@@ -142,7 +142,7 @@ if [ "$task_count" -lt 5 ]; then
     [ -f "$task_file" ] || continue
 
     # Extract task name from frontmatter
-    task_name=$(grep '^name:' "$task_file" | sed 's/^name: *//')
+    task_name=$(./.claude/scripts/doh/api.sh frontmatter get_field "$task_file" "name")
 
     # Strip frontmatter from task content
     sed '1,/^---$/d; 1,/^---$/d' "$task_file" > /tmp/task-body.md
@@ -337,18 +337,18 @@ for task_file in .doh/epics/$ARGUMENTS/[0-9]*.md; do
   issue_num=$(basename "$task_file" .md)
 
   # Get task name from frontmatter
-  task_name=$(grep '^name:' "$task_file" | sed 's/^name: *//')
+  task_name=$(./.claude/scripts/doh/api.sh frontmatter get_field "$task_file" "name")
 
   # Get parallel status
-  parallel=$(grep '^parallel:' "$task_file" | sed 's/^parallel: *//')
+  parallel=$(./.claude/scripts/doh/api.sh frontmatter get_field "$task_file" "parallel")
 
   # Add to tasks section
   echo "- [ ] #${issue_num} - ${task_name} (parallel: ${parallel})" >> /tmp/tasks-section.md
 done
 
 # Add summary statistics
-total_count=$(ls .doh/epics/$ARGUMENTS/[0-9]*.md 2>/dev/null | wc -l)
-parallel_count=$(grep -l '^parallel: true' .doh/epics/$ARGUMENTS/[0-9]*.md 2>/dev/null | wc -l)
+total_count=$(./.claude/scripts/doh/api.sh task list_epic_tasks ".doh/epics/$ARGUMENTS" | wc -l)
+parallel_count=$(./.claude/scripts/doh/api.sh task list_epic_tasks ".doh/epics/$ARGUMENTS" | xargs -I {} ./.claude/scripts/doh/api.sh task is_parallel {} | grep -c "true")
 sequential_count=$((total_count - parallel_count))
 
 cat >> /tmp/tasks-section.md << EOF
@@ -396,7 +396,7 @@ for task_file in .doh/epics/$ARGUMENTS/[0-9]*.md; do
   [ -f "$task_file" ] || continue
 
   issue_num=$(basename "$task_file" .md)
-  task_name=$(grep '^name:' "$task_file" | sed 's/^name: *//')
+  task_name=$(./.claude/scripts/doh/api.sh frontmatter get_field "$task_file" "name")
 
   echo "- #${issue_num}: ${task_name} - https://github.com/${repo}/issues/${issue_num}" >> .doh/epics/$ARGUMENTS/github-mapping.md
 done

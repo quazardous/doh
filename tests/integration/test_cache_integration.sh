@@ -19,7 +19,7 @@ _tf_setup() {
     export DOH_TEST_PROJECT_ROOT="$(_tf_create_temp_dir)"
     
     # Override functions for testing
-    workspace_get_current_project_id() {
+    workspace_workspace_get_current_project_id() {
         echo "$DOH_TEST_PROJECT_ID"
     }
     

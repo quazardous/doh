@@ -15,7 +15,7 @@ Break epic into concrete, actionable tasks.
 
 **IMPORTANT:** Before executing this command, read and follow:
 - `.claude/rules/datetime.md` - For getting real current date/time
-- Source the numbering library: `source .claude/scripts/doh/lib/dohenv.sh && source .claude/scripts/doh/lib/workspace.sh && source .claude/scripts/doh/lib/numbering.sh`
+- Use DOH API for numbering operations: `./.claude/scripts/doh/api.sh numbering get_next "task"`
 
 ## Preflight Checklist
 
@@ -71,12 +71,12 @@ Task:
     - {list of 3-4 tasks for this batch}
 
     For each task:
-    1. Get task number: TASK_NUM=$(get_next_number "task")
+    1. Get task number: TASK_NUM=$(./.claude/scripts/doh/api.sh numbering get_next "task")
     2. Create file: .doh/epics/$ARGUMENTS/$TASK_NUM.md
     3. Use exact format with frontmatter and all sections
     4. Follow task breakdown from epic
     5. Set parallel/depends_on fields appropriately
-    6. Register task: register_task "$TASK_NUM" "[epic_number]" ".doh/epics/$ARGUMENTS/$TASK_NUM.md" "[Task Title]" "$ARGUMENTS"
+    6. Register task: ./.claude/scripts/doh/api.sh numbering register_task "$TASK_NUM" "[epic_number]" ".doh/epics/$ARGUMENTS/$TASK_NUM.md" "[Task Title]" "$ARGUMENTS"
 
     Return: List of files created
 ```
@@ -133,13 +133,13 @@ Clear, concise description of what needs to be done
 
 ### 3. Task Naming Convention
 Save tasks as: `.doh/epics/$ARGUMENTS/{task_number}.md`
-- Use numbering from get_next_number: TASK_NUM=$(get_next_number "task"), then $TASK_NUM.md
+- Use numbering from DOH API: TASK_NUM=$(./.claude/scripts/doh/api.sh numbering get_next "task"), then $TASK_NUM.md
 - Task numbers are globally sequential across all epics
 - Keep task titles short but descriptive
 
 ### 4. Frontmatter Guidelines
 - **name**: Use a descriptive task title (without "Task:" prefix)
-- **number**: Use the task number from get_next_number "task"
+- **number**: Use the task number from DOH API: $(./.claude/scripts/doh/api.sh numbering get_next "task")
 - **status**: Always start with "open" for new tasks
 - **created**: Get REAL current datetime by running: `date -u +"%Y-%m-%dT%H:%M:%SZ"`
 - **updated**: Use the same real datetime as created for new tasks

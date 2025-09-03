@@ -7,6 +7,7 @@
 LIB_DIR="$(dirname "$0")/../.claude/scripts/doh/lib"
 MIGRATION_DIR="$(dirname "$0")"
 
+source "$LIB_DIR/workspace.sh"
 source "$LIB_DIR/dohenv.sh"
 source "$MIGRATION_DIR/detect_duplicates.sh"
 source "$MIGRATION_DIR/deduplicate.sh"
@@ -81,7 +82,7 @@ show_migration_status() {
     
     # Check for existing backups
     local project_id
-    project_id="$(get_current_project_id)" 2>/dev/null
+    project_id="$(workspace_get_current_project_id)" 2>/dev/null
     
     if [[ -n "$project_id" ]]; then
         local backup_root="$HOME/.doh/projects/$project_id/backups"
@@ -233,7 +234,7 @@ run_preflight_checks() {
     
     # Check 4: Registry directory access
     local project_id registry_dir
-    project_id="$(get_current_project_id)" 2>/dev/null
+    project_id="$(workspace_get_current_project_id)" 2>/dev/null
     
     if [[ -n "$project_id" ]]; then
         registry_dir="$HOME/.doh/projects/$project_id"

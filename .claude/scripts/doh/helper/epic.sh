@@ -25,12 +25,12 @@ helper_epic_list() {
         return 1
     }
 
-    if [ ! -d "$doh_root/.doh/epics" ]; then
+    if [ ! -d "$doh_root/epics" ]; then
         echo "📁 No epics directory found. Create your first epic with: /doh:prd-parse <feature-name>"
         return 0
     fi
     
-    if [ -z "$(ls -d "$doh_root"/.doh/epics/*/ 2>/dev/null)" ]; then
+    if [ -z "$(ls -d "$doh_root"/epics/*/ 2>/dev/null)" ]; then
         echo "📁 No epics found. Create your first epic with: /doh:prd-parse <feature-name>"
         return 0
     fi
@@ -43,7 +43,7 @@ helper_epic_list() {
     local planning_epics="" in_progress_epics="" completed_epics=""
 
     # Process all epics
-    for dir in "$doh_root"/.doh/epics/*/; do
+    for dir in "$doh_root"/epics/*/; do
         [ -d "$dir" ] || continue
         [ -f "$dir/epic.md" ] || continue
 
@@ -69,11 +69,15 @@ helper_epic_list() {
 
         # Count tasks
         local task_count
-        task_count=$(ls "$dir"[0-9]*.md 2>/dev/null | wc -l)
+        if ls "$dir"[0-9]*.md >/dev/null 2>&1; then
+            task_count=$(ls "$dir"[0-9]*.md 2>/dev/null | wc -l)
+        else
+            task_count=0
+        fi
 
         # Format output with GitHub issue number if available
         local entry
-        if [ -n "$github" ]; then
+        if [ -n "$github" ] && echo "$github" | grep -q '/[0-9]*$'; then
             local issue_num
             issue_num=$(echo "$github" | grep -o '/[0-9]*$' | tr -d '/')
             entry="   📋 ${dir}epic.md (#$issue_num) - $progress complete ($task_count tasks)"
@@ -102,7 +106,7 @@ helper_epic_list() {
     # Display categorized epics
     echo "📝 Planning:"
     if [ -n "$planning_epics" ]; then
-        echo -e "$planning_epics" | sed '/^$/d'
+        printf "%b" "$planning_epics" | grep -v '^$'
     else
         echo "   (none)"
     fi
@@ -110,7 +114,7 @@ helper_epic_list() {
     echo ""
     echo "🚀 In Progress:"
     if [ -n "$in_progress_epics" ]; then
-        echo -e "$in_progress_epics" | sed '/^$/d'
+        printf "%b" "$in_progress_epics" | grep -v '^$'
     else
         echo "   (none)"
     fi
@@ -118,7 +122,7 @@ helper_epic_list() {
     echo ""
     echo "✅ Completed:"
     if [ -n "$completed_epics" ]; then
-        echo -e "$completed_epics" | sed '/^$/d'
+        printf "%b" "$completed_epics" | grep -v '^$'
     else
         echo "   (none)"
     fi
@@ -127,8 +131,8 @@ helper_epic_list() {
     echo ""
     echo "📊 Summary"
     local total tasks
-    total=$(ls -d "$doh_root"/.doh/epics/*/ 2>/dev/null | wc -l)
-    tasks=$(find "$doh_root"/.doh/epics -name "[0-9]*.md" 2>/dev/null | wc -l)
+    total=$(ls -d "$doh_root"/epics/*/ 2>/dev/null | wc -l)
+    tasks=$(find "$doh_root"/epics -name "[0-9]*.md" 2>/dev/null | wc -l)
     echo "   Total epics: $total"
     echo "   Total tasks: $tasks"
 
@@ -239,6 +243,9 @@ helper_epic_help() {
     echo "  show <epic-name>        Show detailed epic information"
     echo "  status <epic-name>      Get epic status with progress and tasks"
     echo "  tasks <epic-name> [status]  List tasks in epic (optional status filter)"
+    echo "  validate <epic-name>    Validate epic prerequisites before starting operations"
+    echo "  create-branch <epic-name>   Create or switch to epic branch"
+    echo "  ready-tasks <epic-name>     Identify ready tasks for parallel execution"
     echo "  help                    Show this help message"
     echo ""
     echo "Status filters for tasks command:"
@@ -252,6 +259,152 @@ helper_epic_help() {
     echo "  helper.sh epic show data-api-sanity"
     echo "  helper.sh epic status versioning"
     echo "  helper.sh epic tasks data-api-sanity pending"
+    return 0
+}
+
+# === Epic Lifecycle Management Functions ===
+
+# @description Validate epic prerequisites before starting operations
+# @public
+# @arg $1 Epic name/path
+# @stdout Validation messages
+# @stderr Error messages for failed validations
+# @exitcode 0 If all validations pass
+# @exitcode 1 If validation fails
+helper_epic_validate_prerequisites() {
+    local epic_name="$1"
+    local epic_path=".doh/epics/$epic_name"
+    local validation_errors=()
+    
+    # Check epic exists
+    if [[ ! -f "$epic_path/epic.md" ]]; then
+        validation_errors+=("Epic not found: $epic_path/epic.md")
+    fi
+    
+    # Check GitHub sync
+    if [[ -f "$epic_path/epic.md" ]]; then
+        local github_field
+        github_field=$(./.claude/scripts/doh/api.sh frontmatter get_field "$epic_path/epic.md" "github")
+        if [[ -z "$github_field" ]]; then
+            validation_errors+=("Epic not synced to GitHub. Run: /doh:epic-sync $epic_name")
+        fi
+    fi
+    
+    # Check for uncommitted changes
+    if [[ -n "$(git status --porcelain)" ]]; then
+        validation_errors+=("Uncommitted changes detected. Please commit or stash before starting epic.")
+    fi
+    
+    # Report results
+    if [[ ${#validation_errors[@]} -gt 0 ]]; then
+        echo "❌ Epic validation failed:" >&2
+        printf "   - %s\n" "${validation_errors[@]}" >&2
+        return 1
+    fi
+    
+    echo "✅ Epic prerequisites validated"
+    return 0
+}
+
+# @description Create or switch to epic branch with proper git operations
+# @public
+# @arg $1 Epic name
+# @stdout Status messages
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If git operations fail
+helper_epic_create_or_enter_branch() {
+    local epic_name="$1"
+    local branch_name="epic/$epic_name"
+    
+    echo "Managing epic branch: $branch_name"
+    
+    # Check if branch exists (local or remote)
+    if git branch -a | grep -q "$branch_name"; then
+        echo "Switching to existing branch: $branch_name"
+        if ! git checkout "$branch_name"; then
+            echo "❌ Failed to checkout branch: $branch_name" >&2
+            return 1
+        fi
+        
+        # Pull latest if tracking remote
+        if git branch -vv | grep -q "origin/$branch_name"; then
+            echo "Pulling latest changes..."
+            git pull origin "$branch_name" || echo "⚠️ Pull failed - branch may be ahead"
+        fi
+    else
+        echo "Creating new branch: $branch_name"
+        # Ensure we're on main and up to date
+        git checkout main || return 1
+        git pull origin main || return 1
+        
+        # Create and push branch
+        git checkout -b "$branch_name" || return 1
+        git push -u origin "$branch_name" || return 1
+    fi
+    
+    echo "✅ Ready on branch: $branch_name"
+    return 0
+}
+
+# @description Identify ready tasks in epic based on dependencies and status
+# @public
+# @arg $1 Epic name
+# @stdout Task readiness info
+# @stderr Error messages
+# @exitcode 0 If successful
+helper_epic_identify_ready_tasks() {
+    local epic_name="$1"
+    local epic_path=".doh/epics/$epic_name"
+    local ready_tasks=()
+    
+    echo "Analyzing task readiness in epic: $epic_name"
+    
+    # Get all task files (using direct listing since API function doesn't exist yet)
+    local task_files
+    if [[ -d "$epic_path" ]]; then
+        task_files=$(find "$epic_path" -name "[0-9][0-9][0-9].md" -type f 2>/dev/null || echo "")
+    else
+        echo "❌ Epic directory not found: $epic_path"
+        return 1
+    fi
+    
+    while IFS= read -r task_file; do
+        [[ -n "$task_file" ]] || continue
+        
+        local task_status
+        task_status=$(./.claude/scripts/doh/api.sh frontmatter get_field "$task_file" "status")
+        
+        local task_number
+        task_number=$(./.claude/scripts/doh/api.sh frontmatter get_field "$task_file" "number")
+        
+        local task_title  
+        task_title=$(./.claude/scripts/doh/api.sh frontmatter get_field "$task_file" "title")
+        
+        # Check if task is ready (status=pending and no blocking dependencies)
+        if [[ "$task_status" == "pending" ]]; then
+            local depends_on
+            depends_on=$(./.claude/scripts/doh/api.sh frontmatter get_field "$task_file" "depends_on")
+            
+            # For now, simple ready check - can be enhanced with dependency resolution
+            if [[ -z "$depends_on" ]]; then
+                ready_tasks+=("$task_number:$task_title:$task_file")
+                echo "  ✅ Ready: #$task_number - $task_title"
+            else
+                echo "  ⏸️ Blocked: #$task_number - $task_title (depends on: $depends_on)"
+            fi
+        else
+            echo "  ⏭️ Status '$task_status': #$task_number - $task_title"
+        fi
+    done <<< "$task_files"
+    
+    if [[ ${#ready_tasks[@]} -eq 0 ]]; then
+        echo "⚠️ No ready tasks found in epic: $epic_name"
+        return 1
+    fi
+    
+    echo "Found ${#ready_tasks[@]} ready task(s)"
+    printf '%s\n' "${ready_tasks[@]}"
     return 0
 }
 

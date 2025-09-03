@@ -102,7 +102,7 @@ while IFS=: read -r task_file task_number; do
   echo "$content" > "$new_name"
   
   echo "Updated content preview:"
-  grep -E "depends_on:|conflicts_with:" "$new_name"
+  ./.claude/scripts/doh/api.sh frontmatter get_fields "$new_name" "depends_on,conflicts_with"
   echo "---"
 done < /tmp/task-mapping.txt
 ```
@@ -114,7 +114,7 @@ Check that references were updated correctly:
 echo "=== Final Results ==="
 for file in 42.md 43.md 44.md; do
   echo "File: $file"
-  grep -E "name:|depends_on:|conflicts_with:" "$file"
+  ./.claude/scripts/doh/api.sh frontmatter get_fields "$file" "name,depends_on,conflicts_with"
   echo ""
 done
 ```

@@ -19,8 +19,8 @@ _tf_setup() {
     local project_name="test_project_$(basename "$DOH_PROJECT_DIR")"
     export TEST_PROJECT_NAME="$project_name"
     
-    # Override get_current_project_id for testing
-    get_current_project_id() {
+    # Override workspace_get_current_project_id for testing
+    workspace_get_current_project_id() {
         echo "$TEST_PROJECT_NAME"
     }
 }
@@ -28,11 +28,26 @@ _tf_setup() {
 _tf_teardown() {
     # Cleanup test environment
     unset TEST_PROJECT_NAME
-    unset -f get_current_project_id
+    unset -f workspace_get_current_project_id
+}
+
+# Helper to reset numbering sequence and registry
+_tf_reset_numbering() {
+    local taskseq_file="$(_numbering_get_taskseq_path)"
+    if [[ -f "$taskseq_file" ]]; then
+        echo "0" > "$taskseq_file"
+    fi
+    
+    # Also reset the registry
+    local registry_file="$(_numbering_get_registry_path)"
+    if [[ -f "$registry_file" ]]; then
+        rm -f "$registry_file"
+    fi
 }
 
 # Registration Tests
 test_epic_registration() {
+    _tf_reset_numbering
     _numbering_ensure_registry
     local epic_number
     epic_number="$(numbering_get_next "epic")"
@@ -41,6 +56,7 @@ test_epic_registration() {
 }
 
 test_task_registration() {
+    _tf_reset_numbering
     local epic_number task_number
     epic_number="$(numbering_get_next "epic")"
     task_number="$(numbering_get_next "task")"
@@ -51,6 +67,7 @@ test_task_registration() {
 }
 
 test_duplicate_number_rejection() {
+    _tf_reset_numbering
     local epic_number
     epic_number="$(numbering_get_next "epic")"
     
@@ -62,6 +79,7 @@ test_duplicate_number_rejection() {
 }
 
 test_numbering_find_by_number() {
+    _tf_reset_numbering
     local epic_number
     epic_number="$(numbering_get_next "epic")"
     

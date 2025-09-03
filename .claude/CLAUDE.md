@@ -100,10 +100,11 @@ source .claude/scripts/doh/lib/library.sh && library_function
 - NO SIMPLIFICATION : no "//This is simplified stuff for now, complete implementation would blablabla"
 - NO CODE DUPLICATION : check existing codebase to reuse functions and constants Read files before writing new functions. Use common sense function name to find them easily.
 - NO DEAD CODE : either use or delete from codebase completely
-- IMPLEMENT TEST FOR EVERY FUNCTIONS
+- IMPLEMENT TEST FOR EVERY FUNCTIONS : Every significant function must have a dedicated test that covers its real usage.
 - NO CHEATER TESTS : test must be accurate, reflect real usage and be designed to reveal flaws. No useless tests! Design tests to be verbose so we can use them for debuging.
 - NO INCONSISTENT NAMING - read existing codebase naming patterns.
 - NO OVER-ENGINEERING - Don't add unnecessary abstractions, factory patterns, or middleware when simple functions would work. Don't think "enterprise" when you need "working"
 - NO ALIAS OR WRAPPER FUNCTIONS. Don't create wrapper functions to adapt APIs. Refactor the calling code to use the correct API directly.
 - NO MIXED CONCERNS - Don't put validation logic inside API handlers, database queries inside UI components, etc. instead of proper separation
 - NO RESOURCE LEAKS - Don't forget to close database connections, clear timeouts, remove event listeners, or clean up file handles
+- ALWAYS VERIFY CURRENT CODE - Always inspect the codebase before analyzing or suggesting fixes. Do not rely on outdated tasks, backlog items, or prior context.

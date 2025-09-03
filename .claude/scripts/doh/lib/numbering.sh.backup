@@ -140,9 +140,6 @@ _numbering_acquire_lock() {
     local lock_file="$1"
     local timeout="${2:-$LOCK_TIMEOUT}"
     
-    # Ensure parent directory exists for lock file
-    mkdir -p "$(dirname "$lock_file")"
-    
     # Create lock file if it doesn't exist
     touch "$lock_file.lock" 2>/dev/null || {
         echo "Error: Cannot create lock file: $lock_file.lock" >&2

@@ -21,7 +21,7 @@ _tf_setup() {
     export TEST_PROJECT_NAME="$project_name"
     
     # Override get_current_project_id for testing
-    get_current_project_id() {
+    workspace_get_current_project_id() {
         echo "$TEST_PROJECT_NAME"
     }
 }
@@ -29,7 +29,7 @@ _tf_setup() {
 _tf_teardown() {
     # Cleanup test environment
     unset TEST_PROJECT_NAME
-    unset -f get_current_project_id
+    unset -f workspace_get_current_project_id
     # DOH_PROJECT_DIR cleanup is handled by test launcher
 }
 

@@ -38,7 +38,7 @@ _tf_setup() {
         echo "$DOH_TEST_PROJECT_ROOT"
     }
     
-    get_current_project_id() {
+    workspace_get_current_project_id() {
         echo "$DOH_TEST_PROJECT_ID"
     }
     
