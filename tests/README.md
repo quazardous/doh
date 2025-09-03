@@ -321,22 +321,22 @@ You can also run tests directly using the test launcher:
 
 The `test_launcher.sh` automatically sets up environment variables for isolated testing:
 
-- **`PROJECT_DOH_DIR`**: Points to the test's temporary `.doh/` directory, allowing DOH API functions to operate on test project data instead of the actual project's versioned data
-- **`GLOBAL_DOH_DIR`**: Points to a temporary global directory for DOH workspace data, ensuring tests don't interfere with real workspace configurations and caches
+- **`DOH_PROJECT_DIR`**: Points to the test's temporary `.doh/` directory, allowing DOH API functions to operate on test project data instead of the actual project's versioned data
+- **`DOH_GLOBAL_DIR`**: Points to a temporary global directory for DOH workspace data, ensuring tests don't interfere with real workspace configurations and caches
 - **`_TF_LAUNCHER_EXECUTION`**: Flag indicating the test is running through the launcher (used by tests to adjust paths and behavior)
 
 These variables ensure complete test isolation:
-- **PROJECT_DOH_DIR**: Isolates versioned project data (PRDs, epics, tasks, config)
-- **GLOBAL_DOH_DIR**: Isolates non-versioned workspace data (caches, logs, user settings)
+- **DOH_PROJECT_DIR**: Isolates versioned project data (PRDs, epics, tasks, config)
+- **DOH_GLOBAL_DIR**: Isolates non-versioned workspace data (caches, logs, user settings)
 
 When writing tests that use DOH API functions, you don't need to manually set these variables - the launcher handles this automatically:
 
 ```bash
 # DOH API functions will automatically use test directories
 test_version_operations() {
-    # This works correctly because PROJECT_DOH_DIR is set by test_launcher
+    # This works correctly because DOH_PROJECT_DIR is set by test_launcher
     # Operations affect test temp directory, not actual project
-    version_set_project "1.0.0"
+    version_set_current "1.0.0"
     local result=$(version_get_current)
     _tf_assert_equals "1.0.0" "$result" "Version should be updated in test environment"
 }

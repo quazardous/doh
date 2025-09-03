@@ -300,7 +300,7 @@ echo "🚀 Starting version bump workflow..."
 
 # Step 1: Update VERSION file
 echo "📝 Updating VERSION file..."
-if ! set_project_version "$new_version"; then
+if ! version_set_current "$new_version"; then
     echo "Error: Failed to update VERSION file" >&2
     exit 1
 fi

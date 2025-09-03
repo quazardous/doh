@@ -160,8 +160,8 @@ fi
 | `version_get_file` | Get version from file frontmatter | `<file>` | Version string |
 | `version_set_file` | Set version in file frontmatter | `<file> <version>` | 0=success |
 | `version_increment` | Increment version string | `<version> <type>` | New version |
-| `version_set_project` | Set project version | `<version>` | 0=success |
-| `version_bump_project` | Bump project version by type | `<type>` | New version |
+| `version_set_current` | Set current project version | `<version>` | 0=success |
+| `version_bump_current` | Bump current project version by type | `<type>` | New version |
 | `version_bump_file` | Bump file version by type | `<file> <type>` | New version |
 | `version_compare` | Compare two version strings | `<v1> <v2>` | -1/0/1 |
 | `version_validate` | Validate version format | `<version>` | 0=valid, 1=invalid |

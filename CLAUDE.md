@@ -101,7 +101,7 @@ Run commands using the format `/doh:command-name`
 | `doh` | `find_root` | |
 | `dohenv` | `load`, `is_loaded` | |
 | `frontmatter` | `get_field`, `update_field`, `has`, `validate`, `extract`, `add_field`, `remove_field`, `get_fields`, `pretty_print`, `merge`, `create_markdown`, `query`, `bulk_update` | |
-| `version` | `get_current`, `get_file`, `set_file`, `increment`, `set_project`, `bump_project`, `bump_file`, `compare`, `validate`, `find_missing_files`, `find_inconsistencies`, `list` | `to_number`, `prerelease_to_adjustment` |
+| `version` | `get_current`, `get_file`, `set_file`, `increment`, `set_current`, `bump_current`, `bump_file`, `compare`, `validate`, `find_missing_files`, `find_inconsistencies`, `list` | `to_number`, `prerelease_to_adjustment` |
 | `task` | `is_completed`, `get_status`, `list_epic_tasks`, `calculate_epic_progress`, `verify_completion`, `get_name`, `is_parallel` | |
 | `numbering` | `get_next` | |
 | `workspace` | `get_current_project_id` | |

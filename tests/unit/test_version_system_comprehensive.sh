@@ -25,8 +25,9 @@ _tf_setup() {
     }
     cd "$TEST_DIR"
     
-    # Set PROJECT_DOH_DIR to the test directory
-    export PROJECT_DOH_DIR="$TEST_DIR"
+    # Set DOH environment variables to the test directory
+    export DOH_PROJECT_DIR="$TEST_DIR/.doh"
+    export DOH_VERSION_FILE="$TEST_DIR/VERSION"
     
     # Initialize complete DOH structure
     mkdir -p .doh/{versions,epics,prds,cache} .git
@@ -75,6 +76,10 @@ EOF
 }
 
 _tf_teardown() {
+    # Clean up environment variables
+    unset DOH_PROJECT_DIR
+    unset DOH_VERSION_FILE
+    
     # Return to original directory and cleanup
     cd "$OLDPWD" > /dev/null 2>&1
     if [[ -n "$TEST_DIR" && -d "$TEST_DIR" ]]; then
@@ -98,13 +103,13 @@ test_version_core_functions() {
     _tf_assert_equals "0.1.0" "$version" "Should get current project version"
     
     # Test setting project version
-    version_set_project "0.2.0" > /dev/null
+    version_set_current "0.2.0" > /dev/null
     local new_version
     new_version=$(version_get_current)
     _tf_assert_equals "0.2.0" "$new_version" "Should set project version"
     
     # Reset for other tests
-    version_set_project "0.1.0" > /dev/null
+    version_set_current "0.1.0" > /dev/null
     
     cd - > /dev/null
 }
@@ -116,19 +121,19 @@ test_version_bump_operations() {
     
     # Test patch bump
     local patch_version
-    patch_version=$(version_bump_project "patch")
+    patch_version=$(version_bump_current "patch")
     _tf_assert_equals "0.1.1" "$patch_version" "Should bump patch version"
     
     # Reset and test minor bump
-    version_set_project "0.1.0" > /dev/null
+    version_set_current "0.1.0" > /dev/null
     local minor_version
-    minor_version=$(version_bump_project "minor")
+    minor_version=$(version_bump_current "minor")
     _tf_assert_equals "0.2.0" "$minor_version" "Should bump minor version"
     
     # Reset and test major bump
-    version_set_project "0.1.0" > /dev/null
+    version_set_current "0.1.0" > /dev/null
     local major_version
-    major_version=$(version_bump_project "major")
+    major_version=$(version_bump_current "major")
     _tf_assert_equals "1.0.0" "$major_version" "Should bump major version"
     
     cd - > /dev/null
@@ -212,7 +217,7 @@ test_version_consistency_checks() {
     echo "🧪 Testing version consistency..."
     
     # Set project version
-    version_set_project "0.3.0" > /dev/null
+    version_set_current "0.3.0" > /dev/null
     
     # Files now have inconsistent versions
     local project_version
@@ -240,7 +245,7 @@ test_version_workflow_integration() {
     
     # Bump project version
     local new_version
-    new_version=$(version_bump_project "minor")
+    new_version=$(version_bump_current "minor")
     
     # Update file versions to match
     version_set_file ".doh/epics/001.md" "$new_version" > /dev/null
@@ -269,7 +274,7 @@ test_error_handling() {
     echo "🧪 Testing error handling..."
     
     # Test invalid increment level
-    if ! version_bump_project "invalid" > /dev/null 2>&1; then
+    if ! version_bump_current "invalid" > /dev/null 2>&1; then
         echo "✅ PASS: Invalid increment level properly rejected"
     else
         echo "❌ FAIL: Should reject invalid increment levels"

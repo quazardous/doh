@@ -116,32 +116,32 @@ Create comprehensive audit of isolation requirements:
 ### Simplified Isolation Strategy:
 
 **Primary Variable:**
-1. **`GLOBAL_DOH_DIR`** - Root DOH directory (already exists, just needs test override)
+1. **`DOH_GLOBAL_DIR`** - Root DOH directory (already exists, just needs test override)
 
 **Special Cases Only:**
-2. **`DOH_WORKSPACE_PROJECT_ID`** - Override project ID calculation when `GLOBAL_DOH_DIR` alone insufficient
+2. **`DOH_WORKSPACE_PROJECT_ID`** - Override project ID calculation when `DOH_GLOBAL_DIR` alone insufficient
 
 ### Rationale:
-All DOH libraries use pattern: `$GLOBAL_DOH_DIR/projects/$project_id/filename`
+All DOH libraries use pattern: `$DOH_GLOBAL_DIR/projects/$project_id/filename`
 
 **Test isolation approach:**
 ```bash
-# Test framework creates: GLOBAL_DOH_DIR="$(mktemp -d)"
-# Example result: GLOBAL_DOH_DIR="/tmp/tmp.xvf2K9mP3L"  
+# Test framework creates: DOH_GLOBAL_DIR="$(mktemp -d)"
+# Example result: DOH_GLOBAL_DIR="/tmp/tmp.xvf2K9mP3L"  
 # All data goes to: /tmp/tmp.xvf2K9mP3L/projects/doh_abc123/
-# Clean: rm -rf "$GLOBAL_DOH_DIR"
+# Clean: rm -rf "$DOH_GLOBAL_DIR"
 ```
 
 **Benefits:**
 - **Minimal complexity**: Single environment variable for 90% of cases
-- **Existing infrastructure**: `GLOBAL_DOH_DIR` already implemented in `dohenv.sh`
+- **Existing infrastructure**: `DOH_GLOBAL_DIR` already implemented in `dohenv.sh`
 - **Complete isolation**: Tests cannot touch real `~/.doh/` directory
 - **Secure temp directories**: `mktemp -d` ensures unique, safe temporary directories
 - **Easy cleanup**: Remove single temp directory cleans all test artifacts
 - **No conflicts**: Multiple test runs won't interfere with each other
 
 ### Phase 2: Library Enhancement  
-- Verify `GLOBAL_DOH_DIR` usage is consistent across all libraries
+- Verify `DOH_GLOBAL_DIR` usage is consistent across all libraries
 - Standardize function naming inconsistencies (`workspace_get_current_project_id` pattern)
 - Add `DOH_WORKSPACE_PROJECT_ID` override only where needed for special cases
 - Add library documentation for override variables

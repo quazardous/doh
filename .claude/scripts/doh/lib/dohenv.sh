@@ -55,8 +55,8 @@ dohenv_load() {
         done < "$env_file"
     fi
 
-    # GLOBAL_DOH_DIR will not be set if not defined -> we use $(doh_global_dir) that can set the default
-    ## export GLOBAL_DOH_DIR="${GLOBAL_DOH_DIR:-$HOME/.doh}"
+    # DOH_GLOBAL_DIR will not be set if not defined -> we use $(doh_global_dir) that can set the default
+    ## export DOH_GLOBAL_DIR="${DOH_GLOBAL_DIR:-$HOME/.doh}"
     
     # Mark environment as loaded
     export DOH_ENV_LOADED=1

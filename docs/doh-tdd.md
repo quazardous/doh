@@ -300,7 +300,7 @@ init_test_doh_project() {
     mkdir -p .doh/{prds,epics,quick}
     mkdir -p .claude/scripts/doh/{lib,commands}
     echo "DOH_PROJECT_ROOT=$PWD" > .doh/env
-    echo "GLOBAL_DOH_DIR=$PWD/.doh/global" >> .doh/env
+    echo "DOH_GLOBAL_DIR=$PWD/.doh/global" >> .doh/env
 }
 ```
 

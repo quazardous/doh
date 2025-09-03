@@ -12,11 +12,11 @@ source "$LIB_DIR/numbering.sh"
 
 # Test environment setup
 _tf_setup() {
-    # Use PROJECT_DOH_DIR from test launcher
-    _tff_create_minimal_doh_project "$PROJECT_DOH_DIR" >/dev/null
+    # Use DOH_PROJECT_DIR from test launcher
+    _tff_create_minimal_doh_project "$DOH_PROJECT_DIR" >/dev/null
     
     # Set project name for workspace functions
-    local project_name="test_project_$(basename "$PROJECT_DOH_DIR")"
+    local project_name="test_project_$(basename "$DOH_PROJECT_DIR")"
     export TEST_PROJECT_NAME="$project_name"
     
     # Override get_current_project_id for testing

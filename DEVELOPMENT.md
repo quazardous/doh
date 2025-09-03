@@ -10,7 +10,7 @@ All new and updated files include `file_version` to track when features were int
 
 DOH uses two distinct directories to organize project data:
 
-### PROJECT_DOH_DIR (Default: `.doh/`)
+### DOH_PROJECT_DIR (Default: `.doh/`)
 **Purpose**: Versioned project data that should be committed to the repository.
 
 **Contains**:
@@ -21,9 +21,9 @@ DOH uses two distinct directories to organize project data:
 
 **Location**: Inside the project repository (typically `.doh/` folder)
 
-**Environment Variable**: `PROJECT_DOH_DIR` - can override the default location
+**Environment Variable**: `DOH_PROJECT_DIR` - can override the default location
 
-### GLOBAL_DOH_DIR (Default: `~/.doh/`)
+### DOH_GLOBAL_DIR (Default: `~/.doh/`)
 **Purpose**: Persistent global data that should NOT be versioned.
 
 **Contains**:
@@ -49,17 +49,17 @@ DOH uses two distinct directories to organize project data:
 
 This ensures that multiple DOH projects can coexist without data conflicts, even if they have similar names or structures.
 
-**Environment Variable**: `GLOBAL_DOH_DIR` - can override the default location
+**Environment Variable**: `DOH_GLOBAL_DIR` - can override the default location
 
 ### Usage Examples
 ```bash
 # These directories are automatically configured by DOH
-echo "Project data: $(doh_project_dir)"     # Returns PROJECT_DOH_DIR path
-echo "Global data: $(doh_global_dir)"       # Returns GLOBAL_DOH_DIR path
+echo "Project data: $(doh_project_dir)"     # Returns DOH_PROJECT_DIR path
+echo "Global data: $(doh_global_dir)"       # Returns DOH_GLOBAL_DIR path
 
 # Override defaults with environment variables
-export PROJECT_DOH_DIR="/custom/project/doh"
-export GLOBAL_DOH_DIR="/custom/global/doh"
+export DOH_PROJECT_DIR="/custom/project/doh"
+export DOH_GLOBAL_DIR="/custom/global/doh"
 ```
 
 ## Version Management

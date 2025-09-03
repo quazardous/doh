@@ -12,12 +12,12 @@ source "$LIB_DIR/numbering.sh"
 
 # Test environment setup
 _tf_setup() {
-    # Use PROJECT_DOH_DIR from test launcher (already set)
+    # Use DOH_PROJECT_DIR from test launcher (already set)
     # Create minimal DOH project structure in the isolated project directory
-    _tff_create_minimal_doh_project "$PROJECT_DOH_DIR" >/dev/null
+    _tff_create_minimal_doh_project "$DOH_PROJECT_DIR" >/dev/null
     
     # Set project name for workspace functions
-    local project_name="test_project_$(basename "$PROJECT_DOH_DIR")"
+    local project_name="test_project_$(basename "$DOH_PROJECT_DIR")"
     export TEST_PROJECT_NAME="$project_name"
     
     # Override get_current_project_id for testing
@@ -30,7 +30,7 @@ _tf_teardown() {
     # Cleanup test environment
     unset TEST_PROJECT_NAME
     unset -f get_current_project_id
-    # PROJECT_DOH_DIR cleanup is handled by test launcher
+    # DOH_PROJECT_DIR cleanup is handled by test launcher
 }
 
 # Registry Creation Tests

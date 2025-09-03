@@ -14,16 +14,16 @@ source "$LIB_DIR/version.sh"
 source "$LIB_DIR/frontmatter.sh"
 
 _tf_setup() {
-    # Use the PROJECT_DOH_DIR set by test launcher, just create the structure
-    if [[ -n "$PROJECT_DOH_DIR" ]]; then
+    # Use the DOH_PROJECT_DIR set by test launcher, just create the structure
+    if [[ -n "$DOH_PROJECT_DIR" ]]; then
         # Create the project structure using fixture
-        _tff_create_version_test_project "$(dirname "$PROJECT_DOH_DIR")"
+        _tff_create_version_test_project "$(dirname "$DOH_PROJECT_DIR")"
         
         # Add additional files for version commands testing
-        mkdir -p "$PROJECT_DOH_DIR/versions"
+        mkdir -p "$DOH_PROJECT_DIR/versions"
         
         # Create version files
-        cat > "$PROJECT_DOH_DIR/versions/0.1.0.md" << 'EOF'
+        cat > "$DOH_PROJECT_DIR/versions/0.1.0.md" << 'EOF'
 ---
 version: 0.1.0
 type: initial
@@ -35,7 +35,7 @@ created: 2025-09-01T10:00:00Z
 Initial version of the project.
 EOF
 
-    cat > "$PROJECT_DOH_DIR/versions/0.2.0.md" << 'EOF'
+    cat > "$DOH_PROJECT_DIR/versions/0.2.0.md" << 'EOF'
 ---
 version: 0.2.0
 type: minor
@@ -54,7 +54,7 @@ _tf_teardown() {
 }
 
 test_version_get_current() {
-    cd "$(dirname "$PROJECT_DOH_DIR")"
+    cd "$(dirname "$DOH_PROJECT_DIR")"
     
     local version
     version=$(version_get_current)
@@ -66,13 +66,13 @@ test_version_get_current() {
     cd - > /dev/null
 }
 
-test_version_set_project() {
-    cd "$$(dirname "$PROJECT_DOH_DIR")"
+test_version_set_current() {
+    cd "$(dirname "$DOH_PROJECT_DIR")"
     
-    version_set_project "0.2.0" > /dev/null
+    version_set_current "0.2.0" > /dev/null
     local exit_code=$?
     
-    _tf_assert_equals 0 $exit_code "version_set_project should succeed"
+    _tf_assert_equals 0 $exit_code "version_set_current should succeed"
     
     local new_version
     new_version=$(cat VERSION)
@@ -81,14 +81,14 @@ test_version_set_project() {
     cd - > /dev/null
 }
 
-test_bump_project_version_patch() {
-    cd "$$(dirname "$PROJECT_DOH_DIR")"
+test_version_bump_current_patch() {
+    cd "$(dirname "$DOH_PROJECT_DIR")"
     
     local new_version
-    new_version=$(bump_project_version "patch")
+    new_version=$(version_bump_current "patch")
     local exit_code=$?
     
-    _tf_assert_equals 0 $exit_code "bump_project_version patch should succeed"
+    _tf_assert_equals 0 $exit_code "version_bump_current patch should succeed"
     _tf_assert_equals "0.1.1" "$new_version" "Should increment patch version"
     
     local file_version
@@ -98,34 +98,34 @@ test_bump_project_version_patch() {
     cd - > /dev/null
 }
 
-test_bump_project_version_minor() {
-    cd "$$(dirname "$PROJECT_DOH_DIR")"
+test_version_bump_current_minor() {
+    cd "$(dirname "$DOH_PROJECT_DIR")"
     
     local new_version
-    new_version=$(bump_project_version "minor")
+    new_version=$(version_bump_current "minor")
     local exit_code=$?
     
-    _tf_assert_equals 0 $exit_code "bump_project_version minor should succeed"
+    _tf_assert_equals 0 $exit_code "version_bump_current minor should succeed"
     _tf_assert_equals "0.2.0" "$new_version" "Should increment minor version"
     
     cd - > /dev/null
 }
 
-test_bump_project_version_major() {
-    cd "$$(dirname "$PROJECT_DOH_DIR")"
+test_version_bump_current_major() {
+    cd "$(dirname "$DOH_PROJECT_DIR")"
     
     local new_version
-    new_version=$(bump_project_version "major")
+    new_version=$(version_bump_current "major")
     local exit_code=$?
     
-    _tf_assert_equals 0 $exit_code "bump_project_version major should succeed"
+    _tf_assert_equals 0 $exit_code "version_bump_current major should succeed"
     _tf_assert_equals "1.0.0" "$new_version" "Should increment major version"
     
     cd - > /dev/null
 }
 
 test_version_find_missing_files() {
-    cd "$$(dirname "$PROJECT_DOH_DIR")"
+    cd "$(dirname "$DOH_PROJECT_DIR")"
     
     # Create file without version
     cat > .doh/epics/no_version.md << 'EOF'
@@ -158,32 +158,32 @@ EOF
 }
 
 test_version_file_operations() {
-    cd "$$(dirname "$PROJECT_DOH_DIR")"
+    cd "$(dirname "$DOH_PROJECT_DIR")"
     
     # Test getting file version
     local version
-    version=$(get_file_version ".doh/epics/001.md")
+    version=$(version_get_file ".doh/epics/001.md")
     _tf_assert_equals "0.1.0" "$version" "Should get file version from frontmatter"
     
     # Test setting file version
-    set_file_version ".doh/epics/001.md" "0.3.0" > /dev/null
+    version_set_file ".doh/epics/001.md" "0.3.0" > /dev/null
     local exit_code=$?
     _tf_assert_equals 0 $exit_code "Should set file version successfully"
     
     # Verify version was set
     local new_version
-    new_version=$(get_file_version ".doh/epics/001.md")
+    new_version=$(version_get_file ".doh/epics/001.md")
     _tf_assert_equals "0.3.0" "$new_version" "File version should be updated"
     
     cd - > /dev/null
 }
 
 test_version_file_bump() {
-    cd "$$(dirname "$PROJECT_DOH_DIR")"
+    cd "$(dirname "$DOH_PROJECT_DIR")"
     
     # Test bumping file version
     local new_version
-    new_version=$(bump_file_version ".doh/epics/002.md" "minor")
+    new_version=$(version_bump_file ".doh/epics/002.md" "minor")
     local exit_code=$?
     
     _tf_assert_equals 0 $exit_code "Should bump file version successfully"
@@ -191,23 +191,23 @@ test_version_file_bump() {
     
     # Verify file was updated
     local file_version
-    file_version=$(get_file_version ".doh/epics/002.md")
+    file_version=$(version_get_file ".doh/epics/002.md")
     _tf_assert_equals "0.2.0" "$file_version" "File should contain new version"
     
     cd - > /dev/null
 }
 
 test_version_consistency_check() {
-    cd "$$(dirname "$PROJECT_DOH_DIR")"
+    cd "$(dirname "$DOH_PROJECT_DIR")"
     
     # Set inconsistent versions
-    version_set_project "0.3.0" > /dev/null
-    set_file_version ".doh/epics/001.md" "0.1.0" > /dev/null
-    set_file_version ".doh/epics/002.md" "0.2.0" > /dev/null
+    version_set_current "0.3.0" > /dev/null
+    version_set_file ".doh/epics/001.md" "0.1.0" > /dev/null
+    version_set_file ".doh/epics/002.md" "0.2.0" > /dev/null
     
     # Check for version inconsistencies
     local inconsistent_files
-    inconsistent_files=$(find_version_inconsistencies)
+    inconsistent_files=$(version_find_inconsistencies)
     
     # Should find files with versions different from project version
     echo "$inconsistent_files" | grep -q "001.md"
@@ -220,7 +220,7 @@ test_version_consistency_check() {
 }
 
 test_version_list_operations() {
-    cd "$$(dirname "$PROJECT_DOH_DIR")"
+    cd "$(dirname "$DOH_PROJECT_DIR")"
     
     # Create additional version files
     cat > .doh/versions/0.2.0.md << 'EOF'
@@ -235,7 +235,7 @@ EOF
     
     # Test listing versions
     local versions
-    versions=$(list_versions)
+    versions=$(version_list)
     
     echo "$versions" | grep -q "0.1.0"
     _tf_assert_equals 0 $? "Should list existing version 0.1.0"

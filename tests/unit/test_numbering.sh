@@ -37,20 +37,20 @@ cleanup_temp_project() {
 
 # Test environment setup  
 _tf_setup() {
-    # Use the PROJECT_DOH_DIR set by test launcher, create the structure
-    if [[ -n "$PROJECT_DOH_DIR" ]]; then
-        # PROJECT_DOH_DIR now points directly to the .doh directory
+    # Use the DOH_PROJECT_DIR set by test launcher, create the structure
+    if [[ -n "$DOH_PROJECT_DIR" ]]; then
+        # DOH_PROJECT_DIR now points directly to the .doh directory
         # Create project root and basic structure
-        local project_root="$(dirname "$PROJECT_DOH_DIR")"
+        local project_root="$(dirname "$DOH_PROJECT_DIR")"
         mkdir -p "$project_root"
-        mkdir -p "$PROJECT_DOH_DIR"/{epics,prds,quick}
+        mkdir -p "$DOH_PROJECT_DIR"/{epics,prds,quick}
         echo "0.1.0" > "$project_root/VERSION"
         mkdir -p "$project_root/.git"
         
         # Now source the library after directory structure exists
         source "$LIB_DIR/numbering.sh"
     else
-        echo "Error: PROJECT_DOH_DIR not set by test launcher" >&2
+        echo "Error: DOH_PROJECT_DIR not set by test launcher" >&2
         return 1
     fi
 }

@@ -82,6 +82,35 @@ When analyzing logs, you will look for:
 **IMPORTANT**:
 Ensure you read the test carefully to understand what it is testing, so you can better analyze the results.
 
+## Test Prioritization Strategy
+
+After analyzing test results, you must prioritize issues and fixes to maximize efficiency and impact.  
+Use the following hierarchy when reporting and suggesting next steps:
+
+1. **Quick Wins (Easy Fixes)**
+   - Identify tests failing for trivial or isolated reasons (e.g., missing import, bad path, misconfigured env var, small typo).
+   - Fixing these first quickly increases the global pass rate and reduces noise in the test suite.
+
+2. **High Impact Failures**
+   - Prioritize tests that validate critical paths (authentication, payments, core APIs).
+   - Even if fixes are more complex, these are blockers for deployment and must be highlighted.
+
+3. **Clustered Failures**
+   - Detect groups of tests failing for the same root cause (e.g., DB connection errors, common dependency issue).
+   - Report them as a single root issue with a list of affected tests, since fixing one root bug may resolve many failures.
+
+4. **Flaky Tests**
+   - Identify intermittent failures.
+   - Recommend targeted reruns to confirm instability.
+   - Prioritize fixing flaky tests that affect the critical path; defer others until core stability is achieved.
+
+5. **Cost vs Benefit Matrix**
+   - For each failure, estimate:
+     - **Effort**: complexity of fix based on logs, dependencies, and setup.
+     - **Impact**: severity of feature affected and number of tests blocked.
+   - Order the proposed fixes to maximize impact per unit of effort.
+
+
 ## Output Format
 
 Your analysis should follow this structure:
@@ -109,6 +138,20 @@ Your analysis should follow this structure:
 
 ## Recommendations
 [Specific actions to fix failures or improve test reliability]
+
+## Prioritization Roadmap
+1. Quick Wins
+[List of Quick Wins]
+   
+2. High Impact Failures
+[List of High Impact Failures]
+
+3. Clustered Failures
+[List of Clustered Failures]
+
+4. Flaky Tests
+[List of Flaky Tests]
+
 ```
 
 ## Special Considerations

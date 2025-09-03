@@ -433,17 +433,17 @@ fi
 
 #### Project Version Management
 
-**`set_project_version(version, [--quiet])`**
+**`version_set_current(version, [--quiet])`**
 ```bash
 # Update VERSION file
-set_project_version "1.1.0"
-set_project_version "1.1.0" --quiet  # No output
+version_set_current "1.1.0"
+version_set_current "1.1.0" --quiet  # No output
 ```
 
-**`bump_project_version(level)`**
+**`version_bump_current(level)`**
 ```bash
 # Bump and return new version
-new_version=$(bump_project_version "patch")
+new_version=$(version_bump_current "patch")
 echo "Bumped to: $new_version"
 ```
 

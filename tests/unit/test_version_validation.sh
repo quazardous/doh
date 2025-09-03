@@ -18,8 +18,8 @@ source ".claude/scripts/doh/lib/version.sh"
 
 # Export functions for use in test assertions
 export -f version_validate version_compare version_increment _version_to_number
-export -f version_get_current version_get_file version_set_file version_set_project
-export -f version_find_missing_files version_bump_file version_bump_project
+export -f version_get_current version_get_file version_set_file version_set_current
+export -f version_find_missing_files version_bump_file version_bump_current
 
 _tf_setup() {
     # Create temporary test environment

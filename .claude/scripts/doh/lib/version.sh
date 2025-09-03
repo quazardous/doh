@@ -21,13 +21,17 @@ readonly VERSION_LIB_VERSION="1.0.0"
 # @exitcode 0 If successful
 # @exitcode 1 If not in DOH project, VERSION file not found, empty, or invalid
 version_get_current() {
-    local doh_root
-    doh_root="$(doh_project_dir)" || {
-        echo "Error: Not in a DOH project" >&2
-        return 1
-    }
-    
-    local version_file="$doh_root/VERSION"
+    local version_file
+    if [[ -n "${DOH_VERSION_FILE:-}" ]]; then
+        version_file="$DOH_VERSION_FILE"
+    else
+        local project_root
+        project_root="$(doh_project_root)" || {
+            echo "Error: Not in a DOH project" >&2
+            return 1
+        }
+        version_file="$project_root/VERSION"
+    fi
     
     if [[ ! -f "$version_file" ]]; then
         echo "Error: VERSION file not found at project root: $version_file" >&2
@@ -186,13 +190,13 @@ version_increment() {
     echo "$new_version"
 }
 
-# @description Set project version in VERSION file
+# @description Set current project version in VERSION file
 # @public
 # @arg $1 string New version string
 # @stderr Error messages if invalid version or unable to write
 # @exitcode 0 If successful
 # @exitcode 1 If not in DOH project, invalid version, or write error
-version_set_project() {
+version_set_current() {
     local new_version="$1"
     
     if ! version_validate "$new_version"; then
@@ -200,13 +204,17 @@ version_set_project() {
         return 1
     fi
     
-    local doh_root
-    doh_root="$(doh_project_dir)" || {
-        echo "Error: Not in a DOH project" >&2
-        return 1
-    }
-    
-    local version_file="$doh_root/VERSION"
+    local version_file
+    if [[ -n "${DOH_VERSION_FILE:-}" ]]; then
+        version_file="$DOH_VERSION_FILE"
+    else
+        local project_root
+        project_root="$(doh_project_root)" || {
+            echo "Error: Not in a DOH project" >&2
+            return 1
+        }
+        version_file="$project_root/VERSION"
+    fi
     
     # Write new version to file
     if ! echo "$new_version" > "$version_file"; then
@@ -215,14 +223,14 @@ version_set_project() {
     fi
 }
 
-# @description Bump project version by increment type
+# @description Bump current project version by increment type
 # @public
 # @arg $1 string Increment type (major, minor, patch, prerelease)
 # @stdout New version string
 # @stderr Error messages if unable to bump version
 # @exitcode 0 If successful
 # @exitcode 1 If error
-version_bump_project() {
+version_bump_current() {
     local increment_type="$1"
     
     local current_version
@@ -231,7 +239,7 @@ version_bump_project() {
     local new_version
     new_version="$(version_increment "$current_version" "$increment_type")" || return 1
     
-    version_set_project "$new_version" || return 1
+    version_set_current "$new_version" || return 1
     
     echo "$new_version"
 }

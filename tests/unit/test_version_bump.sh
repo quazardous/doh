@@ -40,8 +40,8 @@ version_get_file() {
 version_set_file() {
     "$DOH_API_PATH" version set_file "$@"
 }
-version_set_project() {
-    "$DOH_API_PATH" version set_project "$@"
+version_set_current() {
+    "$DOH_API_PATH" version set_current "$@"
 }
 version_find_missing_files() {
     "$DOH_API_PATH" version find_missing_files "$@"
@@ -49,8 +49,8 @@ version_find_missing_files() {
 version_bump_file() {
     "$DOH_API_PATH" version bump_file "$@"
 }
-version_bump_project() {
-    "$DOH_API_PATH" version bump_project "$@"
+version_bump_current() {
+    "$DOH_API_PATH" version bump_current "$@"
 }
 
 # Use proper DOH API function names directly - no wrapper functions
@@ -63,6 +63,12 @@ _tf_setup() {
     # Initialize basic DOH structure
     mkdir -p .doh .git
     echo "0.1.0" > VERSION
+    
+    # Set DOH_VERSION_FILE to point to our test VERSION file
+    export DOH_VERSION_FILE="$TEST_DIR/VERSION"
+    
+    # Set DOH_PROJECT_DIR to point to our test .doh directory
+    export DOH_PROJECT_DIR="$TEST_DIR/.doh"
     
     # Create a test DOH file with frontmatter
     cat > .doh/test.md << 'EOF'
@@ -92,6 +98,10 @@ EOF
 }
 
 _tf_teardown() {
+    # Clean up environment
+    unset DOH_VERSION_FILE
+    unset DOH_PROJECT_DIR
+    
     # Cleanup test directory
     if [[ -n "$TEST_DIR" && -d "$TEST_DIR" ]]; then
         rm -rf "$TEST_DIR"
@@ -140,13 +150,13 @@ test_increment_version_invalid() {
     _tf_assert_equals 1 $exit_code "Invalid increment level should fail"
 }
 
-test_set_project_version() {
+test_version_set_current() {
     cd "$TEST_DIR"
     
-    version_set_project "0.2.0" > /dev/null
+    version_set_current "0.2.0" > /dev/null
     local exit_code=$?
     
-    _tf_assert_equals 0 $exit_code "version_set_project should succeed"
+    _tf_assert_equals 0 $exit_code "version_set_current should succeed"
     
     local new_version
     new_version=$(cat VERSION)
@@ -155,14 +165,14 @@ test_set_project_version() {
     cd - > /dev/null
 }
 
-test_version_bump_project() {
+test_version_bump_current() {
     cd "$TEST_DIR"
     
     local new_version
-    new_version=$(version_bump_project "patch")
+    new_version=$(version_bump_current "patch")
     local exit_code=$?
     
-    _tf_assert_equals 0 $exit_code "version_bump_project should succeed"
+    _tf_assert_equals 0 $exit_code "version_bump_current should succeed"
     _tf_assert_equals "0.1.1" "$new_version" "New version should be 0.1.1"
     
     local file_version
@@ -293,7 +303,7 @@ test_version_bump_workflow() {
     
     # Bump project version
     local new_version
-    new_version=$(version_bump_project "patch")
+    new_version=$(version_bump_current "patch")
     _tf_assert_equals "0.1.1" "$new_version" "Should bump to 0.1.1"
     
     # Verify VERSION file is updated
