@@ -347,3 +347,69 @@ file_cache_list_epic_files() {
         grep "^[0-9]*,task,.*,.*,$epic_name$" "$cache_file" 2>/dev/null || true
     } | sort -t',' -k1,1n
 }
+
+# Global variable to track lock file descriptor
+declare -g DOH_CACHE_LOCK_FD=""
+
+# @description Acquire exclusive lock for cache file operations using flock
+# @arg $1 string Cache file path
+# @stderr Error messages
+# @exitcode 0 If lock acquired successfully
+# @exitcode 1 If unable to acquire lock
+file_cache_acquire_lock() {
+    local cache_file="$1"
+    
+    if [[ -z "$cache_file" ]]; then
+        echo "Error: Cache file path required for locking" >&2
+        return 1
+    fi
+    
+    # Create lock file path (cache_file + .lock)
+    local lock_file="${cache_file}.lock"
+    
+    # Open lock file and get file descriptor
+    exec {DOH_CACHE_LOCK_FD}>"$lock_file" || {
+        echo "Error: Unable to open lock file $lock_file" >&2
+        return 1
+    }
+    
+    # Acquire exclusive lock with timeout (10 seconds)
+    if ! flock -x -w 10 "$DOH_CACHE_LOCK_FD"; then
+        echo "Error: Unable to acquire lock for $cache_file (timeout after 10s)" >&2
+        exec {DOH_CACHE_LOCK_FD}>&-  # Close file descriptor
+        DOH_CACHE_LOCK_FD=""
+        return 1
+    fi
+    
+    return 0
+}
+
+# @description Release lock for cache file operations
+# @stderr Error messages
+# @exitcode 0 If lock released successfully
+# @exitcode 1 If no lock to release or error
+file_cache_release_lock() {
+    if [[ -z "$DOH_CACHE_LOCK_FD" ]]; then
+        echo "Warning: No active lock to release" >&2
+        return 1
+    fi
+    
+    # Release lock and close file descriptor
+    exec {DOH_CACHE_LOCK_FD}>&- || {
+        echo "Warning: Error closing lock file descriptor" >&2
+        DOH_CACHE_LOCK_FD=""
+        return 1
+    }
+    
+    DOH_CACHE_LOCK_FD=""
+    return 0
+}
+
+# @description Generic acquire lock function (alias for file_cache_acquire_lock)
+# @arg $1 string File path to lock
+# @stderr Error messages
+# @exitcode 0 If lock acquired successfully
+# @exitcode 1 If unable to acquire lock
+acquire_lock() {
+    file_cache_acquire_lock "$1"
+}

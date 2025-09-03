@@ -409,13 +409,13 @@ version_validate() {
     fi
 }
 
-# @description Find files missing version information
+# @description Find files without file_version information
 # @public
-# @stdout List of files missing version information
+# @stdout List of files missing file_version information
 # @stderr Error messages
 # @exitcode 0 If successful
 # @exitcode 1 If not in DOH project
-version_find_missing_files() {
+version_find_files_without_file_version() {
     local doh_root
     doh_root="$(doh_project_dir)" || return 1
     

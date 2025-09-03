@@ -195,9 +195,9 @@ status: open
 EOF
     
     # Test finding files missing version
-    if command -v version_find_missing_files > /dev/null; then
+    if command -v version_find_files_without_file_version > /dev/null; then
         local missing_files
-        missing_files=$(version_find_missing_files .doh/epics)
+        missing_files=$(version_find_files_without_file_version .doh/epics)
         
         if echo "$missing_files" | grep -q "no_version.md"; then
             echo "✅ PASS: Found files missing version"
@@ -205,7 +205,7 @@ EOF
             echo "⚠️  INFO: Version discovery may need enhancement"
         fi
     else
-        echo "⚠️  INFO: version_find_missing_files function not available"
+        echo "⚠️  INFO: version_find_files_without_file_version function not available"
     fi
     
     cd - > /dev/null

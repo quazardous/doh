@@ -11,7 +11,6 @@ set -eo pipefail
 
 # Get script directory for relative paths
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DOH_PROJECT_DIR="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 
 # Parse flags
 PRIVATE_CALL=false

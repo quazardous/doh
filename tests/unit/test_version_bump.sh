@@ -43,8 +43,8 @@ version_set_file() {
 version_set_current() {
     "$DOH_API_PATH" version set_current "$@"
 }
-version_find_missing_files() {
-    "$DOH_API_PATH" version find_missing_files "$@"
+version_find_files_without_file_version() {
+    "$DOH_API_PATH" version find_files_without_file_version "$@"
 }
 version_bump_file() {
     "$DOH_API_PATH" version bump_file "$@"
@@ -277,7 +277,7 @@ This file has frontmatter but no version.
 EOF
     
     local missing_files
-    missing_files=$(version_find_missing_files .)
+    missing_files=$(version_find_files_without_file_version .)
     
     # Should find the file with frontmatter but no version
     echo "$missing_files" | grep -q "no_version.md"

@@ -137,7 +137,7 @@ test_version_release_workflow() {
     
     # Step 1: Validate current project state
     local current_version
-    current_version=$(get_current_version)
+    current_version=$(version_get_current)
     _tf_assert_equals "0.1.0" "$current_version" "Initial version should be 0.1.0"
     
     # Step 2: Complete tasks (mark as completed)
@@ -310,21 +310,21 @@ test_version_rollback_scenario() {
     
     # Create backup of current state
     local initial_version
-    initial_version=$(get_current_version)
+    initial_version=$(version_get_current)
     cp VERSION VERSION.backup
     
     # Attempt version bump
     version_bump_current "minor" > /dev/null
     
     local new_version
-    new_version=$(get_current_version)
+    new_version=$(version_get_current)
     _tf_assert_equals "0.2.0" "$new_version" "Version should be bumped to 0.2.0"
     
     # Simulate rollback need (restore from backup)
     cp VERSION.backup VERSION
     
     local rolled_back_version
-    rolled_back_version=$(get_current_version)
+    rolled_back_version=$(version_get_current)
     _tf_assert_equals "$initial_version" "$rolled_back_version" "Version should be rolled back"
     
     # Cleanup

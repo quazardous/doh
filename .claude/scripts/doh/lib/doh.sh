@@ -25,27 +25,19 @@ doh_global_dir() {
 doh_project_dir() {
     # If DOH_PROJECT_DIR is set, it should point directly to the .doh directory
     if [[ -n "${DOH_PROJECT_DIR:-}" ]]; then
-        if [[ -d "$DOH_PROJECT_DIR" ]]; then
+        if [[ -d "$(dirname "$DOH_PROJECT_DIR")" ]]; then
             echo "$DOH_PROJECT_DIR"
             return 0
         else
-            echo "❌ Error: DOH_PROJECT_DIR set to '$DOH_PROJECT_DIR' but directory not found" >&2
+            echo "❌ Error: Parent directory of DOH_PROJECT_DIR ('$DOH_PROJECT_DIR') not found" >&2
             return 1
         fi
     fi
     
-    # Otherwise, search up the directory tree from current location
-    local dir="$PWD"
-    while [[ "$dir" != "/" ]]; do
-        if [[ -d "$dir/.git" && -d "$dir/.doh" ]]; then
-            echo "$dir/.doh"
-            return 0
-        fi
-        dir="$(dirname "$dir")"
-    done
-    echo "❌ Error: Not in a DOH project (no .doh/ directory at git repo root)" >&2
-    echo "Initialize DOH project with: /doh:init" >&2
-    return 1
+    # Otherwise, default to project root/.doh without trying to be smart
+    local project_root
+    project_root="$(doh_project_root)"
+    echo "$project_root/.doh"
 }
 
 # @description Get DOH project root (relative to library location)

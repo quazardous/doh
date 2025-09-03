@@ -9,6 +9,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/doh.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/workspace.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/numbering.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/frontmatter.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/file-cache.sh"
 
 # Guard against multiple sourcing
 [[ -n "${DOH_LIB_GRAPH_CACHE_LOADED:-}" ]] && return 0
@@ -134,7 +135,7 @@ graph_cache_remove_relationship() {
     cache_file="$(_graph_cache_ensure_cache)" || return 1
     
     # Acquire lock for atomic update
-    acquire_lock "$cache_file" || return 1
+    file_cache_acquire_lock "$cache_file" || return 1
     
     local temp_file=$(mktemp)
     jq --arg num "$number" --arg timestamp "$(date -Iseconds)" '
@@ -281,7 +282,7 @@ graph_cache_rebuild() {
     echo "Rebuilding graph cache..." >&2
     
     # Create fresh cache
-    create_empty_graph_cache "$cache_file"
+    _graph_cache_create_empty_cache "$cache_file"
     
     # Scan all numbered files for relationships
     local numbered_files
@@ -577,6 +578,7 @@ graph_cache_get_version_blocking_tasks() {
 # @exitcode 1 If task parameter missing or no versions affected
 graph_cache_get_task_versions() {
     local task="$1"
+    local target_version="" file_version=""
     
     if [[ -z "$task" ]]; then
         echo "Error: Task number required" >&2
@@ -588,10 +590,10 @@ graph_cache_get_task_versions() {
     project_root="$(doh_project_dir)" || return 1
     
     local task_file
-    task_file=$(find "$project_root/.doh" -name "${task}.md" -type f | head -1)
+    task_file=$(find "$project_root" -name "${task}.md" -type f | head -1)
     
     if [[ -f "$task_file" ]]; then
-        local target_version file_version
+        local target_version="" file_version=""
         target_version=$(frontmatter_get_field "$task_file" "target_version")
         file_version=$(frontmatter_get_field "$task_file" "file_version")
         
@@ -637,7 +639,7 @@ graph_cache_sync_version_cache() {
         return 1
     }
     
-    local versions_dir="$doh_root/.doh/versions"
+    local versions_dir="$doh_root/versions"
     
     if [[ ! -d "$versions_dir" ]]; then
         echo "No versions directory found" >&2
@@ -672,7 +674,7 @@ graph_cache_sync_version_cache() {
                     fi
                 fi
             fi
-        done < <(find "$doh_root/.doh" -name "*.md" -type f)
+        done < <(find "$doh_root" -name "*.md" -type f)
         
         # Create version data with actual required tasks
         local version_data='{
@@ -707,7 +709,7 @@ graph_cache_sync_specific_versions() {
         return 1
     }
     
-    local versions_dir="$doh_root/.doh/versions"
+    local versions_dir="$doh_root/versions"
     
     if [[ ! -d "$versions_dir" ]]; then
         echo "No versions directory found" >&2
@@ -756,7 +758,7 @@ graph_cache_find_versions_for_task() {
     local project_root
     project_root="$(doh_project_dir)" || return 1
     
-    local versions_dir="$project_root/.doh/versions"
+    local versions_dir="$project_root/versions"
     
     if [[ ! -d "$versions_dir" ]]; then
         return 0
@@ -787,9 +789,7 @@ graph_cache_check_version_readiness() {
     local project_root
     project_root="$(doh_project_dir)" || return 1
     
-    if ! command -v get_frontmatter_field > /dev/null 2>&1; then
-        source "$(dirname "${BASH_SOURCE[0]}")/frontmatter.sh"
-    fi
+    # frontmatter.sh is already sourced at the top of this file
     
     local total_tasks=0
     local completed_tasks=0
@@ -808,7 +808,7 @@ graph_cache_check_version_readiness() {
                 fi
             fi
         fi
-    done < <(find "$project_root/.doh" -name "*.md" -type f)
+    done < <(find "$project_root" -name "*.md" -type f)
     
     # Check readiness
     if [[ $total_tasks -eq 0 ]]; then

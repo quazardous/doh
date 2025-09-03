@@ -20,12 +20,16 @@ source ".claude/scripts/doh/lib/frontmatter.sh"
 
 # Export functions for use in test assertions
 export -f _graph_cache_ensure_cache graph_cache_sync_version_cache graph_cache_rebuild
-export -f get_version_blocking_tasks get_task_versions update_frontmatter_field
+export -f graph_cache_get_version_blocking_tasks graph_cache_get_task_versions graph_cache_check_version_readiness frontmatter_update_field
 
 _tf_setup() {
     # Create temporary test environment
     TEST_DIR=$(mktemp -d)
     cd "$TEST_DIR"
+    
+    # Set DOH environment variables for test isolation
+    export DOH_PROJECT_DIR="$TEST_DIR/.doh"
+    export DOH_VERSION_FILE="$TEST_DIR/VERSION"
     
     # Initialize DOH project structure
     mkdir -p .doh/{versions,epics,cache} .git
@@ -100,6 +104,10 @@ EOF
 }
 
 _tf_teardown() {
+    # Clean up environment variables
+    unset DOH_PROJECT_DIR
+    unset DOH_VERSION_FILE
+    
     # Cleanup test directory
     if [[ -n "$TEST_DIR" && -d "$TEST_DIR" ]]; then
         rm -rf "$TEST_DIR"
@@ -142,12 +150,12 @@ test_version_task_relationships() {
     
     # Test querying tasks by version
     local v1_tasks
-    v1_tasks=$(get_version_blocking_tasks "0.1.0")
+    v1_tasks=$(graph_cache_get_version_blocking_tasks "0.1.0")
     echo "$v1_tasks" | grep -q "001"
     _tf_assert_equals 0 $? "Should find task 001 in version 0.1.0"
     
     local v2_tasks  
-    v2_tasks=$(get_version_blocking_tasks "0.2.0")
+    v2_tasks=$(graph_cache_get_version_blocking_tasks "0.2.0")
     echo "$v2_tasks" | grep -q "002"
     _tf_assert_equals 0 $? "Should find task 002 in version 0.2.0"
     
@@ -166,14 +174,14 @@ test_task_version_queries() {
     
     # Test querying versions by task
     local task_versions
-    task_versions=$(get_task_versions "002")
+    task_versions=$(graph_cache_get_task_versions "002")
     
     echo "$task_versions" | grep -q "0.2.0"
     _tf_assert_equals 0 $? "Task 002 should be associated with version 0.2.0"
     
     # Test task with multiple version associations
     local task3_versions
-    task3_versions=$(get_task_versions "003")
+    task3_versions=$(graph_cache_get_task_versions "003")
     
     echo "$task3_versions" | grep -q "0.2.0"
     _tf_assert_equals 0 $? "Task 003 should be associated with current file_version 0.2.0"
@@ -213,7 +221,7 @@ EOF
     
     # Verify new task is in cache
     local task_version
-    task_version=$(get_task_versions "004")
+    task_version=$(graph_cache_get_task_versions "004")
     echo "$task_version" | grep -q "0.3.0"
     _tf_assert_equals 0 $? "New task should appear in cache with target version 0.3.0"
     
@@ -228,7 +236,7 @@ test_cache_invalidation() {
     graph_cache_sync_version_cache > /dev/null
     
     # Modify task file
-    update_frontmatter_field ".doh/epics/003.md" "target_version" "0.4.0" > /dev/null
+    frontmatter_update_field ".doh/epics/003.md" "target_version" "0.4.0" > /dev/null
     
     # Invalidate and refresh cache
     graph_cache_rebuild > /dev/null
@@ -236,7 +244,7 @@ test_cache_invalidation() {
     
     # Verify changes are reflected
     local task_versions
-    task_versions=$(get_task_versions "003")
+    task_versions=$(graph_cache_get_task_versions "003")
     echo "$task_versions" | grep -q "0.4.0"
     _tf_assert_equals 0 $? "Updated target version should be reflected in cache"
     
@@ -272,12 +280,12 @@ test_version_milestone_tracking() {
     
     # Test version readiness check
     local v1_ready
-    v1_ready=$(check_version_readiness "0.1.0")
+    v1_ready=$(graph_cache_check_version_readiness "0.1.0")
     echo "$v1_ready" | grep -q "READY"
     _tf_assert_equals 0 $? "Version 0.1.0 should be ready (all tasks completed)"
     
     local v3_ready
-    v3_ready=$(check_version_readiness "0.3.0")
+    v3_ready=$(graph_cache_check_version_readiness "0.3.0")
     echo "$v3_ready" | grep -q "NOT_READY\|PENDING"
     _tf_assert_equals 0 $? "Version 0.3.0 should not be ready (task 003 in progress)"
     
@@ -321,7 +329,7 @@ EOF
     
     # Test query performance
     start_time=$(date +%s%N)
-    get_version_blocking_tasks "0.2.0" > /dev/null
+    graph_cache_get_version_blocking_tasks "0.2.0" > /dev/null
     end_time=$(date +%s%N)
     
     duration_ms=$(( (end_time - start_time) / 1000000 ))
@@ -339,14 +347,14 @@ test_cache_consistency() {
     
     # Get initial state
     local initial_tasks
-    initial_tasks=$(get_version_blocking_tasks "0.2.0")
+    initial_tasks=$(graph_cache_get_version_blocking_tasks "0.2.0")
     
     # Repopulate cache
     graph_cache_sync_version_cache > /dev/null
     
     # Verify consistency
     local repopulated_tasks
-    repopulated_tasks=$(get_version_blocking_tasks "0.2.0")
+    repopulated_tasks=$(graph_cache_get_version_blocking_tasks "0.2.0")
     
     _tf_assert_equals "$initial_tasks" "$repopulated_tasks" "Cache should be consistent after repopulation"
     
@@ -368,5 +376,3 @@ _tf_assert_less_than() {
     fi
 }
 
-# Run all tests
-_tf_run_tests

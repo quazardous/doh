@@ -165,7 +165,7 @@ fi
 | `version_bump_file` | Bump file version by type | `<file> <type>` | New version |
 | `version_compare` | Compare two version strings | `<v1> <v2>` | -1/0/1 |
 | `version_validate` | Validate version format | `<version>` | 0=valid, 1=invalid |
-| `version_find_missing_files` | Find files missing versions | None | File list |
+| `version_find_files_without_file_version` | Find files without file_version | None | File list |
 | `version_find_inconsistencies` | Find version inconsistencies | None | Issue list |
 | `version_list` | List all versions in project | None | Version list |
 

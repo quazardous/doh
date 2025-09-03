@@ -124,7 +124,7 @@ test_version_bump_current_major() {
     cd - > /dev/null
 }
 
-test_version_find_missing_files() {
+test_version_find_files_without_file_version() {
     cd "$(dirname "$DOH_PROJECT_DIR")"
     
     # Create file without version
@@ -144,7 +144,7 @@ This file has no frontmatter.
 EOF
     
     local missing_files
-    missing_files=$(version_find_missing_files .doh/epics)
+    missing_files=$(version_find_files_without_file_version .doh/epics)
     
     # Should find the file with frontmatter but no version
     echo "$missing_files" | grep -q "no_version.md"
