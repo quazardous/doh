@@ -69,11 +69,26 @@ _tf_run_single_test() {
     if [[ "${VERBOSE:-false}" == "true" ]]; then
         VERBOSE=true "$SCRIPT_DIR/test_launcher.sh" "$test_file" || result=$?
     else
-        # Capture only the final summary line for minimal output
+        # Capture output and extract assertion counts for minimal output
         local output
         output=$(VERBOSE=false "$SCRIPT_DIR/test_launcher.sh" "$test_file" 2>/dev/null) || result=$?
-        # Extract just the final test result line
-        echo "$output" | tail -1
+        
+        # Extract assertion counts from TAP output
+        local total_assertions=$(echo "$output" | grep "^1\.\." | cut -d'.' -f3)
+        local passed_assertions=$(echo "$output" | grep "# Passed:" | cut -d'/' -f1 | cut -d':' -f2 | tr -d ' ')
+        
+        # Store counts for summary (using global variables)
+        _TF_TOTAL_ASSERTIONS=${_TF_TOTAL_ASSERTIONS:-0}
+        _TF_PASSED_ASSERTIONS=${_TF_PASSED_ASSERTIONS:-0}
+        (( _TF_TOTAL_ASSERTIONS += ${total_assertions:-0} ))
+        (( _TF_PASSED_ASSERTIONS += ${passed_assertions:-0} ))
+        
+        # Show compact test result
+        if [[ $result -eq 0 ]]; then
+            echo "✅ ${relative_path}: ${passed_assertions:-0}/${total_assertions:-0} assertions"
+        else
+            echo "❌ ${relative_path}: failed"
+        fi
     fi
     
     local end_time=$(date +%s)
@@ -141,6 +156,10 @@ _tf_run_tests_parallel() {
 _tf_run_tests_sequential() {
     local test_files=("$@")
     local failed=0
+    
+    # Initialize assertion counters
+    _TF_TOTAL_ASSERTIONS=0
+    _TF_PASSED_ASSERTIONS=0
     
     _tf_log_info "Running ${#test_files[@]} tests sequentially"
     
@@ -225,10 +244,13 @@ _tf_print_summary() {
         fi
     else
         # Compact summary for non-verbose mode
+        local total_assertions=${_TF_TOTAL_ASSERTIONS:-0}
+        local passed_assertions=${_TF_PASSED_ASSERTIONS:-0}
+        
         if [[ $failed -eq 0 ]]; then
-            echo "✅ $passed/$total tests passed (${duration}s)"
+            echo "✅ $passed/$total tests passed, $passed_assertions/$total_assertions assertions (${duration}s)"
         else
-            echo "❌ $passed/$total tests passed, $failed failed (${duration}s)"
+            echo "❌ $passed/$total tests passed, $failed failed, $passed_assertions/$total_assertions assertions (${duration}s)"
         fi
     fi
     
