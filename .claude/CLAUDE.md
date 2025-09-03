@@ -108,3 +108,5 @@ source .claude/scripts/doh/lib/library.sh && library_function
 - NO MIXED CONCERNS - Don't put validation logic inside API handlers, database queries inside UI components, etc. instead of proper separation
 - NO RESOURCE LEAKS - Don't forget to close database connections, clear timeouts, remove event listeners, or clean up file handles
 - ALWAYS VERIFY CURRENT CODE - Always inspect the codebase before analyzing or suggesting fixes. Do not rely on outdated tasks, backlog items, or prior context.
+- NO PREMATURE SCRIPTING IN REFACTOR - Do not extract logic into separate scripts or automation tools unless the same operation will be repeated across multiple files or contexts. 
+

@@ -26,6 +26,7 @@ _tf_debug() {
     fi
 }
 
+
 # Colors for output (only if terminal supports it)
 if [[ -t 1 ]]; then
     _TF_RED='\033[0;31m'
@@ -52,14 +53,24 @@ _tf_test_suite_start() {
 
 # Finalize test suite
 _tf_test_suite_end() {
-    echo "1..$_TF_TEST_COUNT"
-    echo "# Passed: $_TF_TEST_PASSED/$_TF_TEST_COUNT"
-    echo "# Failed: $_TF_TEST_FAILED/$_TF_TEST_COUNT"
-    
-    if [[ $_TF_TEST_FAILED -gt 0 ]]; then
-        echo -e "# ${_TF_RED}FAILURE${_TF_NC}: $_TF_TEST_FAILED test(s) failed"
-        return 1
+    # Only output TAP format if we have actual test counts
+    if [[ $_TF_TEST_COUNT -gt 0 ]]; then
+        echo "1..$_TF_TEST_COUNT"
+        echo "# Passed: $_TF_TEST_PASSED/$_TF_TEST_COUNT"
+        echo "# Failed: $_TF_TEST_FAILED/$_TF_TEST_COUNT"
+        
+        if [[ $_TF_TEST_FAILED -gt 0 ]]; then
+            echo -e "# ${_TF_RED}FAILURE${_TF_NC}: $_TF_TEST_FAILED test(s) failed"
+            return 1
+        else
+            echo -e "# ${_TF_GREEN}SUCCESS${_TF_NC}: All tests passed"
+            return 0
+        fi
     else
+        # No tests ran
+        echo "1..0"
+        echo "# Passed: 0/0"
+        echo "# Failed: 0/0"
         echo -e "# ${_TF_GREEN}SUCCESS${_TF_NC}: All tests passed"
         return 0
     fi
@@ -73,7 +84,7 @@ _tf_test_result() {
     
     ((_TF_TEST_COUNT++))
     
-    if [[ "$status" == "ok" ]]; then
+    if [[ "$status" == "passed" ]]; then
         ((_TF_TEST_PASSED++))
         echo -e "${_TF_GREEN}ok${_TF_NC} $_TF_TEST_COUNT - $description"
     else
@@ -94,9 +105,9 @@ _tf_assert_equals() {
     local actual="$3"
     
     if [[ "$expected" == "$actual" ]]; then
-        _tf_test_result "ok" "$message"
+        _tf_test_result "passed" "$message"
     else
-        _tf_test_result "not ok" "$message" "Expected '$expected', got '$actual'"
+        _tf_test_result "failed" "$message" "Expected '$expected', got '$actual'"
     fi
 }
 
@@ -106,9 +117,9 @@ _tf_assert_not_equals() {
     local actual="$3"
     
     if [[ "$expected" != "$actual" ]]; then
-        _tf_test_result "ok" "$message"
+        _tf_test_result "passed" "$message"
     else
-        _tf_test_result "not ok" "$message" "Expected '$expected' to be different from '$actual'"
+        _tf_test_result "failed" "$message" "Expected '$expected' to be different from '$actual'"
     fi
 }
 
@@ -117,9 +128,9 @@ _tf_assert_true() {
     local condition="$2"
     
     if [[ "$condition" == "true" ]] || [[ "$condition" == "0" ]]; then
-        _tf_test_result "ok" "$message"
+        _tf_test_result "passed" "$message"
     else
-        _tf_test_result "not ok" "$message" "Expected true, got '$condition'"
+        _tf_test_result "failed" "$message" "Expected true, got '$condition'"
     fi
 }
 
@@ -128,10 +139,10 @@ _tf_assert() {
     shift
     
     if ("$@") &>/dev/null; then
-        _tf_test_result "ok" "$message"
+        _tf_test_result "passed" "$message"
     else
         local exit_code=$?
-        _tf_test_result "not ok" "$message" "Command failed with exit code $exit_code: $*"
+        _tf_test_result "failed" "$message" "Command failed with exit code $exit_code: $*"
     fi
 }
 
@@ -140,9 +151,9 @@ _tf_assert_not() {
     shift
     
     if ! ("$@") &>/dev/null; then
-        _tf_test_result "ok" "$message"
+        _tf_test_result "passed" "$message"
     else
-        _tf_test_result "not ok" "$message" "Command succeeded but was expected to fail: $*"
+        _tf_test_result "failed" "$message" "Command succeeded but was expected to fail: $*"
     fi
 }
 
@@ -151,9 +162,9 @@ _tf_assert_false() {
     local condition="$2"
     
     if [[ "$condition" == "false" ]] || [[ "$condition" != "0" && "$condition" != "true" ]]; then
-        _tf_test_result "ok" "$message"
+        _tf_test_result "passed" "$message"
     else
-        _tf_test_result "not ok" "$message" "Expected false, got '$condition'"
+        _tf_test_result "failed" "$message" "Expected false, got '$condition'"
     fi
 }
 
@@ -163,9 +174,21 @@ _tf_assert_contains() {
     local needle="$3"
     
     if [[ "$haystack" =~ $needle ]]; then
-        _tf_test_result "ok" "$message"
+        _tf_test_result "passed" "$message"
     else
-        _tf_test_result "not ok" "$message" "'$haystack' does not contain '$needle'"
+        _tf_test_result "failed" "$message" "'$haystack' does not contain '$needle'"
+    fi
+}
+
+_tf_assert_not_contains() {
+    local message="$1"
+    local haystack="$2"
+    local needle="$3"
+    
+    if [[ ! "$haystack" =~ $needle ]]; then
+        _tf_test_result "passed" "$message"
+    else
+        _tf_test_result "failed" "$message" "'$haystack' should not contain '$needle'"
     fi
 }
 
@@ -174,9 +197,9 @@ _tf_assert_file_exists() {
     local file="$2"
     
     if [[ -f "$file" ]]; then
-        _tf_test_result "ok" "$message"
+        _tf_test_result "passed" "$message"
     else
-        _tf_test_result "not ok" "$message" "File '$file' does not exist"
+        _tf_test_result "failed" "$message" "File '$file' does not exist"
     fi
 }
 
@@ -186,14 +209,14 @@ _tf_assert_file_contains() {
     local content="$3"
     
     if [[ ! -f "$file" ]]; then
-        _tf_test_result "not ok" "$message" "File '$file' does not exist"
+        _tf_test_result "failed" "$message" "File '$file' does not exist"
         return
     fi
     
     if grep -q "$content" "$file"; then
-        _tf_test_result "ok" "$message"
+        _tf_test_result "passed" "$message"
     else
-        _tf_test_result "not ok" "$message" "File '$file' does not contain '$content'"
+        _tf_test_result "failed" "$message" "File '$file' does not contain '$content'"
     fi
 }
 
@@ -376,7 +399,7 @@ _tf_direct_execution_error() {
 if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
     export -f _tf_test_suite_start _tf_test_suite_end
     export -f _tf_assert_equals _tf_assert_not_equals _tf_assert_true _tf_assert_false _tf_assert _tf_assert_not
-    export -f _tf_assert_contains _tf_assert_file_exists _tf_assert_file_contains
+    export -f _tf_assert_contains _tf_assert_not_contains _tf_assert_file_exists _tf_assert_file_contains
     export -f _tf_run_test_function _tf_run_test_file
     export -f _tf_create_temp_dir _tf_create_temp_file _tf_cleanup_temp _tf_with_mock
     export -f _tf_log_info _tf_log_success _tf_log_error _tf_log_warn _tf_log_debug _tf_log_trace

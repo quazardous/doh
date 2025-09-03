@@ -74,8 +74,20 @@ _tf_run_single_test() {
         output=$(VERBOSE=false "$SCRIPT_DIR/test_launcher.sh" "$test_file" 2>/dev/null) || result=$?
         
         # Extract assertion counts from TAP output
-        local total_assertions=$(echo "$output" | grep "^1\.\." | cut -d'.' -f3)
-        local passed_assertions=$(echo "$output" | grep "# Passed:" | cut -d'/' -f1 | cut -d':' -f2 | tr -d ' ')
+        local total_assertions=$(echo "$output" | grep "^1\.\." | head -1 | cut -d'.' -f3 | tr -d ' ')
+        local passed_assertions=$(echo "$output" | grep "# Passed:" | head -1 | cut -d'/' -f1 | cut -d':' -f2 | tr -d ' ')
+        
+        # If no TAP output, try to count legacy _tf_pass/_tf_fail calls
+        if [[ -z "$total_assertions" || "$total_assertions" == "0" ]]; then
+            local pass_count=$(echo "$output" | grep -c "✅ PASS:" 2>/dev/null || echo "0")
+            local fail_count=$(echo "$output" | grep -c "❌ FAIL:" 2>/dev/null || echo "0")
+            pass_count=$(echo "$pass_count" | tr -d ' \n\r')
+            fail_count=$(echo "$fail_count" | tr -d ' \n\r')
+            if [[ $pass_count -gt 0 || $fail_count -gt 0 ]]; then
+                total_assertions=$((pass_count + fail_count))
+                passed_assertions=$pass_count
+            fi
+        fi
         
         # Store counts for summary (using global variables)
         _TF_TOTAL_ASSERTIONS=${_TF_TOTAL_ASSERTIONS:-0}
@@ -83,16 +95,19 @@ _tf_run_single_test() {
         (( _TF_TOTAL_ASSERTIONS += ${total_assertions:-0} ))
         (( _TF_PASSED_ASSERTIONS += ${passed_assertions:-0} ))
         
-        # Show compact test result
+        # Calculate duration first
+        local end_time=$(date +%s)
+        local duration=$((end_time - start_time))
+        
+        # Show compact test result with timing
         if [[ $result -eq 0 ]]; then
-            echo "✅ ${relative_path}: ${passed_assertions:-0}/${total_assertions:-0} assertions"
+            echo "✅ ${passed_assertions:-0}/${total_assertions:-0} ${relative_path} (${duration}s)"
         else
-            echo "❌ ${relative_path}: failed"
+            echo "❌ ${relative_path}: failed (${duration}s)"
         fi
     fi
     
-    local end_time=$(date +%s)
-    local duration=$((end_time - start_time))
+    # Duration already calculated above
     
     if [[ $result -eq 0 ]]; then
         _tf_log_success "$relative_path completed in ${duration}s"
