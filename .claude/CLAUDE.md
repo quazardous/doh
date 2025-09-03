@@ -23,31 +23,32 @@ Using the test-runner agent ensures:
 
 ## DOH API ENFORCEMENT
 
-### MANDATORY: Always use DOH API and Helper Scripts
+### MANDATORY: Use DOH API for Markdown Commands and Interactive Usage
 
-**For DOH library functions:**
+**For DOH library functions in markdown commands and interactive contexts:**
 ```bash
 # ✅ CORRECT: Use DOH API
 ./.claude/scripts/doh/api.sh <library> <function> [args...]
 
-# ❌ WRONG: Direct library sourcing  
+# ❌ WRONG: Direct library sourcing in markdown commands
 source .claude/scripts/doh/lib/library.sh && library_function
 ```
 
-**For DOH commands and workflows:**
+**For DOH commands and workflows in markdown commands:**
 ```bash
 # ✅ CORRECT: Use DOH helper
 ./.claude/scripts/doh/helper.sh <helper> <command> [args...]
 
-# ❌ WRONG: Direct script execution
+# ❌ WRONG: Direct script execution in markdown commands
 ./.claude/scripts/doh/some-script.sh
 ```
 
 **Rules:**
-- **NEVER source DOH libraries directly** - always use `api.sh`
-- **NEVER call DOH scripts directly** - always use `helper.sh` 
-- This applies to ALL contexts: commands, tests, automation, development
-- Both mainstream development and agent operations must follow this pattern
+- **For markdown commands and interactive usage**: Always use `api.sh` and `helper.sh` 
+- **For internal scripts and test files**: Direct library sourcing and script execution is allowed and recommended for performance
+- Scripts in `.claude/scripts/doh/` can source libraries directly using `source` statements
+- Test files in `tests/` can source DOH libraries directly for efficiency
+- The API enforcement applies primarily to user-facing commands and agent operations
 
 **Examples:**
 ```bash
@@ -103,5 +104,6 @@ source .claude/scripts/doh/lib/library.sh && library_function
 - NO CHEATER TESTS : test must be accurate, reflect real usage and be designed to reveal flaws. No useless tests! Design tests to be verbose so we can use them for debuging.
 - NO INCONSISTENT NAMING - read existing codebase naming patterns.
 - NO OVER-ENGINEERING - Don't add unnecessary abstractions, factory patterns, or middleware when simple functions would work. Don't think "enterprise" when you need "working"
+- NO ALIAS OR WRAPPER FUNCTIONS. Don't create wrapper functions to adapt APIs. Refactor the calling code to use the correct API directly.
 - NO MIXED CONCERNS - Don't put validation logic inside API handlers, database queries inside UI components, etc. instead of proper separation
 - NO RESOURCE LEAKS - Don't forget to close database connections, clear timeouts, remove event listeners, or clean up file handles

@@ -41,7 +41,7 @@ echo ""
 # Project Information
 project_id="$(get_current_project_id)"
 echo "Project: $project_id"
-echo "DOH Global Dir: $DOH_GLOBAL_DIR"
+echo "DOH Global Dir: $GLOBAL_DOH_DIR"
 echo ""
 
 # Workspace Mode Detection

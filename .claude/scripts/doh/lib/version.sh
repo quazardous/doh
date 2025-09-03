@@ -125,9 +125,10 @@ version_increment() {
         return 1
     fi
     
-    # Parse version components
+    # Parse version components (strip build metadata first)
+    local clean_version="${version%%+*}"  # Remove build metadata
     local major minor patch prerelease
-    if [[ "$version" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)(-([a-zA-Z0-9.-]+))?$ ]]; then
+    if [[ "$clean_version" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)(-([a-zA-Z0-9.-]+))?$ ]]; then
         major="${BASH_REMATCH[1]}"
         minor="${BASH_REMATCH[2]}"
         patch="${BASH_REMATCH[3]}"
@@ -139,18 +140,18 @@ version_increment() {
     
     case "$increment_type" in
         major)
-            ((major++))
+            major=$((major + 1))
             minor=0
             patch=0
             prerelease=""
             ;;
         minor)
-            ((minor++))
+            minor=$((minor + 1))
             patch=0
             prerelease=""
             ;;
         patch)
-            ((patch++))
+            patch=$((patch + 1))
             prerelease=""
             ;;
         prerelease)
@@ -212,8 +213,6 @@ version_set_project() {
         echo "Error: Unable to write to VERSION file: $version_file" >&2
         return 1
     fi
-    
-    echo "Updated project version to: $new_version"
 }
 
 # @description Bump project version by increment type
@@ -268,6 +267,9 @@ version_bump_file() {
 _version_to_number() {
     local version="$1"
     
+    # Strip build metadata if present
+    version="${version%%+*}"
+    
     # Extract major.minor.patch and ignore prerelease for comparison
     if [[ "$version" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
         local major="${BASH_REMATCH[1]}"
@@ -289,17 +291,47 @@ _version_to_number() {
 _version_prerelease_to_adjustment() {
     local version="$1"
     
+    # Strip build metadata if present
+    version="${version%%+*}"
+    
     if [[ "$version" =~ -([a-zA-Z0-9.-]+)$ ]]; then
         local prerelease="${BASH_REMATCH[1]}"
         
         # Prerelease versions are less than release versions
         # Return negative adjustment
-        case "$prerelease" in
-            alpha*) echo "-1000" ;;
-            beta*) echo "-500" ;;
-            rc*) echo "-100" ;;
-            *) echo "-50" ;;
-        esac
+        local base_adjust=0
+        local suffix_adjust=0
+        
+        # Parse prerelease type and optional suffix
+        if [[ "$prerelease" =~ ^(alpha|beta|rc)(\.|$)(.*)$ ]]; then
+            local type="${BASH_REMATCH[1]}"
+            local rest="${BASH_REMATCH[3]}"
+            
+            case "$type" in
+                alpha) base_adjust=-1000 ;;
+                beta) base_adjust=-500 ;;
+                rc) base_adjust=-100 ;;
+            esac
+            
+            # Handle suffix - numeric identifiers come before non-numeric
+            if [[ -n "$rest" ]]; then
+                if [[ "$rest" =~ ^[0-9]+$ ]]; then
+                    # Pure numeric suffix
+                    suffix_adjust="${rest}"
+                elif [[ "$rest" =~ ^([0-9]+)\. ]]; then
+                    # Numeric followed by more
+                    suffix_adjust="${BASH_REMATCH[1]}"
+                else
+                    # Non-numeric suffix - stays within the base range
+                    # alpha.x should still be less than beta
+                    suffix_adjust=50
+                fi
+            fi
+        else
+            base_adjust=-50
+        fi
+        
+        echo $((base_adjust + suffix_adjust))
     else
         # No prerelease, full release
         echo "0"
@@ -312,7 +344,9 @@ _version_prerelease_to_adjustment() {
 # @arg $2 string Second version string
 # @stdout Comparison result: -1 (v1 < v2), 0 (v1 == v2), 1 (v1 > v2)
 # @stderr Error messages if invalid versions
-# @exitcode 0 Always successful
+# @exitcode 0 If versions are equal
+# @exitcode 1 If first version is greater
+# @exitcode 2 If first version is lesser
 version_compare() {
     local version1="$1"
     local version2="$2"
@@ -328,23 +362,43 @@ version_compare() {
     
     if [[ $total1 -lt $total2 ]]; then
         echo "-1"
+        return 2
     elif [[ $total1 -gt $total2 ]]; then
         echo "1"
+        return 1
     else
         echo "0"
+        return 0
     fi
 }
 
 # @description Validate version string format
 # @public
 # @arg $1 string Version string to validate
+# @arg $2 string Optional "explode" flag to output parsed components
+# @stdout If explode flag set: "major=X minor=Y patch=Z prerelease=PRE build=BUILD"
 # @exitcode 0 If valid version format
 # @exitcode 1 If invalid version format
 version_validate() {
     local version="$1"
+    local explode="${2:-false}"
     
-    # Check basic semver pattern
-    [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?$ ]]
+    # Check basic semver pattern with optional build metadata
+    if [[ "$version" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)(-([a-zA-Z0-9.-]+))?(\+([a-zA-Z0-9.-]+))?$ ]]; then
+        if [[ "$explode" == "true" || "$explode" == "explode" ]]; then
+            local major="${BASH_REMATCH[1]}"
+            local minor="${BASH_REMATCH[2]}"
+            local patch="${BASH_REMATCH[3]}"
+            local prerelease="${BASH_REMATCH[5]}"
+            local build="${BASH_REMATCH[7]}"
+            
+            # Echo exploded version components
+            echo "major=$major minor=$minor patch=$patch prerelease=$prerelease build=$build"
+        fi
+        return 0
+    else
+        return 1
+    fi
 }
 
 # @description Find files missing version information

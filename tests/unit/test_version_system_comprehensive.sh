@@ -25,6 +25,9 @@ _tf_setup() {
     }
     cd "$TEST_DIR"
     
+    # Set PROJECT_DOH_DIR to the test directory
+    export PROJECT_DOH_DIR="$TEST_DIR"
+    
     # Initialize complete DOH structure
     mkdir -p .doh/{versions,epics,prds,cache} .git
     echo "0.1.0" > VERSION
@@ -68,12 +71,12 @@ target_version: 0.2.0
 Another test task.
 EOF
     
-    cd - > /dev/null
+    # Don't change directory back yet - tests need to run in TEST_DIR
 }
 
 _tf_teardown() {
     # Return to original directory and cleanup
-    cd - > /dev/null 2>&1
+    cd "$OLDPWD" > /dev/null 2>&1
     if [[ -n "$TEST_DIR" && -d "$TEST_DIR" ]]; then
         rm -rf "$TEST_DIR"
     fi
@@ -95,13 +98,13 @@ test_version_core_functions() {
     _tf_assert_equals "0.1.0" "$version" "Should get current project version"
     
     # Test setting project version
-    set_project_version "0.2.0" > /dev/null
+    version_set_project "0.2.0" > /dev/null
     local new_version
     new_version=$(version_get_current)
     _tf_assert_equals "0.2.0" "$new_version" "Should set project version"
     
     # Reset for other tests
-    set_project_version "0.1.0" > /dev/null
+    version_set_project "0.1.0" > /dev/null
     
     cd - > /dev/null
 }
@@ -117,13 +120,13 @@ test_version_bump_operations() {
     _tf_assert_equals "0.1.1" "$patch_version" "Should bump patch version"
     
     # Reset and test minor bump
-    set_project_version "0.1.0" > /dev/null
+    version_set_project "0.1.0" > /dev/null
     local minor_version
     minor_version=$(version_bump_project "minor")
     _tf_assert_equals "0.2.0" "$minor_version" "Should bump minor version"
     
     # Reset and test major bump
-    set_project_version "0.1.0" > /dev/null
+    version_set_project "0.1.0" > /dev/null
     local major_version
     major_version=$(version_bump_project "major")
     _tf_assert_equals "1.0.0" "$major_version" "Should bump major version"
@@ -138,18 +141,18 @@ test_file_version_operations() {
     
     # Test getting file version
     local file_version
-    file_version=$(get_file_version ".doh/epics/001.md")
+    file_version=$(version_get_file ".doh/epics/001.md")
     _tf_assert_equals "0.1.0" "$file_version" "Should get file version"
     
     # Test setting file version
-    set_file_version ".doh/epics/001.md" "0.3.0" > /dev/null
+    version_set_file ".doh/epics/001.md" "0.3.0" > /dev/null
     local new_file_version
-    new_file_version=$(get_file_version ".doh/epics/001.md")
+    new_file_version=$(version_get_file ".doh/epics/001.md")
     _tf_assert_equals "0.3.0" "$new_file_version" "Should set file version"
     
     # Test bumping file version
     local bumped_version
-    bumped_version=$(bump_file_version ".doh/epics/002.md" "minor")
+    bumped_version=$(version_bump_file ".doh/epics/002.md" "minor")
     _tf_assert_equals "0.2.0" "$bumped_version" "Should bump file version"
     
     cd - > /dev/null
@@ -158,16 +161,16 @@ test_file_version_operations() {
 test_version_validation_basic() {
     echo "🧪 Testing basic version validation..."
     
-    # Test that validate_version function exists and works with basic cases
-    if command -v validate_version > /dev/null; then
+    # Test that version_validate function exists and works with basic cases
+    if command -v version_validate > /dev/null; then
         # Test some basic valid versions
-        if validate_version "1.0.0" > /dev/null 2>&1; then
-            echo "✅ PASS: validate_version works with basic semver"
+        if version_validate "1.0.0" > /dev/null 2>&1; then
+            echo "✅ PASS: version_validate works with basic semver"
         else
-            echo "⚠️  INFO: validate_version strict - may need enhancement for full semver"
+            echo "⚠️  INFO: version_validate strict - may need enhancement for full semver"
         fi
     else
-        echo "⚠️  INFO: validate_version function not available"
+        echo "⚠️  INFO: version_validate function not available"
     fi
 }
 
@@ -187,9 +190,9 @@ status: open
 EOF
     
     # Test finding files missing version
-    if command -v find_files_missing_version > /dev/null; then
+    if command -v version_find_missing_files > /dev/null; then
         local missing_files
-        missing_files=$(find_files_missing_version .doh/epics)
+        missing_files=$(version_find_missing_files .doh/epics)
         
         if echo "$missing_files" | grep -q "no_version.md"; then
             echo "✅ PASS: Found files missing version"
@@ -197,7 +200,7 @@ EOF
             echo "⚠️  INFO: Version discovery may need enhancement"
         fi
     else
-        echo "⚠️  INFO: find_files_missing_version function not available"
+        echo "⚠️  INFO: version_find_missing_files function not available"
     fi
     
     cd - > /dev/null
@@ -209,13 +212,13 @@ test_version_consistency_checks() {
     echo "🧪 Testing version consistency..."
     
     # Set project version
-    set_project_version "0.3.0" > /dev/null
+    version_set_project "0.3.0" > /dev/null
     
     # Files now have inconsistent versions
     local project_version
     project_version=$(version_get_current)
     local file1_version
-    file1_version=$(get_file_version ".doh/epics/001.md")
+    file1_version=$(version_get_file ".doh/epics/001.md")
     
     if [[ "$project_version" != "$file1_version" ]]; then
         echo "✅ PASS: Can detect version inconsistencies"
@@ -240,16 +243,16 @@ test_version_workflow_integration() {
     new_version=$(version_bump_project "minor")
     
     # Update file versions to match
-    set_file_version ".doh/epics/001.md" "$new_version" > /dev/null
-    set_file_version ".doh/epics/002.md" "$new_version" > /dev/null
+    version_set_file ".doh/epics/001.md" "$new_version" > /dev/null
+    version_set_file ".doh/epics/002.md" "$new_version" > /dev/null
     
     # Verify workflow completed successfully  
     local final_project_version
     final_project_version=$(version_get_current)
     local final_file1_version
-    final_file1_version=$(get_file_version ".doh/epics/001.md")
+    final_file1_version=$(version_get_file ".doh/epics/001.md")
     local final_file2_version
-    final_file2_version=$(get_file_version ".doh/epics/002.md")
+    final_file2_version=$(version_get_file ".doh/epics/002.md")
     
     _tf_assert_equals "$new_version" "$final_project_version" "Project version should match"
     _tf_assert_equals "$new_version" "$final_file1_version" "File 1 version should match"
@@ -273,7 +276,7 @@ test_error_handling() {
     fi
     
     # Test missing file
-    if ! get_file_version "nonexistent.md" > /dev/null 2>&1; then
+    if ! version_get_file "nonexistent.md" > /dev/null 2>&1; then
         echo "✅ PASS: Missing file error handled"
     else
         echo "⚠️  INFO: Missing file handling may need improvement"

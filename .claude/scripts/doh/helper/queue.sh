@@ -4,7 +4,7 @@
 # User-facing functions for DOH message queue management
 
 # Source required dependencies
-source "$(dirname "${BASH_SOURCE[0]}")/../lib/message-queue.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/queue.sh"
 
 # Guard against multiple sourcing
 [[ -n "${DOH_HELPER_QUEUE_LOADED:-}" ]] && return 0

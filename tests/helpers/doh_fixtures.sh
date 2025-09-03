@@ -8,19 +8,19 @@
 DOH_TEST_FIXTURES_LOADED=1
 
 # Create a minimal DOH project structure in the given directory
-# @arg $1 string Directory where to create the .doh structure (defaults to DOH_PROJECT_DIR)
+# @arg $1 string Directory where to create the .doh structure (defaults to PROJECT_DOH_DIR)
 # @stdout Path to the project directory
 # @exitcode 0 If successful
 # @exitcode 1 If directory creation fails
 _tff_create_minimal_doh_project() {
-    local doh_dir="${1:-${DOH_PROJECT_DIR:-}}"
+    local doh_dir="${1:-${PROJECT_DOH_DIR:-}}"
     
     if [[ -z "$doh_dir" ]]; then
         echo "Error: No DOH directory specified" >&2
         return 1
     fi
     
-    # DOH_PROJECT_DIR points to the .doh directory itself
+    # PROJECT_DOH_DIR points to the .doh directory itself
     # Project root is the parent directory
     local project_root="$(dirname "$doh_dir")"
     
@@ -39,12 +39,12 @@ _tff_create_minimal_doh_project() {
 }
 
 # Create a DOH project with sample epics and tasks
-# @arg $1 string Directory where to create the .doh structure (defaults to DOH_PROJECT_DIR)
+# @arg $1 string Directory where to create the .doh structure (defaults to PROJECT_DOH_DIR)
 # @stdout Path to the project directory
 # @exitcode 0 If successful
 # @exitcode 1 If directory creation fails
 _tff_create_sample_doh_project() {
-    local project_dir="${1:-${DOH_PROJECT_DIR:-}}"
+    local project_dir="${1:-${PROJECT_DOH_DIR:-}}"
     
     # First create the minimal structure
     _tff_create_minimal_doh_project "$project_dir" || return 1
@@ -84,12 +84,12 @@ EOF
 }
 
 # Create a DOH project for version testing
-# @arg $1 string Directory where to create the .doh structure (defaults to DOH_PROJECT_DIR)
+# @arg $1 string Directory where to create the .doh structure (defaults to PROJECT_DOH_DIR)
 # @stdout Path to the project directory
 # @exitcode 0 If successful
 # @exitcode 1 If directory creation fails
 _tff_create_version_test_project() {
-    local project_dir="${1:-${DOH_PROJECT_DIR:-}}"
+    local project_dir="${1:-${PROJECT_DOH_DIR:-}}"
     
     # Create minimal structure
     _tff_create_minimal_doh_project "$project_dir" || return 1
@@ -134,12 +134,12 @@ EOF
 }
 
 # Create a DOH project for cache testing
-# @arg $1 string Directory where to create the .doh structure (defaults to DOH_PROJECT_DIR)
+# @arg $1 string Directory where to create the .doh structure (defaults to PROJECT_DOH_DIR)
 # @stdout Path to the project directory
 # @exitcode 0 If successful
 # @exitcode 1 If directory creation fails
 _tff_create_cache_test_project() {
-    local project_dir="${1:-${DOH_PROJECT_DIR:-}}"
+    local project_dir="${1:-${PROJECT_DOH_DIR:-}}"
     
     # Create minimal structure
     _tff_create_minimal_doh_project "$project_dir" || return 1

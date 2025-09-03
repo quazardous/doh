@@ -14,16 +14,16 @@ source "$LIB_DIR/version.sh"
 source "$LIB_DIR/frontmatter.sh"
 
 _tf_setup() {
-    # Use the DOH_PROJECT_DIR set by test launcher, just create the structure
-    if [[ -n "$DOH_PROJECT_DIR" ]]; then
+    # Use the PROJECT_DOH_DIR set by test launcher, just create the structure
+    if [[ -n "$PROJECT_DOH_DIR" ]]; then
         # Create the project structure using fixture
-        _tff_create_version_test_project "$(dirname "$DOH_PROJECT_DIR")"
+        _tff_create_version_test_project "$(dirname "$PROJECT_DOH_DIR")"
         
         # Add additional files for version commands testing
-        mkdir -p "$DOH_PROJECT_DIR/versions"
+        mkdir -p "$PROJECT_DOH_DIR/versions"
         
         # Create version files
-        cat > "$DOH_PROJECT_DIR/versions/0.1.0.md" << 'EOF'
+        cat > "$PROJECT_DOH_DIR/versions/0.1.0.md" << 'EOF'
 ---
 version: 0.1.0
 type: initial
@@ -35,7 +35,7 @@ created: 2025-09-01T10:00:00Z
 Initial version of the project.
 EOF
 
-    cat > "$DOH_PROJECT_DIR/versions/0.2.0.md" << 'EOF'
+    cat > "$PROJECT_DOH_DIR/versions/0.2.0.md" << 'EOF'
 ---
 version: 0.2.0
 type: minor
@@ -54,7 +54,7 @@ _tf_teardown() {
 }
 
 test_version_get_current() {
-    cd "$(dirname "$DOH_PROJECT_DIR")"
+    cd "$(dirname "$PROJECT_DOH_DIR")"
     
     local version
     version=$(version_get_current)
@@ -67,7 +67,7 @@ test_version_get_current() {
 }
 
 test_version_set_project() {
-    cd "$$(dirname "$DOH_PROJECT_DIR")"
+    cd "$$(dirname "$PROJECT_DOH_DIR")"
     
     version_set_project "0.2.0" > /dev/null
     local exit_code=$?
@@ -82,7 +82,7 @@ test_version_set_project() {
 }
 
 test_bump_project_version_patch() {
-    cd "$$(dirname "$DOH_PROJECT_DIR")"
+    cd "$$(dirname "$PROJECT_DOH_DIR")"
     
     local new_version
     new_version=$(bump_project_version "patch")
@@ -99,7 +99,7 @@ test_bump_project_version_patch() {
 }
 
 test_bump_project_version_minor() {
-    cd "$$(dirname "$DOH_PROJECT_DIR")"
+    cd "$$(dirname "$PROJECT_DOH_DIR")"
     
     local new_version
     new_version=$(bump_project_version "minor")
@@ -112,7 +112,7 @@ test_bump_project_version_minor() {
 }
 
 test_bump_project_version_major() {
-    cd "$$(dirname "$DOH_PROJECT_DIR")"
+    cd "$$(dirname "$PROJECT_DOH_DIR")"
     
     local new_version
     new_version=$(bump_project_version "major")
@@ -125,7 +125,7 @@ test_bump_project_version_major() {
 }
 
 test_version_find_missing_files() {
-    cd "$$(dirname "$DOH_PROJECT_DIR")"
+    cd "$$(dirname "$PROJECT_DOH_DIR")"
     
     # Create file without version
     cat > .doh/epics/no_version.md << 'EOF'
@@ -158,7 +158,7 @@ EOF
 }
 
 test_version_file_operations() {
-    cd "$$(dirname "$DOH_PROJECT_DIR")"
+    cd "$$(dirname "$PROJECT_DOH_DIR")"
     
     # Test getting file version
     local version
@@ -179,7 +179,7 @@ test_version_file_operations() {
 }
 
 test_version_file_bump() {
-    cd "$$(dirname "$DOH_PROJECT_DIR")"
+    cd "$$(dirname "$PROJECT_DOH_DIR")"
     
     # Test bumping file version
     local new_version
@@ -198,7 +198,7 @@ test_version_file_bump() {
 }
 
 test_version_consistency_check() {
-    cd "$$(dirname "$DOH_PROJECT_DIR")"
+    cd "$$(dirname "$PROJECT_DOH_DIR")"
     
     # Set inconsistent versions
     version_set_project "0.3.0" > /dev/null
@@ -220,7 +220,7 @@ test_version_consistency_check() {
 }
 
 test_version_list_operations() {
-    cd "$$(dirname "$DOH_PROJECT_DIR")"
+    cd "$$(dirname "$PROJECT_DOH_DIR")"
     
     # Create additional version files
     cat > .doh/versions/0.2.0.md << 'EOF'

@@ -13,7 +13,7 @@ DOH_LIB_CORE_LOADED=1
 # @stdout DOH global directory path
 # @exitcode 0 Always successful
 doh_global_dir() {
-    echo "${DOH_GLOBAL_DIR:-$HOME/.doh}"
+    echo "${GLOBAL_DOH_DIR:-$HOME/.doh}"
 }
 
 # @description Get DOH project .doh directory path
@@ -23,13 +23,13 @@ doh_global_dir() {
 # @exitcode 0 If successful
 # @exitcode 1 If not in DOH project
 doh_project_dir() {
-    # If DOH_PROJECT_DIR is set, it should point directly to the .doh directory
-    if [[ -n "${DOH_PROJECT_DIR:-}" ]]; then
-        if [[ -d "$DOH_PROJECT_DIR" ]]; then
-            echo "$DOH_PROJECT_DIR"
+    # If PROJECT_DOH_DIR is set, it should point directly to the .doh directory
+    if [[ -n "${PROJECT_DOH_DIR:-}" ]]; then
+        if [[ -d "$PROJECT_DOH_DIR" ]]; then
+            echo "$PROJECT_DOH_DIR"
             return 0
         else
-            echo "❌ Error: DOH_PROJECT_DIR set to '$DOH_PROJECT_DIR' but directory not found" >&2
+            echo "❌ Error: PROJECT_DOH_DIR set to '$PROJECT_DOH_DIR' but directory not found" >&2
             return 1
         fi
     fi

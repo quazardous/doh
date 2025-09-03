@@ -17,7 +17,7 @@ This loads `.doh/env` if it exists and exports all `DOH_*` variables with sensib
 Optional file `.doh/env` in project root:
 ```bash
 # DOH Environment Configuration
-DOH_GLOBAL_DIR=~/.doh
+GLOBAL_DOH_DIR=~/.doh
 DOH_DEBUG=0
 ```
 
@@ -25,7 +25,7 @@ Only `DOH_*` variables are processed. Comments and empty lines are ignored.
 
 ## Standard Variables
 
-### DOH_GLOBAL_DIR
+### GLOBAL_DOH_DIR
 - **Default**: `~/.doh`
 - **Purpose**: Global state directory outside any repository
 - **Structure**: 
@@ -63,7 +63,7 @@ The environment loader automatically detects the current DOH project by finding 
 #!/bin/bash
 source .claude/scripts/doh/lib/dohenv.sh  # OK - shell script
 
-# Now DOH_GLOBAL_DIR is available
+# Now GLOBAL_DOH_DIR is available
 source .claude/scripts/doh/lib/workspace.sh
 ```
 
@@ -84,7 +84,7 @@ source .claude/scripts/doh/lib/dohenv.sh  # WRONG - don't do this
 # by the calling script via: source .claude/scripts/doh/lib/dohenv.sh
 
 # Use variables directly
-mkdir -p "$DOH_GLOBAL_DIR/projects"
+mkdir -p "$GLOBAL_DOH_DIR/projects"
 ```
 
 ## Rationale

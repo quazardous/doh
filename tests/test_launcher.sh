@@ -51,11 +51,11 @@ export _TF_LAUNCHER_EXECUTION="true"
 # Set up DOH test isolation using secure temporary directory
 
 export DOH_TEST_CLEANUP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/doh.XXXXXX")"
-export DOH_GLOBAL_DIR="${DOH_TEST_CLEANUP_DIR}/global_doh"
-export DOH_PROJECT_DIR="${DOH_TEST_CLEANUP_DIR}/project_doh"
+export GLOBAL_DOH_DIR="${DOH_TEST_CLEANUP_DIR}/global_doh"
+export PROJECT_DOH_DIR="${DOH_TEST_CLEANUP_DIR}/project_doh"
 if [[ "${DOH_TEST_DEBUG:-false}" == "true" ]]; then
-    echo "DEBUG: DOH_GLOBAL_DIR = '$DOH_GLOBAL_DIR'"
-    echo "DEBUG: DOH_PROJECT_DIR = '$DOH_PROJECT_DIR'"
+    echo "DEBUG: GLOBAL_DOH_DIR = '$GLOBAL_DOH_DIR'"
+    echo "DEBUG: PROJECT_DOH_DIR = '$PROJECT_DOH_DIR'"
 fi
 
 # Load DOH environment with isolation in place
@@ -73,7 +73,7 @@ cleanup_test_isolation() {
     if [[ -n "${DOH_TEST_CLEANUP_DIR:-}" && -d "$DOH_TEST_CLEANUP_DIR" ]]; then
         rm -rf "$DOH_TEST_CLEANUP_DIR"
     fi
-    unset DOH_GLOBAL_DIR DOH_TEST_CLEANUP_DIR
+    unset GLOBAL_DOH_DIR DOH_TEST_CLEANUP_DIR
 }
 
 # Ensure cleanup happens on exit

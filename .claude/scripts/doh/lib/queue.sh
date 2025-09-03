@@ -19,7 +19,7 @@ readonly QUEUE_STATUS_ERROR=".error"
 # @description Generate unique message ID
 # @stdout Unique message ID string
 # @exitcode 0 If successful
-generate_message_id() {
+queue_generate_message_id() {
     local timestamp
     timestamp=$(date +"%Y%m%d_%H%M%S")
     
@@ -35,7 +35,7 @@ generate_message_id() {
 # @stdout Path to queue directory
 # @exitcode 0 If successful
 # @exitcode 1 If project ID cannot be retrieved
-get_queue_dir() {
+queue_get_dir() {
     local queue_name="${1:-$DEFAULT_QUEUE_NAME}"
     
     local project_id
@@ -49,11 +49,11 @@ get_queue_dir() {
 # @stdout Path to ensured queue directory
 # @exitcode 0 If successful
 # @exitcode 1 If directory cannot be created
-ensure_queue_dir() {
+queue_ensure_dir() {
     local queue_name="${1:-$DEFAULT_QUEUE_NAME}"
     
     local queue_dir
-    queue_dir="$(get_queue_dir "$queue_name")" || return 1
+    queue_dir="$(queue_get_dir "$queue_name")" || return 1
     
     mkdir -p "$queue_dir" || {
         echo "Error: Could not create queue directory: $queue_dir" >&2
@@ -74,7 +74,7 @@ ensure_queue_dir() {
 # @stderr Error messages for invalid parameters
 # @exitcode 0 If successful
 # @exitcode 1 If invalid parameters provided
-create_renumber_message() {
+queue_create_renumber_message() {
     local source_type="$1"      # "task" or "epic"
     local source_id="$2"        # original identifier
     local source_number="$3"    # current number
@@ -93,7 +93,7 @@ create_renumber_message() {
     fi
     
     local message_id timestamp
-    message_id="$(generate_message_id)"
+    message_id="$(queue_generate_message_id)"
     timestamp="$(date -Iseconds)"
     
     # Build message JSON
@@ -138,7 +138,7 @@ create_renumber_message() {
 # @stderr Error messages and confirmation
 # @exitcode 0 If successful
 # @exitcode 1 If invalid parameters or operation fails
-queue_message() {
+queue_add_message() {
     local queue_name="$1"
     local message="$2"
     
@@ -148,7 +148,7 @@ queue_message() {
     fi
     
     local queue_dir
-    queue_dir="$(ensure_queue_dir "$queue_name")" || return 1
+    queue_dir="$(queue_ensure_dir "$queue_name")" || return 1
     
     # Extract message ID for filename
     local message_id
@@ -199,7 +199,7 @@ queue_message() {
 # @stderr Status change confirmation
 # @exitcode 0 On success
 # @exitcode 1 On error
-set_message_status() {
+queue_set_message_status() {
     local queue_name="$1"
     local message_id="$2"
     local status="$3"  # "", ".ok", or ".error"
@@ -211,7 +211,7 @@ set_message_status() {
     fi
     
     local queue_dir
-    queue_dir="$(get_queue_dir "$queue_name")" || return 1
+    queue_dir="$(queue_get_dir "$queue_name")" || return 1
     
     local current_file new_file
     
@@ -262,7 +262,7 @@ set_message_status() {
 # @stderr Error messages
 # @exitcode 0 If successful
 # @exitcode 1 If message not found
-get_message() {
+queue_get_message() {
     local queue_name="$1"
     local message_id="$2"
     
@@ -272,7 +272,7 @@ get_message() {
     fi
     
     local queue_dir
-    queue_dir="$(get_queue_dir "$queue_name")" || return 1
+    queue_dir="$(queue_get_dir "$queue_name")" || return 1
     
     # Find message file regardless of status
     local message_file
@@ -296,7 +296,7 @@ get_message() {
 # @stderr Error messages
 # @exitcode 0 If successful
 # @exitcode 1 If invalid parameters
-list_messages() {
+queue_list_messages() {
     local queue_name="$1"
     local status_filter="$2"  # optional: "pending", "ok", "error", or empty for all
     
@@ -306,7 +306,7 @@ list_messages() {
     fi
     
     local queue_dir
-    queue_dir="$(get_queue_dir "$queue_name")" || return 1
+    queue_dir="$(queue_get_dir "$queue_name")" || return 1
     
     if [[ ! -d "$queue_dir" ]]; then
         return 0  # Empty queue
@@ -358,11 +358,11 @@ list_messages() {
 # @arg $2 string Optional status filter
 # @stdout Number of messages
 # @exitcode 0 If successful
-count_messages() {
+queue_count_messages() {
     local queue_name="$1"
     local status_filter="$2"
     
-    list_messages "$queue_name" "$status_filter" | wc -l
+    queue_list_messages "$queue_name" "$status_filter" | wc -l
 }
 
 # @description Purge processed messages (ok and error)
@@ -371,7 +371,7 @@ count_messages() {
 # @stderr Purge operation summary
 # @exitcode 0 On success
 # @exitcode 1 If invalid parameters
-purge_processed_messages() {
+queue_purge_processed() {
     local queue_name="$1"
     local max_age_days="${2:-7}"  # Default: keep for 7 days
     
@@ -381,7 +381,7 @@ purge_processed_messages() {
     fi
     
     local queue_dir
-    queue_dir="$(get_queue_dir "$queue_name")" || return 1
+    queue_dir="$(queue_get_dir "$queue_name")" || return 1
     
     if [[ ! -d "$queue_dir" ]]; then
         echo "Queue directory does not exist: $queue_dir" >&2
@@ -405,7 +405,7 @@ purge_processed_messages() {
 # @stderr Error messages
 # @exitcode 0 If successful
 # @exitcode 1 If invalid parameters
-get_queue_stats() {
+queue_get_stats() {
     local queue_name="$1"
     
     if [[ -z "$queue_name" ]]; then
@@ -414,12 +414,12 @@ get_queue_stats() {
     fi
     
     local queue_dir
-    queue_dir="$(get_queue_dir "$queue_name")" || return 1
+    queue_dir="$(queue_get_dir "$queue_name")" || return 1
     
     local pending_count ok_count error_count total_count
-    pending_count="$(count_messages "$queue_name" "pending")"
-    ok_count="$(count_messages "$queue_name" "ok")"
-    error_count="$(count_messages "$queue_name" "error")"
+    pending_count="$(queue_count_messages "$queue_name" "pending")"
+    ok_count="$(queue_count_messages "$queue_name" "ok")"
+    error_count="$(queue_count_messages "$queue_name" "error")"
     total_count=$((pending_count + ok_count + error_count))
     
     cat << EOF
@@ -438,7 +438,7 @@ EOF
 # @stderr Processing status messages
 # @exitcode 0 On success
 # @exitcode 1 On error
-process_message() {
+queue_process_message() {
     local queue_name="$1"
     local message_id="$2"
     
@@ -449,7 +449,7 @@ process_message() {
     
     # Get message content
     local message
-    message="$(get_message "$queue_name" "$message_id")" || {
+    message="$(queue_get_message "$queue_name" "$message_id")" || {
         echo "Error: Could not retrieve message $message_id" >&2
         return 1
     }
@@ -467,11 +467,11 @@ process_message() {
             sleep 0.1
             
             # Mark as successful
-            set_message_status "$queue_name" "$message_id" "$QUEUE_STATUS_OK"
+            queue_set_message_status "$queue_name" "$message_id" "$QUEUE_STATUS_OK"
             ;;
         *)
             # Unknown operation
-            set_message_status "$queue_name" "$message_id" "$QUEUE_STATUS_ERROR" "Unknown operation: $operation"
+            queue_set_message_status "$queue_name" "$message_id" "$QUEUE_STATUS_ERROR" "Unknown operation: $operation"
             return 1
             ;;
     esac
@@ -484,7 +484,7 @@ process_message() {
 # @stderr Error messages for invalid format
 # @exitcode 0 If valid
 # @exitcode 1 If invalid
-validate_message() {
+queue_validate_message() {
     local message="$1"
     
     if [[ -z "$message" ]]; then

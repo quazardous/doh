@@ -30,41 +30,41 @@ Run commands using the format `/doh:command-name`
 ### Quick Usage
 ```bash
 # Call public DOH library functions (function names without library prefix)
-./.claude/scripts/doh/helper/api.sh <library> <function> [args...]
+./.claude/scripts/doh/api.sh <library> <function> [args...]
 
 # Call private DOH library functions (with --private flag)
-./.claude/scripts/doh/helper/api.sh --private <library> <function> [args...]
+./.claude/scripts/doh/api.sh --private <library> <function> [args...]
 ```
 
 ### Public Function Examples
 ```bash
 # Version operations - call functions without version_ prefix
-./.claude/scripts/doh/helper/api.sh version get_current
-./.claude/scripts/doh/helper/api.sh version get_file ".doh/epics/versioning/005.md"
-./.claude/scripts/doh/helper/api.sh version validate "1.2.3"
-./.claude/scripts/doh/helper/api.sh version compare "1.0.0" "2.0.0"
-./.claude/scripts/doh/helper/api.sh version increment "1.0.0" "patch"
+./.claude/scripts/doh/api.sh version get_current
+./.claude/scripts/doh/api.sh version get_file ".doh/epics/versioning/005.md"
+./.claude/scripts/doh/api.sh version validate "1.2.3"
+./.claude/scripts/doh/api.sh version compare "1.0.0" "2.0.0"
+./.claude/scripts/doh/api.sh version increment "1.0.0" "patch"
 
 # Frontmatter operations - call functions without frontmatter_ prefix
-./.claude/scripts/doh/helper/api.sh frontmatter get_field "file.md" "field_name"
-./.claude/scripts/doh/helper/api.sh frontmatter update_field "file.md" "status" "completed"
-./.claude/scripts/doh/helper/api.sh frontmatter has "file.md"
-./.claude/scripts/doh/helper/api.sh frontmatter validate "file.md"
+./.claude/scripts/doh/api.sh frontmatter get_field "file.md" "field_name"
+./.claude/scripts/doh/api.sh frontmatter update_field "file.md" "status" "completed"
+./.claude/scripts/doh/api.sh frontmatter has "file.md"
+./.claude/scripts/doh/api.sh frontmatter validate "file.md"
 
 # Task operations - call functions without task_ prefix
-./.claude/scripts/doh/helper/api.sh task get_status ".doh/epics/data-api-sanity/032.md"
-./.claude/scripts/doh/helper/api.sh task is_completed ".doh/epics/data-api-sanity/032.md"
-./.claude/scripts/doh/helper/api.sh task get_name ".doh/epics/data-api-sanity/032.md"
+./.claude/scripts/doh/api.sh task get_status ".doh/epics/data-api-sanity/032.md"
+./.claude/scripts/doh/api.sh task is_completed ".doh/epics/data-api-sanity/032.md"
+./.claude/scripts/doh/api.sh task get_name ".doh/epics/data-api-sanity/032.md"
 
 # DOH core operations
-./.claude/scripts/doh/helper/api.sh doh find_root
+./.claude/scripts/doh/api.sh doh find_root
 ```
 
 ### Private Function Examples
 ```bash
 # Call private functions with --private flag (function names without _library_ prefix)
-./.claude/scripts/doh/helper/api.sh --private version to_number "1.0.0"
-./.claude/scripts/doh/helper/api.sh --private version prerelease_to_adjustment "1.0.0-alpha"
+./.claude/scripts/doh/api.sh --private version to_number "1.0.0"
+./.claude/scripts/doh/api.sh --private version prerelease_to_adjustment "1.0.0-alpha"
 ```
 
 ### Benefits
@@ -84,12 +84,12 @@ Run commands using the format `/doh:command-name`
 ### Usage Examples
 ```bash
 # Public function calls - function name without library prefix
-./.claude/scripts/doh/helper/api.sh version get_current
-./.claude/scripts/doh/helper/api.sh frontmatter get_field "file.md" "status"
-./.claude/scripts/doh/helper/api.sh task is_completed "task.md"
+./.claude/scripts/doh/api.sh version get_current
+./.claude/scripts/doh/api.sh frontmatter get_field "file.md" "status"
+./.claude/scripts/doh/api.sh task is_completed "task.md"
 
 # Private function calls - requires --private flag
-./.claude/scripts/doh/helper/api.sh --private version to_number "1.0.0"
+./.claude/scripts/doh/api.sh --private version to_number "1.0.0"
 ```
 
 ## DOH Library Reference
@@ -120,12 +120,12 @@ The helper script provides clear error messages and proper exit codes:
 The API helper preserves all return values from the underlying DOH functions:
 ```bash
 # Success cases return 0
-./.claude/scripts/doh/helper/api.sh version validate "1.0.0"  # Exit code: 0
-./.claude/scripts/doh/helper/api.sh task is_completed "completed_task.md"  # Exit code: 0
+./.claude/scripts/doh/api.sh version validate "1.0.0"  # Exit code: 0
+./.claude/scripts/doh/api.sh task is_completed "completed_task.md"  # Exit code: 0
 
 # Failure cases return 1 (or other appropriate codes)
-./.claude/scripts/doh/helper/api.sh version validate "invalid"  # Exit code: 1
-./.claude/scripts/doh/helper/api.sh task is_completed "pending_task.md"  # Exit code: 1
+./.claude/scripts/doh/api.sh version validate "invalid"  # Exit code: 1
+./.claude/scripts/doh/api.sh task is_completed "pending_task.md"  # Exit code: 1
 ```
 
 ## Testing

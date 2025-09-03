@@ -1,39 +1,34 @@
 #!/bin/bash
 
-# Script to run tests with automatic log redirection
-# Usage: ./claude/scripts/test-and-log.sh path/to/test.py [optional_log_name.log]
+# Generic test runner with output redirection to specified log file
+# Usage: ./claude/scripts/test-and-log.sh <log_file_path> <test_command> [args...]
 
-if [ $# -eq 0 ]; then
-    echo "Usage: $0 <test_file_path> [log_filename]"
-    echo "Example: $0 tests/e2e/my_test_name.py"
-    echo "Example: $0 tests/e2e/my_test_name.py my_test_name_v2.log"
+if [ $# -lt 2 ]; then
+    echo "Usage: $0 <log_file_path> <test_command> [args...]"
+    echo "Examples:"
+    echo "  $0 tests/logs/version_test_20250903_123045.log ./tests/test_launcher.sh tests/unit/test_version.sh"
+    echo "  $0 /tmp/debug_run.log ./tests/run.sh"
+    echo "  $0 tests/logs/integration_test.log python tests/my_test.py"
     exit 1
 fi
 
-TEST_PATH="$1"
+LOG_FILE="$1"
+shift  # Remove log file from arguments, rest are the command
 
-# Create logs directory if it doesn't exist
-mkdir -p tests/logs
-
-# Determine log file name
-if [ $# -ge 2 ]; then
-    # Use provided log filename (second parameter)
-    LOG_NAME="$2"
-    # Ensure it ends with .log
-    if [[ ! "$LOG_NAME" == *.log ]]; then
-        LOG_NAME="${LOG_NAME}.log"
-    fi
-    LOG_FILE="tests/logs/${LOG_NAME}"
-else
-    # Extract the test filename without extension for the log name
-    TEST_NAME=$(basename "$TEST_PATH" .py)
-    LOG_FILE="tests/logs/${TEST_NAME}.log"
+# Check that log directory exists
+LOG_DIR=$(dirname "$LOG_FILE")
+if [ ! -d "$LOG_DIR" ]; then
+    echo "Error: Log directory '$LOG_DIR' does not exist"
+    echo "Please create the directory first: mkdir -p '$LOG_DIR'"
+    exit 1
 fi
 
-# Run the test with output redirection
-echo "Running test: $TEST_PATH"
+# Run the command with output redirection
+echo "Running: $*"
 echo "Logging to: $LOG_FILE"
-python "$TEST_PATH" > "$LOG_FILE" 2>&1
+
+# Execute the command and capture all output
+"$@" > "$LOG_FILE" 2>&1
 
 # Check exit code
 EXIT_CODE=$?

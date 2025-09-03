@@ -317,6 +317,63 @@ You can also run tests directly using the test launcher:
 
 ## Test Environment
 
+### DOH Environment Variables
+
+The `test_launcher.sh` automatically sets up environment variables for isolated testing:
+
+- **`PROJECT_DOH_DIR`**: Points to the test's temporary `.doh/` directory, allowing DOH API functions to operate on test project data instead of the actual project's versioned data
+- **`GLOBAL_DOH_DIR`**: Points to a temporary global directory for DOH workspace data, ensuring tests don't interfere with real workspace configurations and caches
+- **`_TF_LAUNCHER_EXECUTION`**: Flag indicating the test is running through the launcher (used by tests to adjust paths and behavior)
+
+These variables ensure complete test isolation:
+- **PROJECT_DOH_DIR**: Isolates versioned project data (PRDs, epics, tasks, config)
+- **GLOBAL_DOH_DIR**: Isolates non-versioned workspace data (caches, logs, user settings)
+
+When writing tests that use DOH API functions, you don't need to manually set these variables - the launcher handles this automatically:
+
+```bash
+# DOH API functions will automatically use test directories
+test_version_operations() {
+    # This works correctly because PROJECT_DOH_DIR is set by test_launcher
+    # Operations affect test temp directory, not actual project
+    version_set_project "1.0.0"
+    local result=$(version_get_current)
+    _tf_assert_equals "1.0.0" "$result" "Version should be updated in test environment"
+}
+```
+
+### DOH Project Setup Helper
+
+For tests that need a minimal DOH project structure, consider creating a helper function like `_tf_create_minimal_doh_project`:
+
+```bash
+_tf_create_minimal_doh_project() {
+    local project_dir="${1:-$(pwd)}"
+    
+    # Create DOH structure
+    mkdir -p "$project_dir/.doh" "$project_dir/.git"
+    echo "0.1.0" > "$project_dir/VERSION"
+    
+    # Create basic .doh files if needed
+    cat > "$project_dir/.doh/example.md" << 'EOF'
+---
+file_version: 0.1.0
+name: Example Task
+status: open
+---
+# Example Task
+EOF
+}
+
+_tf_setup() {
+    TEST_DIR=$(_tf_create_temp_dir)
+    cd "$TEST_DIR"
+    _tf_create_minimal_doh_project "$TEST_DIR"
+}
+```
+
+This pattern ensures tests have a consistent DOH project structure and work correctly with DOH API functions.
+
 ### Temporary Files
 ```bash
 # Create temporary files/directories

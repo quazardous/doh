@@ -16,7 +16,7 @@ Implement comprehensive test isolation system for DOH ensuring all tests are com
 Tests currently pollute the actual `~/.doh` workspace with registry entries, cache files, and artifacts, making the test suite unreliable and potentially destructive. Current test suite shows 9/16 tests failing due to registry pollution.
 
 ## Solution Overview
-Use `DOH_GLOBAL_DIR="$(mktemp -d)"` to redirect all DOH data operations to secure temporary directories that are automatically cleaned up after tests complete.
+Use `GLOBAL_DOH_DIR="$(mktemp -d)"` to redirect all DOH data operations to secure temporary directories that are automatically cleaned up after tests complete.
 
 ## Key Requirements
 - All tests must be no-op on current project data
@@ -27,8 +27,8 @@ Use `DOH_GLOBAL_DIR="$(mktemp -d)"` to redirect all DOH data operations to secur
 ## Implementation Strategy
 
 ### Phase 1: Research & Validation
-- Verify `DOH_GLOBAL_DIR` usage consistency across all DOH libraries
-- Identify any hardcoded paths that bypass `DOH_GLOBAL_DIR`
+- Verify `GLOBAL_DOH_DIR` usage consistency across all DOH libraries
+- Identify any hardcoded paths that bypass `GLOBAL_DOH_DIR`
 - Test isolation approach with sample tests
 
 ### Phase 2: Library Enhancement
@@ -37,7 +37,7 @@ Use `DOH_GLOBAL_DIR="$(mktemp -d)"` to redirect all DOH data operations to secur
 - Document environment variable usage in libraries
 
 ### Phase 3: Test Framework Integration
-- Add automatic isolation setup: `DOH_GLOBAL_DIR="$(mktemp -d)"`
+- Add automatic isolation setup: `GLOBAL_DOH_DIR="$(mktemp -d)"`
 - Implement cleanup procedures with error handling
 - Ensure transparent operation for test authors
 

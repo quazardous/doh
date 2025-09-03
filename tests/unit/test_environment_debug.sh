@@ -8,7 +8,7 @@ source "$(dirname "$0")/../helpers/test_framework.sh" 2>/dev/null || source "../
 # Test environment variable visibility
 test_environment_variables() {
     echo "=== ENVIRONMENT DEBUG ==="
-    echo "DOH_GLOBAL_DIR: ${DOH_GLOBAL_DIR:-<not set>}"
+    echo "GLOBAL_DOH_DIR: ${GLOBAL_DOH_DIR:-<not set>}"
     echo "DOH_TEST_CLEANUP_DIR: ${DOH_TEST_CLEANUP_DIR:-<not set>}"
     echo "_TF_LAUNCHER_EXECUTION: ${_TF_LAUNCHER_EXECUTION:-<not set>}"
     echo "HOME: $HOME"
@@ -19,21 +19,21 @@ test_environment_variables() {
 }
 
 test_doh_global_dir_set() {
-    _tf_assert_not_equals "" "${DOH_GLOBAL_DIR:-}" "DOH_GLOBAL_DIR should be set"
-    _tf_assert_contains "$DOH_GLOBAL_DIR" "/tmp" "DOH_GLOBAL_DIR should be a temp directory"
+    _tf_assert_not_equals "" "${GLOBAL_DOH_DIR:-}" "GLOBAL_DOH_DIR should be set"
+    _tf_assert_contains "$GLOBAL_DOH_DIR" "/tmp" "GLOBAL_DOH_DIR should be a temp directory"
 }
 
 test_isolation_directory_exists() {
     # DOH libraries should create directories as needed
     # This test ensures the path is set correctly
-    _tf_assert_not_equals "" "${DOH_GLOBAL_DIR:-}" "Isolation directory path should be set"
+    _tf_assert_not_equals "" "${GLOBAL_DOH_DIR:-}" "Isolation directory path should be set"
 }
 
 test_can_write_to_isolation_dir() {
     # Create the directory first (simulating what DOH libraries would do)
-    mkdir -p "$DOH_GLOBAL_DIR"
+    mkdir -p "$GLOBAL_DOH_DIR"
     
-    local test_file="$DOH_GLOBAL_DIR/test_write.txt"
+    local test_file="$GLOBAL_DOH_DIR/test_write.txt"
     echo "test content" > "$test_file"
     _tf_assert_file_exists "$test_file" "Should be able to write to isolation directory"
     _tf_assert_file_contains "$test_file" "test content" "File should contain test content"
@@ -41,7 +41,7 @@ test_can_write_to_isolation_dir() {
 
 test_isolation_vs_real_doh() {
     local real_doh_dir="$HOME/.doh"
-    _tf_assert_not_equals "$DOH_GLOBAL_DIR" "$real_doh_dir" "Isolation dir should not be real ~/.doh"
+    _tf_assert_not_equals "$GLOBAL_DOH_DIR" "$real_doh_dir" "Isolation dir should not be real ~/.doh"
 }
 
 # Run tests

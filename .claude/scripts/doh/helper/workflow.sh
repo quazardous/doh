@@ -4,7 +4,7 @@
 # User-facing functions for workflow and project operations
 
 # Source required dependencies
-source "$(dirname "${BASH_SOURCE[0]}")/../lib/workflow.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/task.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/project.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/reporting.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/workspace.sh"
@@ -19,8 +19,72 @@ DOH_HELPER_WORKFLOW_LOADED=1
 # @stderr Error messages
 # @exitcode 0 If successful
 helper_workflow_next() {
-    # Call the library function
-    workflow_get_next "$@"
+    local epic_filter="${1:-}"
+    
+    local doh_root
+    doh_root=$(doh_project_dir) || {
+        echo "Error: Not in DOH project" >&2
+        return 1
+    }
+
+    echo "🔄 Next Available Tasks:"
+    echo "======================"
+    echo ""
+
+    local search_path="$doh_root/.doh/epics"
+    if [ -n "$epic_filter" ]; then
+        search_path="$doh_root/.doh/epics/$epic_filter"
+        if [ ! -d "$search_path" ]; then
+            echo "Error: Epic not found: $epic_filter" >&2
+            return 1
+        fi
+        echo "Epic: $epic_filter"
+        echo ""
+    fi
+
+    local count=0
+    find "$search_path" -name "[0-9]*.md" -type f 2>/dev/null | sort | while read -r task_file; do
+        if [ -f "$task_file" ]; then
+            local status depends_on task_number title epic_name
+            status=$(frontmatter_get_field "$task_file" "status" 2>/dev/null)
+            depends_on=$(frontmatter_get_field "$task_file" "depends_on" 2>/dev/null)
+            task_number=$(frontmatter_get_field "$task_file" "number" 2>/dev/null)
+            title=$(frontmatter_get_field "$task_file" "title" 2>/dev/null)
+            
+            # Get epic name from path if not filtering by epic
+            if [ -z "$epic_filter" ]; then
+                local rel_path
+                rel_path=$(realpath --relative-to="$doh_root" "$task_file" 2>/dev/null)
+                if [[ "$rel_path" == .doh/epics/*/[0-9]*.md ]]; then
+                    epic_name=$(echo "$rel_path" | sed -n 's|^\.doh/epics/\([^/]*\)/.*|\1|p')
+                fi
+            fi
+
+            # Check if task is available (pending status and no blocking dependencies)
+            if [[ "$status" == "pending" || "$status" == "open" || -z "$status" ]]; then
+                local is_blocked=false
+                
+                # Check for dependencies
+                if [ -n "$depends_on" ] && [ "$depends_on" != "null" ] && [ "$depends_on" != "" ]; then
+                    is_blocked=true
+                fi
+                
+                if [ "$is_blocked" = false ]; then
+                    local task_info="  • Task $task_number"
+                    [ -n "$title" ] && task_info="$task_info: $title"
+                    [ -n "$epic_name" ] && task_info="$task_info [$epic_name]"
+                    
+                    echo "$task_info"
+                    ((count++))
+                fi
+            fi
+        fi
+    done
+    
+    echo ""
+    local scope_text=""
+    [ -n "$epic_filter" ] && scope_text=" in epic '$epic_filter'"
+    echo "Found $count available tasks$scope_text"
 }
 
 # @description Show currently active tasks
@@ -28,8 +92,62 @@ helper_workflow_next() {
 # @stderr Error messages
 # @exitcode 0 If successful
 helper_workflow_in_progress() {
-    # Call the library function
-    workflow_get_in_progress "$@"
+    local epic_filter="${1:-}"
+    
+    local doh_root
+    doh_root=$(doh_project_dir) || {
+        echo "Error: Not in DOH project" >&2
+        return 1
+    }
+
+    echo "🔄 Tasks In Progress:"
+    echo "===================="
+    echo ""
+
+    local search_path="$doh_root/.doh/epics"
+    if [ -n "$epic_filter" ]; then
+        search_path="$doh_root/.doh/epics/$epic_filter"
+        if [ ! -d "$search_path" ]; then
+            echo "Error: Epic not found: $epic_filter" >&2
+            return 1
+        fi
+        echo "Epic: $epic_filter"
+        echo ""
+    fi
+
+    local count=0
+    find "$search_path" -name "[0-9]*.md" -type f 2>/dev/null | sort | while read -r task_file; do
+        if [ -f "$task_file" ]; then
+            local status task_number title epic_name
+            status=$(frontmatter_get_field "$task_file" "status" 2>/dev/null)
+            
+            if [ "$status" = "in_progress" ]; then
+                task_number=$(frontmatter_get_field "$task_file" "number" 2>/dev/null)
+                title=$(frontmatter_get_field "$task_file" "title" 2>/dev/null)
+                
+                # Get epic name from path if not filtering by epic
+                if [ -z "$epic_filter" ]; then
+                    local rel_path
+                    rel_path=$(realpath --relative-to="$doh_root" "$task_file" 2>/dev/null)
+                    if [[ "$rel_path" == .doh/epics/*/[0-9]*.md ]]; then
+                        epic_name=$(echo "$rel_path" | sed -n 's|^\.doh/epics/\([^/]*\)/.*|\1|p')
+                    fi
+                fi
+
+                local task_info="  • Task $task_number"
+                [ -n "$title" ] && task_info="$task_info: $title"
+                [ -n "$epic_name" ] && task_info="$task_info [$epic_name]"
+                
+                echo "$task_info"
+                ((count++))
+            fi
+        fi
+    done
+    
+    echo ""
+    local scope_text=""
+    [ -n "$epic_filter" ] && scope_text=" in epic '$epic_filter'"
+    echo "Found $count tasks in progress$scope_text"
 }
 
 # @description Show blocked tasks needing attention
@@ -37,8 +155,75 @@ helper_workflow_in_progress() {
 # @stderr Error messages
 # @exitcode 0 If successful
 helper_workflow_blocked() {
-    # Call the library function
-    workflow_get_blocked "$@"
+    local epic_filter="${1:-}"
+    
+    local doh_root
+    doh_root=$(doh_project_dir) || {
+        echo "Error: Not in DOH project" >&2
+        return 1
+    }
+
+    echo "⏸️  Blocked Tasks:"
+    echo "================="
+    echo ""
+
+    local search_path="$doh_root/.doh/epics"
+    if [ -n "$epic_filter" ]; then
+        search_path="$doh_root/.doh/epics/$epic_filter"
+        if [ ! -d "$search_path" ]; then
+            echo "Error: Epic not found: $epic_filter" >&2
+            return 1
+        fi
+        echo "Epic: $epic_filter"
+        echo ""
+    fi
+
+    local count=0
+    find "$search_path" -name "[0-9]*.md" -type f 2>/dev/null | sort | while read -r task_file; do
+        if [ -f "$task_file" ]; then
+            local status depends_on task_number title epic_name blocked_reason=""
+            status=$(frontmatter_get_field "$task_file" "status" 2>/dev/null)
+            depends_on=$(frontmatter_get_field "$task_file" "depends_on" 2>/dev/null)
+            task_number=$(frontmatter_get_field "$task_file" "number" 2>/dev/null)
+            title=$(frontmatter_get_field "$task_file" "title" 2>/dev/null)
+            
+            # Get epic name from path if not filtering by epic
+            if [ -z "$epic_filter" ]; then
+                local rel_path
+                rel_path=$(realpath --relative-to="$doh_root" "$task_file" 2>/dev/null)
+                if [[ "$rel_path" == .doh/epics/*/[0-9]*.md ]]; then
+                    epic_name=$(echo "$rel_path" | sed -n 's|^\.doh/epics/\([^/]*\)/.*|\1|p')
+                fi
+            fi
+
+            local is_blocked=false
+            
+            # Check if explicitly marked as blocked
+            if [ "$status" = "blocked" ]; then
+                is_blocked=true
+                blocked_reason=" (status: blocked)"
+            # Check if has unmet dependencies
+            elif [ -n "$depends_on" ] && [ "$depends_on" != "null" ] && [ "$depends_on" != "" ]; then
+                is_blocked=true
+                blocked_reason=" (has dependencies)"
+            fi
+            
+            if [ "$is_blocked" = true ]; then
+                local task_info="  • Task $task_number"
+                [ -n "$title" ] && task_info="$task_info: $title"
+                [ -n "$epic_name" ] && task_info="$task_info [$epic_name]"
+                task_info="$task_info$blocked_reason"
+                
+                echo "$task_info"
+                ((count++))
+            fi
+        fi
+    done
+    
+    echo ""
+    local scope_text=""
+    [ -n "$epic_filter" ] && scope_text=" in epic '$epic_filter'"
+    echo "Found $count blocked tasks$scope_text"
 }
 
 # @description Generate standup report
@@ -46,8 +231,154 @@ helper_workflow_blocked() {
 # @stderr Error messages
 # @exitcode 0 If successful
 helper_workflow_standup() {
-    # Call the library function
-    reporting_generate_standup "$@"
+    local target_date="${1:-$(date +%Y-%m-%d)}"
+    
+    local doh_root
+    doh_root=$(doh_project_dir) || {
+        echo "Error: Not in DOH project" >&2
+        return 1
+    }
+
+    echo "📅 Daily Standup Report - $target_date"
+    echo "======================================"
+    echo ""
+
+    # Get recently completed tasks (last 2 days)
+    echo "✅ Recently Completed:"
+    echo "---------------------"
+    local completed_count=0
+    
+    find "$doh_root/.doh/epics" -name "[0-9]*.md" -type f -mtime -2 2>/dev/null | while read -r task_file; do
+        if [ -f "$task_file" ]; then
+            local status task_number title epic_name
+            status=$(frontmatter_get_field "$task_file" "status" 2>/dev/null)
+            
+            if [ "$status" = "completed" ] || [ "$status" = "closed" ]; then
+                task_number=$(frontmatter_get_field "$task_file" "number" 2>/dev/null)
+                title=$(frontmatter_get_field "$task_file" "title" 2>/dev/null)
+                
+                # Get epic name from path
+                local rel_path
+                rel_path=$(realpath --relative-to="$doh_root" "$task_file" 2>/dev/null)
+                if [[ "$rel_path" == .doh/epics/*/[0-9]*.md ]]; then
+                    epic_name=$(echo "$rel_path" | sed -n 's|^\.doh/epics/\([^/]*\)/.*|\1|p')
+                fi
+                
+                echo "  • Task $task_number: $title [$epic_name]"
+                ((completed_count++))
+            fi
+        fi
+    done
+    
+    [ $completed_count -eq 0 ] && echo "  No tasks completed recently"
+    
+    echo ""
+    
+    # Get currently in-progress tasks
+    echo "🔄 Currently In Progress:"
+    echo "------------------------"
+    local in_progress_count=0
+    
+    find "$doh_root/.doh/epics" -name "[0-9]*.md" -type f 2>/dev/null | while read -r task_file; do
+        if [ -f "$task_file" ]; then
+            local status task_number title epic_name
+            status=$(frontmatter_get_field "$task_file" "status" 2>/dev/null)
+            
+            if [ "$status" = "in_progress" ]; then
+                task_number=$(frontmatter_get_field "$task_file" "number" 2>/dev/null)
+                title=$(frontmatter_get_field "$task_file" "title" 2>/dev/null)
+                
+                # Get epic name from path
+                local rel_path
+                rel_path=$(realpath --relative-to="$doh_root" "$task_file" 2>/dev/null)
+                if [[ "$rel_path" == .doh/epics/*/[0-9]*.md ]]; then
+                    epic_name=$(echo "$rel_path" | sed -n 's|^\.doh/epics/\([^/]*\)/.*|\1|p')
+                fi
+                
+                echo "  • Task $task_number: $title [$epic_name]"
+                ((in_progress_count++))
+            fi
+        fi
+    done
+    
+    [ $in_progress_count -eq 0 ] && echo "  No tasks currently in progress"
+    
+    echo ""
+    
+    # Get next priorities (pending tasks with no dependencies)
+    echo "📋 Next Priorities:"
+    echo "------------------"
+    local next_count=0
+    
+    find "$doh_root/.doh/epics" -name "[0-9]*.md" -type f 2>/dev/null | sort | head -5 | while read -r task_file; do
+        if [ -f "$task_file" ]; then
+            local status depends_on task_number title epic_name
+            status=$(frontmatter_get_field "$task_file" "status" 2>/dev/null)
+            depends_on=$(frontmatter_get_field "$task_file" "depends_on" 2>/dev/null)
+            
+            # Check if task is available (pending and no dependencies)
+            if [[ "$status" == "pending" || "$status" == "open" || -z "$status" ]]; then
+                if [ -z "$depends_on" ] || [ "$depends_on" = "null" ]; then
+                    task_number=$(frontmatter_get_field "$task_file" "number" 2>/dev/null)
+                    title=$(frontmatter_get_field "$task_file" "title" 2>/dev/null)
+                    
+                    # Get epic name from path
+                    local rel_path
+                    rel_path=$(realpath --relative-to="$doh_root" "$task_file" 2>/dev/null)
+                    if [[ "$rel_path" == .doh/epics/*/[0-9]*.md ]]; then
+                        epic_name=$(echo "$rel_path" | sed -n 's|^\.doh/epics/\([^/]*\)/.*|\1|p')
+                    fi
+                    
+                    echo "  • Task $task_number: $title [$epic_name]"
+                    ((next_count++))
+                fi
+            fi
+        fi
+    done
+    
+    [ $next_count -eq 0 ] && echo "  No immediate priorities available"
+    
+    echo ""
+    
+    # Get blocked tasks
+    echo "⏸️  Blocked Items:"
+    echo "----------------"
+    local blocked_count=0
+    
+    find "$doh_root/.doh/epics" -name "[0-9]*.md" -type f 2>/dev/null | while read -r task_file; do
+        if [ -f "$task_file" ]; then
+            local status depends_on task_number title epic_name
+            status=$(frontmatter_get_field "$task_file" "status" 2>/dev/null)
+            depends_on=$(frontmatter_get_field "$task_file" "depends_on" 2>/dev/null)
+            
+            local is_blocked=false
+            if [ "$status" = "blocked" ]; then
+                is_blocked=true
+            elif [ -n "$depends_on" ] && [ "$depends_on" != "null" ]; then
+                is_blocked=true
+            fi
+            
+            if [ "$is_blocked" = true ]; then
+                task_number=$(frontmatter_get_field "$task_file" "number" 2>/dev/null)
+                title=$(frontmatter_get_field "$task_file" "title" 2>/dev/null)
+                
+                # Get epic name from path
+                local rel_path
+                rel_path=$(realpath --relative-to="$doh_root" "$task_file" 2>/dev/null)
+                if [[ "$rel_path" == .doh/epics/*/[0-9]*.md ]]; then
+                    epic_name=$(echo "$rel_path" | sed -n 's|^\.doh/epics/\([^/]*\)/.*|\1|p')
+                fi
+                
+                echo "  • Task $task_number: $title [$epic_name]"
+                ((blocked_count++))
+            fi
+        fi
+    done
+    
+    [ $blocked_count -eq 0 ] && echo "  No blocked tasks"
+    
+    echo ""
+    echo "📊 Summary: $completed_count completed, $in_progress_count in progress, $next_count ready, $blocked_count blocked"
 }
 
 # @description Show comprehensive project status
@@ -55,8 +386,80 @@ helper_workflow_standup() {
 # @stderr Error messages
 # @exitcode 0 If successful
 helper_workflow_status() {
-    # Call the library function
-    project_get_status "$@"
+    echo "Getting status..."
+    echo ""
+    echo ""
+
+    echo "📊 Project Status"
+    echo "================"
+    echo ""
+
+    # Get DOH root directory
+    local doh_root
+    doh_root=$(doh_project_dir) || {
+        echo "Error: Not in a DOH project" >&2
+        return 1
+    }
+
+    # PRD Statistics
+    echo "📄 PRDs:"
+    local prd_dir="$doh_root/.doh/prds"
+    if [ -d "$prd_dir" ]; then
+        local total
+        total=$(find "$prd_dir" -name "*.md" -type f 2>/dev/null | wc -l)
+        echo "  Total: $total"
+    else
+        echo "  No PRDs found"
+    fi
+
+    echo ""
+    
+    # Epic Statistics
+    echo "📚 Epics:"
+    local epic_dir="$doh_root/.doh/epics"
+    if [ -d "$epic_dir" ]; then
+        local total
+        total=$(find "$epic_dir" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l)
+        echo "  Total: $total"
+    else
+        echo "  No epics found"
+    fi
+
+    echo ""
+    
+    # Task Statistics
+    echo "📝 Tasks:"
+    if [ -d "$epic_dir" ]; then
+        # Count all numbered task files
+        local total
+        total=$(find "$epic_dir" -name "[0-9]*.md" -type f 2>/dev/null | wc -l)
+        
+        # Count tasks by status using frontmatter API
+        local pending=0 completed=0 in_progress=0 blocked=0
+        
+        while IFS= read -r task_file; do
+            if [[ -n "$task_file" && -f "$task_file" ]]; then
+                local status
+                status=$(frontmatter_get_field "$task_file" "status" 2>/dev/null)
+                case "$status" in
+                    "pending"|"open") ((pending++)) ;;
+                    "completed"|"closed") ((completed++)) ;;
+                    "in_progress") ((in_progress++)) ;;
+                    "blocked") ((blocked++)) ;;
+                esac
+            fi
+        done < <(find "$epic_dir" -name "[0-9]*.md" -type f 2>/dev/null)
+        
+        echo "  Pending: $pending"
+        echo "  In Progress: $in_progress" 
+        echo "  Completed: $completed"
+        echo "  Blocked: $blocked"
+        echo "  Total: $total"
+    else
+        echo "  No tasks found"
+    fi
+
+    return 0
 }
 
 # @description Manage workspace and environment
@@ -65,8 +468,94 @@ helper_workflow_status() {
 # @stderr Error messages
 # @exitcode 0 If successful
 helper_workflow_workspace() {
-    # Call the library function
-    workspace_diagnostic "$@"
+    local reset_flag="${1:-}"
+    
+    # Check for reset flag
+    if [[ "$reset_flag" == "--reset" ]]; then
+        reset_workspace
+        return $?
+    fi
+    
+    local doh_root
+    doh_root=$(doh_project_dir) || {
+        echo "Error: Not in DOH project" >&2
+        return 1
+    }
+
+    echo "🔧 DOH Workspace Diagnostic"
+    echo "=========================="
+    echo ""
+
+    # Project Information
+    local project_id
+    project_id="$(workspace_get_current_project_id)"
+    echo "Project: $project_id"
+    echo "DOH Global Dir: $(doh_global_dir)"
+    echo ""
+
+    # Workspace Mode Detection
+    local current_mode
+    current_mode="$(detect_workspace_mode 2>/dev/null || echo "unknown")"
+    echo "Current Mode: $current_mode"
+    echo ""
+
+    # Workspace State
+    echo "📋 Workspace State:"
+    load_workspace_state | grep -E "^(mode|current_epic|current_branch|current_worktree|agent_count):" | while IFS=': ' read -r key value; do
+        echo "  $key: $value"
+    done
+    echo ""
+
+    # Git Information
+    echo "📚 Git Status:"
+    echo "  Branch: $(git branch --show-current 2>/dev/null || echo "unknown")"
+    echo "  Worktrees:"
+    git worktree list 2>/dev/null | while read -r line; do
+        echo "    $line"
+    done
+    echo ""
+
+    # Workspace Integrity Check
+    echo "🔍 Integrity Check:"
+    if check_workspace_integrity; then
+        echo "  Status: ✅ All checks passed"
+    else
+        echo "  Status: ⚠️ Issues detected"
+        echo ""
+        echo "💡 To fix issues, run: /doh:workspace --reset"
+    fi
+    echo ""
+
+    # Active Tasks Summary
+    echo "📊 Active Tasks:"
+    if [[ -d "$doh_root/.doh/epics" ]]; then
+        local epic_count=0
+        local task_count=0
+        
+        for epic_dir in "$doh_root/.doh/epics"/*/; do
+            [[ ! -d "$epic_dir" ]] && continue
+            local epic_name
+            epic_name="$(basename "$epic_dir")"
+            epic_count=$((epic_count + 1))
+            
+            # Count tasks in this epic
+            while IFS= read -r -d '' task_file; do
+                [[ -f "$task_file" ]] && task_count=$((task_count + 1))
+            done < <(find "$epic_dir" -name "[0-9]*.md" -type f -print0)
+        done
+        
+        echo "  Epics: $epic_count"
+        echo "  Total Tasks: $task_count"
+    else
+        echo "  No epics found"
+    fi
+
+    echo ""
+    echo "🚀 Available Actions:"
+    echo "  /doh:workspace --reset  - Reset workspace state"
+    echo "  /doh:next              - Show next available tasks"
+    echo "  /doh:epic-list         - List all epics"
+    echo "  /doh:status            - Show overall status"
 }
 
 # @description Search across DOH documents
