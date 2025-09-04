@@ -96,7 +96,7 @@ epic: $ARGUMENTS
 depends_on: []  # List of task numbers this depends on, e.g., [001, 002]
 parallel: true  # Can this run in parallel with other tasks?
 conflicts_with: []  # Tasks that modify same files, e.g., [003, 004]
-number qui peux file_version: 0.1.0
+file_version: 0.1.0
 ---
 
 # Task: [Task Title]

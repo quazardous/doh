@@ -27,6 +27,8 @@ _tf_setup() {
     
     # Initialize git repo and set version
     ( 
+        echo "$TEST_DIR" 
+        echo $DOH_VERSION_FILE
         cd "$TEST_DIR" 
         mkdir -p .git
         local version_file=$(doh_version_file)
@@ -36,10 +38,6 @@ _tf_setup() {
         echo "0.1.0" > "$version_file"
         echo "DEBUG: version_file exists? $(test -f "$version_file" && echo "YES" || echo "NO")"
         
-        # Initialize git repo for version tracking
-        git init . > /dev/null 2>&1
-        git config user.email "test@example.com" > /dev/null 2>&1
-        git config user.name "Test User" > /dev/null 2>&1
     )
     
     # Create initial version file
@@ -136,16 +134,9 @@ depends_on: [002]
 Implement version management commands.
 EOF
     
-    # Commit initial state
-    git add . > /dev/null 2>&1
-    git commit -m "Initial version structure" > /dev/null 2>&1
-    
 }
 
 _tf_teardown() {
-    # Clean up environment variables
-    unset DOH_PROJECT_DIR
-    unset DOH_VERSION_FILE
     
     # Cleanup test directory
     if [[ -n "$TEST_DIR" && -d "$TEST_DIR" ]]; then
@@ -272,7 +263,7 @@ test_major_version_workflow() {
     frontmatter_update_field "$doh_dir/prds/core-features.md" "target_version" "2.0.0" > /dev/null
     
     # Add breaking change indicator to epic
-    cat >> .doh/epics/001.md << 'EOF'
+    cat >> "$TEST_DIR/.doh/epics/001.md" << 'EOF'
 
 ## Breaking Changes
 - Major API restructure
