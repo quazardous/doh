@@ -26,19 +26,20 @@ _tf_setup() {
     _tff_create_minimal_doh_project
     
     # Initialize git repo and set version
-    ( cd "$TEST_DIR" 
-      mkdir -p .git
-      local version_file=$(doh_version_file)
-      echo "DEBUG: version_file = '$version_file'"
-      echo "DEBUG: Creating version file directory $(dirname "$version_file")"
-      mkdir -p "$(dirname "$version_file")"
-      echo "0.1.0" > "$version_file"
-      echo "DEBUG: version_file exists? $(test -f "$version_file" && echo "YES" || echo "NO")"
-      
-      # Initialize git repo for version tracking
-      git init . > /dev/null 2>&1
-      git config user.email "test@example.com" > /dev/null 2>&1
-      git config user.name "Test User" > /dev/null 2>&1
+    ( 
+        cd "$TEST_DIR" 
+        mkdir -p .git
+        local version_file=$(doh_version_file)
+        echo "DEBUG: version_file = '$version_file'"
+        echo "DEBUG: Creating version file directory $(dirname "$version_file")"
+        mkdir -p "$(dirname "$version_file")"
+        echo "0.1.0" > "$version_file"
+        echo "DEBUG: version_file exists? $(test -f "$version_file" && echo "YES" || echo "NO")"
+        
+        # Initialize git repo for version tracking
+        git init . > /dev/null 2>&1
+        git config user.email "test@example.com" > /dev/null 2>&1
+        git config user.name "Test User" > /dev/null 2>&1
     )
     
     # Create initial version file

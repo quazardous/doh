@@ -18,13 +18,6 @@ export -f version_find_files_without_file_version version_bump_file version_bump
 _tf_setup() {
     # Create temporary test environment
     TEST_DIR=$(mktemp -d)
-    cd "$TEST_DIR"
-    
-    # Initialize basic DOH structure
-    mkdir -p .doh .git
-    echo "0.1.0" > VERSION
-    
-    cd - > /dev/null
 }
 
 _tf_teardown() {
