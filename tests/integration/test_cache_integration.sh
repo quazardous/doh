@@ -78,8 +78,6 @@ _tf_teardown() {
     if [[ -n "$DOH_TEST_DIR" && "$DOH_TEST_DIR" =~ cache_test_ ]]; then
         rm -rf "$DOH_TEST_DIR"
     fi
-    if [[ -n "$DOH_TEST_PROJECT_ROOT" ]]; then
-    fi
 }
 
 # File Cache Tests

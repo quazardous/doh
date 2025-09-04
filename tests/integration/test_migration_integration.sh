@@ -94,12 +94,6 @@ Create the login form component.
 EOF
 }
 
-_tf_teardown() {
-    # Cleanup test environment
-    if [[ -n "$DOH_TEST_PROJECT_ROOT" ]]; then
-    fi
-}
-
 # Duplicate Detection Tests
 test_duplicate_detection_epics() {
     if ! command -v detect_duplicates >/dev/null 2>&1; then
