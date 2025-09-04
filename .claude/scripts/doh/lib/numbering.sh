@@ -65,7 +65,7 @@ _numbering_create_empty_registry() {
   "file_cache": {
     "000": {
       "type": "epic",
-      "path": ".doh/quick/manifest.md",
+      "path": "quick/manifest.md",
       "name": "QUICK"
     }
   },

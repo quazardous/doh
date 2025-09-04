@@ -136,6 +136,93 @@ test_add_header_markdown_with_frontmatter() {
     _tf_assert_file_contains "Should preserve original content" "$file_path" "# Test Markdown"
 }
 
+# Test: _file_headers_add_markdown_html with new file
+test_file_headers_add_markdown_html_new() {
+    local temp_dir=$(_tf_test_container_tmpdir)
+    local file_path="$temp_dir/new_html.md"
+    
+    echo '# New Markdown' > "$file_path"
+    echo 'Content here' >> "$file_path"
+    
+    _tf_assert "Should succeed adding HTML headers" _file_headers_add_markdown_html "$file_path" "1.5.0" "2025-01-01T12:00:00Z"
+    
+    local first_line=$(head -n 1 "$file_path")
+    local second_line=$(head -n 2 "$file_path" | tail -n 1)
+    
+    _tf_assert_equals "First line should be version comment" "<!-- DOH Version: 1.5.0 -->" "$first_line"
+    _tf_assert_equals "Second line should be created comment" "<!-- Created: 2025-01-01T12:00:00Z -->" "$second_line"
+    _tf_assert_file_contains "Should preserve original content" "$file_path" "# New Markdown"
+}
+
+# Test: _file_headers_add_markdown_html update existing
+test_file_headers_add_markdown_html_update() {
+    local temp_dir=$(_tf_test_container_tmpdir)
+    local file_path="$temp_dir/existing_html.md"
+    
+    # Create file with existing HTML comments
+    cat > "$file_path" << 'EOF'
+<!-- DOH Version: 1.0.0 -->
+<!-- Created: 2024-01-01T10:00:00Z -->
+
+# Existing Markdown
+Old content
+EOF
+    
+    _tf_assert "Should succeed updating HTML headers" _file_headers_add_markdown_html "$file_path" "2.0.0" "2025-01-01T12:00:00Z"
+    
+    _tf_assert_file_contains "Should update version" "$file_path" "<!-- DOH Version: 2.0.0 -->"
+    _tf_assert_file_contains "Should preserve created date" "$file_path" "<!-- Created: 2024-01-01T10:00:00Z -->"
+    
+    # Check that new created date is NOT present
+    local new_created_count
+    new_created_count=$(grep -c "Created: 2025-01-01T12:00:00Z" "$file_path" 2>/dev/null) || new_created_count="0"
+    _tf_assert_equals "Should not have new created date" "0" "$new_created_count"
+    
+    _tf_assert_file_contains "Should preserve content" "$file_path" "# Existing Markdown"
+}
+
+# Test: _file_headers_add_markdown_html with partial headers
+test_file_headers_add_markdown_html_partial() {
+    local temp_dir=$(_tf_test_container_tmpdir)
+    local file_path="$temp_dir/partial_html.md"
+    
+    # Create file with only version comment
+    cat > "$file_path" << 'EOF'
+<!-- DOH Version: 1.0.0 -->
+
+# Partial Markdown
+Content
+EOF
+    
+    _tf_assert "Should succeed adding missing headers" _file_headers_add_markdown_html "$file_path" "1.5.0" "2025-01-01T12:00:00Z"
+    
+    _tf_assert_file_contains "Should update version" "$file_path" "<!-- DOH Version: 1.5.0 -->"
+    _tf_assert_file_contains "Should add created date" "$file_path" "<!-- Created: 2025-01-01T12:00:00Z -->"
+    _tf_assert_file_contains "Should preserve content" "$file_path" "# Partial Markdown"
+}
+
+# Test: Markdown frontmatter integration with new function
+test_add_header_markdown_frontmatter_integration() {
+    local project_dir=$(doh_project_dir)
+    local file_path="$project_dir/001.md"  # Task file pattern
+    
+    # Create DOH structured file
+    cat > "$file_path" << 'EOF'
+# Test Task
+
+## Overview
+Content here
+EOF
+    
+    # This should use frontmatter path since it's a DOH task file
+    _tf_assert "Should succeed with frontmatter path" file_headers_add_version "$file_path" "1.2.0"
+    
+    _tf_assert_file_contains "Should have frontmatter" "$file_path" "---"
+    _tf_assert_file_contains "Should have version in frontmatter" "$file_path" "file_version: 1.2.0"
+    _tf_assert_file_contains "Should have created timestamp" "$file_path" "created:"
+    _tf_assert_file_contains "Should preserve content" "$file_path" "# Test Task"
+}
+
 # Test: Python file with shebang
 test_add_header_python_with_shebang() {
     local project_dir=$(doh_project_dir)

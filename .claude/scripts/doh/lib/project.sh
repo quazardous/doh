@@ -21,17 +21,17 @@ readonly PROJECT_LIB_VERSION="1.0.0"
 # @exitcode 0 If successful
 # @exitcode 1 If not in DOH project
 project_get_summary() {
-    local doh_root
-    doh_root=$(doh_project_dir) || {
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
 
     # Count totals
     local prd_count epic_count task_count completed_count
-    prd_count=$(find "$doh_root/.doh/prds" -name "*.md" -type f 2>/dev/null | wc -l)
-    epic_count=$(find "$doh_root/.doh/epics" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l)
-    task_count=$(find "$doh_root/.doh/epics" -name "[0-9]*.md" -type f 2>/dev/null | wc -l)
+    prd_count=$(find "$doh_dir/prds" -name "*.md" -type f 2>/dev/null | wc -l)
+    epic_count=$(find "$doh_dir/epics" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l)
+    task_count=$(find "$doh_dir/epics" -name "[0-9]*.md" -type f 2>/dev/null | wc -l)
     
     # Count completed tasks
     completed_count=0
@@ -43,7 +43,7 @@ project_get_summary() {
                 ((completed_count++))
             fi
         fi
-    done < <(find "$doh_root/.doh/epics" -name "[0-9]*.md" -type f 2>/dev/null)
+    done < <(find "$doh_dir/epics" -name "[0-9]*.md" -type f 2>/dev/null)
 
     # Calculate completion percentage
     local completion_percent=0
@@ -62,8 +62,8 @@ project_get_summary() {
 project_get_recent_activity() {
     local days="${1:-7}"
     
-    local doh_root
-    doh_root=$(doh_project_dir) || {
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
@@ -72,11 +72,11 @@ project_get_recent_activity() {
     echo "======================================"
 
     # Find recently modified files
-    find "$doh_root/.doh" -name "*.md" -type f -mtime -"$days" -printf '%T@ %p\n' 2>/dev/null | \
+    find "$doh_dir" -name "*.md" -type f -mtime -"$days" -printf '%T@ %p\n' 2>/dev/null | \
     sort -nr | head -10 | while read -r timestamp filepath; do
         local filename relative_path
         filename=$(basename "$filepath")
-        relative_path=$(realpath --relative-to="$doh_root" "$filepath" 2>/dev/null || echo "$filepath")
+        relative_path=$(realpath --relative-to="$doh_dir" "$filepath" 2>/dev/null || echo "$filepath")
         
         # Get file type and status if available
         local file_info=""
@@ -95,8 +95,8 @@ project_get_recent_activity() {
 # @stderr Error messages
 # @exitcode 0 If successful
 project_get_health() {
-    local doh_root
-    doh_root=$(doh_project_dir) || {
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
@@ -109,7 +109,7 @@ project_get_health() {
 
     # Check for tasks without frontmatter
     local invalid_tasks
-    invalid_tasks=$(find "$doh_root/.doh/epics" -name "[0-9]*.md" -type f 2>/dev/null | while read -r task_file; do
+    invalid_tasks=$(find "$doh_dir/epics" -name "[0-9]*.md" -type f 2>/dev/null | while read -r task_file; do
         if ! frontmatter_has "$task_file" 2>/dev/null; then
             echo "$task_file"
             ((issues++))
@@ -125,7 +125,7 @@ project_get_health() {
     fi
 
     # Check for epics without epic.md
-    find "$doh_root/.doh/epics" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | while read -r epic_dir; do
+    find "$doh_dir/epics" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | while read -r epic_dir; do
         if [ ! -f "$epic_dir/epic.md" ]; then
             echo "⚠️  Epic missing epic.md: $(basename "$epic_dir")"
             ((issues++))

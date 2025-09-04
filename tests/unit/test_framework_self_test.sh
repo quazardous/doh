@@ -61,9 +61,8 @@ test_tf_temp_utilities() {
     echo "dir test file" > "$temp_dir/test.txt"
     _tf_assert_file_exists "Should create files in temp dir" "$temp_dir/test.txt"
     
-    # Test cleanup
-    _tf_assert_not "Temp file should be cleaned up" test -f "$temp_file"
-    _tf_assert_not "Temp directory should be cleaned up" test -d "$temp_dir"
+    # Note: Cleanup happens after tests complete, not during the test
+    # The test launcher handles cleanup, so we shouldn't test for cleanup here
 }
 
 test_tf_mocking() {

@@ -8,6 +8,7 @@ set -euo pipefail
 # Source required dependencies
 DOH_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
 source "${DOH_ROOT}/.claude/scripts/doh/lib/dohenv.sh"
+source "${DOH_ROOT}/.claude/scripts/doh/lib/doh.sh"
 source "${DOH_ROOT}/.claude/scripts/doh/lib/version.sh"
 
 # Load DOH environment
@@ -55,8 +56,14 @@ helper_version_new() {
     echo "   From: $current_version"
     echo "   To: $version"
     
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
+        echo "Error: Not in DOH project" >&2
+        return 1
+    }
+
     # Check if this creates a new version file
-    local version_file=".doh/versions/${version}.md"
+    local version_file="$doh_dir/versions/${version}.md"
     if [[ ! -f "$version_file" ]]; then
         echo ""
         echo "💡 Suggestion: Create version file with goals"
@@ -104,14 +111,20 @@ helper_version_show() {
             echo "⚠️ No VERSION file found"
         fi
         
+        local doh_dir
+        doh_dir=$(doh_project_dir) || {
+            echo "Error: Not in DOH project" >&2
+            return 1
+        }
+
         # Show available version files
         echo ""
         echo "📚 Available Version Files:"
-        if [[ -d ".doh/versions" ]]; then
+        if [[ -d "$doh_dir/versions" ]]; then
             local version_files
-            version_files=$(ls .doh/versions/*.md 2>/dev/null | wc -l)
+            version_files=$(ls "$doh_dir/versions/*.md" 2>/dev/null | wc -l)
             if [[ "$version_files" -gt 0 ]]; then
-                for version_file in .doh/versions/*.md; do
+                for version_file in "$doh_dir/versions/*.md"; do
                     if [[ -f "$version_file" ]]; then
                         local version_name
                         version_name=$(basename "$version_file" .md)

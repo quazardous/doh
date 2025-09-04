@@ -21,18 +21,18 @@ helper_epic_list() {
     echo ""
     echo ""
 
-    local doh_root
-    doh_root=$(doh_project_dir) || {
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
 
-    if [ ! -d "$doh_root/epics" ]; then
+    if [ ! -d "$doh_dir/epics" ]; then
         echo "📁 No epics directory found. Create your first epic with: /doh:prd-parse <feature-name>"
         return 0
     fi
     
-    if [ -z "$(ls -d "$doh_root"/epics/*/ 2>/dev/null)" ]; then
+    if [ -z "$(ls -d "$doh_dir"/epics/*/ 2>/dev/null)" ]; then
         echo "📁 No epics found. Create your first epic with: /doh:prd-parse <feature-name>"
         return 0
     fi
@@ -45,7 +45,7 @@ helper_epic_list() {
     local planning_epics="" in_progress_epics="" completed_epics=""
 
     # Process all epics
-    for dir in "$doh_root"/epics/*/; do
+    for dir in "$doh_dir"/epics/*/; do
         [ -d "$dir" ] || continue
         [ -f "$dir/epic.md" ] || continue
 
@@ -133,8 +133,8 @@ helper_epic_list() {
     echo ""
     echo "📊 Summary"
     local total tasks
-    total=$(ls -d "$doh_root"/epics/*/ 2>/dev/null | wc -l)
-    tasks=$(find "$doh_root"/epics -name "[0-9]*.md" 2>/dev/null | wc -l)
+    total=$(ls -d "$doh_dir"/epics/*/ 2>/dev/null | wc -l)
+    tasks=$(find "$doh_dir"/epics -name "[0-9]*.md" 2>/dev/null | wc -l)
     echo "   Total epics: $total"
     echo "   Total tasks: $tasks"
 
@@ -279,12 +279,12 @@ helper_epic_help() {
 # @exitcode 1 If validation fails
 helper_epic_validate_prerequisites() {
     local epic_name="$1"
-    local doh_root
-    doh_root=$(doh_project_dir) || {
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
-    local epic_path="$doh_root/epics/$epic_name"
+    local epic_path="$doh_dir/epics/$epic_name"
     local validation_errors=()
     
     # Check epic exists
@@ -366,12 +366,12 @@ helper_epic_create_or_enter_branch() {
 # @exitcode 0 If successful
 helper_epic_identify_ready_tasks() {
     local epic_name="$1"
-    local doh_root
-    doh_root=$(doh_project_dir) || {
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
-    local epic_path="$doh_root/epics/$epic_name"
+    local epic_path="$doh_dir/epics/$epic_name"
     local ready_tasks=()
     
     echo "Analyzing task readiness in epic: $epic_name"
@@ -442,12 +442,12 @@ helper_epic_create() {
     fi
     
     # Check if epic already exists
-    local doh_root
-    doh_root=$(doh_project_dir) || {
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
-    local epic_path="$doh_root/epics/${epic_name}/epic.md"
+    local epic_path="$doh_dir/epics/${epic_name}/epic.md"
     if [[ -f "$epic_path" ]]; then
         echo "Error: Epic already exists: $epic_path" >&2
         return 1
@@ -463,41 +463,38 @@ helper_epic_create() {
     }
     
     # Create epic directory
-    mkdir -p "$doh_root/epics/${epic_name}"
+    mkdir -p "$doh_dir/epics/${epic_name}"
     
     # Create epic using frontmatter API
     local created_date
     created_date="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
     
-    # Create epic file with frontmatter
-    frontmatter_create_markdown "$epic_path" \
-        "name" "$epic_name" \
-        "number" "$epic_number" \
-        "status" "backlog" \
-        "created" "$created_date" \
-        "progress" "0%" \
-        "github" "[Will be updated when synced to GitHub]" \
-        "file_version" "0.1.0"
+    # Prepare epic content
+    local epic_content
+    epic_content=$(cat <<EOF
+
+# Epic: $epic_name
+
+$(if [[ -n "$description" ]]; then echo "## Description"; echo "$description"; echo ""; fi)## Overview
+<!-- Epic overview goes here -->
+
+## Implementation Strategy
+<!-- Implementation details go here -->
+
+## Tasks
+<!-- Tasks will be added during decomposition -->
+EOF
+)
     
-    # Add epic content
-    {
-        echo ""
-        echo "# Epic: $epic_name"
-        echo ""
-        if [[ -n "$description" ]]; then
-            echo "## Description"
-            echo "$description"
-            echo ""
-        fi
-        echo "## Overview"
-        echo "<!-- Epic overview goes here -->"
-        echo ""
-        echo "## Implementation Strategy"
-        echo "<!-- Implementation details go here -->"
-        echo ""
-        echo "## Tasks"
-        echo "<!-- Tasks will be added during decomposition -->"
-    } >> "$epic_path"
+    # Create epic file with frontmatter using field:value format
+    frontmatter_create_markdown "$epic_path" "$epic_content" \
+        "name:$epic_name" \
+        "number:$epic_number" \
+        "status:backlog" \
+        "created:$created_date" \
+        "progress:0%" \
+        "github:[Will be updated when synced to GitHub]" \
+        "file_version:0.1.0"
     
     # Register epic in numbering system
     numbering_register_epic "$epic_number" "$epic_path" "$epic_name"
@@ -524,17 +521,17 @@ helper_epic_parse() {
     fi
     
     # Check if PRD exists
-    local doh_root
-    doh_root=$(doh_project_dir) || {
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
-    local prd_path="$doh_root/prds/${prd_name}.md"
+    local prd_path="$doh_dir/prds/${prd_name}.md"
     if [[ ! -f "$prd_path" ]]; then
         echo "Error: PRD not found: $prd_path" >&2
         echo "Available PRDs:" >&2
-        if [[ -d "$doh_root/prds" ]]; then
-            ls -1 "$doh_root/prds"/*.md 2>/dev/null | sed "s|$doh_root/prds/||; s|.md$||" | sed 's/^/  - /' || echo "  (none)"
+        if [[ -d "$doh_dir/prds" ]]; then
+            ls -1 "$doh_dir/prds"/*.md 2>/dev/null | sed "s|$doh_dir/prds/||; s|.md$||" | sed 's/^/  - /' || echo "  (none)"
         fi
         return 1
     fi
@@ -547,7 +544,7 @@ helper_epic_parse() {
     target_version="$(frontmatter_get_field "$prd_path" "target_version" 2>/dev/null || echo "")"
     
     # Check if epic already exists
-    local epic_path="$doh_root/epics/${prd_name}/epic.md"
+    local epic_path="$doh_dir/epics/${prd_name}/epic.md"
     if [[ -f "$epic_path" ]]; then
         echo "Warning: Epic already exists: $epic_path" >&2
         echo "Do you want to overwrite? (yes/no)" >&2

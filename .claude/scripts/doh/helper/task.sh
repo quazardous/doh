@@ -8,6 +8,7 @@ set -euo pipefail
 # Source required dependencies
 DOH_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
 source "${DOH_ROOT}/.claude/scripts/doh/lib/dohenv.sh"
+source "${DOH_ROOT}/.claude/scripts/doh/lib/doh.sh"
 source "${DOH_ROOT}/.claude/scripts/doh/lib/numbering.sh" 
 source "${DOH_ROOT}/.claude/scripts/doh/lib/frontmatter.sh"
 
@@ -31,14 +32,20 @@ helper_task_decompose() {
         echo "Usage: helper.sh task decompose <epic-name>" >&2
         return 1
     fi
+
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
+        echo "Error: Not in DOH project" >&2
+        return 1
+    }
     
     # Check if epic exists
-    local epic_path=".doh/epics/${epic_name}/epic.md"
+    local epic_path="$doh_dir/epics/${epic_name}/epic.md"
     if [[ ! -f "$epic_path" ]]; then
         echo "Error: Epic not found: $epic_path" >&2
         echo "Available epics:" >&2
-        if [[ -d ".doh/epics" ]]; then
-            ls -1 .doh/epics/ 2>/dev/null | sed 's/^/  - /' || echo "  (none)"
+        if [[ -d "$doh_dir/epics" ]]; then
+            ls -1 "$doh_dir/epics" 2>/dev/null | sed 's/^/  - /' || echo "  (none)"
         fi
         return 1
     fi
@@ -58,8 +65,8 @@ helper_task_decompose() {
     
     # Count existing tasks
     local task_count=0
-    if [[ -d ".doh/epics/${epic_name}" ]]; then
-        task_count=$(find ".doh/epics/${epic_name}" -name "[0-9][0-9][0-9].md" -type f 2>/dev/null | wc -l)
+    if [[ -d "$doh_dir/epics/${epic_name}" ]]; then
+        task_count=$(find "$doh_dir/epics/${epic_name}" -name "[0-9][0-9][0-9].md" -type f 2>/dev/null | wc -l)
     fi
     
     echo "   Existing tasks: $task_count"
@@ -70,7 +77,7 @@ helper_task_decompose() {
         echo "   Use /doh:epic-decompose $epic_name for interactive task creation."
         echo ""
         echo "📋 Existing tasks:"
-        find ".doh/epics/${epic_name}" -name "[0-9][0-9][0-9].md" -type f 2>/dev/null | sort | while read -r task_file; do
+        find "$doh_dir/epics/${epic_name}" -name "[0-9][0-9][0-9].md" -type f 2>/dev/null | sort | while read -r task_file; do
             local task_number
             task_number="$(basename "$task_file" .md)"
             local task_name
@@ -99,15 +106,21 @@ helper_task_status() {
         echo "Usage: helper.sh task status <task-number>" >&2
         return 1
     fi
-    
+
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
+        echo "Error: Not in DOH project" >&2
+        return 1
+    }
+
     # Find task file by number (search in all epics)
     local task_file
-    task_file=$(find .doh/epics -name "${task_number}.md" -type f 2>/dev/null | head -1)
-    
+    task_file=$(find "$doh_dir/epics" -name "${task_number}.md" -type f 2>/dev/null | head -1)
+
     if [[ -z "$task_file" ]]; then
         echo "Error: Task #$task_number not found" >&2
         echo "Available tasks:" >&2
-        find .doh/epics -name "[0-9][0-9][0-9].md" -type f 2>/dev/null | sort | head -10 | while read -r f; do
+        find "$doh_dir/epics" -name "[0-9][0-9][0-9].md" -type f 2>/dev/null | sort | head -10 | while read -r f; do
             local num=$(basename "$f" .md)
             echo "  - Task #$num"
         done
@@ -203,11 +216,17 @@ helper_task_update() {
             return 1
             ;;
     esac
+
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
+        echo "Error: Not in DOH project" >&2
+        return 1
+    }
     
     # Find task file
     local task_file
-    task_file=$(find .doh/epics -name "${task_number}.md" -type f 2>/dev/null | head -1)
-    
+    task_file=$(find "$doh_dir/epics" -name "${task_number}.md" -type f 2>/dev/null | head -1)
+
     if [[ -z "$task_file" ]]; then
         echo "Error: Task #$task_number not found" >&2
         return 1

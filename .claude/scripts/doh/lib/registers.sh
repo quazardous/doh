@@ -13,7 +13,6 @@ source "$(dirname "${BASH_SOURCE[0]}")/numbering.sh"
 DOH_LIB_REGISTERS_LOADED=1
 
 # Constants
-readonly REGISTERS_LIB_VERSION="1.0.0"
 
 # Cache refresh and validation functions
 
@@ -27,7 +26,13 @@ registers_rebuild_file_cache() {
     registry_file="$(_numbering_ensure_registry)" || return 1
     
     local project_root
-    project_root="$(doh_project_dir)" || {
+    project_root="$(doh_project_root)" || {
+        echo "Error: Not in a DOH project" >&2
+        return 1
+    }
+    
+    local doh_dir
+    doh_dir="$(doh_project_dir)" || {
         echo "Error: Not in a DOH project" >&2
         return 1
     }
@@ -65,7 +70,7 @@ registers_rebuild_file_cache() {
     
     # Scan for task files  
     local task_files
-    task_files=$(find "$project_root" -name "*.md" -path "*/.doh/epics/*" -not -name "epic.md" -type f | sort)
+    task_files=$(find "$doh_dir/epics" -name "*.md" -not -name "epic.md" -type f | sort)
     
     while IFS= read -r task_file; do
         if [[ -n "$task_file" ]]; then
@@ -82,8 +87,8 @@ registers_rebuild_file_cache() {
                 if grep -q "^epic:" "$task_file"; then
                     epic_name=$(grep -m 1 "^epic:" "$task_file" | cut -d':' -f2- | xargs)
                 else
-                    # Infer from path: .doh/epics/epic-name/
-                    epic_name=$(echo "$rel_path" | sed -n 's|^\.doh/epics/\([^/]*\)/.*|\1|p')
+                    # Infer from path: epics/epic-name/
+                    epic_name=$(echo "$rel_path" | sed -n 's|^epics/\([^/]*\)/.*|\1|p')
                 fi
                 
                 if [[ -n "$task_name" && -n "$task_number" ]]; then
@@ -105,7 +110,7 @@ registers_rebuild_file_cache() {
     local quick_exists
     quick_exists=$(jq -r '.file_cache["000"]' "$temp_file")
     if [[ "$quick_exists" == "null" ]]; then
-        local quick_data='{"type": "epic", "path": ".doh/quick/manifest.md", "name": "QUICK"}'
+        local quick_data='{"type": "epic", "path": "quick/manifest.md", "name": "QUICK"}'
         jq --argjson data "$quick_data" '.file_cache["000"] = $data' "$temp_file" > "$temp_file.tmp" && mv "$temp_file.tmp" "$temp_file"
     fi
     
@@ -128,7 +133,10 @@ registers_rebuild_graph_cache() {
     registry_file="$(_numbering_ensure_registry)" || return 1
     
     local project_root
-    project_root="$(doh_project_dir)" || return 1
+    project_root="$(doh_project_root)" || return 1
+    
+    local doh_dir
+    doh_dir="$(doh_project_dir)" || return 1
     
     echo "Rebuilding graph cache from file relationships..." >&2
     
@@ -141,7 +149,7 @@ registers_rebuild_graph_cache() {
     
     # Scan all numbered files for parent relationships
     local numbered_files
-    numbered_files=$(find "$project_root" -name "*.md" -path "*/.doh/epics/*" -type f | sort)
+    numbered_files=$(find "$doh_dir/epics" -name "*.md" -type f | sort)
     
     while IFS= read -r file; do
         if [[ -n "$file" && -f "$file" ]]; then
@@ -158,7 +166,7 @@ registers_rebuild_graph_cache() {
                 # Infer from path
                 local rel_path
                 rel_path=$(realpath --relative-to="$project_root" "$file")
-                epic_name=$(echo "$rel_path" | sed -n 's|^\.doh/epics/\([^/]*\)/.*|\1|p')
+                epic_name=$(echo "$rel_path" | sed -n 's|^epics/\([^/]*\)/.*|\1|p')
             fi
             
             # Add to graph cache if has parent or epic
@@ -203,7 +211,10 @@ registers_validate_consistency() {
     registry_file="$(_numbering_ensure_registry)" || return 1
     
     local project_root
-    project_root="$(doh_project_dir)" || return 1
+    project_root="$(doh_project_root)" || return 1
+    
+    local doh_dir
+    doh_dir="$(doh_project_dir)" || return 1
     
     local errors=0
     
@@ -237,7 +248,7 @@ registers_validate_consistency() {
     
     # Check for uncached numbered files
     local numbered_files
-    numbered_files=$(find "$project_root" -name "*.md" -path "*/.doh/*" -type f -exec grep -l "^number:" {} \;)
+    numbered_files=$(find "$doh_dir" -name "*.md" -type f -exec grep -l "^number:" {} \;)
     
     while IFS= read -r file; do
         if [[ -n "$file" ]]; then

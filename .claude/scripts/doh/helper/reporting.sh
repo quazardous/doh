@@ -1,18 +1,11 @@
 #!/bin/bash
 
-# DOH Reporting Library
-# Pure library for report generation operations (no automatic execution)
+# DOH Reporting Helper
+# Helper for report generation operations
 
 # Source core library dependencies
-source "$(dirname "${BASH_SOURCE[0]}")/doh.sh"
-source "$(dirname "${BASH_SOURCE[0]}")/frontmatter.sh"
-
-# Guard against multiple sourcing
-[[ -n "${DOH_LIB_REPORTING_LOADED:-}" ]] && return 0
-DOH_LIB_REPORTING_LOADED=1
-
-# Constants
-readonly REPORTING_LIB_VERSION="1.0.0"
+source "${DOH_ROOT}/.claude/scripts/doh/lib/doh.sh"
+source "${DOH_ROOT}/.claude/scripts/doh/lib/frontmatter.sh"
 
 # @description Generate daily standup report
 # @arg $1 string Optional date (YYYY-MM-DD format, default: today)
@@ -20,11 +13,17 @@ readonly REPORTING_LIB_VERSION="1.0.0"
 # @stderr Error messages
 # @exitcode 0 If successful
 # @exitcode 1 If error occurred
-reporting_generate_standup() {
+helper_reporting_generate_standup() {
     local target_date="${1:-$(date +%Y-%m-%d)}"
     
-    local doh_root
-    doh_root=$(doh_project_dir) || {
+    local project_root
+    project_root=$(doh_project_root) || {
+        echo "Error: Not in DOH project" >&2
+        return 1
+    }
+    
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
@@ -38,7 +37,7 @@ reporting_generate_standup() {
     echo "---------------------"
     local completed_count=0
     
-    find "$doh_root/.doh/epics" -name "[0-9]*.md" -type f -mtime -2 2>/dev/null | while read -r task_file; do
+    find "$doh_dir/epics" -name "[0-9]*.md" -type f -mtime -2 2>/dev/null | while read -r task_file; do
         if [ -f "$task_file" ]; then
             local status task_number title epic_name
             status=$(frontmatter_get_field "$task_file" "status" 2>/dev/null)
@@ -49,9 +48,9 @@ reporting_generate_standup() {
                 
                 # Get epic name from path
                 local rel_path
-                rel_path=$(realpath --relative-to="$doh_root" "$task_file" 2>/dev/null)
-                if [[ "$rel_path" == .doh/epics/*/[0-9]*.md ]]; then
-                    epic_name=$(echo "$rel_path" | sed -n 's|^\.doh/epics/\([^/]*\)/.*|\1|p')
+                rel_path=$(realpath --relative-to="$project_root" "$task_file" 2>/dev/null)
+                if [[ "$rel_path" == *epics/*/[0-9]*.md ]]; then
+                    epic_name=$(echo "$rel_path" | sed -n 's|.*epics/\([^/]*\)/.*|\1|p')
                 fi
                 
                 echo "  • Task $task_number: $title [$epic_name]"
@@ -69,7 +68,7 @@ reporting_generate_standup() {
     echo "------------------------"
     local in_progress_count=0
     
-    find "$doh_root/.doh/epics" -name "[0-9]*.md" -type f 2>/dev/null | while read -r task_file; do
+    find "$doh_dir/epics" -name "[0-9]*.md" -type f 2>/dev/null | while read -r task_file; do
         if [ -f "$task_file" ]; then
             local status task_number title epic_name
             status=$(frontmatter_get_field "$task_file" "status" 2>/dev/null)
@@ -80,9 +79,9 @@ reporting_generate_standup() {
                 
                 # Get epic name from path
                 local rel_path
-                rel_path=$(realpath --relative-to="$doh_root" "$task_file" 2>/dev/null)
-                if [[ "$rel_path" == .doh/epics/*/[0-9]*.md ]]; then
-                    epic_name=$(echo "$rel_path" | sed -n 's|^\.doh/epics/\([^/]*\)/.*|\1|p')
+                rel_path=$(realpath --relative-to="$project_root" "$task_file" 2>/dev/null)
+                if [[ "$rel_path" == *epics/*/[0-9]*.md ]]; then
+                    epic_name=$(echo "$rel_path" | sed -n 's|.*epics/\([^/]*\)/.*|\1|p')
                 fi
                 
                 echo "  • Task $task_number: $title [$epic_name]"
@@ -100,7 +99,7 @@ reporting_generate_standup() {
     echo "------------------"
     local next_count=0
     
-    find "$doh_root/.doh/epics" -name "[0-9]*.md" -type f 2>/dev/null | sort | head -5 | while read -r task_file; do
+    find "$doh_dir/epics" -name "[0-9]*.md" -type f 2>/dev/null | sort | head -5 | while read -r task_file; do
         if [ -f "$task_file" ]; then
             local status depends_on task_number title epic_name
             status=$(frontmatter_get_field "$task_file" "status" 2>/dev/null)
@@ -114,9 +113,9 @@ reporting_generate_standup() {
                     
                     # Get epic name from path
                     local rel_path
-                    rel_path=$(realpath --relative-to="$doh_root" "$task_file" 2>/dev/null)
-                    if [[ "$rel_path" == .doh/epics/*/[0-9]*.md ]]; then
-                        epic_name=$(echo "$rel_path" | sed -n 's|^\.doh/epics/\([^/]*\)/.*|\1|p')
+                    rel_path=$(realpath --relative-to="$project_root" "$task_file" 2>/dev/null)
+                    if [[ "$rel_path" == *epics/*/[0-9]*.md ]]; then
+                        epic_name=$(echo "$rel_path" | sed -n 's|.*epics/\([^/]*\)/.*|\1|p')
                     fi
                     
                     echo "  • Task $task_number: $title [$epic_name]"
@@ -135,7 +134,7 @@ reporting_generate_standup() {
     echo "----------------"
     local blocked_count=0
     
-    find "$doh_root/.doh/epics" -name "[0-9]*.md" -type f 2>/dev/null | while read -r task_file; do
+    find "$doh_dir/epics" -name "[0-9]*.md" -type f 2>/dev/null | while read -r task_file; do
         if [ -f "$task_file" ]; then
             local status depends_on task_number title epic_name
             status=$(frontmatter_get_field "$task_file" "status" 2>/dev/null)
@@ -154,9 +153,9 @@ reporting_generate_standup() {
                 
                 # Get epic name from path
                 local rel_path
-                rel_path=$(realpath --relative-to="$doh_root" "$task_file" 2>/dev/null)
-                if [[ "$rel_path" == .doh/epics/*/[0-9]*.md ]]; then
-                    epic_name=$(echo "$rel_path" | sed -n 's|^\.doh/epics/\([^/]*\)/.*|\1|p')
+                rel_path=$(realpath --relative-to="$project_root" "$task_file" 2>/dev/null)
+                if [[ "$rel_path" == *epics/*/[0-9]*.md ]]; then
+                    epic_name=$(echo "$rel_path" | sed -n 's|.*epics/\([^/]*\)/.*|\1|p')
                 fi
                 
                 echo "  • Task $task_number: $title [$epic_name]"
@@ -177,21 +176,27 @@ reporting_generate_standup() {
 # @stderr Error messages
 # @exitcode 0 If successful
 # @exitcode 1 If epic not found
-reporting_generate_epic_summary() {
+helper_reporting_generate_epic_summary() {
     local epic_name="$1"
     
     if [ -z "$epic_name" ]; then
-        echo "Usage: reporting_generate_epic_summary <epic-name>" >&2
+        echo "Usage: helper_reporting_generate_epic_summary <epic-name>" >&2
         return 1
     fi
 
-    local doh_root
-    doh_root=$(doh_project_dir) || {
+    local project_root
+    project_root=$(doh_project_root) || {
+        echo "Error: Not in DOH project" >&2
+        return 1
+    }
+    
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
 
-    local epic_file="$doh_root/.doh/epics/$epic_name/epic.md"
+    local epic_file="$doh_dir/epics/$epic_name/epic.md"
     
     if [ ! -f "$epic_file" ]; then
         echo "Error: Epic not found: $epic_name" >&2
@@ -223,7 +228,7 @@ reporting_generate_epic_summary() {
     echo "📊 Task Breakdown:"
     local total=0 pending=0 in_progress=0 completed=0 blocked=0
     
-    find "$doh_root/.doh/epics/$epic_name" -name "[0-9]*.md" -type f 2>/dev/null | while read -r task_file; do
+    find "$doh_dir/epics/$epic_name" -name "[0-9]*.md" -type f 2>/dev/null | while read -r task_file; do
         if [ -f "$task_file" ]; then
             local task_status
             task_status=$(frontmatter_get_field "$task_file" "status" 2>/dev/null)
@@ -262,7 +267,7 @@ reporting_generate_epic_summary() {
     
     # Recent activity in this epic
     echo "📅 Recent Activity (last 7 days):"
-    find "$doh_root/.doh/epics/$epic_name" -name "*.md" -type f -mtime -7 -printf '%T@ %p\n' 2>/dev/null | \
+    find "$doh_dir/epics/$epic_name" -name "*.md" -type f -mtime -7 -printf '%T@ %p\n' 2>/dev/null | \
     sort -nr | head -5 | while read -r timestamp filepath; do
         local filename
         filename=$(basename "$filepath")
@@ -278,7 +283,7 @@ reporting_generate_epic_summary() {
 # @arg $2 number Total count
 # @stdout Formatted progress bar
 # @exitcode 0 Always successful
-reporting_format_progress() {
+_helper_reporting_format_progress() {
     local completed="${1:-0}"
     local total="${2:-1}"
     
@@ -302,11 +307,17 @@ reporting_format_progress() {
 # @stdout Recent activity list
 # @stderr Error messages
 # @exitcode 0 If successful
-reporting_get_recent_activity() {
+helper_reporting_get_recent_activity() {
     local days="${1:-7}"
     
-    local doh_root
-    doh_root=$(doh_project_dir) || {
+    local project_root
+    project_root=$(doh_project_root) || {
+        echo "Error: Not in DOH project" >&2
+        return 1
+    }
+    
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
@@ -316,17 +327,17 @@ reporting_get_recent_activity() {
     echo ""
 
     # Find recently modified files
-    find "$doh_root/.doh" -name "*.md" -type f -mtime -"$days" -printf '%T@ %p\n' 2>/dev/null | \
+    find "$doh_dir" -name "*.md" -type f -mtime -"$days" -printf '%T@ %p\n' 2>/dev/null | \
     sort -nr | head -15 | while read -r timestamp filepath; do
         local filename relative_path file_type=""
         filename=$(basename "$filepath")
-        relative_path=$(realpath --relative-to="$doh_root" "$filepath" 2>/dev/null || echo "$filepath")
+        relative_path=$(realpath --relative-to="$project_root" "$filepath" 2>/dev/null || echo "$filepath")
         
         # Determine file type
         case "$relative_path" in
-            .doh/epics/*/epic.md) file_type="[epic]" ;;
-            .doh/epics/*/[0-9]*.md) file_type="[task]" ;;
-            .doh/prds/*.md) file_type="[prd]" ;;
+            *epics/*/epic.md) file_type="[epic]" ;;
+            *epics/*/[0-9]*.md) file_type="[task]" ;;
+            *prds/*.md) file_type="[prd]" ;;
             *) file_type="[doc]" ;;
         esac
         

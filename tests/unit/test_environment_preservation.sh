@@ -18,8 +18,15 @@ test_environment_priority_hierarchy() {
     
     # Create temporary .doh/env file with values
     local temp_dir=$(_tf_create_temp_dir)
+    echo "DEBUG: temp_dir = '$temp_dir'"
+    echo "DEBUG: temp_dir exists? $(test -d "$temp_dir" && echo "YES" || echo "NO")"
+    
     local doh_env_file="$temp_dir/.doh/env"
+    echo "DEBUG: doh_env_file will be at '$doh_env_file'"
+    echo "DEBUG: Creating directory $(dirname "$doh_env_file")"
+    
     mkdir -p "$(dirname "$doh_env_file")"
+    echo "DEBUG: .doh directory exists? $(test -d "$temp_dir/.doh" && echo "YES" || echo "NO")"
     
     cat > "$doh_env_file" << 'EOF'
 # Test .doh/env file
@@ -27,12 +34,22 @@ DOH_GLOBAL_DIR="/tmp/from_doh_env"
 DOH_TEST_VAR="from_doh_env"
 DOH_PRIORITY_TEST="from_doh_env"
 EOF
+    echo "DEBUG: env file exists? $(test -f "$doh_env_file" && echo "YES" || echo "NO")"
+    echo "DEBUG: env file contents:"
+    cat "$doh_env_file" 2>/dev/null || echo "DEBUG: Could not read env file"
 
-    # Mock doh_project_dir to return our temp directory
-    _tf_with_mock "doh_project_dir" "echo $temp_dir" dohenv_load
-    
-    _tf_assert_equals "DOH_GLOBAL_DIR should be set from .doh/env when not pre-existing" "/tmp/from_doh_env" "${DOH_GLOBAL_DIR:-}"
-    _tf_assert_equals "DOH_TEST_VAR should be set from .doh/env" "from_doh_env" "${DOH_TEST_VAR:-}"
+    # Use subshell to override DOH_PROJECT_DIR without affecting parent
+    echo "DEBUG: Setting DOH_PROJECT_DIR to '$temp_dir/.doh' in subshell"
+    (
+        export DOH_PROJECT_DIR="$temp_dir/.doh"
+        dohenv_load
+        
+        echo "DEBUG: After dohenv_load - DOH_GLOBAL_DIR = '${DOH_GLOBAL_DIR:-}'"
+        echo "DEBUG: After dohenv_load - DOH_TEST_VAR = '${DOH_TEST_VAR:-}'"
+        
+        _tf_assert_equals "DOH_GLOBAL_DIR should be set from .doh/env when not pre-existing" "/tmp/from_doh_env" "${DOH_GLOBAL_DIR:-}"
+        _tf_assert_equals "DOH_TEST_VAR should be set from .doh/env" "from_doh_env" "${DOH_TEST_VAR:-}"
+    )
     
     # Restore original DOH_GLOBAL_DIR for test isolation
     if [[ -n "$original_doh_global" ]]; then
@@ -47,8 +64,13 @@ test_existing_env_vars_preserved() {
     export DOH_TEST_VAR="existing_value"
     export DOH_PRIORITY_TEST="existing_value"
     
+    echo "DEBUG: Before loading - DOH_GLOBAL_DIR = '$DOH_GLOBAL_DIR'"
+    echo "DEBUG: Before loading - DOH_TEST_VAR = '$DOH_TEST_VAR'"
+    
     # Create conflicting .doh/env file
     local temp_dir=$(_tf_create_temp_dir)
+    echo "DEBUG: temp_dir = '$temp_dir'"
+    
     local doh_env_file="$temp_dir/.doh/env"
     mkdir -p "$(dirname "$doh_env_file")"
     
@@ -58,17 +80,27 @@ DOH_TEST_VAR="should_be_ignored"
 DOH_PRIORITY_TEST="should_be_ignored"
 DOH_NEW_VAR="from_doh_env"
 EOF
+    echo "DEBUG: Created env file at '$doh_env_file'"
+    echo "DEBUG: env file exists? $(test -f "$doh_env_file" && echo "YES" || echo "NO")"
 
-    # Mock doh_project_dir and load environment
-    _tf_with_mock "doh_project_dir" "echo $temp_dir" dohenv_load
-    
-    # Existing variables should be preserved
-    _tf_assert_equals "Existing DOH_GLOBAL_DIR should be preserved" "/tmp/existing_value" "$DOH_GLOBAL_DIR"
-    _tf_assert_equals "Existing DOH_TEST_VAR should be preserved" "existing_value" "$DOH_TEST_VAR" 
-    _tf_assert_equals "Existing DOH_PRIORITY_TEST should be preserved" "existing_value" "$DOH_PRIORITY_TEST"
-    
-    # New variables should be set from .doh/env
-    _tf_assert_equals "New DOH_NEW_VAR should be set from .doh/env" "from_doh_env" "${DOH_NEW_VAR:-}"
+    # Use subshell to test environment loading with DOH_PROJECT_DIR
+    echo "DEBUG: Setting DOH_PROJECT_DIR to '$temp_dir/.doh' in subshell"
+    (
+        export DOH_PROJECT_DIR="$temp_dir/.doh"
+        dohenv_load
+        
+        echo "DEBUG: After loading - DOH_GLOBAL_DIR = '$DOH_GLOBAL_DIR'"
+        echo "DEBUG: After loading - DOH_TEST_VAR = '$DOH_TEST_VAR'"
+        echo "DEBUG: After loading - DOH_NEW_VAR = '${DOH_NEW_VAR:-}'"
+        
+        # Existing variables should be preserved
+        _tf_assert_equals "Existing DOH_GLOBAL_DIR should be preserved" "/tmp/existing_value" "$DOH_GLOBAL_DIR"
+        _tf_assert_equals "Existing DOH_TEST_VAR should be preserved" "existing_value" "$DOH_TEST_VAR" 
+        _tf_assert_equals "Existing DOH_PRIORITY_TEST should be preserved" "existing_value" "$DOH_PRIORITY_TEST"
+        
+        # New variables should be set from .doh/env
+        _tf_assert_equals "New DOH_NEW_VAR should be set from .doh/env" "from_doh_env" "${DOH_NEW_VAR:-}"
+    )
     
     # Cleanup
     unset DOH_GLOBAL_DIR DOH_TEST_VAR DOH_PRIORITY_TEST DOH_NEW_VAR
@@ -119,13 +151,20 @@ DOH_GLOBAL_DIR="/tmp/should_be_ignored"
 DOH_NEW_VAR="should_be_set"
 EOF
 
-    # Load environment multiple times
-    _tf_with_mock "doh_project_dir" "echo $temp_dir" dohenv_load
-    _tf_with_mock "doh_project_dir" "echo $temp_dir" dohenv_load  
-    _tf_with_mock "doh_project_dir" "echo $temp_dir" dohenv_load
-    
-    _tf_assert_equals "Multiple loads should not overwrite existing DOH_GLOBAL_DIR" "/tmp/first_value" "$DOH_GLOBAL_DIR"
-    _tf_assert_equals "New variable should be set on first load" "should_be_set" "${DOH_NEW_VAR:-}"
+    # Load environment multiple times using subshell
+    echo "DEBUG: Setting DOH_PROJECT_DIR to '$temp_dir/.doh' for multiple loads"
+    (
+        export DOH_PROJECT_DIR="$temp_dir/.doh"
+        dohenv_load
+        dohenv_load  
+        dohenv_load
+        
+        echo "DEBUG: After multiple loads - DOH_GLOBAL_DIR = '$DOH_GLOBAL_DIR'"
+        echo "DEBUG: After multiple loads - DOH_NEW_VAR = '${DOH_NEW_VAR:-}'"
+        
+        _tf_assert_equals "Multiple loads should not overwrite existing DOH_GLOBAL_DIR" "/tmp/first_value" "$DOH_GLOBAL_DIR"
+        _tf_assert_equals "New variable should be set on first load" "should_be_set" "${DOH_NEW_VAR:-}"
+    )
     
     # Cleanup
     unset DOH_GLOBAL_DIR DOH_NEW_VAR
@@ -152,16 +191,24 @@ invalid_var="should_be_ignored"
 DOH_TEST_EQUALS="value=with=equals"
 EOF
 
-    # Load environment
-    _tf_with_mock "doh_project_dir" "echo $temp_dir" dohenv_load
-    
-    _tf_assert_equals "Paths with spaces should work" "/tmp/path with spaces/test" "${DOH_TEST_PATH:-}"
-    _tf_assert_equals "Quoted values should work" "value with quotes" "${DOH_TEST_QUOTES:-}"
-    _tf_assert_equals "Single quoted values should work" "single quoted value" "${DOH_TEST_SINGLE:-}"
-    _tf_assert_contains "Tilde should be expanded to HOME" "${DOH_TILDE_PATH:-}" "$HOME"
-    _tf_assert_equals "Colons in values should work" "value:with:colons" "${DOH_TEST_COLON:-}"
-    _tf_assert_equals "Equals signs in values should work" "value=with=equals" "${DOH_TEST_EQUALS:-}"
-    _tf_assert_equals "Invalid variable names should be ignored" "" "${invalid_var:-}"
+    # Load environment using subshell
+    echo "DEBUG: Setting DOH_PROJECT_DIR to '$temp_dir/.doh' for special characters test"
+    (
+        export DOH_PROJECT_DIR="$temp_dir/.doh"
+        dohenv_load
+        
+        echo "DEBUG: After loading - DOH_TEST_PATH = '${DOH_TEST_PATH:-}'"
+        echo "DEBUG: After loading - DOH_TEST_QUOTES = '${DOH_TEST_QUOTES:-}'"
+        echo "DEBUG: After loading - DOH_TILDE_PATH = '${DOH_TILDE_PATH:-}'"
+        
+        _tf_assert_equals "Paths with spaces should work" "/tmp/path with spaces/test" "${DOH_TEST_PATH:-}"
+        _tf_assert_equals "Quoted values should work" "value with quotes" "${DOH_TEST_QUOTES:-}"
+        _tf_assert_equals "Single quoted values should work" "single quoted value" "${DOH_TEST_SINGLE:-}"
+        _tf_assert_contains "Tilde should be expanded to HOME" "${DOH_TILDE_PATH:-}" "$HOME"
+        _tf_assert_equals "Colons in values should work" "value:with:colons" "${DOH_TEST_COLON:-}"
+        _tf_assert_equals "Equals signs in values should work" "value=with=equals" "${DOH_TEST_EQUALS:-}"
+        _tf_assert_equals "Invalid variable names should be ignored" "" "${invalid_var:-}"
+    )
     
     # Cleanup
     unset DOH_TEST_PATH DOH_TEST_QUOTES DOH_TEST_SINGLE DOH_TILDE_PATH DOH_TEST_COLON DOH_TEST_EQUALS
@@ -179,15 +226,22 @@ test_battle_test_concurrent_environments() {
     echo "DOH_TEST_VAR=project2_value" > "$temp_dir2/.doh/env"
     
     # Test that existing environment variables win
+    echo "DEBUG: Testing concurrent environments with temp_dir1='$temp_dir1' and temp_dir2='$temp_dir2'"
     (
         export DOH_TEST_VAR="process1_override"
-        _tf_with_mock "doh_project_dir" "echo $temp_dir1" dohenv_load
+        export DOH_PROJECT_DIR="$temp_dir1/.doh"
+        echo "DEBUG: Process 1 - DOH_PROJECT_DIR='$DOH_PROJECT_DIR', DOH_TEST_VAR='$DOH_TEST_VAR'"
+        dohenv_load
+        echo "DEBUG: Process 1 after load - DOH_TEST_VAR='$DOH_TEST_VAR'"
         _tf_assert_equals "Process 1 should preserve its environment" "process1_override" "$DOH_TEST_VAR"
     )
     
     (
         export DOH_TEST_VAR="process2_override"  
-        _tf_with_mock "doh_project_dir" "echo $temp_dir2" dohenv_load
+        export DOH_PROJECT_DIR="$temp_dir2/.doh"
+        echo "DEBUG: Process 2 - DOH_PROJECT_DIR='$DOH_PROJECT_DIR', DOH_TEST_VAR='$DOH_TEST_VAR'"
+        dohenv_load
+        echo "DEBUG: Process 2 after load - DOH_TEST_VAR='$DOH_TEST_VAR'"
         _tf_assert_equals "Process 2 should preserve its environment" "process2_override" "$DOH_TEST_VAR"
     )
     

@@ -1,27 +1,26 @@
 #!/bin/bash
 
-# DOH Validation Library
-# Pure library for system validation operations (no automatic execution)
+# DOH Validation Helper
+# Helper for system validation operations
 
 # Source core library dependencies
-source "$(dirname "${BASH_SOURCE[0]}")/doh.sh"
-source "$(dirname "${BASH_SOURCE[0]}")/frontmatter.sh"
-
-# Guard against multiple sourcing
-[[ -n "${DOH_LIB_VALIDATION_LOADED:-}" ]] && return 0
-DOH_LIB_VALIDATION_LOADED=1
-
-# Constants
-readonly VALIDATION_LIB_VERSION="1.0.0"
+source "${DOH_ROOT}/.claude/scripts/doh/lib/doh.sh"
+source "${DOH_ROOT}/.claude/scripts/doh/lib/frontmatter.sh"
 
 # @description Perform comprehensive DOH system validation
 # @stdout Validation report with errors, warnings, and health status
 # @stderr Error messages
 # @exitcode 0 If system is healthy (no errors/warnings/invalid files)
 # @exitcode 1 If system has issues
-validation_validate_system() {
-    local doh_root
-    doh_root=$(doh_project_dir) || {
+helper_validation_validate_system() {
+    local project_root
+    project_root=$(doh_project_root) || {
+        echo "Error: Not in DOH project" >&2
+        return 1
+    }
+    
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
@@ -35,28 +34,28 @@ validation_validate_system() {
     # Check directory structure
     echo "📁 Directory Structure:"
     
-    if [ -d "$doh_root/.claude" ]; then
+    if [ -d "$project_root/.claude" ]; then
         echo "  ✅ .claude directory exists"
     else
         echo "  ❌ .claude directory missing"
         ((errors++))
     fi
     
-    if [ -d "$doh_root/.doh/prds" ]; then
+    if [ -d "$doh_dir/prds" ]; then
         echo "  ✅ PRDs directory exists"
     else
         echo "  ⚠️ PRDs directory missing"
         ((warnings++))
     fi
     
-    if [ -d "$doh_root/.doh/epics" ]; then
+    if [ -d "$doh_dir/epics" ]; then
         echo "  ✅ Epics directory exists"
     else
         echo "  ⚠️ Epics directory missing"
         ((warnings++))
     fi
     
-    if [ -d "$doh_root/.claude/rules" ]; then
+    if [ -d "$project_root/.claude/rules" ]; then
         echo "  ✅ Rules directory exists"
     else
         echo "  ⚠️ Rules directory missing"
@@ -69,7 +68,7 @@ validation_validate_system() {
     echo "🗂️ Data Integrity:"
 
     # Check epics have epic.md files
-    find "$doh_root/.doh/epics" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | while read -r epic_dir; do
+    find "$doh_dir/epics" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | while read -r epic_dir; do
         if [ -d "$epic_dir" ] && [ ! -f "$epic_dir/epic.md" ]; then
             echo "  ⚠️ Missing epic.md in $(basename "$epic_dir")"
             ((warnings++))
@@ -78,7 +77,7 @@ validation_validate_system() {
 
     # Check for tasks without epics
     local orphaned_count
-    orphaned_count=$(find "$doh_root/.claude" -name "[0-9]*.md" -not -path "$doh_root/.doh/epics/*/*" 2>/dev/null | wc -l)
+    orphaned_count=$(find "$project_root/.claude" -name "[0-9]*.md" -not -path "$doh_dir/epics/*/*" 2>/dev/null | wc -l)
     if [ "$orphaned_count" -gt 0 ]; then
         echo "  ⚠️ Found $orphaned_count orphaned task files"
         ((warnings++))
@@ -90,7 +89,7 @@ validation_validate_system() {
     echo "🔗 Reference Check:"
     
     local ref_warnings=0
-    find "$doh_root/.doh/epics" -name "[0-9]*.md" -type f 2>/dev/null | while read -r task_file; do
+    find "$doh_dir/epics" -name "[0-9]*.md" -type f 2>/dev/null | while read -r task_file; do
         if [ -f "$task_file" ]; then
             local depends_on
             depends_on=$(frontmatter_get_field "$task_file" "depends_on" 2>/dev/null)
@@ -126,13 +125,13 @@ validation_validate_system() {
     echo "📝 Frontmatter Validation:"
     
     local fm_invalid=0
-    find "$doh_root/.doh" -name "*.md" 2>/dev/null | while read -r file; do
+    find "$doh_dir" -name "*.md" 2>/dev/null | while read -r file; do
         if [ -f "$file" ]; then
             if ! frontmatter_has "$file"; then
-                echo "  ⚠️ Missing frontmatter: $(realpath --relative-to="$doh_root" "$file")"
+                echo "  ⚠️ Missing frontmatter: $(realpath --relative-to="$project_root" "$file")"
                 fm_invalid=$((fm_invalid + 1))
             elif ! frontmatter_validate "$file"; then
-                echo "  ⚠️ Invalid frontmatter: $(realpath --relative-to="$doh_root" "$file")"
+                echo "  ⚠️ Invalid frontmatter: $(realpath --relative-to="$project_root" "$file")"
                 fm_invalid=$((fm_invalid + 1))
             fi
         fi
@@ -168,9 +167,15 @@ validation_validate_system() {
 # @stderr Error messages
 # @exitcode 0 If all required directories exist
 # @exitcode 1 If critical directories missing
-validation_check_directories() {
-    local doh_root
-    doh_root=$(doh_project_dir) || {
+helper_validation_check_directories() {
+    local project_root
+    project_root=$(doh_project_root) || {
+        echo "Error: Not in DOH project" >&2
+        return 1
+    }
+    
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
@@ -180,20 +185,20 @@ validation_check_directories() {
     echo "📁 Directory Structure Check:"
     
     # Critical directories
-    if [ ! -d "$doh_root/.claude" ]; then
+    if [ ! -d "$project_root/.claude" ]; then
         echo "  ❌ Missing .claude directory"
         ((errors++))
     fi
     
-    if [ ! -d "$doh_root/.doh" ]; then
-        echo "  ❌ Missing .doh directory"
+    if [ ! -d "$doh_dir" ]; then
+        echo "  ❌ Missing DOH directory"
         ((errors++))
     fi
     
     # Optional but expected directories
-    [ -d "$doh_root/.doh/prds" ] || echo "  ⚠️ Missing .doh/prds directory"
-    [ -d "$doh_root/.doh/epics" ] || echo "  ⚠️ Missing .doh/epics directory"
-    [ -d "$doh_root/.claude/rules" ] || echo "  ⚠️ Missing .claude/rules directory"
+    [ -d "$doh_dir/prds" ] || echo "  ⚠️ Missing prds directory"
+    [ -d "$doh_dir/epics" ] || echo "  ⚠️ Missing epics directory"
+    [ -d "$project_root/.claude/rules" ] || echo "  ⚠️ Missing .claude/rules directory"
     
     if [ $errors -eq 0 ]; then
         echo "  ✅ Directory structure is valid"
@@ -208,9 +213,15 @@ validation_check_directories() {
 # @stderr Error messages
 # @exitcode 0 If all files have valid frontmatter
 # @exitcode 1 If files have invalid or missing frontmatter
-validation_check_frontmatter() {
-    local doh_root
-    doh_root=$(doh_project_dir) || {
+helper_validation_check_frontmatter() {
+    local project_root
+    project_root=$(doh_project_root) || {
+        echo "Error: Not in DOH project" >&2
+        return 1
+    }
+    
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
@@ -219,13 +230,13 @@ validation_check_frontmatter() {
     
     local invalid_count=0
     
-    find "$doh_root/.doh" -name "*.md" 2>/dev/null | while read -r file; do
+    find "$doh_dir" -name "*.md" 2>/dev/null | while read -r file; do
         if [ -f "$file" ]; then
             if ! frontmatter_has "$file"; then
-                echo "  ⚠️ Missing frontmatter: $(realpath --relative-to="$doh_root" "$file")"
+                echo "  ⚠️ Missing frontmatter: $(realpath --relative-to="$project_root" "$file")"
                 ((invalid_count++))
             elif ! frontmatter_validate "$file"; then
-                echo "  ⚠️ Invalid frontmatter: $(realpath --relative-to="$doh_root" "$file")"
+                echo "  ⚠️ Invalid frontmatter: $(realpath --relative-to="$project_root" "$file")"
                 ((invalid_count++))
             fi
         fi
@@ -244,9 +255,15 @@ validation_check_frontmatter() {
 # @stderr Error messages  
 # @exitcode 0 If all references are valid
 # @exitcode 1 If broken references found
-validation_check_references() {
-    local doh_root
-    doh_root=$(doh_project_dir) || {
+helper_validation_check_references() {
+    local project_root
+    project_root=$(doh_project_root) || {
+        echo "Error: Not in DOH project" >&2
+        return 1
+    }
+    
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
@@ -255,7 +272,7 @@ validation_check_references() {
     
     local broken_refs=0
     
-    find "$doh_root/.doh/epics" -name "[0-9]*.md" -type f 2>/dev/null | while read -r task_file; do
+    find "$doh_dir/epics" -name "[0-9]*.md" -type f 2>/dev/null | while read -r task_file; do
         if [ -f "$task_file" ]; then
             local depends_on
             depends_on=$(frontmatter_get_field "$task_file" "depends_on" 2>/dev/null)

@@ -273,8 +273,8 @@ graph_cache_get_epic_items() {
 # @exitcode 0 If successful
 # @exitcode 1 If unable to find project root or create cache
 graph_cache_rebuild() {
-    local project_root
-    project_root="$(doh_project_dir)" || return 1
+    local doh_dir
+    doh_dir="$(doh_project_dir)" || return 1
     
     local cache_file
     cache_file="$(_graph_cache_ensure_cache)" || return 1
@@ -286,7 +286,7 @@ graph_cache_rebuild() {
     
     # Scan all numbered files for relationships
     local numbered_files
-    numbered_files=$(find "$project_root" -name "*.md" -path "*/.doh/*" -type f -exec grep -l "^number:" {} \;)
+    numbered_files=$(find "$doh_dir" -name "*.md" -type f -exec grep -l "^number:" {} \;)
     
     while IFS= read -r file; do
         if [[ -n "$file" && -f "$file" ]]; then
@@ -300,12 +300,12 @@ graph_cache_rebuild() {
             if grep -q "^epic:" "$file"; then
                 epic_name=$(grep -m 1 "^epic:" "$file" | cut -d':' -f2- | xargs)
             else
-                # Infer from path for tasks: .doh/epics/epic-name/
+                # Infer from path for tasks: epics/epic-name/
                 local rel_path
-                rel_path=$(realpath --relative-to="$project_root" "$file")
+                rel_path=$(realpath --relative-to="$doh_dir" "$file")
                 
-                if [[ "$rel_path" == *.doh/epics/*/[0-9]*.md ]]; then
-                    epic_name=$(echo "$rel_path" | sed -n 's|^\.doh/epics/\([^/]*\)/.*|\1|p')
+                if [[ "$rel_path" == epics/*/[0-9]*.md ]]; then
+                    epic_name=$(echo "$rel_path" | sed -n 's|^epics/\([^/]*\)/.*|\1|p')
                 fi
             fi
             
@@ -328,8 +328,8 @@ graph_cache_validate() {
     local cache_file
     cache_file="$(_graph_cache_ensure_cache)" || return 1
     
-    local project_root
-    project_root="$(doh_project_dir)" || return 1
+    local doh_dir
+    doh_dir="$(doh_project_dir)" || return 1
     
     local errors=0
     
@@ -353,7 +353,7 @@ graph_cache_validate() {
                 if [[ "$parent_in_cache" == "" ]]; then
                     # Check if parent file exists
                     local parent_files
-                    parent_files=$(find "$project_root" -name "*.md" -path "*/.doh/*" -type f -exec grep -l "^number:.*$parent" {} \; 2>/dev/null)
+                    parent_files=$(find "$doh_dir" -name "*.md" -type f -exec grep -l "^number:.*$parent" {} \; 2>/dev/null)
                     
                     if [[ -z "$parent_files" ]]; then
                         echo "Warning: Parent $parent for number $number not found" >&2
@@ -586,11 +586,11 @@ graph_cache_get_task_versions() {
     fi
     
     # First, check if task file has target_version field
-    local project_root
-    project_root="$(doh_project_dir)" || return 1
+    local doh_dir
+    doh_dir="$(doh_project_dir)" || return 1
     
     local task_file
-    task_file=$(find "$project_root" -name "${task}.md" -type f | head -1)
+    task_file=$(find "$doh_dir" -name "${task}.md" -type f | head -1)
     
     if [[ -f "$task_file" ]]; then
         local target_version="" file_version=""
@@ -633,13 +633,13 @@ graph_cache_get_task_versions() {
 graph_cache_sync_version_cache() {
     echo "Syncing version data to graph cache..." >&2
     
-    local doh_root
-    doh_root="$(doh_project_dir)" || {
+    local doh_dir
+    doh_dir="$(doh_project_dir)" || {
         echo "Error: Not in a DOH project" >&2
         return 1
     }
     
-    local versions_dir="$doh_root/versions"
+    local versions_dir="$doh_dir/versions"
     
     if [[ ! -d "$versions_dir" ]]; then
         echo "No versions directory found" >&2
@@ -674,7 +674,7 @@ graph_cache_sync_version_cache() {
                     fi
                 fi
             fi
-        done < <(find "$doh_root" -name "*.md" -type f)
+        done < <(find "$doh_dir" -name "*.md" -type f)
         
         # Create version data with actual required tasks
         local version_data='{
@@ -703,13 +703,13 @@ graph_cache_sync_specific_versions() {
     
     echo "Selective version sync for: $*" >&2
     
-    local doh_root
-    doh_root="$(doh_project_dir)" || {
+    local doh_dir
+    doh_dir="$(doh_project_dir)" || {
         echo "Error: Not in a DOH project" >&2
         return 1
     }
     
-    local versions_dir="$doh_root/versions"
+    local versions_dir="$doh_dir/versions"
     
     if [[ ! -d "$versions_dir" ]]; then
         echo "No versions directory found" >&2
@@ -755,10 +755,10 @@ graph_cache_find_versions_for_task() {
     fi
     
     # Find all version files that reference this task
-    local project_root
-    project_root="$(doh_project_dir)" || return 1
+    local doh_dir
+    doh_dir="$(doh_project_dir)" || return 1
     
-    local versions_dir="$project_root/versions"
+    local versions_dir="$doh_dir/versions"
     
     if [[ ! -d "$versions_dir" ]]; then
         return 0
@@ -786,8 +786,8 @@ graph_cache_check_version_readiness() {
     fi
     
     # Find all task files with this version as target_version
-    local project_root
-    project_root="$(doh_project_dir)" || return 1
+    local doh_dir
+    doh_dir="$(doh_project_dir)" || return 1
     
     # frontmatter.sh is already sourced at the top of this file
     
@@ -808,7 +808,7 @@ graph_cache_check_version_readiness() {
                 fi
             fi
         fi
-    done < <(find "$project_root" -name "*.md" -type f)
+    done < <(find "$doh_dir" -name "*.md" -type f)
     
     # Check readiness
     if [[ $total_tasks -eq 0 ]]; then

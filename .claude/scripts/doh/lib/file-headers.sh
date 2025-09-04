@@ -182,97 +182,103 @@ _file_headers_add_markdown() {
     local filename=$(basename "$file")
     
     # Decision logic:
-    # 1. If file already has frontmatter → use frontmatter
+    # 1. If file already has frontmatter → use frontmatter_update_many
     # 2. If file already has HTML comments → use HTML comments
     # 3. If file has neither → choose based on file type/location
     
     if frontmatter_has "$file"; then
-        # File already has frontmatter - update it safely
-        local temp_file=$(mktemp)
-        local in_frontmatter=false
-        local has_version=false
-        local has_created=false
-        
-        while IFS= read -r line; do
-            if [[ "$line" == "---" ]]; then
-                if [[ "$in_frontmatter" == false ]]; then
-                    # Start of frontmatter
-                    in_frontmatter=true
-                    echo "$line" >> "$temp_file"
-                else
-                    # End of frontmatter - add missing fields before closing
-                    if [[ "$has_version" == false ]]; then
-                        echo "file_version: $version" >> "$temp_file"
-                    fi
-                    if [[ "$has_created" == false ]]; then
-                        echo "created: $created" >> "$temp_file"  
-                    fi
-                    echo "$line" >> "$temp_file"
-                    in_frontmatter=false
-                fi
-            elif [[ "$in_frontmatter" == true ]]; then
-                # Inside frontmatter
-                if [[ "$line" =~ ^file_version: ]]; then
-                    echo "file_version: $version" >> "$temp_file"
-                    has_version=true
-                elif [[ "$line" =~ ^created: ]] && [[ "$has_created" == false ]]; then
-                    echo "$line" >> "$temp_file"  # Keep existing created date
-                    has_created=true
-                else
-                    echo "$line" >> "$temp_file"
-                fi
-            else
-                # Outside frontmatter
-                echo "$line" >> "$temp_file"
-            fi
-        done < "$file"
-        
-        mv "$temp_file" "$file"
+        # File already has frontmatter - use frontmatter_update_many
+        frontmatter_update_many "$file" \
+            "file_version:$version" \
+            "created:$created"
     elif _file_headers_markdown_uses_html_comments "$file"; then
         # File already uses HTML comments - update them
-        local temp_file=$(mktemp)
-        local updated_version=false
-        local updated_created=false
-        
+        _file_headers_add_markdown_html "$file" "$version" "$created"
+    else
+        local doh_dir
+        doh_dir=$(doh_project_dir) || {
+            echo "Error: Not in DOH project" >&2
+            return 1
+        }
+        # File has no existing version headers - choose format based on file type
+        if [[ "$file" == "$doh_dir/"* ]] && { [[ "$file" =~ \.(epic|task|prd)\.md$ ]] || [[ "$filename" =~ ^[0-9]+\.md$ ]] }; then
+            # Structured DOH files - add frontmatter using frontmatter_update_many
+            # frontmatter_update_many handles file without frontmatter via frontmatter_assert internally
+            frontmatter_update_many "$file" \
+                "file_version:$version" \
+                "created:$created"
+        else
+            # General markdown files - add HTML comments
+            _file_headers_add_markdown_html "$file" "$version" "$created"
+        fi
+    fi
+}
+
+# @description Add or update HTML comment headers in markdown files
+# @private
+# @arg $1 string Path to file
+# @arg $2 string Version
+# @arg $3 string Created date
+_file_headers_add_markdown_html() {
+    local file="$1"
+    local version="$2"
+    local created="$3"
+    
+    local temp_file=$(mktemp)
+    local updated_version=false
+    local updated_created=false
+    local has_existing_headers=false
+    
+    # Check if file already has HTML headers
+    if _file_headers_markdown_uses_html_comments "$file"; then
+        has_existing_headers=true
+    fi
+    
+    if [[ "$has_existing_headers" == true ]]; then
+        # Update existing HTML comments
         while IFS= read -r line; do
             if [[ "$line" =~ ^\<!--[[:space:]]*DOH[[:space:]]+Version: ]]; then
                 echo "<!-- DOH Version: $version -->" >> "$temp_file"
                 updated_version=true
             elif [[ "$line" =~ ^\<!--[[:space:]]*Created: ]]; then
-                if [[ "$updated_created" == false ]]; then
-                    echo "<!-- Created: $created -->" >> "$temp_file"
-                    updated_created=true
-                else
-                    echo "$line" >> "$temp_file"
-                fi
+                # Preserve existing created date
+                echo "$line" >> "$temp_file"
+                updated_created=true
             else
                 echo "$line" >> "$temp_file"
             fi
         done < "$file"
         
-        mv "$temp_file" "$file"
-    else
-        # File has no existing version headers - choose format based on file type
-        if [[ "$file" =~ \.(epic|task|prd)\.md$ ]] || [[ "$filename" =~ ^[0-9]+\.md$ ]] || [[ "$file" =~ \.doh/.*\.md$ ]]; then
-            # Structured DOH files - add frontmatter
-            local temp_file=$(mktemp)
-            echo "---" > "$temp_file"
-            echo "file_version: $version" >> "$temp_file"
-            echo "created: $created" >> "$temp_file"
-            echo "---" >> "$temp_file"
-            echo "" >> "$temp_file"
-            cat "$file" >> "$temp_file"
-            mv "$temp_file" "$file"
-        else
-            # General markdown files - add HTML comments
-            local temp_file=$(mktemp)
-            echo "<!-- DOH Version: $version -->" > "$temp_file"
-            echo "<!-- Created: $created -->" >> "$temp_file"
-            echo "" >> "$temp_file"
-            cat "$file" >> "$temp_file"
-            mv "$temp_file" "$file"
+        # Add missing headers if not updated
+        if [[ "$updated_version" == false ]]; then
+            # Insert at beginning
+            local final_temp=$(mktemp)
+            echo "<!-- DOH Version: $version -->" > "$final_temp"
+            cat "$temp_file" >> "$final_temp"
+            mv "$final_temp" "$temp_file"
         fi
+        if [[ "$updated_created" == false ]]; then
+            # Insert at beginning (after version if present)
+            local final_temp=$(mktemp)
+            if [[ "$updated_version" == true ]]; then
+                head -1 "$temp_file" > "$final_temp"
+                echo "<!-- Created: $created -->" >> "$final_temp"
+                tail -n +2 "$temp_file" >> "$final_temp"
+            else
+                echo "<!-- Created: $created -->" > "$final_temp"
+                cat "$temp_file" >> "$final_temp"
+            fi
+            mv "$final_temp" "$temp_file"
+        fi
+    else
+        # Add new HTML comments at the beginning
+        echo "<!-- DOH Version: $version -->" > "$temp_file"
+        echo "<!-- Created: $created -->" >> "$temp_file"
+        echo "" >> "$temp_file"
+        cat "$file" >> "$temp_file"
     fi
+    
+    mv "$temp_file" "$file"
 }
 
 # @description Add Python header

@@ -81,7 +81,7 @@ test_epic_count() {
     local epic_count
     epic_count=$(ls -d "$DOH_PROJECT_DIR/epics"/*/ 2>/dev/null | wc -l)
     
-    _tf_assert_equals "Should find exactly 2 test epics (found $epic_count)" "2" "$epic_count"
+    _tf_assert_equals "Should find exactly 3 test epics (found $epic_count)" "3" "$epic_count"
 }
 
 # Test doh_project_dir function returns test environment .doh path

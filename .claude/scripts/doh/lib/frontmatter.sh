@@ -351,40 +351,33 @@ frontmatter_merge() {
     mv "$temp_file" "$target_file"
 }
 
-# @description Create a new markdown file with frontmatter
+# @description Create a new markdown file with frontmatter using field:value pairs
 # @public
 # @arg $1 string Path to the new file
-# @arg $2 string YAML frontmatter content
-# @arg $3 string Markdown content (optional)
+# @arg $2 string Markdown content (optional, pass empty string "" if no content)
+# @arg $... string Field:value pairs for frontmatter
 # @stderr Error messages
 # @exitcode 0 If successful
 # @exitcode 1 If error
 frontmatter_create_markdown() {
     local file="$1"
-    local frontmatter="$2"
-    local content="${3:-}"
+    local content="$2"
+    shift 2
     
     if [[ -f "$file" ]]; then
         echo "Error: File already exists: $file" >&2
         return 1
     fi
     
-    # Validate frontmatter YAML
-    if ! echo "$frontmatter" | yq eval '.' - >/dev/null 2>&1; then
-        echo "Error: Invalid YAML frontmatter" >&2
-        return 1
+    # Create empty file with content
+    if [[ -n "$content" ]]; then
+        echo "$content" > "$file"
+    else
+        touch "$file"
     fi
     
-    # Create file
-    {
-        echo "---"
-        echo "$frontmatter"
-        echo "---"
-        if [[ -n "$content" ]]; then
-            echo
-            echo "$content"
-        fi
-    } > "$file"
+    # Use frontmatter_update_many to add frontmatter with field:value pairs
+    frontmatter_update_many "$file" "$@"
 }
 
 # @description Query frontmatter with complex yq expressions

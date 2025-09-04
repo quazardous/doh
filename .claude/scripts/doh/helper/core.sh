@@ -30,57 +30,60 @@ helper_core_validate() {
 # @stdout DOH system help with available commands and usage
 # @exitcode 0 Always successful
 helper_core_help() {
-    echo "DOH - Development Operations Helper"
-    echo "=================================="
-    echo ""
-    echo "DOH is a task and epic management system for development workflows."
-    echo ""
-    echo "Quick Start:"
-    echo "  /doh:init          Initialize DOH in current project"
-    echo "  /doh:prd-new       Create new Product Requirements Document"
-    echo "  /doh:epic-new      Create new epic from PRD"
-    echo "  /doh:task-new      Create new task within epic"
-    echo ""
-    echo "Core Commands:"
-    echo "  /doh:validate      Validate DOH system integrity"
-    echo "  /doh:help          Show this help message"
-    echo "  /doh:status        Show overall project status"
-    echo ""
-    echo "Management Commands:"
-    echo "  /doh:epic-list     List all epics by status"
-    echo "  /doh:epic-status   Show epic progress and task breakdown"
-    echo "  /doh:prd-list      List all PRDs by status"
-    echo "  /doh:prd-status    Show PRD distribution and recent activity"
-    echo "  /doh:task-list     List tasks with filtering options"
-    echo ""
-    echo "Workflow Commands:"
-    echo "  /doh:next          Show next actionable tasks"
-    echo "  /doh:in-progress   Show currently active tasks"
-    echo "  /doh:blocked       Show blocked tasks needing attention"
-    echo "  /doh:standup       Generate standup report"
-    echo ""
-    echo "Version Management:"
-    echo "  /doh:version-status    Show version information"
-    echo "  /doh:version-bump      Increment project version"
-    echo "  /doh:version-validate  Validate version consistency"
-    echo ""
-    echo "Workspace Commands:"
-    echo "  /doh:workspace         Manage workspace and environment"
-    echo "  /doh:search            Search across DOH documents"
-    echo ""
-    echo "System Information:"
-    echo "  - Configuration: .doh/env"
-    echo "  - PRDs: .doh/prds/"
-    echo "  - Epics: .doh/epics/"
-    echo "  - Versions: .doh/versions/"
-    echo ""
-    echo "For detailed command help, run the specific command or check .claude/commands/doh/"
-    echo ""
-    echo "Quick Examples:"
-    echo "  /doh:prd-new \"user-authentication\"  # Create auth PRD"
-    echo "  /doh:epic-new \"user-auth\"           # Convert PRD to epic"  
-    echo "  /doh:task-new \"login-form\"          # Add task to epic"
-    echo "  /doh:status                          # Check overall progress"
+    local doh_dir="$(doh_project_dir)"
+    cat <<EOF
+DOH - Development Operations Helper
+==================================
+
+DOH is a task and epic management system for development workflows.
+
+Quick Start:
+  /doh:init          Initialize DOH in current project
+  /doh:prd-new       Create new Product Requirements Document
+  /doh:epic-new      Create new epic from PRD
+  /doh:task-new      Create new task within epic
+
+Core Commands:
+  /doh:validate      Validate DOH system integrity
+  /doh:help          Show this help message
+  /doh:status        Show overall project status
+
+Management Commands:
+  /doh:epic-list     List all epics by status
+  /doh:epic-status   Show epic progress and task breakdown
+  /doh:prd-list      List all PRDs by status
+  /doh:prd-status    Show PRD distribution and recent activity
+  /doh:task-list     List tasks with filtering options
+
+Workflow Commands:
+  /doh:next          Show next actionable tasks
+  /doh:in-progress   Show currently active tasks
+  /doh:blocked       Show blocked tasks needing attention
+  /doh:standup       Generate standup report
+
+Version Management:
+  /doh:version-status    Show version information
+  /doh:version-bump      Increment project version
+  /doh:version-validate  Validate version consistency
+
+Workspace Commands:
+  /doh:workspace         Manage workspace and environment
+  /doh:search            Search across DOH documents
+
+System Information:
+  - Configuration: $doh_dir/env
+  - PRDs: $doh_dir/prds/
+  - Epics: $doh_dir/epics/
+  - Versions: $doh_dir/versions/
+
+For detailed command help, run the specific command or check .claude/commands/doh/
+
+Quick Examples:
+  /doh:prd-new "user-authentication"  # Create auth PRD
+  /doh:epic-new "user-auth"           # Convert PRD to epic
+  /doh:task-new "login-form"          # Add task to epic
+  /doh:status                         # Check overall progress
+EOF
     
     return 0
 }
@@ -91,19 +94,22 @@ helper_core_help() {
 # @exitcode 0 If successful
 # @exitcode 1 If initialization fails
 helper_core_init() {
+    local doh_dir="$(doh_project_dir)"
+    local project_root="$(doh_project_root)"
+
     echo "🚀 Initializing DOH System"
     echo "========================="
     echo ""
     
     # Check if we're in a git repository
-    if [ ! -d ".git" ]; then
+    if [ ! -d "$project_root/.git" ]; then
         echo "❌ Error: Not in a git repository" >&2
         echo "   Initialize git first with: git init" >&2
         return 1
     fi
     
     # Check if DOH is already initialized
-    if [ -d ".doh" ]; then
+    if [ -d "$doh_dir" ]; then
         echo "⚠️  DOH already initialized in this project"
         echo "   Use /doh:validate to check system health"
         return 0
@@ -112,15 +118,15 @@ helper_core_init() {
     echo "📁 Creating DOH directory structure..."
     
     # Create core directories
-    mkdir -p .doh/{epics,prds,versions} || {
+    mkdir -p "$doh_dir"/{epics,prds,versions} || {
         echo "❌ Error: Failed to create DOH directories" >&2
         return 1
     }
     
     # Create environment file
-    if [ ! -f ".doh/env" ]; then
+    if [ ! -f "$doh_dir/env" ]; then
         echo "📝 Creating environment configuration..."
-        cat > .doh/env << 'EOF'
+        cat > "$doh_dir/env" << 'EOF'
 # DOH Project Environment
 # Customize these settings for your project
 
@@ -149,9 +155,9 @@ EOF
     fi
     
     # Create sample PRD
-    if [ ! -f ".doh/prds/getting-started.md" ]; then
+    if [ ! -f "$doh_dir/prds/getting-started.md" ]; then
         echo "📄 Creating sample PRD..."
-        cat > .doh/prds/getting-started.md << 'EOF'
+        cat > "$doh_dir/prds/getting-started.md" << 'EOF'
 ---
 name: getting-started
 description: Learn DOH task management basics
@@ -186,16 +192,17 @@ Use `/doh:epic-new getting-started` to convert this PRD into an epic, then add s
 EOF
     fi
     
+    local version_file=$(doh_version_file)
     # Create version file
-    if [ ! -f "VERSION" ]; then
+    if [ ! -f "$version_file" ]; then
         echo "🏷️  Creating version file..."
-        echo "0.1.0" > VERSION
+        echo "0.1.0" > "$version_file"
     fi
     
     # Create initial version document
-    if [ ! -f ".doh/versions/0.1.0.md" ]; then
+    if [ ! -f "$doh_dir/versions/0.1.0.md" ]; then
         echo "📋 Creating initial version document..."
-        cat > .doh/versions/0.1.0.md << 'EOF'
+        cat > "$doh_dir/versions/0.1.0.md" << EOF
 ---
 version: 0.1.0
 status: active
@@ -214,7 +221,7 @@ Initial DOH system setup and configuration.
 - Version tracking system
 
 ## Next Steps
-1. Review and customize `.doh/env` settings
+1. Review and customize `.$doh_dir/env` settings
 2. Explore the sample PRD: `/doh:prd-list`
 3. Create your first epic: `/doh:epic-new getting-started`
 4. Check system health: `/doh:validate`
@@ -222,32 +229,34 @@ EOF
     fi
     
     # Initialize git ignore entries
-    if [ -f ".gitignore" ] && ! grep -q ".doh/cache" .gitignore; then
+    if [ -f ".gitignore" ] && ! grep -q "$doh_dir/cache" .gitignore; then
         echo "🚫 Updating .gitignore..."
-        cat >> .gitignore << 'EOF'
+        cat >> .gitignore << EOF
 
 # DOH cache and temporary files
-.doh/cache/
-.doh/.tmp/
+$doh_dir/cache/
+$doh_dir/.tmp/
 EOF
     fi
     
-    echo ""
-    echo "✅ DOH initialization complete!"
-    echo ""
-    echo "📊 System Status:"
-    echo "   • Environment: .doh/env"  
-    echo "   • Sample PRD: .doh/prds/getting-started.md"
-    echo "   • Version: 0.1.0"
-    echo ""
-    echo "🎯 Next Actions:"
-    echo "   1. Customize settings: edit .doh/env"
-    echo "   2. Validate system: /doh:validate"
-    echo "   3. List PRDs: /doh:prd-list"
-    echo "   4. Create epic: /doh:epic-new getting-started"
-    echo "   5. Check status: /doh:status"
-    echo ""
-    echo "💡 Tip: Run /doh:help for complete command reference"
+    cat <<EOF
+
+✅ DOH initialization complete!
+
+📊 System Status:
+   • Environment: $doh_dir/env
+   • Sample PRD: $doh_dir/prds/getting-started.md
+   • Version: 0.1.0
+
+🎯 Next Actions:
+   1. Customize settings: edit $doh_dir/env
+   2. Validate system: /doh:validate
+   3. List PRDs: /doh:prd-list
+   4. Create epic: /doh:epic-new getting-started
+   5. Check status: /doh:status
+
+💡 Tip: Run /doh:help for complete command reference
+EOF
     
     return 0
 }

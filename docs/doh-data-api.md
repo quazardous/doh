@@ -98,7 +98,7 @@ fi
 
 | Function | Description | Returns |
 |----------|-------------|---------|
-| `dohenv_load` | Load environment variables from .doh/env | 0=success, 1=error |
+| `dohenv_load` | Load environment variables from DOH project env file | 0=success, 1=error |
 | `dohenv_is_loaded` | Check if DOH environment loaded | 0=loaded, 1=not loaded |
 | `dohenv_get` | Get DOH environment variable with fallback | Variable value |
 
@@ -133,7 +133,7 @@ api_key=$(dohenv_get "API_KEY" "default_value")
 | `frontmatter_get_fields` | Get all field names | `<file>` | Field list |
 | `frontmatter_pretty_print` | Pretty print frontmatter | `<file>` | Formatted YAML |
 | `frontmatter_merge` | Merge frontmatter between files | `<source> <target>` | 0=success |
-| `frontmatter_create_markdown` | Create markdown with frontmatter | `<file> <yaml> <content>` | 0=success |
+| `frontmatter_create_markdown` | Create markdown with frontmatter | `<file> <content> <field:value>...` | 0=success |
 | `frontmatter_query` | Query with yq expressions | `<file> <query>` | Query result |
 | `frontmatter_bulk_update` | Update multiple fields | `<file> <field=value>...` | 0=success |
 
@@ -236,7 +236,6 @@ numbering_register_epic "005" ".doh/epics/auth" "Authentication System"
 
 | Function | Description | Arguments | Returns |
 |----------|-------------|-----------|---------|
-| `prd_get_status` | Get PRD status report | `<prd_path>` | Status report |
 | `prd_get_count` | Get PRD count by status | `[status]` | Count |
 | `prd_list_by_status` | List PRDs by status | `<status>` | PRD list |
 | `prd_list` | List all PRDs with metadata | None | PRD list |

@@ -11,7 +11,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/doh.sh"
 [[ -n "${DOH_LIB_DOHENV_LOADED:-}" ]] && return 0
 DOH_LIB_DOHENV_LOADED=1
 
-# @description Load environment variables from .doh/env
+# @description Load environment variables from DOH project env file
 # @public
 # @stdout No output
 # @stderr Error messages if loading fails
@@ -20,14 +20,14 @@ DOH_LIB_DOHENV_LOADED=1
 # 
 # Environment variable priority (highest to lowest):
 # 1. Existing environment variables (export DOH_VAR=value)
-# 2. .doh/env file (project-specific configuration) 
+# 2. {doh_dir}/env file (project-specific configuration) 
 # 3. Default values (built-in fallbacks)
 dohenv_load() {
-    local doh_root
-    doh_root="$(doh_project_dir)" || return 1
+    local doh_dir
+    doh_dir="$(doh_project_dir)" || return 1
     
-    # Load custom config from .doh/env if it exists
-    local env_file="$doh_root/.doh/env"
+    # Load custom config from env file if it exists
+    local env_file="$doh_dir/env"
     if [[ -f "$env_file" ]]; then
         while IFS='=' read -r key value; do
             # Skip comments and empty lines
@@ -93,6 +93,6 @@ dohenv_get() {
 # @exitcode 0 If successful
 _dohenv_parse_line() {
     local line="$1"
-    # Implementation details for parsing .doh/env lines
+    # Implementation details for parsing DOH env lines
     # This would be used internally by dohenv_load
 }

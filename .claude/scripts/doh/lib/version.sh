@@ -398,11 +398,11 @@ version_validate() {
 # @exitcode 0 If successful
 # @exitcode 1 If not in DOH project
 version_find_files_without_file_version() {
-    local doh_root
-    doh_root="$(doh_project_dir)" || return 1
+    local doh_dir
+    doh_dir="$(doh_project_dir)" || return 1
     
     # Find markdown files in DOH directory structure
-    find "$doh_root" -name "*.md" -type f | while read -r file; do
+    find "$doh_dir" -name "*.md" -type f | while read -r file; do
         if ! frontmatter_has "$file"; then
             continue
         fi
@@ -423,11 +423,11 @@ version_find_files_without_file_version() {
 # @exitcode 0 If successful
 # @exitcode 1 If not in DOH project
 version_find_inconsistencies() {
-    local doh_root
-    doh_root="$(doh_project_dir)" || return 1
+    local doh_dir
+    doh_dir="$(doh_project_dir)" || return 1
     
     # Find markdown files and check for version issues
-    find "$doh_root" -name "*.md" -type f | while read -r file; do
+    find "$doh_dir" -name "*.md" -type f | while read -r file; do
         if ! frontmatter_has "$file"; then
             continue
         fi
@@ -450,18 +450,19 @@ version_find_inconsistencies() {
 # @exitcode 0 If successful
 # @exitcode 1 If not in DOH project
 version_list() {
-    local doh_root
-    doh_root="$(doh_project_dir)" || return 1
+    local doh_dir
+    doh_dir="$(doh_project_dir)" || return 1
     
     # Collect all versions from markdown files
     {
         # Project version
-        if [[ -f "$doh_root/VERSION" ]]; then
+        local version_file
+        version_file="$(doh_version_file)" && [[ -f "$version_file" ]] && {
             version_get_current 2>/dev/null || true
-        fi
+        }
         
         # File versions
-        find "$doh_root" -name "*.md" -type f | while read -r file; do
+        find "$doh_dir" -name "*.md" -type f | while read -r file; do
             if frontmatter_has "$file"; then
                 local version
                 version=$(frontmatter_get_field "$file" "version" 2>/dev/null) || true

@@ -24,8 +24,8 @@ epic_get_status() {
     local epic_name="$1"
 
     # Get DOH root directory
-    local doh_root
-    doh_root=$(doh_project_dir) || {
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
         echo "Error: Not in a DOH project" >&2
         return 1
     }
@@ -39,20 +39,20 @@ epic_get_status() {
         echo "Usage: epic-status.sh <epic-name>"
         echo ""
         echo "Available epics:"
-        find "$doh_root/.doh/epics" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | while read -r dir; do
+        find "$doh_dir/epics" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | while read -r dir; do
             [ -d "$dir" ] && echo "  • $(basename "$dir")"
         done
         return 1
     else
         # Show status for specific epic
-        local epic_dir="$doh_root/.doh/epics/$epic_name"
+        local epic_dir="$doh_dir/epics/$epic_name"
         local epic_file="$epic_dir/epic.md"
 
         if [ ! -f "$epic_file" ]; then
             echo "❌ Epic not found: $epic_name"
             echo ""
             echo "Available epics:"
-            find "$doh_root/.doh/epics" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | while read -r dir; do
+            find "$doh_dir/epics" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | while read -r dir; do
                 [ -d "$dir" ] && echo "  • $(basename "$dir")"
             done
             return 1
@@ -140,13 +140,13 @@ epic_get_status() {
 # @exitcode 0 If successful
 # @exitcode 1 If error occurred
 epic_list() {
-    local doh_root
-    doh_root=$(doh_project_dir) || {
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
 
-    local epic_dir="$doh_root/.doh/epics"
+    local epic_dir="$doh_dir/epics"
     
     if [ ! -d "$epic_dir" ]; then
         echo "No epics directory found."
@@ -197,13 +197,13 @@ epic_show() {
         return 1
     fi
 
-    local doh_root
-    doh_root=$(doh_project_dir) || {
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
 
-    local epic_file="$doh_root/.doh/epics/$epic_name/epic.md"
+    local epic_file="$doh_dir/epics/$epic_name/epic.md"
     
     if [ ! -f "$epic_file" ]; then
         echo "Error: Epic not found: $epic_name" >&2
@@ -250,13 +250,13 @@ epic_get_tasks() {
         return 1
     fi
 
-    local doh_root
-    doh_root=$(doh_project_dir) || {
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
 
-    local epic_dir="$doh_root/.doh/epics/$epic_name"
+    local epic_dir="$doh_dir/epics/$epic_name"
     
     if [ ! -d "$epic_dir" ]; then
         echo "Error: Epic not found: $epic_name" >&2

@@ -45,7 +45,7 @@ test_helper_version_show() {
     result="$(./.claude/scripts/doh/helper.sh version show 2>&1)"
     
     # Should show version information (may succeed or fail depending on VERSION file existence)
-    _tf_assert_contains "Should show version info" "$result" "version"
+    _tf_assert_contains "Should show version info" "$result" "Version"
 }
 
 # Test version bump validation - no type

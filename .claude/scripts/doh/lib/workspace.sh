@@ -15,11 +15,17 @@ DOH_LIB_WORKSPACE_LOADED=1
 # @exitcode 0 If successful
 # @exitcode 1 If unable to find DOH root
 workspace_get_current_project_id() {
-    local doh_root
-    doh_root="$(doh_project_dir)" || return 1
+    # Allow override via environment variable
+    if [[ -n "${DOH_PROJECT_ID:-}" ]]; then
+        echo "$DOH_PROJECT_ID"
+        return 0
+    fi
     
-    local project_name=$(basename "$doh_root")
-    local abs_path=$(realpath "$doh_root")
+    local project_root
+    project_root="$(doh_project_root)" || return 1
+    
+    local project_name=$(basename "$project_root")
+    local abs_path=$(realpath "$project_root")
     local path_hash=$(echo "$abs_path" | sha256sum | cut -c1-8)
     
     echo "${project_name}_${path_hash}"
@@ -355,8 +361,8 @@ workspace_diagnostic() {
         return $?
     fi
     
-    local doh_root
-    doh_root=$(doh_project_dir) || {
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
@@ -407,11 +413,11 @@ workspace_diagnostic() {
 
     # Active Tasks Summary
     echo "📊 Active Tasks:"
-    if [[ -d "$doh_root/.doh/epics" ]]; then
+    if [[ -d "$doh_dir/epics" ]]; then
         local epic_count=0
         local task_count=0
         
-        for epic_dir in "$doh_root/.doh/epics"/*/; do
+        for epic_dir in "$doh_dir/epics"/*/; do
             [[ ! -d "$epic_dir" ]] && continue
             local epic_name
             epic_name="$(basename "$epic_dir")"

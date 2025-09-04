@@ -262,7 +262,7 @@ _tf_assert_file_contains() {
         return
     fi
     
-    if grep -q "$content" "$file"; then
+    if grep -q -- "$content" "$file"; then
         _tf_test_result "passed" "$message"
     else
         _tf_test_result "failed" "$message" "File '$file' does not contain '$content'"

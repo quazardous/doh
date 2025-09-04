@@ -3,6 +3,9 @@
 # DOH Init Helper
 # User-facing functions for DOH system initialization
 
+# Source required dependencies
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/doh.sh"
+
 # Guard against multiple sourcing
 [[ -n "${DOH_HELPER_INIT_LOADED:-}" ]] && return 0
 DOH_HELPER_INIT_LOADED=1
@@ -12,7 +15,9 @@ DOH_HELPER_INIT_LOADED=1
 # @stderr Error messages
 # @exitcode 0 If successful
 # @exitcode 1 If initialization failed
-init_helper_initialize() {
+helper_init_initialize() {
+  local doh_dir=$(doh_project_dir)
+  local project_root=$(doh_project_root)
   echo "Initializing..."
   echo ""
   echo ""
@@ -107,21 +112,21 @@ EOF
   # Create directory structure
   echo ""
   echo "📁 Creating directory structure..."
-  mkdir -p .doh/prds
-  mkdir -p .doh/epics
-  mkdir -p .claude/rules
-  mkdir -p .claude/agents
-  mkdir -p .claude/scripts/doh
+  mkdir -p $doh_dir/prds
+  mkdir -p $doh_dir/epics
+  mkdir -p $project_root/.claude/rules
+  mkdir -p $project_root/.claude/agents
+  mkdir -p $project_root/.claude/scripts/doh
   echo "  ✅ Directories created"
 
   # Copy scripts if in main repo
-  if [ -d "scripts/doh" ] && [ ! "$(pwd)" = *"/.claude"* ]; then
-    echo ""
-    echo "📝 Copying DOH scripts..."
-    cp -r scripts/doh/* .claude/scripts/doh/
-    chmod +x .claude/scripts/doh/*.sh
-    echo "  ✅ Scripts copied and made executable"
-  fi
+  # if [ -d "scripts/doh" ] && [ ! "$(pwd)" = *"/.claude"* ]; then
+  #   echo ""
+  #   echo "📝 Copying DOH scripts..."
+  #   cp -r scripts/doh/* .claude/scripts/doh/
+  #   chmod +x .claude/scripts/doh/*.sh
+  #   echo "  ✅ Scripts copied and made executable"
+  # fi
 
   # Check for git
   echo ""
@@ -156,10 +161,10 @@ EOF
   fi
 
   # Create CLAUDE.md if it doesn't exist
-  if [ ! -f "CLAUDE.md" ]; then
+  if [ ! -f "$project_root/CLAUDE.md" ]; then
     echo ""
     echo "📄 Creating CLAUDE.md..."
-    cat > CLAUDE.md << 'EOF'
+    cat > "$project_root/CLAUDE.md" << 'EOF'
   # CLAUDE.md
 
   > Think carefully and implement the most concise solution that changes as little code as possible.
@@ -176,7 +181,7 @@ EOF
   ## Code Style
 
   Follow existing patterns in the codebase.
-  EOF
+EOF
     echo "  ✅ CLAUDE.md created"
   fi
 

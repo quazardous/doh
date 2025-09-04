@@ -32,14 +32,16 @@ _file_cache_get_path() {
 # @exitcode 0 If successful
 _file_cache_create_empty() {
     local cache_file="$1"
-    
+    local doh_dir
+    doh_dir=$(doh_project_dir) || return 1
+
     mkdir -p "$(dirname "$cache_file")"
     
     # CSV header
     echo "number,type,path,name,epic" > "$cache_file"
     
     # Add QUICK epic as first entry
-    echo "000,epic,.doh/quick/manifest.md,QUICK," >> "$cache_file"
+    echo "000,epic,$doh_dir/quick/manifest.md,QUICK," >> "$cache_file"
 }
 
 # @description Ensure file cache exists
@@ -218,9 +220,6 @@ file_cache_remove_file() {
 # @exitcode 0 If successful
 # @exitcode 1 If unable to find project root or create cache
 file_cache_rebuild() {
-    local project_root
-    project_root="$(doh_project_dir)" || return 1
-    
     local cache_file
     cache_file="$(_file_cache_ensure)" || return 1
     
@@ -228,15 +227,18 @@ file_cache_rebuild() {
     
     # Create fresh cache
     _file_cache_create_empty "$cache_file"
-    
+
+    local doh_dir
+    doh_dir=$(doh_project_dir) || return 1
+
     # Scan for all numbered files
     local numbered_files
-    numbered_files=$(find "$project_root" -name "*.md" -path "*/.doh/*" -type f -exec grep -l "^number:" {} \;)
+    numbered_files=$(find "$doh_dir" -name "*.md" -type f -exec grep -l "^number:" {} \;)
     
     while IFS= read -r file; do
         if [[ -n "$file" && -f "$file" ]]; then
             local rel_path number name epic type
-            rel_path=$(realpath --relative-to="$project_root" "$file")
+            rel_path=$(realpath --relative-to="$doh_dir" "$file")
             
             # Extract metadata from frontmatter
             number=$(grep -m 1 "^number:" "$file" | cut -d':' -f2- | xargs)
@@ -253,8 +255,8 @@ file_cache_rebuild() {
                     if grep -q "^epic:" "$file"; then
                         epic=$(grep -m 1 "^epic:" "$file" | cut -d':' -f2- | xargs)
                     else
-                        # Infer from path: .doh/epics/epic-name/
-                        epic=$(echo "$rel_path" | sed -n 's|^\.doh/epics/\([^/]*\)/.*|\1|p')
+                        # Infer from path: epics/epic-name/
+                        epic=$(echo "$rel_path" | sed -n "s|^epics/\([^/]*\)/.*|\1|p")
                     fi
                 fi
                 

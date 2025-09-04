@@ -16,15 +16,18 @@ _tf_setup() {
     source "$(dirname "${BASH_SOURCE[0]}")/../helpers/doh_fixtures.sh"
     _tff_create_minimal_doh_project
     
-    local project_dir=$(doh_project_dir)
+    local doh_dir=$(doh_project_dir)
     local version_file=$(doh_version_file)
     
+    # Create the DOH directory first!
+    mkdir -p "$doh_dir"
+    
     # Initialize git and set version using DOH functions
-    mkdir -p "$(dirname "$project_dir")/.git"
+    mkdir -p "$(dirname "$doh_dir")/.git"
     echo "0.1.0" > "$version_file"
     
     # Create a test DOH file with frontmatter
-    cat > "$project_dir/test.md" << 'EOF'
+    cat > "$doh_dir/test.md" << 'EOF'
 ---
 file_version: 0.1.0
 name: Test File
@@ -35,8 +38,8 @@ status: open
 This is a test file for version bump testing.
 EOF
     
-    # Create another test file
-    cat > "$project_dir/another.md" << 'EOF'
+    # Create another test file  
+    cat > "$doh_dir/another.md" << 'EOF'
 ---
 name: Another Test
 file_version: 0.1.0
@@ -118,10 +121,10 @@ test_version_bump_current() {
 }
 
 test_get_file_version() {
-    local project_dir=$(doh_project_dir)
+    local doh_dir=$(doh_project_dir)
     
     local version
-    version=$(version_get_file "$project_dir/test.md")
+    version=$(version_get_file "$doh_dir/test.md")
     local exit_code=$?
     
     _tf_assert_equals "version_get_file should succeed" 0 $exit_code
@@ -129,30 +132,30 @@ test_get_file_version() {
 }
 
 test_set_file_version() {
-    local project_dir=$(doh_project_dir)
+    local doh_dir=$(doh_project_dir)
     
-    version_set_file "$project_dir/test.md" "0.2.0" > /dev/null
+    version_set_file "$doh_dir/test.md" "0.2.0" > /dev/null
     local exit_code=$?
     
     _tf_assert_equals "version_set_file should succeed" 0 $exit_code
     
     local new_version
-    new_version=$(version_get_file "$project_dir/test.md")
+    new_version=$(version_get_file "$doh_dir/test.md")
     _tf_assert_equals "File version should be updated to 0.2.0" "0.2.0" "$new_version"
 }
 
 test_bump_file_version() {
-    local project_dir=$(doh_project_dir)
+    local doh_dir=$(doh_project_dir)
     
     local new_version
-    new_version=$(version_bump_file "$project_dir/another.md" "minor")
+    new_version=$(version_bump_file "$doh_dir/another.md" "minor")
     local exit_code=$?
     
     _tf_assert_equals "version_bump_file should succeed" 0 $exit_code
     _tf_assert_equals "New file version should be 0.2.0" "0.2.0" "$new_version"
     
     local file_version
-    file_version=$(version_get_file "$project_dir/another.md")
+    file_version=$(version_get_file "$doh_dir/another.md")
     _tf_assert_equals "File should contain new version" "0.2.0" "$file_version"
 }
 
@@ -186,16 +189,16 @@ test_compare_versions() {
 }
 
 test_find_files_missing_version() {
-    local project_dir=$(doh_project_dir)
+    local doh_dir=$(doh_project_dir)
     
     # Create file without frontmatter
-    cat > "$project_dir/no_frontmatter.md" << 'EOF'
+    cat > "$doh_dir/no_frontmatter.md" << 'EOF'
 # File without frontmatter
 This file has no frontmatter.
 EOF
     
     # Create file with frontmatter but no version
-    cat > "$project_dir/no_version.md" << 'EOF'
+    cat > "$doh_dir/no_version.md" << 'EOF'
 ---
 name: No Version File
 status: open
@@ -206,7 +209,7 @@ This file has frontmatter but no version.
 EOF
     
     local missing_files
-    missing_files=$(version_find_files_without_file_version "$project_dir")
+    missing_files=$(version_find_files_without_file_version "$doh_dir")
     
     # Should find the file with frontmatter but no version
     echo "$missing_files" | grep -q "no_version.md"
@@ -221,7 +224,7 @@ EOF
 test_version_bump_workflow() {
     echo "🧪 Testing complete version bump workflow..."
     
-    local project_dir=$(doh_project_dir)
+    local doh_dir=$(doh_project_dir)
     local version_file=$(doh_version_file)
     
     # Initial state check
@@ -240,16 +243,16 @@ test_version_bump_workflow() {
     _tf_assert_equals "VERSION file should contain new version" "0.1.1" "$file_content"
     
     # Update file versions to match
-    version_set_file "$project_dir/test.md" "$new_version" > /dev/null
-    version_set_file "$project_dir/another.md" "$new_version" > /dev/null
+    version_set_file "$doh_dir/test.md" "$new_version" > /dev/null
+    version_set_file "$doh_dir/another.md" "$new_version" > /dev/null
     
     # Verify file versions are updated
     local test_file_version
-    test_file_version=$(version_get_file "$project_dir/test.md")
+    test_file_version=$(version_get_file "$doh_dir/test.md")
     _tf_assert_equals "Test file version should be updated" "$new_version" "$test_file_version"
     
     local another_file_version
-    another_file_version=$(version_get_file "$project_dir/another.md")
+    another_file_version=$(version_get_file "$doh_dir/another.md")
     _tf_assert_equals "Another file version should be updated" "$new_version" "$another_file_version"
 }
 

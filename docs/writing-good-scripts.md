@@ -31,7 +31,7 @@ source ".claude/scripts/doh/helper.sh"
 
 # CLI operations through helper system
 helper_epic_list "active"                    # List active epics
-helper_prd_status "003"                      # Show PRD status  
+helper_prd_status                            # Show PRD status report  
 helper_workflow_next                         # Show next tasks
 helper_core_init                             # Initialize DOH project
 ```

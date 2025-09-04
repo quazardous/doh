@@ -4,7 +4,7 @@
 # Tests complete version workflows and command integrations
 
 # Load test framework
-source "$(dirname "$0")/../helpers/test_framework.sh"
+source "$(dirname "$0")/../helpers/test_framework.sh" 2>/dev/null || source "../helpers/test_framework.sh" 2>/dev/null || source "tests/helpers/test_framework.sh"
 
 # Load version management libraries
 source ".claude/scripts/doh/lib/dohenv.sh"
@@ -14,24 +14,38 @@ source ".claude/scripts/doh/lib/frontmatter.sh"
 _tf_setup() {
     # Create temporary test environment
     TEST_DIR=$(mktemp -d)
-    cd "$TEST_DIR"
+    echo "DEBUG: TEST_DIR = $TEST_DIR"
     
-    # Use normal DOH tools for project setup
+    # Load fixtures
     source "$(dirname "${BASH_SOURCE[0]}")/../helpers/doh_fixtures.sh"
+    
+    # Set up environment to point to temp directory
+    export DOH_PROJECT_DIR="$TEST_DIR/.doh"
+    echo "DEBUG: DOH_PROJECT_DIR = $DOH_PROJECT_DIR"
+    echo "DEBUG: Creating minimal DOH project in $TEST_DIR"
     _tff_create_minimal_doh_project
     
     # Initialize git repo and set version
-    mkdir -p .git
-    local version_file=$(doh_version_file)
-    echo "0.1.0" > "$version_file"
-    
-    # Initialize git repo for version tracking
-    git init . > /dev/null 2>&1
-    git config user.email "test@example.com" > /dev/null 2>&1
-    git config user.name "Test User" > /dev/null 2>&1
+    ( cd "$TEST_DIR" 
+      mkdir -p .git
+      local version_file=$(doh_version_file)
+      echo "DEBUG: version_file = '$version_file'"
+      echo "DEBUG: Creating version file directory $(dirname "$version_file")"
+      mkdir -p "$(dirname "$version_file")"
+      echo "0.1.0" > "$version_file"
+      echo "DEBUG: version_file exists? $(test -f "$version_file" && echo "YES" || echo "NO")"
+      
+      # Initialize git repo for version tracking
+      git init . > /dev/null 2>&1
+      git config user.email "test@example.com" > /dev/null 2>&1
+      git config user.name "Test User" > /dev/null 2>&1
+    )
     
     # Create initial version file
-    cat > .doh/versions/0.1.0.md << 'EOF'
+    echo "DEBUG: Creating $TEST_DIR/.doh/versions/0.1.0.md"
+    mkdir -p "$TEST_DIR/.doh/versions"
+    echo "DEBUG: $TEST_DIR/.doh/versions directory exists? $(test -d "$TEST_DIR/.doh/versions" && echo "YES" || echo "NO")"
+    cat > "$TEST_DIR/.doh/versions/0.1.0.md" << 'EOF'
 ---
 version: 0.1.0
 type: initial
@@ -51,7 +65,10 @@ Initial version of the DOH project with basic functionality.
 EOF
     
     # Create PRD with version
-    cat > .doh/prds/core-features.md << 'EOF'
+    echo "DEBUG: Creating $TEST_DIR/.doh/prds/core-features.md"
+    mkdir -p "$TEST_DIR/.doh/prds"
+    echo "DEBUG: $TEST_DIR/.doh/prds directory exists? $(test -d "$TEST_DIR/.doh/prds" && echo "YES" || echo "NO")"
+    cat > "$TEST_DIR/.doh/prds/core-features.md" << 'EOF'
 ---
 name: core-features
 status: draft
@@ -65,7 +82,10 @@ Core features for the DOH system.
 EOF
     
     # Create epic with version hierarchy
-    cat > .doh/epics/001.md << 'EOF'
+    echo "DEBUG: Creating $TEST_DIR/.doh/epics/001.md"
+    mkdir -p "$TEST_DIR/.doh/epics"
+    echo "DEBUG: $TEST_DIR/.doh/epics directory exists? $(test -d "$TEST_DIR/.doh/epics" && echo "YES" || echo "NO")"
+    cat > "$TEST_DIR/.doh/epics/001.md" << 'EOF'
 ---
 name: version-management
 number: 001
@@ -81,7 +101,8 @@ Implementation of version management system.
 EOF
     
     # Create tasks with version dependencies
-    cat > .doh/epics/002.md << 'EOF'
+    echo "DEBUG: Creating $TEST_DIR/.doh/epics/002.md"
+    cat > "$TEST_DIR/.doh/epics/002.md" << 'EOF'
 ---
 name: version-validation
 number: 002
@@ -97,7 +118,8 @@ depends_on: []
 Implement version validation utilities.
 EOF
     
-    cat > .doh/epics/003.md << 'EOF'
+    echo "DEBUG: Creating $TEST_DIR/.doh/epics/003.md"
+    cat > "$TEST_DIR/.doh/epics/003.md" << 'EOF'
 ---
 name: version-commands
 number: 003
@@ -142,12 +164,13 @@ test_version_release_workflow() {
     _tf_assert_equals "Initial version should be 0.1.0" "0.1.0" "$current_version"
     
     # Step 2: Complete tasks (mark as completed)
-    frontmatter_update_field ".doh/epics/002.md" "status" "completed" > /dev/null
-    frontmatter_update_field ".doh/epics/003.md" "status" "completed" > /dev/null
+    local doh_dir=$(doh_project_dir)
+    frontmatter_update_field "$doh_dir/epics/002.md" "status" "completed" > /dev/null
+    frontmatter_update_field "$doh_dir/epics/003.md" "status" "completed" > /dev/null
     
     # Step 3: Check epic readiness for version bump
     local epic_status
-    epic_status=$(frontmatter_get_field ".doh/epics/001.md" "status")
+    epic_status=$(frontmatter_get_field "$doh_dir/epics/001.md" "status")
     _tf_assert_equals "Epic should still be in progress" "in_progress" "$epic_status"
     
     # Step 4: Bump project version (minor release)
@@ -156,7 +179,8 @@ test_version_release_workflow() {
     _tf_assert_equals "Should bump to target version 0.2.0" "0.2.0" "$new_version"
     
     # Step 5: Create version milestone file
-    cat > .doh/versions/0.2.0.md << 'EOF'
+    echo "DEBUG: Creating $TEST_DIR/.doh/versions/0.2.0.md"
+    cat > "$TEST_DIR/.doh/versions/0.2.0.md" << 'EOF'
 ---
 version: 0.2.0
 type: minor
@@ -182,22 +206,22 @@ Version management system implementation.
 EOF
     
     # Step 6: Update file versions to match release
-    version_set_file ".doh/prds/core-features.md" "$new_version" > /dev/null
-    version_set_file ".doh/epics/001.md" "$new_version" > /dev/null
-    version_set_file ".doh/epics/002.md" "$new_version" > /dev/null
-    version_set_file ".doh/epics/003.md" "$new_version" > /dev/null
+    version_set_file "$doh_dir/prds/core-features.md" "$new_version" > /dev/null
+    version_set_file "$doh_dir/epics/001.md" "$new_version" > /dev/null
+    version_set_file "$doh_dir/epics/002.md" "$new_version" > /dev/null
+    version_set_file "$doh_dir/epics/003.md" "$new_version" > /dev/null
     
     # Step 7: Verify all files have consistent versions
     local prd_version
-    prd_version=$(version_get_file ".doh/prds/core-features.md")
+    prd_version=$(version_get_file "$doh_dir/prds/core-features.md")
     _tf_assert_equals "PRD version should be updated" "$new_version" "$prd_version"
     
     local epic_version
-    epic_version=$(version_get_file ".doh/epics/001.md")
+    epic_version=$(version_get_file "$doh_dir/epics/001.md")
     _tf_assert_equals "Epic version should be updated" "$new_version" "$epic_version"
     
     # Step 8: Mark epic as completed
-    frontmatter_update_field ".doh/epics/001.md" "status" "completed" > /dev/null
+    frontmatter_update_field "$doh_dir/epics/001.md" "status" "completed" > /dev/null
     
     # Step 9: Verify no version inconsistencies
     local inconsistencies
@@ -213,16 +237,17 @@ test_version_hierarchy_inheritance() {
     echo "🧪 Testing version hierarchy inheritance..."
     
     # Test PRD -> Epic -> Task version inheritance
+    local doh_dir=$(doh_project_dir)
     local prd_target
-    prd_target=$(frontmatter_get_field ".doh/prds/core-features.md" "target_version")
+    prd_target=$(frontmatter_get_field "$doh_dir/prds/core-features.md" "target_version")
     _tf_assert_equals "PRD should have target version 1.0.0" "1.0.0" "$prd_target"
     
     local epic_target
-    epic_target=$(frontmatter_get_field ".doh/epics/001.md" "target_version")
+    epic_target=$(frontmatter_get_field "$doh_dir/epics/001.md" "target_version")
     _tf_assert_equals "Epic should have its own target version" "0.2.0" "$epic_target"
     
     local task_target
-    task_target=$(frontmatter_get_field ".doh/epics/002.md" "target_version")
+    task_target=$(frontmatter_get_field "$doh_dir/epics/002.md" "target_version")
     _tf_assert_equals "Task should inherit epic target version" "0.2.0" "$task_target"
     
     cd - > /dev/null
@@ -234,16 +259,17 @@ test_version_dependency_tracking() {
     echo "🧪 Testing version dependency tracking..."
     
     # Check task dependencies
+    local doh_dir=$(doh_project_dir)
     local task_deps
-    task_deps=$(frontmatter_get_field ".doh/epics/003.md" "depends_on")
+    task_deps=$(frontmatter_get_field "$doh_dir/epics/003.md" "depends_on")
     echo "$task_deps" | grep -q "002"
     _tf_assert_equals "Task 003 should depend on task 002" 0 $?
     
     # Verify dependency versions are consistent
     local dep_version
-    dep_version=$(version_get_file ".doh/epics/002.md")
+    dep_version=$(version_get_file "$doh_dir/epics/002.md")
     local dependent_version
-    dependent_version=$(version_get_file ".doh/epics/003.md")
+    dependent_version=$(version_get_file "$doh_dir/epics/003.md")
     
     _tf_assert_equals "Dependent tasks should have consistent versions" "$dep_version" "$dependent_version"
     
@@ -256,7 +282,8 @@ test_major_version_workflow() {
     echo "🧪 Testing major version workflow..."
     
     # Simulate breaking change scenario
-    frontmatter_update_field ".doh/prds/core-features.md" "target_version" "2.0.0" > /dev/null
+    local doh_dir=$(doh_project_dir)
+    frontmatter_update_field "$doh_dir/prds/core-features.md" "target_version" "2.0.0" > /dev/null
     
     # Add breaking change indicator to epic
     cat >> .doh/epics/001.md << 'EOF'
@@ -272,7 +299,8 @@ EOF
     _tf_assert_equals "Should bump to major version 1.0.0" "1.0.0" "$major_version"
     
     # Create major version milestone
-    cat > .doh/versions/1.0.0.md << 'EOF'
+    echo "DEBUG: Creating $TEST_DIR/.doh/versions/1.0.0.md"
+    cat > "$TEST_DIR/.doh/versions/1.0.0.md" << 'EOF'
 ---
 version: 1.0.0
 type: major
@@ -340,13 +368,14 @@ test_concurrent_version_operations() {
     echo "🧪 Testing concurrent version operations safety..."
     
     # Simulate concurrent file version updates
+    local doh_dir=$(doh_project_dir)
     local pids=()
     
     # Start multiple background operations
-    version_set_file ".doh/epics/002.md" "0.3.0" > /dev/null &
+    version_set_file "$doh_dir/epics/002.md" "0.3.0" > /dev/null &
     pids+=($!)
     
-    version_set_file ".doh/epics/003.md" "0.3.0" > /dev/null &
+    version_set_file "$doh_dir/epics/003.md" "0.3.0" > /dev/null &
     pids+=($!)
     
     # Wait for all operations to complete
@@ -356,11 +385,11 @@ test_concurrent_version_operations() {
     
     # Verify both operations succeeded
     local version1
-    version1=$(version_get_file ".doh/epics/002.md")
+    version1=$(version_get_file "$doh_dir/epics/002.md")
     _tf_assert_equals "Concurrent version update 1 should succeed" "0.3.0" "$version1"
     
     local version2
-    version2=$(version_get_file ".doh/epics/003.md")
+    version2=$(version_get_file "$doh_dir/epics/003.md")
     _tf_assert_equals "Concurrent version update 2 should succeed" "0.3.0" "$version2"
     
     cd - > /dev/null

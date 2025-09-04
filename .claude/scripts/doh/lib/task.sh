@@ -42,8 +42,8 @@ task_transition_status() {
             ;;
     esac
     
-    local doh_root
-    doh_root=$(doh_project_dir) || {
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
@@ -54,10 +54,10 @@ task_transition_status() {
         task_file="$task_identifier"
     else
         # Search by task number
-        task_file=$(find "$doh_root/.doh/epics" -name "${task_identifier}.md" -type f 2>/dev/null | head -1)
+        task_file=$(find "$doh_dir/epics" -name "${task_identifier}.md" -type f 2>/dev/null | head -1)
         if [ -z "$task_file" ]; then
             # Try with leading zeros
-            task_file=$(find "$doh_root/.doh/epics" -name "0${task_identifier}.md" -o -name "00${task_identifier}.md" -type f 2>/dev/null | head -1)
+            task_file=$(find "$doh_dir/epics" -name "0${task_identifier}.md" -o -name "00${task_identifier}.md" -type f 2>/dev/null | head -1)
         fi
     fi
     

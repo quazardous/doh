@@ -112,7 +112,7 @@ _tf_run_single_test() {
                 echo "✅ ${relative_path}: assertions: ${passed_assertions:-0}/${total_assertions:-0} (${duration}s)"
             fi
         else
-            echo "❌ ${relative_path}: failed (${duration}s)"
+            echo "❌ ${relative_path}: failed, functions: ${passed_functions:-0}/${total_functions:-0}, assertions: ${passed_assertions:-0}/${total_assertions:-0} (${duration}s)"
         fi
     fi
     

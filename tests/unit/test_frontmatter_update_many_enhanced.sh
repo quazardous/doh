@@ -9,19 +9,22 @@ source "$(dirname "${BASH_SOURCE[0]}")/../helpers/doh_fixtures.sh"
 
 _tf_setup() {
     # Use skeleton fixture system for proper test isolation
-    _tff_create_helper_test_project >/dev/null
-    _tff_setup_workspace_for_helpers
-    
+    local project_dir=$(_tff_create_helper_test_project)
+    _tff_setup_workspace_for_helpers >/dev/null
+
+    # Create the project directory first!
+    mkdir -p "$project_dir"
+
     # Source DOH libraries after environment is set up
     source .claude/scripts/doh/lib/frontmatter.sh
     source .claude/scripts/doh/lib/version.sh
     
     # Create test files in the test environment
-    TEST_DIR="."
-    TEST_FILE="test.md"
-    TEST_NEW_FILE="new.md"
-    TEST_EXISTING_FILE="existing.md"
-    
+    TEST_DIR="$project_dir"
+    TEST_FILE="$project_dir/test.md"
+    TEST_NEW_FILE="$project_dir/new.md"
+    TEST_EXISTING_FILE="$project_dir/existing.md"
+
     # Create test file with basic frontmatter
     cat > "$TEST_FILE" << 'EOF'
 ---

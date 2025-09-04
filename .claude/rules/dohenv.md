@@ -10,11 +10,11 @@ All DOH scripts must source the environment loader first:
 source .claude/scripts/doh/lib/dohenv.sh
 ```
 
-This loads `.doh/env` if it exists and exports all `DOH_*` variables with sensible defaults.
+This loads `{doh_project_dir}/env` if it exists and exports all `DOH_*` variables with sensible defaults.
 
 ## Configuration File
 
-Optional file `.doh/env` in project root:
+Optional file `{doh_project_dir}/env` in DOH directory:
 ```bash
 # DOH Environment Configuration
 DOH_GLOBAL_DIR=~/.doh

@@ -14,106 +14,6 @@ DOH_LIB_PRD_LOADED=1
 # Constants
 readonly PRD_LIB_VERSION="1.0.0"
 
-# @description Get PRD status report with distribution and recent activity
-# @stdout Formatted PRD status report
-# @stderr Error messages
-# @exitcode 0 If successful
-# @exitcode 1 If not in DOH project or other errors
-prd_get_status() {
-    # Get DOH root directory
-    local doh_root
-    doh_root=$(doh_project_dir) || {
-        echo "Error: Not in a DOH project" >&2
-        return 1
-    }
-
-    local prd_dir="$doh_root/.doh/prds"
-
-    echo "📄 PRD Status Report"
-    echo "===================="
-    echo ""
-
-    if [ ! -d "$prd_dir" ]; then
-        echo "No PRD directory found."
-        return 0
-    fi
-
-    # Count total PRDs
-    local total
-    total=$(find "$prd_dir" -name "*.md" -type f 2>/dev/null | wc -l)
-    if [ "$total" -eq 0 ]; then
-        echo "No PRDs found."
-        return 0
-    fi
-
-    # Count by status using frontmatter API
-    local backlog=0 in_progress=0 implemented=0
-
-    while IFS= read -r file; do
-        if [ -f "$file" ]; then
-            local status
-            status=$(frontmatter_get_field "$file" "status" 2>/dev/null)
-
-            case "$status" in
-                backlog|draft|""|"null") 
-                    ((backlog++))
-                    ;;
-                in-progress|active|in_progress) 
-                    ((in_progress++))
-                    ;;
-                implemented|completed|done) 
-                    ((implemented++))
-                    ;;
-                *) 
-                    ((backlog++))
-                    ;;
-            esac
-        fi
-    done < <(find "$prd_dir" -name "*.md" -type f 2>/dev/null)
-
-    echo "Getting status..."
-    echo ""
-    echo ""
-
-    # Display chart
-    echo "📊 Distribution:"
-    echo "================"
-    echo ""
-
-    if [ "$total" -gt 0 ]; then
-        local backlog_bars in_progress_bars implemented_bars
-        backlog_bars=$((backlog > 0 ? backlog*20/total : 0))
-        in_progress_bars=$((in_progress > 0 ? in_progress*20/total : 0))
-        implemented_bars=$((implemented > 0 ? implemented*20/total : 0))
-        
-        echo "  Backlog:     $(printf '%-3d' $backlog) [$(printf '%0.s█' $(seq 1 $backlog_bars) 2>/dev/null)]"
-        echo "  In Progress: $(printf '%-3d' $in_progress) [$(printf '%0.s█' $(seq 1 $in_progress_bars) 2>/dev/null)]"
-        echo "  Implemented: $(printf '%-3d' $implemented) [$(printf '%0.s█' $(seq 1 $implemented_bars) 2>/dev/null)]"
-    else
-        echo "  No PRDs to display"
-    fi
-    echo ""
-    echo "  Total PRDs: $total"
-
-    # Recent activity using frontmatter API
-    echo ""
-    echo "📅 Recent PRDs (last 5 modified):"
-    find "$prd_dir" -name "*.md" -type f -printf '%T@ %p\n' 2>/dev/null | sort -nr | head -5 | cut -d' ' -f2- | while read -r file; do
-        local name
-        name=$(frontmatter_get_field "$file" "name" 2>/dev/null)
-        [ -z "$name" ] || [ "$name" = "null" ] && name=$(basename "$file" .md)
-        echo "  • $name"
-    done
-
-    # Suggestions
-    echo ""
-    echo "💡 Next Actions:"
-    [ $backlog -gt 0 ] && echo "  • Parse backlog PRDs to epics: /doh:prd-parse <name>"
-    [ $in_progress -gt 0 ] && echo "  • Check progress on active PRDs: /doh:epic-status <name>"
-    [ $total -eq 0 ] && echo "  • Create your first PRD: /doh:prd-new <name>"
-
-    return 0
-}
 
 # @description Get PRD count by status
 # @arg $1 string Optional status filter (backlog|in-progress|implemented)
@@ -124,13 +24,13 @@ prd_get_status() {
 prd_get_count() {
     local status_filter="${1:-}"
     
-    local doh_root
-    doh_root=$(doh_project_dir) || {
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
 
-    local prd_dir="$doh_root/.doh/prds"
+    local prd_dir="$doh_dir/prds"
     [ ! -d "$prd_dir" ] && echo "0" && return 0
 
     local count=0
@@ -167,13 +67,13 @@ prd_get_count() {
 prd_list_by_status() {
     local status_filter="${1:-}"
     
-    local doh_root
-    doh_root=$(doh_project_dir) || {
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
 
-    local prd_dir="$doh_root/.doh/prds"
+    local prd_dir="$doh_dir/prds"
     [ ! -d "$prd_dir" ] && return 0
 
     while IFS= read -r file; do
@@ -209,13 +109,13 @@ prd_list_by_status() {
 prd_list() {
     local status_filter="${1:-}"
     
-    local doh_root
-    doh_root=$(doh_project_dir) || {
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
 
-    local prd_dir="$doh_root/.doh/prds"
+    local prd_dir="$doh_dir/prds"
     
     if [ ! -d "$prd_dir" ]; then
         echo "No PRDs directory found."

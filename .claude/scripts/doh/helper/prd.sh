@@ -15,24 +15,28 @@ DOH_HELPER_PRD_LOADED=1
 # @stderr Error messages
 # @exitcode 0 If successful
 helper_prd_list() {
+    local doh_dir=($(doh_project_dir)) || {
+        echo "Error: Not in DOH project" >&2
+        return 1
+    }
     echo "Getting PRDs..."
     echo ""
     echo ""
 
-    local doh_root
-    doh_root=$(doh_project_dir) || {
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
 
     # Check if PRD directory exists
-    if [ ! -d "$doh_root/.doh/prds" ]; then
+    if [ ! -d "$doh_dir/prds" ]; then
         echo "📁 No PRD directory found. Create your first PRD with: /doh:prd-new <feature-name>"
         return 0
     fi
 
     # Check for PRD files
-    if ! ls "$doh_root"/.doh/prds/*.md >/dev/null 2>&1; then
+    if ! ls "$doh_dir"/prds/*.md >/dev/null 2>&1; then
         echo "📁 No PRDs found. Create your first PRD with: /doh:prd-new <feature-name>"
         return 0
     fi
@@ -46,7 +50,7 @@ helper_prd_list() {
 
     # Display by status groups
     echo "🔍 Backlog PRDs:"
-    for file in "$doh_root"/.doh/prds/*.md; do
+    for file in "$doh_dir"/prds/*.md; do
         [ -f "$file" ] || continue
         
         # Extract metadata using frontmatter if available, fallback to grep
@@ -68,7 +72,7 @@ helper_prd_list() {
             
             # Show relative path from doh root
             local relative_file
-            relative_file=$(realpath --relative-to="$doh_root" "$file")
+            relative_file=$(realpath --relative-to="$doh_dir" "$file")
             echo "   📋 $relative_file - $desc"
             ((backlog_count++))
         fi
@@ -78,7 +82,7 @@ helper_prd_list() {
 
     echo ""
     echo "🔄 In-Progress PRDs:"
-    for file in "$doh_root"/.doh/prds/*.md; do
+    for file in "$doh_dir"/prds/*.md; do
         [ -f "$file" ] || continue
         
         local status name desc
@@ -97,7 +101,7 @@ helper_prd_list() {
             [ -z "$desc" ] && desc="No description"
             
             local relative_file
-            relative_file=$(realpath --relative-to="$doh_root" "$file")
+            relative_file=$(realpath --relative-to="$doh_dir" "$file")
             echo "   📋 $relative_file - $desc"
             ((in_progress_count++))
         fi
@@ -106,7 +110,7 @@ helper_prd_list() {
 
     echo ""
     echo "✅ Implemented PRDs:"
-    for file in "$doh_root"/.doh/prds/*.md; do
+    for file in "$doh_dir"/prds/*.md; do
         [ -f "$file" ] || continue
         
         local status name desc
@@ -125,7 +129,7 @@ helper_prd_list() {
             [ -z "$desc" ] && desc="No description"
             
             local relative_file
-            relative_file=$(realpath --relative-to="$doh_root" "$file")
+            relative_file=$(realpath --relative-to="$doh_dir" "$file")
             echo "   📋 $relative_file - $desc"
             ((implemented_count++))
         fi
@@ -148,8 +152,99 @@ helper_prd_list() {
 # @stderr Error messages  
 # @exitcode 0 If successful
 helper_prd_status() {
-    # Call the library function which already provides user-friendly output
-    prd_get_status
+    # Get DOH root directory
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
+        echo "Error: Not in a DOH project" >&2
+        return 1
+    }
+
+    local prd_dir="$doh_dir/prds"
+
+    echo "📄 PRD Status Report"
+    echo "===================="
+    echo ""
+
+    if [ ! -d "$prd_dir" ]; then
+        echo "No PRD directory found."
+        return 0
+    fi
+
+    # Count total PRDs
+    local total
+    total=$(find "$prd_dir" -name "*.md" -type f 2>/dev/null | wc -l)
+    if [ "$total" -eq 0 ]; then
+        echo "No PRDs found."
+        return 0
+    fi
+
+    # Count by status using frontmatter API
+    local backlog=0 in_progress=0 implemented=0
+
+    while IFS= read -r file; do
+        if [ -f "$file" ]; then
+            local status
+            status=$(frontmatter_get_field "$file" "status" 2>/dev/null)
+
+            case "$status" in
+                backlog|draft|""|"null") 
+                    ((backlog++))
+                    ;;
+                in-progress|active|in_progress) 
+                    ((in_progress++))
+                    ;;
+                implemented|completed|done) 
+                    ((implemented++))
+                    ;;
+                *) 
+                    ((backlog++))
+                    ;;
+            esac
+        fi
+    done < <(find "$prd_dir" -name "*.md" -type f 2>/dev/null)
+
+    echo "Getting status..."
+    echo ""
+    echo ""
+
+    # Display chart
+    echo "📊 Distribution:"
+    echo "================"
+    echo ""
+
+    if [ "$total" -gt 0 ]; then
+        local backlog_bars in_progress_bars implemented_bars
+        backlog_bars=$((backlog > 0 ? backlog*20/total : 0))
+        in_progress_bars=$((in_progress > 0 ? in_progress*20/total : 0))
+        implemented_bars=$((implemented > 0 ? implemented*20/total : 0))
+        
+        echo "  Backlog:     $(printf '%-3d' $backlog) [$(printf '%0.s█' $(seq 1 $backlog_bars) 2>/dev/null)]"
+        echo "  In Progress: $(printf '%-3d' $in_progress) [$(printf '%0.s█' $(seq 1 $in_progress_bars) 2>/dev/null)]"
+        echo "  Implemented: $(printf '%-3d' $implemented) [$(printf '%0.s█' $(seq 1 $implemented_bars) 2>/dev/null)]"
+    else
+        echo "  No PRDs to display"
+    fi
+    echo ""
+    echo "  Total PRDs: $total"
+
+    # Recent activity using frontmatter API
+    echo ""
+    echo "📅 Recent PRDs (last 5 modified):"
+    find "$prd_dir" -name "*.md" -type f -printf '%T@ %p\n' 2>/dev/null | sort -nr | head -5 | cut -d' ' -f2- | while read -r file; do
+        local name
+        name=$(frontmatter_get_field "$file" "name" 2>/dev/null)
+        [ -z "$name" ] || [ "$name" = "null" ] && name=$(basename "$file" .md)
+        echo "  • $name"
+    done
+
+    # Suggestions
+    echo ""
+    echo "💡 Next Actions:"
+    [ $backlog -gt 0 ] && echo "  • Parse backlog PRDs to epics: /doh:prd-parse <name>"
+    [ $in_progress -gt 0 ] && echo "  • Check progress on active PRDs: /doh:epic-status <name>"
+    [ $total -eq 0 ] && echo "  • Create your first PRD: /doh:prd-new <name>"
+
+    return 0
 }
 
 # @description List PRDs by specific status
@@ -236,13 +331,13 @@ helper_prd_help() {
     echo "Usage: helper.sh prd <command> [options]"
     echo ""
     echo "Commands:"
-    echo "  new <prd-name> [description]  Create a new PRD"
-    echo "  parse <prd-name>        Parse and analyze existing PRD"
-    echo "  list                    List all PRDs categorized by status"
-    echo "  status                  Show comprehensive PRD status report"
-    echo "  by-status <status>      List PRDs filtered by specific status"
-    echo "  count [status]          Count PRDs by status or show all counts"
-    echo "  help                    Show this help message"
+    echo "  new <prd-name> [description] [target_version]  Create a new PRD"
+    echo "  parse <prd-name>                              Parse and analyze existing PRD"
+    echo "  list                                          List all PRDs categorized by status"
+    echo "  status                                        Show comprehensive PRD status report"
+    echo "  by-status <status>                            List PRDs filtered by specific status"
+    echo "  count [status]                                Count PRDs by status or show all counts"
+    echo "  help                                          Show this help message"
     echo ""
     echo "Status values:"
     echo "  backlog       - PRDs in backlog/draft phase"
@@ -252,6 +347,7 @@ helper_prd_help() {
     echo ""
     echo "Examples:"
     echo "  helper.sh prd new my-feature \"Feature description\""
+    echo "  helper.sh prd new my-feature \"Feature description\" \"2.0.0\""
     echo "  helper.sh prd parse existing-prd"
     echo "  helper.sh prd list"
     echo "  helper.sh prd status"
@@ -264,22 +360,30 @@ helper_prd_help() {
 # @description Créer un nouveau PRD
 # @arg $1 string Nom du PRD
 # @arg $2 string Description (optionnel)
+# @arg $3 string Version cible (optionnel, défaut 1.0.0)
 # @stdout Chemin vers le PRD créé
 # @exitcode 0 Si création réussie
 # @exitcode 1 Si erreur de paramètres
 helper_prd_new() {
     local prd_name="${1:-}"
     local description="${2:-}"
-    
+    local target_version="${3:-1.0.0}"
+
     # Validation
     if [[ -z "$prd_name" ]]; then
         echo "Error: PRD name required" >&2
-        echo "Usage: helper.sh prd new <prd-name> [description]" >&2
+        echo "Usage: helper.sh prd new <prd-name> [description] [target_version]" >&2
         return 1
     fi
+
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
+        echo "Error: Not in DOH project" >&2
+        return 1
+    }
     
     # Check if PRD already exists
-    local prd_path=".doh/prds/${prd_name}.md"
+    local prd_path="$doh_dir/prds/${prd_name}.md"
     if [[ -f "$prd_path" ]]; then
         echo "Error: PRD already exists: $prd_path" >&2
         return 1
@@ -288,64 +392,56 @@ helper_prd_new() {
     echo "Creating PRD: $prd_name"
     
     # Create PRDs directory if it doesn't exist
-    mkdir -p ".doh/prds"
+    mkdir -p "$doh_dir/prds"
+
+    # Prepare PRD content template
+    local prd_content
+    prd_content=$(cat <<EOF
+
+# PRD: $prd_name
+
+## Executive Summary
+$(if [[ -n "$description" ]]; then echo "$description"; else echo "<!-- Brief overview and value proposition -->"; fi)
+
+## Problem Statement
+<!-- What problem are we solving? -->
+
+## User Stories
+<!-- Primary user personas and detailed user journeys -->
+
+## Requirements
+
+### Functional Requirements
+<!-- Core features and capabilities -->
+
+### Non-Functional Requirements
+<!-- Performance, security, scalability needs -->
+
+## Success Criteria
+<!-- Measurable outcomes and KPIs -->
+
+## Constraints & Assumptions
+<!-- Technical limitations, timeline constraints -->
+
+## Out of Scope
+<!-- What we're explicitly NOT building -->
+
+## Dependencies
+<!-- External and internal dependencies -->
+EOF
+)
     
-    # Create PRD using frontmatter API
-    local created_date
-    created_date="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-    
-    # Create PRD file with frontmatter
-    frontmatter_create_markdown "$prd_path" \
-        "name" "$prd_name" \
-        "description" "$description" \
-        "status" "backlog" \
-        "created" "$created_date" \
-        "target_version" "1.0.0" \
-        "file_version" "0.1.0"
-    
-    # Add PRD content template
-    {
-        echo ""
-        echo "# PRD: $prd_name"
-        echo ""
-        echo "## Executive Summary"
-        if [[ -n "$description" ]]; then
-            echo "$description"
-        else
-            echo "<!-- Brief overview and value proposition -->"
-        fi
-        echo ""
-        echo "## Problem Statement"
-        echo "<!-- What problem are we solving? -->"
-        echo ""
-        echo "## User Stories"
-        echo "<!-- Primary user personas and detailed user journeys -->"
-        echo ""
-        echo "## Requirements"
-        echo ""
-        echo "### Functional Requirements"
-        echo "<!-- Core features and capabilities -->"
-        echo ""
-        echo "### Non-Functional Requirements"
-        echo "<!-- Performance, security, scalability needs -->"
-        echo ""
-        echo "## Success Criteria"
-        echo "<!-- Measurable outcomes and KPIs -->"
-        echo ""
-        echo "## Constraints & Assumptions"
-        echo "<!-- Technical limitations, timeline constraints -->"
-        echo ""
-        echo "## Out of Scope"
-        echo "<!-- What we're explicitly NOT building -->"
-        echo ""
-        echo "## Dependencies"
-        echo "<!-- External and internal dependencies -->"
-    } >> "$prd_path"
-    
+    # Create PRD file with frontmatter using field:value format
+    frontmatter_create_markdown "$prd_path" "$prd_content" \
+        "name:$prd_name" \
+        "description:$description" \
+        "status:backlog" \
+        "target_version:$target_version"
+
     echo "✅ PRD created: $prd_path"
     echo "   Status: backlog"
-    echo "   Target version: 1.0.0"
-    
+    echo "   Target version: $target_version"
+
     return 0
 }
 
@@ -362,14 +458,20 @@ helper_prd_parse() {
         echo "Usage: helper.sh prd parse <prd-name>" >&2
         return 1
     fi
-    
+
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
+        echo "Error: Not in DOH project" >&2
+        return 1
+    }
+
     # Check if PRD exists
-    local prd_path=".doh/prds/${prd_name}.md"
+    local prd_path="$doh_dir/prds/${prd_name}.md"
     if [[ ! -f "$prd_path" ]]; then
         echo "Error: PRD not found: $prd_path" >&2
         echo "Available PRDs:" >&2
-        if [[ -d ".doh/prds" ]]; then
-            ls -1 .doh/prds/*.md 2>/dev/null | sed 's|.doh/prds/||; s|.md$||' | sed 's/^/  - /' || echo "  (none)"
+        if [[ -d "$doh_dir/prds" ]]; then
+            ls -1 "$doh_dir/prds"/*.md 2>/dev/null | sed "s|$doh_dir/prds/||; s|.md$||" | sed 's/^/  - /' || echo "  (none)"
         fi
         return 1
     fi

@@ -21,8 +21,8 @@ DOH_HELPER_WORKFLOW_LOADED=1
 helper_workflow_next() {
     local epic_filter="${1:-}"
     
-    local doh_root
-    doh_root=$(doh_project_dir) || {
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
@@ -31,9 +31,9 @@ helper_workflow_next() {
     echo "======================"
     echo ""
 
-    local search_path="$doh_root/.doh/epics"
+    local search_path="$doh_dir/epics"
     if [ -n "$epic_filter" ]; then
-        search_path="$doh_root/.doh/epics/$epic_filter"
+        search_path="$doh_dir/epics/$epic_filter"
         if [ ! -d "$search_path" ]; then
             echo "Error: Epic not found: $epic_filter" >&2
             return 1
@@ -41,6 +41,12 @@ helper_workflow_next() {
         echo "Epic: $epic_filter"
         echo ""
     fi
+
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
+        echo "Error: Not in DOH project" >&2
+        return 1
+    }
 
     local count=0
     find "$search_path" -name "[0-9]*.md" -type f 2>/dev/null | sort | while read -r task_file; do
@@ -54,9 +60,9 @@ helper_workflow_next() {
             # Get epic name from path if not filtering by epic
             if [ -z "$epic_filter" ]; then
                 local rel_path
-                rel_path=$(realpath --relative-to="$doh_root" "$task_file" 2>/dev/null)
-                if [[ "$rel_path" == .doh/epics/*/[0-9]*.md ]]; then
-                    epic_name=$(echo "$rel_path" | sed -n 's|^\.doh/epics/\([^/]*\)/.*|\1|p')
+                rel_path=$(realpath --relative-to="$doh_dir" "$task_file" 2>/dev/null)
+                if [[ "$rel_path" == $doh_dir/epics/*/[0-9]*.md ]]; then
+                    epic_name=$(echo "$rel_path" | sed -n "s|^$doh_dir/epics/\([^/]*\)/.*|\1|p")
                 fi
             fi
 
@@ -94,8 +100,8 @@ helper_workflow_next() {
 helper_workflow_in_progress() {
     local epic_filter="${1:-}"
     
-    local doh_root
-    doh_root=$(doh_project_dir) || {
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
@@ -104,9 +110,9 @@ helper_workflow_in_progress() {
     echo "===================="
     echo ""
 
-    local search_path="$doh_root/.doh/epics"
+    local search_path="$doh_dir/epics"
     if [ -n "$epic_filter" ]; then
-        search_path="$doh_root/.doh/epics/$epic_filter"
+        search_path="$doh_dir/epics/$epic_filter"
         if [ ! -d "$search_path" ]; then
             echo "Error: Epic not found: $epic_filter" >&2
             return 1
@@ -128,9 +134,9 @@ helper_workflow_in_progress() {
                 # Get epic name from path if not filtering by epic
                 if [ -z "$epic_filter" ]; then
                     local rel_path
-                    rel_path=$(realpath --relative-to="$doh_root" "$task_file" 2>/dev/null)
-                    if [[ "$rel_path" == .doh/epics/*/[0-9]*.md ]]; then
-                        epic_name=$(echo "$rel_path" | sed -n 's|^\.doh/epics/\([^/]*\)/.*|\1|p')
+                    rel_path=$(realpath --relative-to="$doh_dir" "$task_file" 2>/dev/null)
+                    if [[ "$rel_path" == $doh_dir/epics/*/[0-9]*.md ]]; then
+                        epic_name=$(echo "$rel_path" | sed -n "s|^$doh_dir/epics/\([^/]*\)/.*|\1|p")
                     fi
                 fi
 
@@ -157,8 +163,8 @@ helper_workflow_in_progress() {
 helper_workflow_blocked() {
     local epic_filter="${1:-}"
     
-    local doh_root
-    doh_root=$(doh_project_dir) || {
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
@@ -167,9 +173,9 @@ helper_workflow_blocked() {
     echo "================="
     echo ""
 
-    local search_path="$doh_root/.doh/epics"
+    local search_path="$doh_dir/epics"
     if [ -n "$epic_filter" ]; then
-        search_path="$doh_root/.doh/epics/$epic_filter"
+        search_path="$doh_dir/epics/$epic_filter"
         if [ ! -d "$search_path" ]; then
             echo "Error: Epic not found: $epic_filter" >&2
             return 1
@@ -190,9 +196,9 @@ helper_workflow_blocked() {
             # Get epic name from path if not filtering by epic
             if [ -z "$epic_filter" ]; then
                 local rel_path
-                rel_path=$(realpath --relative-to="$doh_root" "$task_file" 2>/dev/null)
-                if [[ "$rel_path" == .doh/epics/*/[0-9]*.md ]]; then
-                    epic_name=$(echo "$rel_path" | sed -n 's|^\.doh/epics/\([^/]*\)/.*|\1|p')
+                rel_path=$(realpath --relative-to="$doh_dir" "$task_file" 2>/dev/null)
+                if [[ "$rel_path" == $doh_dir/epics/*/[0-9]*.md ]]; then
+                    epic_name=$(echo "$rel_path" | sed -n "s|^$doh_dir/epics/\([^/]*\)/.*|\1|p")
                 fi
             fi
 
@@ -233,8 +239,8 @@ helper_workflow_blocked() {
 helper_workflow_standup() {
     local target_date="${1:-$(date +%Y-%m-%d)}"
     
-    local doh_root
-    doh_root=$(doh_project_dir) || {
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
@@ -248,7 +254,7 @@ helper_workflow_standup() {
     echo "---------------------"
     local completed_count=0
     
-    find "$doh_root/.doh/epics" -name "[0-9]*.md" -type f -mtime -2 2>/dev/null | while read -r task_file; do
+    find "$doh_dir/epics" -name "[0-9]*.md" -type f -mtime -2 2>/dev/null | while read -r task_file; do
         if [ -f "$task_file" ]; then
             local status task_number title epic_name
             status=$(frontmatter_get_field "$task_file" "status" 2>/dev/null)
@@ -259,9 +265,9 @@ helper_workflow_standup() {
                 
                 # Get epic name from path
                 local rel_path
-                rel_path=$(realpath --relative-to="$doh_root" "$task_file" 2>/dev/null)
-                if [[ "$rel_path" == .doh/epics/*/[0-9]*.md ]]; then
-                    epic_name=$(echo "$rel_path" | sed -n 's|^\.doh/epics/\([^/]*\)/.*|\1|p')
+                rel_path=$(realpath --relative-to="$doh_dir" "$task_file" 2>/dev/null)
+                if [[ "$rel_path" == $doh_dir/epics/*/[0-9]*.md ]]; then
+                    epic_name=$(echo "$rel_path" | sed -n "s|^$doh_dir/epics/\([^/]*\)/.*|\1|p")
                 fi
                 
                 echo "  • Task $task_number: $title [$epic_name]"
@@ -279,7 +285,7 @@ helper_workflow_standup() {
     echo "------------------------"
     local in_progress_count=0
     
-    find "$doh_root/.doh/epics" -name "[0-9]*.md" -type f 2>/dev/null | while read -r task_file; do
+    find "$doh_dir/epics" -name "[0-9]*.md" -type f 2>/dev/null | while read -r task_file; do
         if [ -f "$task_file" ]; then
             local status task_number title epic_name
             status=$(frontmatter_get_field "$task_file" "status" 2>/dev/null)
@@ -290,9 +296,9 @@ helper_workflow_standup() {
                 
                 # Get epic name from path
                 local rel_path
-                rel_path=$(realpath --relative-to="$doh_root" "$task_file" 2>/dev/null)
-                if [[ "$rel_path" == .doh/epics/*/[0-9]*.md ]]; then
-                    epic_name=$(echo "$rel_path" | sed -n 's|^\.doh/epics/\([^/]*\)/.*|\1|p')
+                rel_path=$(realpath --relative-to="$doh_dir" "$task_file" 2>/dev/null)
+                if [[ "$rel_path" == $doh_dir/epics/*/[0-9]*.md ]]; then
+                    epic_name=$(echo "$rel_path" | sed -n "s|^$doh_dir/epics/\([^/]*\)/.*|\1|p")
                 fi
                 
                 echo "  • Task $task_number: $title [$epic_name]"
@@ -310,7 +316,7 @@ helper_workflow_standup() {
     echo "------------------"
     local next_count=0
     
-    find "$doh_root/.doh/epics" -name "[0-9]*.md" -type f 2>/dev/null | sort | head -5 | while read -r task_file; do
+    find "$doh_dir/epics" -name "[0-9]*.md" -type f 2>/dev/null | sort | head -5 | while read -r task_file; do
         if [ -f "$task_file" ]; then
             local status depends_on task_number title epic_name
             status=$(frontmatter_get_field "$task_file" "status" 2>/dev/null)
@@ -324,9 +330,9 @@ helper_workflow_standup() {
                     
                     # Get epic name from path
                     local rel_path
-                    rel_path=$(realpath --relative-to="$doh_root" "$task_file" 2>/dev/null)
-                    if [[ "$rel_path" == .doh/epics/*/[0-9]*.md ]]; then
-                        epic_name=$(echo "$rel_path" | sed -n 's|^\.doh/epics/\([^/]*\)/.*|\1|p')
+                    rel_path=$(realpath --relative-to="$doh_dir" "$task_file" 2>/dev/null)
+                    if [[ "$rel_path" == $doh_dir/epics/*/[0-9]*.md ]]; then
+                        epic_name=$(echo "$rel_path" | sed -n "s|^$doh_dir/epics/\([^/]*\)/.*|\1|p")
                     fi
                     
                     echo "  • Task $task_number: $title [$epic_name]"
@@ -345,7 +351,7 @@ helper_workflow_standup() {
     echo "----------------"
     local blocked_count=0
     
-    find "$doh_root/.doh/epics" -name "[0-9]*.md" -type f 2>/dev/null | while read -r task_file; do
+    find "$doh_dir/epics" -name "[0-9]*.md" -type f 2>/dev/null | while read -r task_file; do
         if [ -f "$task_file" ]; then
             local status depends_on task_number title epic_name
             status=$(frontmatter_get_field "$task_file" "status" 2>/dev/null)
@@ -364,9 +370,9 @@ helper_workflow_standup() {
                 
                 # Get epic name from path
                 local rel_path
-                rel_path=$(realpath --relative-to="$doh_root" "$task_file" 2>/dev/null)
-                if [[ "$rel_path" == .doh/epics/*/[0-9]*.md ]]; then
-                    epic_name=$(echo "$rel_path" | sed -n 's|^\.doh/epics/\([^/]*\)/.*|\1|p')
+                rel_path=$(realpath --relative-to="$doh_dir" "$task_file" 2>/dev/null)
+                if [[ "$rel_path" == $doh_dir/epics/*/[0-9]*.md ]]; then
+                    epic_name=$(echo "$rel_path" | sed -n "s|^$doh_dir/epics/\([^/]*\)/.*|\1|p")
                 fi
                 
                 echo "  • Task $task_number: $title [$epic_name]"
@@ -395,15 +401,15 @@ helper_workflow_status() {
     echo ""
 
     # Get DOH root directory
-    local doh_root
-    doh_root=$(doh_project_dir) || {
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
         echo "Error: Not in a DOH project" >&2
         return 1
     }
 
     # PRD Statistics
     echo "📄 PRDs:"
-    local prd_dir="$doh_root/.doh/prds"
+    local prd_dir="$doh_dir/prds"
     if [ -d "$prd_dir" ]; then
         local total
         total=$(find "$prd_dir" -name "*.md" -type f 2>/dev/null | wc -l)
@@ -416,7 +422,7 @@ helper_workflow_status() {
     
     # Epic Statistics
     echo "📚 Epics:"
-    local epic_dir="$doh_root/.doh/epics"
+    local epic_dir="$doh_dir/epics"
     if [ -d "$epic_dir" ]; then
         local total
         total=$(find "$epic_dir" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l)
@@ -476,8 +482,8 @@ helper_workflow_workspace() {
         return $?
     fi
     
-    local doh_root
-    doh_root=$(doh_project_dir) || {
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
@@ -528,11 +534,11 @@ helper_workflow_workspace() {
 
     # Active Tasks Summary
     echo "📊 Active Tasks:"
-    if [[ -d "$doh_root/.doh/epics" ]]; then
+    if [[ -d "$doh_dir/epics" ]]; then
         local epic_count=0
         local task_count=0
         
-        for epic_dir in "$doh_root/.doh/epics"/*/; do
+        for epic_dir in "$doh_dir/epics"/*/; do
             [[ ! -d "$epic_dir" ]] && continue
             local epic_name
             epic_name="$(basename "$epic_dir")"
@@ -573,8 +579,8 @@ helper_workflow_search() {
         return 1
     fi
     
-    local doh_root
-    doh_root=$(doh_project_dir) || {
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
@@ -588,10 +594,10 @@ helper_workflow_search() {
     echo ""
     
     # Search in PRDs
-    if [ -d "$doh_root/.doh/prds" ]; then
+    if [ -d "$doh_dir/prds" ]; then
         echo "📄 PRDs:"
         local results
-        results=$(find "$doh_root/.doh/prds" -name "*.md" -exec grep -l -i "$query" {} \; 2>/dev/null)
+        results=$(find "$doh_dir/prds" -name "*.md" -exec grep -l -i "$query" {} \; 2>/dev/null)
         if [ -n "$results" ]; then
             while IFS= read -r file; do
                 local name matches
@@ -606,10 +612,10 @@ helper_workflow_search() {
     fi
     
     # Search in Epics
-    if [ -d "$doh_root/.doh/epics" ]; then
+    if [ -d "$doh_dir/epics" ]; then
         echo "📚 Epics:"
         local results
-        results=$(find "$doh_root/.doh/epics" -name "epic.md" -exec grep -l -i "$query" {} \; 2>/dev/null)
+        results=$(find "$doh_dir/epics" -name "epic.md" -exec grep -l -i "$query" {} \; 2>/dev/null)
         if [ -n "$results" ]; then
             while IFS= read -r file; do
                 local epic_name matches
@@ -624,10 +630,10 @@ helper_workflow_search() {
     fi
     
     # Search in Tasks
-    if [ -d "$doh_root/.doh/epics" ]; then
+    if [ -d "$doh_dir/epics" ]; then
         echo "📝 Tasks:"
         local results
-        results=$(find "$doh_root/.doh/epics" -name "[0-9]*.md" -exec grep -l -i "$query" {} \; 2>/dev/null | head -10)
+        results=$(find "$doh_dir/epics" -name "[0-9]*.md" -exec grep -l -i "$query" {} \; 2>/dev/null | head -10)
         if [ -n "$results" ]; then
             while IFS= read -r file; do
                 local epic_name task_num
@@ -642,7 +648,7 @@ helper_workflow_search() {
     
     # Summary
     local total
-    total=$(find "$doh_root/.doh" -name "*.md" -exec grep -l -i "$query" {} \; 2>/dev/null | wc -l)
+    total=$(find "$doh_dir/.doh" -name "*.md" -exec grep -l -i "$query" {} \; 2>/dev/null | wc -l)
     echo ""
     echo "📊 Total files with matches: $total"
     
