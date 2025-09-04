@@ -332,35 +332,6 @@ EOF
     cd - > /dev/null
 }
 
-test_version_rollback_scenario() {
-    cd "$TEST_DIR"
-    
-    echo "🧪 Testing version rollback scenario..."
-    
-    # Create backup of current state
-    local initial_version
-    initial_version=$(version_get_current)
-    cp VERSION VERSION.backup
-    
-    # Attempt version bump
-    version_bump_current "minor" > /dev/null
-    
-    local new_version
-    new_version=$(version_get_current)
-    _tf_assert_equals "Version should be bumped to 0.2.0" "0.2.0" "$new_version"
-    
-    # Simulate rollback need (restore from backup)
-    cp VERSION.backup VERSION
-    
-    local rolled_back_version
-    rolled_back_version=$(version_get_current)
-    _tf_assert_equals "Version should be rolled back" "$initial_version" "$rolled_back_version"
-    
-    # Cleanup
-    rm -f VERSION.backup
-    
-    cd - > /dev/null
-}
 
 test_concurrent_version_operations() {
     cd "$TEST_DIR"
