@@ -16,10 +16,11 @@ _tf_setup() {
     # Use the DOH_PROJECT_DIR set by test launcher
     if [[ -n "$DOH_PROJECT_DIR" ]]; then
         # Create minimal project structure
-        _tff_create_minimal_doh_project "$(dirname "$DOH_PROJECT_DIR")" >/dev/null
+        _tff_create_minimal_doh_project >/dev/null
         
         # Ensure VERSION file exists with 0.1.0
-        echo "0.1.0" > "$(dirname "$DOH_PROJECT_DIR")/VERSION"
+        local version_file=$(doh_version_file)
+        echo "0.1.0" > "$version_file"
         
         # Create a simple test file with frontmatter
         mkdir -p "$DOH_PROJECT_DIR"

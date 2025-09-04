@@ -24,7 +24,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/helper/epic.sh"
 
 _tf_setup() {
     # Use skeleton fixture system for proper test isolation
-    _tff_create_helper_test_project "$DOH_PROJECT_DIR" >/dev/null
+    _tff_create_helper_test_project >/dev/null
     _tff_setup_workspace_for_helpers
     
     # Create isolated test environment

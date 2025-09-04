@@ -8,7 +8,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/../helpers/test_framework.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/../helpers/doh_fixtures.sh"
 
 _tf_setup() {
-    _tff_create_sample_doh_project "$DOH_PROJECT_DIR" >/dev/null
+    _tff_create_sample_doh_project >/dev/null
     return 0
 }
 

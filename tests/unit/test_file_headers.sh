@@ -11,17 +11,21 @@ source "$(dirname "${BASH_SOURCE[0]}")/../helpers/doh_fixtures.sh"
 # Test setup
 _tf_setup() {
     # Use skeleton fixture system for proper test isolation
-    _tff_create_helper_test_project "$DOH_PROJECT_DIR" >/dev/null
+    _tff_create_helper_test_project
     _tff_setup_workspace_for_helpers
     
     # Source the library after environment is set up
     source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/file-headers.sh"
+    source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/doh.sh"
     
-    # Create test files for each supported type
-    echo '#!/bin/bash' > test.sh
-    echo 'echo "hello"' >> test.sh
+    # Get project directory using DOH function
+    local project_dir=$(doh_project_dir)
     
-    cat > test.md << 'EOF'
+    # Create test files for each supported type in the project directory
+    echo '#!/bin/bash' > "$project_dir/test.sh"
+    echo 'echo "hello"' >> "$project_dir/test.sh"
+    
+    cat > "$project_dir/test.md" << 'EOF'
 ---
 title: Test Document
 ---
@@ -30,16 +34,16 @@ title: Test Document
 Content here
 EOF
     
-    echo '#!/usr/bin/env python3' > test.py
-    echo 'print("hello")' >> test.py
+    echo '#!/usr/bin/env python3' > "$project_dir/test.py"
+    echo 'print("hello")' >> "$project_dir/test.py"
     
-    echo 'console.log("hello");' > test.js
-    echo 'const x: string = "hello";' > test.ts
-    echo 'version: 1.0.0' > test.yml
-    echo 'key: value' > test.yaml
+    echo 'console.log("hello");' > "$project_dir/test.js"
+    echo 'const x: string = "hello";' > "$project_dir/test.ts"
+    echo 'version: 1.0.0' > "$project_dir/test.yml"
+    echo 'key: value' > "$project_dir/test.yaml"
     
     # Create files with existing headers
-    cat > existing_shell.sh << 'EOF'
+    cat > "$project_dir/existing_shell.sh" << 'EOF'
 #!/bin/bash
 # DOH Version: 0.0.1
 # Created: 2025-01-01T00:00:00Z
@@ -47,7 +51,7 @@ EOF
 echo "existing"
 EOF
     
-    cat > existing_markdown.md << 'EOF'
+    cat > "$project_dir/existing_markdown.md" << 'EOF'
 ---
 file_version: 0.0.1
 created: 2025-01-01T00:00:00Z
@@ -57,12 +61,12 @@ created: 2025-01-01T00:00:00Z
 EOF
     
     # Create problematic files
-    echo > empty.sh
-    echo -n "no newline" > no_newline.py
-    echo "   " > whitespace_only.js
+    echo > "$project_dir/empty.sh"
+    echo -n "no newline" > "$project_dir/no_newline.py"
+    echo "   " > "$project_dir/whitespace_only.js"
     
     # Create unsupported file type
-    echo "binary data" > test.bin
+    echo "binary data" > "$project_dir/test.bin"
 }
 
 _tf_teardown() {

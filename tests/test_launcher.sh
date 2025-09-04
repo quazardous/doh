@@ -50,10 +50,10 @@ export _TF_LAUNCHER_EXECUTION="true"
 
 # Set up DOH test isolation using secure temporary directory
 
-export DOH_TEST_CLEANUP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/doh.XXXXXX")"
-export DOH_GLOBAL_DIR="${DOH_TEST_CLEANUP_DIR}/global_doh"
-export DOH_PROJECT_DIR="${DOH_TEST_CLEANUP_DIR}/project_doh"
-export DOH_VERSION_FILE="${DOH_TEST_CLEANUP_DIR}/VERSION"
+export DOH_TEST_CONTAINER_DIR="$(mktemp -d "${TMPDIR:-/tmp}/doh.XXXXXX")"
+export DOH_GLOBAL_DIR="${DOH_TEST_CONTAINER_DIR}/global_doh"
+export DOH_PROJECT_DIR="${DOH_TEST_CONTAINER_DIR}/project_doh"
+export DOH_VERSION_FILE="${DOH_TEST_CONTAINER_DIR}/VERSION"
 if [[ "${DOH_TEST_DEBUG:-false}" == "true" ]]; then
     echo "DEBUG: DOH_GLOBAL_DIR = '$DOH_GLOBAL_DIR'"
     echo "DEBUG: DOH_PROJECT_DIR = '$DOH_PROJECT_DIR'"
@@ -69,13 +69,13 @@ fi
 # Cleanup function for test isolation
 cleanup_test_isolation() {
     if [[ "${DOH_TEST_DEBUG:-false}" == "true" ]]; then
-        echo "DEBUG: Preserving temp directory: $DOH_TEST_CLEANUP_DIR" >&2
+        echo "DEBUG: Preserving temp directory: $DOH_TEST_CONTAINER_DIR" >&2
         return
     fi
-    if [[ -n "${DOH_TEST_CLEANUP_DIR:-}" && -d "$DOH_TEST_CLEANUP_DIR" ]]; then
-        rm -rf "$DOH_TEST_CLEANUP_DIR"
+    if [[ -n "${DOH_TEST_CONTAINER_DIR:-}" && -d "$DOH_TEST_CONTAINER_DIR" ]]; then
+        rm -rf "$DOH_TEST_CONTAINER_DIR"
     fi
-    unset DOH_GLOBAL_DIR DOH_TEST_CLEANUP_DIR
+    unset DOH_GLOBAL_DIR DOH_TEST_CONTAINER_DIR
 }
 
 # Ensure cleanup happens on exit

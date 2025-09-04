@@ -12,12 +12,12 @@ _tf_setup() {
     # Save any existing DOH env vars
     _saved_DOH_PROJECT_DIR="${DOH_PROJECT_DIR:-}"
     _saved_DOH_GLOBAL_DIR="${DOH_GLOBAL_DIR:-}"
-    _saved_DOH_TEST_CLEANUP_DIR="${DOH_TEST_CLEANUP_DIR:-}"
+    _saved_DOH_TEST_CONTAINER_DIR="${DOH_TEST_CONTAINER_DIR:-}"
     
     # Unset all DOH environment variables
     unset DOH_PROJECT_DIR
     unset DOH_GLOBAL_DIR  
-    unset DOH_TEST_CLEANUP_DIR
+    unset DOH_TEST_CONTAINER_DIR
     
     return 0
 }
@@ -30,8 +30,8 @@ _tf_teardown() {
     if [[ -n "$_saved_DOH_GLOBAL_DIR" ]]; then
         export DOH_GLOBAL_DIR="$_saved_DOH_GLOBAL_DIR"
     fi
-    if [[ -n "$_saved_DOH_TEST_CLEANUP_DIR" ]]; then
-        export DOH_TEST_CLEANUP_DIR="$_saved_DOH_TEST_CLEANUP_DIR"
+    if [[ -n "$_saved_DOH_TEST_CONTAINER_DIR" ]]; then
+        export DOH_TEST_CONTAINER_DIR="$_saved_DOH_TEST_CONTAINER_DIR"
     fi
     
     return 0
@@ -65,7 +65,7 @@ test_doh_project_dir_equals_root_plus_doh() {
 test_doh_env_vars_unset() {
     _tf_assert_equals "DOH_PROJECT_DIR should be unset" "unset" "${DOH_PROJECT_DIR:-unset}"
     _tf_assert_equals "DOH_GLOBAL_DIR should be unset" "unset" "${DOH_GLOBAL_DIR:-unset}"
-    _tf_assert_equals "DOH_TEST_CLEANUP_DIR should be unset" "unset" "${DOH_TEST_CLEANUP_DIR:-unset}"
+    _tf_assert_equals "DOH_TEST_CONTAINER_DIR should be unset" "unset" "${DOH_TEST_CONTAINER_DIR:-unset}"
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then

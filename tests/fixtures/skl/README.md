@@ -21,7 +21,7 @@ my-project/                    # Real project root
 
 #### Test Environment Structure  
 ```
-/tmp/doh.XXXXXX/              # Test container (DOH_TEST_CLEANUP_DIR)
+/tmp/doh.XXXXXX/              # Test container (DOH_TEST_CONTAINER_DIR)
 ├── VERSION                   # DOH_VERSION_FILE (project version)
 ├── global_doh/              # DOH_GLOBAL_DIR (workspace data)
 └── project_doh/             # DOH_PROJECT_DIR (≡ .doh/)
@@ -68,7 +68,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/../helpers/doh_fixtures.sh"
 
 _tf_setup() {
     # Choose appropriate skeleton for your test needs
-    _tff_create_helper_test_project "$DOH_PROJECT_DIR" >/dev/null
+    _tff_create_helper_test_project >/dev/null
     _tff_setup_workspace_for_helpers
 }
 ```

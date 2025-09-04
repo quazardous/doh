@@ -9,6 +9,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/../helpers/doh_fixtures.sh"
 
 # Library will be sourced in setup after directory structure is created
 LIB_DIR="$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib"
+source "$LIB_DIR/numbering.sh"
 
 # Test-specific helper functions (no _tf_ prefix needed)
 create_temp_project() {
@@ -37,22 +38,11 @@ cleanup_temp_project() {
 
 # Test environment setup  
 _tf_setup() {
-    # Use the DOH_PROJECT_DIR set by test launcher, create the structure
-    if [[ -n "$DOH_PROJECT_DIR" ]]; then
-        # DOH_PROJECT_DIR now points directly to the .doh directory
-        # Create project root and basic structure
-        local project_root="$(dirname "$DOH_PROJECT_DIR")"
-        mkdir -p "$project_root"
-        mkdir -p "$DOH_PROJECT_DIR"/{epics,prds,quick}
-        echo "0.1.0" > "$project_root/VERSION"
-        mkdir -p "$project_root/.git"
-        
-        # Now source the library after directory structure exists
-        source "$LIB_DIR/numbering.sh"
-    else
-        echo "Error: DOH_PROJECT_DIR not set by test launcher" >&2
-        return 1
-    fi
+    # Create project root and basic structure using DOH API
+    local project_dir=$(doh_project_dir)
+    mkdir -p "$project_dir"/{epics,prds,quick}
+    local version_file=$(doh_version_file)
+    echo "0.1.0" > "$version_file"
 }
 
 _tf_teardown() {

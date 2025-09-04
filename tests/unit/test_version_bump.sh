@@ -4,13 +4,7 @@
 # Tests the comprehensive version bump workflow functionality
 
 # Load test framework
-if [[ -n "${_TF_LAUNCHER_EXECUTION:-}" ]]; then
-    # Running through test launcher from project root
-    source "tests/helpers/test_framework.sh"
-else
-    # Running directly from test directory
-    source "$(dirname "$0")/../helpers/test_framework.sh"
-fi
+source "$(dirname "${BASH_SOURCE[0]}")/../helpers/test_framework.sh"
 
 # Source DOH version library directly for better performance
 source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/version.sh"
@@ -18,22 +12,19 @@ source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/version.sh"
 # Use proper DOH API function names directly - no wrapper functions
 
 _tf_setup() {
-    # Create temporary test environment
-    TEST_DIR=$(mktemp -d)
-    cd "$TEST_DIR"
+    # Use standard DOH test setup
+    source "$(dirname "${BASH_SOURCE[0]}")/../helpers/doh_fixtures.sh"
+    _tff_create_minimal_doh_project
     
-    # Initialize basic DOH structure
-    mkdir -p .doh .git
-    echo "0.1.0" > VERSION
+    local project_dir=$(doh_project_dir)
+    local version_file=$(doh_version_file)
     
-    # Set DOH_VERSION_FILE to point to our test VERSION file
-    export DOH_VERSION_FILE="$TEST_DIR/VERSION"
-    
-    # Set DOH_PROJECT_DIR to point to our test .doh directory
-    export DOH_PROJECT_DIR="$TEST_DIR/.doh"
+    # Initialize git and set version using DOH functions
+    mkdir -p "$(dirname "$project_dir")/.git"
+    echo "0.1.0" > "$version_file"
     
     # Create a test DOH file with frontmatter
-    cat > .doh/test.md << 'EOF'
+    cat > "$project_dir/test.md" << 'EOF'
 ---
 file_version: 0.1.0
 name: Test File
@@ -45,7 +36,7 @@ This is a test file for version bump testing.
 EOF
     
     # Create another test file
-    cat > .doh/another.md << 'EOF'
+    cat > "$project_dir/another.md" << 'EOF'
 ---
 name: Another Test
 file_version: 0.1.0
@@ -55,32 +46,20 @@ type: task
 # Another Test
 Another test file.
 EOF
-    
-    cd - > /dev/null
 }
 
 _tf_teardown() {
-    # Clean up environment
-    unset DOH_VERSION_FILE
-    unset DOH_PROJECT_DIR
-    
-    # Cleanup test directory
-    if [[ -n "$TEST_DIR" && -d "$TEST_DIR" ]]; then
-        rm -rf "$TEST_DIR"
-    fi
+    # Environment cleanup is handled by test launcher
+    return 0
 }
 
 test_version_get_current() {
-    cd "$TEST_DIR"
-    
     local version
     version=$(version_get_current)
     local exit_code=$?
     
     _tf_assert_equals "version_get_current should succeed" 0 $exit_code
     _tf_assert_equals "Current version should be 0.1.0" "0.1.0" "$version"
-    
-    cd - > /dev/null
 }
 
 test_increment_version_patch() {
@@ -113,23 +92,18 @@ test_increment_version_invalid() {
 }
 
 test_version_set_current() {
-    cd "$TEST_DIR"
-    
     version_set_current "0.2.0" > /dev/null
     local exit_code=$?
     
     _tf_assert_equals "version_set_current should succeed" 0 $exit_code
     
     local new_version
-    new_version=$(cat VERSION)
+    local version_file=$(doh_version_file)
+    new_version=$(cat "$version_file")
     _tf_assert_equals "VERSION file should be updated" "0.2.0" "$new_version"
-    
-    cd - > /dev/null
 }
 
 test_version_bump_current() {
-    cd "$TEST_DIR"
-    
     local new_version
     new_version=$(version_bump_current "patch")
     local exit_code=$?
@@ -138,55 +112,48 @@ test_version_bump_current() {
     _tf_assert_equals "New version should be 0.1.1" "0.1.1" "$new_version"
     
     local file_version
-    file_version=$(cat VERSION)
+    local version_file=$(doh_version_file)
+    file_version=$(cat "$version_file")
     _tf_assert_equals "VERSION file should contain new version" "0.1.1" "$file_version"
-    
-    cd - > /dev/null
 }
 
 test_get_file_version() {
-    cd "$TEST_DIR"
+    local project_dir=$(doh_project_dir)
     
     local version
-    version=$(version_get_file ".doh/test.md")
+    version=$(version_get_file "$project_dir/test.md")
     local exit_code=$?
     
     _tf_assert_equals "version_get_file should succeed" 0 $exit_code
     _tf_assert_equals "File version should be 0.1.0" "0.1.0" "$version"
-    
-    cd - > /dev/null
 }
 
 test_set_file_version() {
-    cd "$TEST_DIR"
+    local project_dir=$(doh_project_dir)
     
-    version_set_file ".doh/test.md" "0.2.0" > /dev/null
+    version_set_file "$project_dir/test.md" "0.2.0" > /dev/null
     local exit_code=$?
     
     _tf_assert_equals "version_set_file should succeed" 0 $exit_code
     
     local new_version
-    new_version=$(version_get_file ".doh/test.md")
+    new_version=$(version_get_file "$project_dir/test.md")
     _tf_assert_equals "File version should be updated to 0.2.0" "0.2.0" "$new_version"
-    
-    cd - > /dev/null
 }
 
 test_bump_file_version() {
-    cd "$TEST_DIR"
+    local project_dir=$(doh_project_dir)
     
     local new_version
-    new_version=$(version_bump_file ".doh/another.md" "minor")
+    new_version=$(version_bump_file "$project_dir/another.md" "minor")
     local exit_code=$?
     
     _tf_assert_equals "version_bump_file should succeed" 0 $exit_code
     _tf_assert_equals "New file version should be 0.2.0" "0.2.0" "$new_version"
     
     local file_version
-    file_version=$(version_get_file ".doh/another.md")
+    file_version=$(version_get_file "$project_dir/another.md")
     _tf_assert_equals "File should contain new version" "0.2.0" "$file_version"
-    
-    cd - > /dev/null
 }
 
 test_validate_version() {
@@ -219,16 +186,16 @@ test_compare_versions() {
 }
 
 test_find_files_missing_version() {
-    cd "$TEST_DIR"
+    local project_dir=$(doh_project_dir)
     
     # Create file without frontmatter
-    cat > .doh/no_frontmatter.md << 'EOF'
+    cat > "$project_dir/no_frontmatter.md" << 'EOF'
 # File without frontmatter
 This file has no frontmatter.
 EOF
     
     # Create file with frontmatter but no version
-    cat > .doh/no_version.md << 'EOF'
+    cat > "$project_dir/no_version.md" << 'EOF'
 ---
 name: No Version File
 status: open
@@ -239,7 +206,7 @@ This file has frontmatter but no version.
 EOF
     
     local missing_files
-    missing_files=$(version_find_files_without_file_version .)
+    missing_files=$(version_find_files_without_file_version "$project_dir")
     
     # Should find the file with frontmatter but no version
     echo "$missing_files" | grep -q "no_version.md"
@@ -248,15 +215,14 @@ EOF
     # Should not find files without frontmatter
     echo "$missing_files" | grep -q "no_frontmatter.md"
     _tf_assert_equals "Should not find files without frontmatter" 1 $?
-    
-    cd - > /dev/null
 }
 
 # Version bump workflow integration test
 test_version_bump_workflow() {
-    cd "$TEST_DIR"
-    
     echo "🧪 Testing complete version bump workflow..."
+    
+    local project_dir=$(doh_project_dir)
+    local version_file=$(doh_version_file)
     
     # Initial state check
     local initial_version
@@ -270,23 +236,21 @@ test_version_bump_workflow() {
     
     # Verify VERSION file is updated
     local file_content
-    file_content=$(cat VERSION)
+    file_content=$(cat "$version_file")
     _tf_assert_equals "VERSION file should contain new version" "0.1.1" "$file_content"
     
     # Update file versions to match
-    version_set_file ".doh/test.md" "$new_version" > /dev/null
-    version_set_file ".doh/another.md" "$new_version" > /dev/null
+    version_set_file "$project_dir/test.md" "$new_version" > /dev/null
+    version_set_file "$project_dir/another.md" "$new_version" > /dev/null
     
     # Verify file versions are updated
     local test_file_version
-    test_file_version=$(version_get_file ".doh/test.md")
+    test_file_version=$(version_get_file "$project_dir/test.md")
     _tf_assert_equals "Test file version should be updated" "$new_version" "$test_file_version"
     
     local another_file_version
-    another_file_version=$(version_get_file ".doh/another.md")
+    another_file_version=$(version_get_file "$project_dir/another.md")
     _tf_assert_equals "Another file version should be updated" "$new_version" "$another_file_version"
-    
-    cd - > /dev/null
 }
 
 # Run tests if script executed directly

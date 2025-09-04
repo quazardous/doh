@@ -72,3 +72,13 @@ doh_require_project() {
     root=$(doh_project_root) || exit 1
     echo "$root"
 }
+
+# @description Get the DOH version file path
+# @public
+# @stdout Path to VERSION file
+# @stderr Error message if not in DOH project (production mode only)
+# @exitcode 0 If successful
+# @exitcode 1 If not in DOH project (production mode only)
+doh_version_file() {
+    echo "${DOH_VERSION_FILE:-$(doh_project_root)/VERSION}"
+}

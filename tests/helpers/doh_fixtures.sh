@@ -7,25 +7,25 @@
 [[ -n "${DOH_TEST_FIXTURES_LOADED:-}" ]] && return 0
 DOH_TEST_FIXTURES_LOADED=1
 
-# Copy skeleton project to test directory
+# Source DOH library for path functions
+source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/doh.sh"
+
+# Copy skeleton project to test container directory
 # @arg $1 string Skeleton name (minimal, helper-test, sample, version-test, cache-test)  
-# @arg $2 string Target container directory (defaults to DOH_PROJECT_DIR parent)
 # @stdout Path to the container directory
 # @exitcode 0 If successful
 # @exitcode 1 If copy fails
 _tff_copy_skeleton() {
     local skeleton_name="$1"
-    local container_dir="${2:-$(dirname "${DOH_PROJECT_DIR:-}")}"
     
     if [[ -z "$skeleton_name" ]]; then
         echo "Error: Skeleton name required" >&2
         return 1
     fi
     
-    if [[ -z "$container_dir" ]]; then
-        echo "Error: No container directory specified" >&2
-        return 1
-    fi
+    # Use test framework function to get container directory
+    local container_dir
+    container_dir=$(_tf_test_container_dir) || return 1
     
     local skeleton_dir="$(dirname "${BASH_SOURCE[0]}")/../fixtures/skl/$skeleton_name"
     
@@ -45,18 +45,13 @@ _tff_copy_skeleton() {
     echo "$container_dir"
 }
 
-# Create a minimal DOH project structure in the given directory
-# @arg $1 string Directory where to create the .doh structure (defaults to DOH_PROJECT_DIR)
+# Create a minimal DOH project structure using doh_project_dir()
 # @stdout Path to the container directory
 # @exitcode 0 If successful
 # @exitcode 1 If directory creation fails
 _tff_create_minimal_doh_project() {
-    local doh_dir="${1:-${DOH_PROJECT_DIR:-}}"
-    
-    if [[ -z "$doh_dir" ]]; then
-        echo "Error: No DOH directory specified" >&2
-        return 1
-    fi
+    # Use DOH library function to get project directory
+    local doh_dir=$(doh_project_dir)
     
     # DOH_PROJECT_DIR points to the .doh directory itself
     # Container directory is the parent directory
@@ -68,19 +63,19 @@ _tff_create_minimal_doh_project() {
     echo "$container_dir"
 }
 
-# Create a DOH project with sample epics and tasks
-# @arg $1 string Directory where to create the .doh structure (defaults to DOH_PROJECT_DIR)
+# Create a DOH project with sample epics and tasks using doh_project_dir()
 # @stdout Path to the project directory
 # @exitcode 0 If successful
 # @exitcode 1 If directory creation fails
 _tff_create_sample_doh_project() {
-    local project_dir="${1:-${DOH_PROJECT_DIR:-}}"
+    # Use DOH library function to get project directory
+    local project_dir=$(doh_project_dir)
     
     # First create the minimal structure
-    _tff_create_minimal_doh_project "$project_dir" || return 1
+    _tff_create_minimal_doh_project || return 1
     
     # Add sample epic
-    local epic_dir="$project_dir/.doh/epics/test-epic"
+    local epic_dir="$project_dir/epics/test-epic"
     mkdir -p "$epic_dir"
     
     # Create epic.md with frontmatter
@@ -113,24 +108,26 @@ EOF
     echo "$project_dir"
 }
 
-# Create a DOH project for version testing
-# @arg $1 string Directory where to create the .doh structure (defaults to DOH_PROJECT_DIR)
+# Create a DOH project for version testing using doh_project_dir()
 # @stdout Path to the project directory
 # @exitcode 0 If successful
 # @exitcode 1 If directory creation fails
 _tff_create_version_test_project() {
-    local project_dir="${1:-${DOH_PROJECT_DIR:-}}"
+    # Use DOH library function to get project directory
+    local project_dir=$(doh_project_dir)
     
     # Create minimal structure
-    _tff_create_minimal_doh_project "$project_dir" || return 1
+    _tff_create_minimal_doh_project || return 1
     
-    # Set specific version
-    echo "0.1.0" > "$project_dir/VERSION"
+    # Set specific version (container directory is parent of project_dir)
+    local container_dir="$(dirname "$project_dir")"
+    local version_file=$(doh_version_file)
+    echo "0.1.0" > "$version_file"
     
     # Create files with version fields
-    mkdir -p "$project_dir/.doh/epics/versioned"
+    mkdir -p "$project_dir/epics/versioned"
     
-    cat > "$project_dir/.doh/epics/versioned/001.md" << 'EOF'
+    cat > "$project_dir/epics/versioned/001.md" << 'EOF'
 ---
 epic_number: "001"
 name: Versioned Epic
@@ -140,7 +137,7 @@ target_version: 0.2.0
 # Versioned Epic
 EOF
     
-    cat > "$project_dir/.doh/epics/versioned/002.md" << 'EOF'
+    cat > "$project_dir/epics/versioned/002.md" << 'EOF'
 ---
 task_number: "002"
 parent: "001"
@@ -151,7 +148,7 @@ file_version: 0.1.0
 EOF
     
     # Create file without version (for testing find_missing_version)
-    cat > "$project_dir/.doh/epics/versioned/003.md" << 'EOF'
+    cat > "$project_dir/epics/versioned/003.md" << 'EOF'
 ---
 task_number: "003"
 parent: "001"
@@ -163,21 +160,21 @@ EOF
     echo "$project_dir"
 }
 
-# Create a DOH project for cache testing
-# @arg $1 string Directory where to create the .doh structure (defaults to DOH_PROJECT_DIR)
+# Create a DOH project for cache testing using doh_project_dir()
 # @stdout Path to the project directory
 # @exitcode 0 If successful
 # @exitcode 1 If directory creation fails
 _tff_create_cache_test_project() {
-    local project_dir="${1:-${DOH_PROJECT_DIR:-}}"
+    # Use DOH library function to get project directory
+    local project_dir=$(doh_project_dir)
     
     # Create minimal structure
-    _tff_create_minimal_doh_project "$project_dir" || return 1
+    _tff_create_minimal_doh_project || return 1
     
     # Create epic structure for cache testing
-    mkdir -p "$project_dir/.doh/epics/user-auth"
+    mkdir -p "$project_dir/epics/user-auth"
     
-    cat > "$project_dir/.doh/epics/user-auth/epic.md" << 'EOF'
+    cat > "$project_dir/epics/user-auth/epic.md" << 'EOF'
 ---
 epic_number: "001"
 name: User Authentication
@@ -186,7 +183,7 @@ status: in_progress
 # User Authentication Epic
 EOF
     
-    cat > "$project_dir/.doh/epics/user-auth/002.md" << 'EOF'
+    cat > "$project_dir/epics/user-auth/002.md" << 'EOF'
 ---
 task_number: "002"
 parent: "001"
@@ -197,7 +194,7 @@ status: completed
 # Login Implementation
 EOF
     
-    cat > "$project_dir/.doh/epics/user-auth/004.md" << 'EOF'
+    cat > "$project_dir/epics/user-auth/004.md" << 'EOF'
 ---
 task_number: "004"
 parent: "001"
@@ -211,18 +208,13 @@ EOF
     echo "$project_dir"
 }
 
-# Create a DOH project for helper testing (PRD, epic, etc.)
-# @arg $1 string Directory where to create the .doh structure (defaults to DOH_PROJECT_DIR)
+# Create a DOH project for helper testing (PRD, epic, etc.) using doh_project_dir()
 # @stdout Path to the container directory
 # @exitcode 0 If successful
 # @exitcode 1 If directory creation fails
 _tff_create_helper_test_project() {
-    local doh_dir="${1:-${DOH_PROJECT_DIR:-}}"
-    
-    if [[ -z "$doh_dir" ]]; then
-        echo "Error: No DOH directory specified" >&2
-        return 1
-    fi
+    # Use DOH library function to get project directory
+    local doh_dir=$(doh_project_dir)
     
     # DOH_PROJECT_DIR points to the .doh directory itself
     # Container directory is the parent directory

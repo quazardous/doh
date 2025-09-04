@@ -13,7 +13,7 @@ source "$LIB_DIR/numbering.sh"
 # Test environment setup
 _tf_setup() {
     # Use DOH_PROJECT_DIR from test launcher
-    _tff_create_minimal_doh_project "$DOH_PROJECT_DIR" >/dev/null
+    _tff_create_minimal_doh_project >/dev/null
     
     # Set project name for workspace functions
     local project_name="test_project_$(basename "$DOH_PROJECT_DIR")"

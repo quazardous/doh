@@ -5,17 +5,22 @@
 
 source "$(dirname "${BASH_SOURCE[0]}")/../helpers/test_framework.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/../helpers/doh_fixtures.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/doh.sh"
+
+# Global variable to store project directory
+PROJECT_DIR=""
 
 # Source DOH library for direct function calls
 source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/doh.sh"
 
 _tf_setup() {
     # Create sample DOH project in test environment
-    _tff_create_sample_doh_project "$DOH_PROJECT_DIR" >/dev/null
+    _tff_create_sample_doh_project >/dev/null
     
     # Create additional sample epics for more realistic testing
-    mkdir -p "$DOH_PROJECT_DIR/epics/data-api-sanity"
-    cat > "$DOH_PROJECT_DIR/epics/data-api-sanity/epic.md" << 'EOF'
+    PROJECT_DIR=$(doh_project_dir)
+    mkdir -p "$PROJECT_DIR/epics/data-api-sanity"
+    cat > "$PROJECT_DIR/epics/data-api-sanity/epic.md" << 'EOF'
 ---
 name: data-api-sanity
 number: 024
@@ -29,8 +34,8 @@ file_version: 0.1.0
 Test epic for debugging epic list functionality.
 EOF
     
-    mkdir -p "$DOH_PROJECT_DIR/epics/test-driven-dev"
-    cat > "$DOH_PROJECT_DIR/epics/test-driven-dev/epic.md" << 'EOF'
+    mkdir -p "$PROJECT_DIR/epics/test-driven-dev"
+    cat > "$PROJECT_DIR/epics/test-driven-dev/epic.md" << 'EOF'
 ---
 name: test-driven-dev
 number: 014
@@ -54,8 +59,8 @@ _tf_teardown() {
 # Test that test environment was set up correctly
 test_test_environment_setup() {
     # Verify we created the test epics
-    _tf_assert_file_exists "data-api-sanity epic should exist" "$DOH_PROJECT_DIR/epics/data-api-sanity/epic.md"
-    _tf_assert_file_exists "test-driven-dev epic should exist" "$DOH_PROJECT_DIR/epics/test-driven-dev/epic.md"
+    _tf_assert_file_exists "data-api-sanity epic should exist" "$PROJECT_DIR/epics/data-api-sanity/epic.md"
+    _tf_assert_file_exists "test-driven-dev epic should exist" "$PROJECT_DIR/epics/test-driven-dev/epic.md"
 }
 
 # Test that epic helper can parse epic metadata

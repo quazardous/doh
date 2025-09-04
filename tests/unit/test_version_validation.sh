@@ -4,13 +4,7 @@
 # Tests the version validation utilities and functions
 
 # Load test framework
-if [[ -n "${_TF_LAUNCHER_EXECUTION:-}" ]]; then
-    # Running through test launcher from project root
-    source "tests/helpers/test_framework.sh"
-else
-    # Running directly from test directory
-    source "$(dirname "$0")/../helpers/test_framework.sh"
-fi
+source "$(dirname "$0")/../helpers/test_framework.sh"
 
 # Load version management libraries
 source ".claude/scripts/doh/lib/dohenv.sh"

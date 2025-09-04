@@ -22,16 +22,7 @@ readonly VERSION_LIB_VERSION="1.0.0"
 # @exitcode 1 If not in DOH project, VERSION file not found, empty, or invalid
 version_get_current() {
     local version_file
-    if [[ -n "${DOH_VERSION_FILE:-}" ]]; then
-        version_file="$DOH_VERSION_FILE"
-    else
-        local project_root
-        project_root="$(doh_project_root)" || {
-            echo "Error: Not in a DOH project" >&2
-            return 1
-        }
-        version_file="$project_root/VERSION"
-    fi
+    version_file="$(doh_version_file)" || return 1
     
     if [[ ! -f "$version_file" ]]; then
         echo "Error: VERSION file not found at project root: $version_file" >&2
@@ -205,16 +196,7 @@ version_set_current() {
     fi
     
     local version_file
-    if [[ -n "${DOH_VERSION_FILE:-}" ]]; then
-        version_file="$DOH_VERSION_FILE"
-    else
-        local project_root
-        project_root="$(doh_project_root)" || {
-            echo "Error: Not in a DOH project" >&2
-            return 1
-        }
-        version_file="$project_root/VERSION"
-    fi
+    version_file="$(doh_version_file)" || return 1
     
     # Write new version to file
     if ! echo "$new_version" > "$version_file"; then

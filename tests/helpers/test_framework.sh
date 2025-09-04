@@ -334,6 +334,20 @@ _tf_cleanup_temp() {
     fi
 }
 
+# Get the DOH test container directory
+# @stdout Path to the test container directory (DOH_TEST_CONTAINER_DIR)
+# @exitcode 0 If successful
+# @exitcode 1 If DOH_TEST_CONTAINER_DIR is not set (test not running through launcher)
+_tf_test_container_dir() {
+    if [[ -n "${DOH_TEST_CONTAINER_DIR:-}" ]]; then
+        echo "$DOH_TEST_CONTAINER_DIR"
+        return 0
+    else
+        echo "Error: DOH_TEST_CONTAINER_DIR not set - test must run through test launcher" >&2
+        return 1
+    fi
+}
+
 # Mock function support
 _tf_with_mock() {
     local original_func="$1"
@@ -419,7 +433,7 @@ if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
     export -f _tf_assert_equals _tf_assert_not_equals _tf_assert_true _tf_assert_false _tf_assert _tf_assert_not
     export -f _tf_assert_contains _tf_assert_not_contains _tf_assert_file_exists _tf_assert_file_contains
     export -f _tf_run_test_function _tf_run_test_file
-    export -f _tf_create_temp_dir _tf_create_temp_file _tf_cleanup_temp _tf_with_mock
+    export -f _tf_create_temp_dir _tf_create_temp_file _tf_cleanup_temp _tf_test_container_dir _tf_with_mock
     export -f _tf_log_info _tf_log_success _tf_log_error _tf_log_warn _tf_log_debug _tf_log_trace
     export -f _tf_direct_execution_error
 fi

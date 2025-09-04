@@ -6,10 +6,25 @@ source "$(dirname "${BASH_SOURCE[0]}")/../helpers/test_framework.sh"
 
 # Test environment setup
 _tf_setup() {
+    # Debug: Display all DOH environment variables
+    _tf_log_debug "DOH Environment Variables:"
+    _tf_log_debug "  DOH_PROJECT_DIR: $DOH_PROJECT_DIR"
+    _tf_log_debug "  DOH_GLOBAL_DIR: $DOH_GLOBAL_DIR"
+    _tf_log_debug "  DOH_VERSION_FILE: $DOH_VERSION_FILE"
+    _tf_log_debug "  Current working directory: $(pwd)"
+    
     # Create VERSION file with 0.0.1 for testing
-    local version_dir="$(dirname "$DOH_VERSION_FILE")"
+    local version_file="$(doh_version_file)"
+    local version_dir="$(dirname "$version_file")"
     mkdir -p "$version_dir"
-    echo "0.0.1" > "$DOH_VERSION_FILE"
+    echo "0.0.1" > "$version_file"
+    _tf_log_debug "  Created VERSION file at: $version_file (content: 0.0.1)"
+    
+    # Create DOH directories for testing (they don't exist initially by design)
+    mkdir -p "$DOH_PROJECT_DIR"
+    mkdir -p "$DOH_GLOBAL_DIR"
+    _tf_log_debug "  Created DOH_PROJECT_DIR: $DOH_PROJECT_DIR"
+    _tf_log_debug "  Created DOH_GLOBAL_DIR: $DOH_GLOBAL_DIR"
 }
 
 _tf_teardown() {
@@ -82,23 +97,24 @@ test_doh_version_file_isolation() {
     _tf_assert_contains "DOH_VERSION_FILE should be in temp directory" "$DOH_VERSION_FILE" "/tmp/"
     
     # Should be writable (directory should exist)
-    local version_dir
-    version_dir="$(dirname "$DOH_VERSION_FILE")"
+    local version_file="$(doh_version_file)"
+    local version_dir="$(dirname "$version_file")"
     _tf_assert "DOH_VERSION_FILE directory should be writable" [ -w "$version_dir" ]
 }
 
 # Test DOH_VERSION_FILE is empty or doesn't exist
 test_doh_version_file_emptiness() {
-    if [ -f "$DOH_VERSION_FILE" ]; then
+    local version_file="$(doh_version_file)"
+    if [ -f "$version_file" ]; then
         # If file exists, should be empty or contain only test data
         local file_size
-        file_size=$(stat -f%z "$DOH_VERSION_FILE" 2>/dev/null || stat -c%s "$DOH_VERSION_FILE" 2>/dev/null || echo "0")
+        file_size=$(stat -f%z "$version_file" 2>/dev/null || stat -c%s "$version_file" 2>/dev/null || echo "0")
         
         # Should be small (empty or minimal test content)
         _tf_assert "DOH_VERSION_FILE should be empty or minimal" [ "$file_size" -lt 100 ]
     else
         # If file doesn't exist, that's also acceptable for isolation
-        _tf_assert "DOH_VERSION_FILE non-existence is acceptable for isolation" [ ! -f "$DOH_VERSION_FILE" ]
+        _tf_assert "DOH_VERSION_FILE non-existence is acceptable for isolation" [ ! -f "$version_file" ]
     fi
 }
 
@@ -112,7 +128,8 @@ test_doh_env_vars_not_real_project() {
     _tf_assert "DOH_GLOBAL_DIR should not be real global" [ "$DOH_GLOBAL_DIR" != "$HOME/.doh" ]
     
     # Should not point to real version file
-    _tf_assert "DOH_VERSION_FILE should not be real version file" [ "$DOH_VERSION_FILE" != "$(pwd)/VERSION" ]
+    local version_file="$(doh_version_file)"
+    _tf_assert "DOH_VERSION_FILE should not be real version file" [ "$version_file" != "$(pwd)/VERSION" ]
 }
 
 # Test DOH library path functions work with isolated environment

@@ -395,12 +395,14 @@ The `test_launcher.sh` automatically sets up environment variables for isolated 
 #### Environment Variables (Internal Use)
 - **`DOH_PROJECT_DIR`**: Points to the test's temporary `.doh/` directory, allowing DOH API functions to operate on test project data instead of the actual project's versioned data. **The directory itself does not exist initially by design**, mirroring how a fresh project starts before any DOH commands are run.
 - **`DOH_GLOBAL_DIR`**: Points to a temporary global directory for DOH workspace data, ensuring tests don't interfere with real workspace configurations and caches
-- **`DOH_VERSION_FILE`**: Points to `${DOH_TEST_CLEANUP_DIR}/VERSION`, isolating global version operations from the developer's real DOH global configuration. **The file itself does not exist initially by design** and is created by DOH commands as needed.
+- **`DOH_VERSION_FILE`**: Points to `${DOH_TEST_CONTAINER_DIR}/VERSION`, isolating global version operations from the developer's real DOH global configuration. **The file itself does not exist initially by design** and is created by DOH commands as needed.
 - **`_TF_LAUNCHER_EXECUTION`**: Flag indicating the test is running through the launcher (used by tests to adjust paths and behavior)
 
-#### DOH Path Functions (Recommended)
+#### DOH Path Functions (MANDATORY)
 
-**Tests should use DOH library path functions instead of direct environment variable access:**
+**⚠️ IMPORTANT: Direct access to DOH environment variables is strongly discouraged. Always use the corresponding DOH API functions.**
+
+**Tests MUST use DOH library path functions instead of direct environment variable access:**
 
 ```bash
 # Source DOH library first
@@ -409,24 +411,48 @@ source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/doh.sh"
 # ✅ CORRECT: Use DOH library path functions
 local project_dir=$(doh_project_dir)    # Get DOH project directory
 local global_dir=$(doh_global_dir)      # Get DOH global directory  
+local version_file=$(doh_version_file)  # Get VERSION file path
 
-# ❌ WRONG: Direct environment variable access
-echo "$DOH_PROJECT_DIR"     # Avoid direct variable usage
-echo "$DOH_GLOBAL_DIR"      # Avoid direct variable usage
+# ❌ FORBIDDEN: Direct environment variable access
+echo "$DOH_PROJECT_DIR"     # ❌ Use doh_project_dir() instead
+echo "$DOH_GLOBAL_DIR"      # ❌ Use doh_global_dir() instead
+echo "$DOH_VERSION_FILE"    # ❌ Use doh_version_file() instead
 ```
+
+**Available DOH Path Functions:**
+- **`doh_project_dir()`** - Returns path to DOH project directory (`.doh/`)
+- **`doh_global_dir()`** - Returns path to DOH global directory (`~/.doh` or test isolation)
+- **`doh_version_file()`** - Returns path to VERSION file (project root or test isolation)
+- **`doh_project_root()`** - Returns path to project root directory
 
 **Benefits of using DOH library functions:**
 - **Automatic structure creation**: DOH functions create necessary directory structure on first access
 - **Consistent behavior**: Same behavior in tests as in production DOH usage
-- **Performance**: Direct function calls are faster than API wrapper
+- **Perfect test isolation**: Functions handle test vs production environments transparently
 - **Error handling**: DOH functions provide proper error handling and validation
+- **API consistency**: Unified interface across all DOH operations
 
-**When direct variable access is acceptable:**
-- Very specific test cases that need to test missing directory scenarios
-- Test setup functions that need raw path access before library initialization
-- Performance-critical scenarios where function call overhead matters
+**Very Limited Exceptions (Must Be Justified with Comments):**
+Direct environment variable access is only acceptable in these specific cases and **MUST include a justifying comment**:
 
-For most tests, the DOH library functions should be preferred as they handle structure creation automatically and provide the same behavior as real DOH usage.
+```bash
+# JUSTIFIED: Environment validation test - testing DOH_PROJECT_DIR is properly set
+_tf_assert "DOH_PROJECT_DIR should be set" [ -n "$DOH_PROJECT_DIR" ]
+
+# JUSTIFIED: Debug logging - displaying environment state for diagnostic purposes  
+_tf_log_debug "DOH_PROJECT_DIR: $DOH_PROJECT_DIR"
+
+# JUSTIFIED: Test launcher validation - checking if test environment is properly set up
+if [[ -n "$DOH_PROJECT_DIR" ]]; then
+```
+
+**Acceptable cases:**
+- **Environment validation tests**: Tests that verify environment variables are properly set (only in `test_test_framework_env.sh`)
+- **Debug logging**: Displaying environment state for diagnostic purposes (e.g., `test_launcher.sh` debug output)
+- **Test launcher validation**: Checking if test environment is properly set up before proceeding
+- **Framework internals**: Test launcher setup and cleanup operations
+
+**All other usage should use the DOH API functions without exception.** This ensures proper abstraction, test isolation, and consistent behavior across all environments.
 
 **Isolation Granularity**: These variables are set **once per test file**, not per test function. All test functions within a single test file share the same isolated environment.
 
@@ -478,7 +504,7 @@ The test launcher creates a fully isolated DOH environment that includes:
 
 #### Temporary Directory Structure
 ```
-/tmp/doh.XXXXXX/                    # Secure temporary container (DOH_TEST_CLEANUP_DIR)
+/tmp/doh.XXXXXX/                    # Secure temporary container (DOH_TEST_CONTAINER_DIR)
 ├── VERSION                         # DOH_VERSION_FILE (project VERSION, copied from skeleton)
 ├── global_doh/                     # DOH_GLOBAL_DIR
 │   ├── projects/                   # Workspace project registry (created as needed)
@@ -585,8 +611,9 @@ EOF
 # ❌ AVOID: Manual directory creation (unless testing missing directory scenarios)
 _tf_setup_manual() {
     # Only use this pattern for specific test cases that need manual control
-    mkdir -p "$DOH_PROJECT_DIR/epics" "$DOH_PROJECT_DIR/prds" "$DOH_PROJECT_DIR/versions"
-    local project_root="$(dirname "$DOH_PROJECT_DIR")"
+    local project_dir=$(doh_project_dir)
+    mkdir -p "$project_dir/epics" "$project_dir/prds" "$project_dir/versions"
+    local project_root="$(dirname "$project_dir")"
     echo "0.2.0" > "$project_root/VERSION"
 }
 ```
@@ -601,7 +628,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/../helpers/doh_fixtures.sh"
 
 _tf_setup() {
     # Create complete DOH project structure
-    _tff_create_minimal_doh_project "$DOH_PROJECT_DIR" >/dev/null
+    _tff_create_minimal_doh_project >/dev/null
     
     # Set up workspace environment for helper testing
     _tff_setup_workspace_for_helpers
@@ -646,29 +673,30 @@ This approach ensures tests behave like real DOH usage:
 ```bash
 # For helper function tests (recommended)
 _tf_setup() {
-    _tff_create_helper_test_project "$DOH_PROJECT_DIR" >/dev/null
+    _tff_create_helper_test_project >/dev/null
     _tff_setup_workspace_for_helpers
 }
 
 # For epic-related tests
 _tf_setup() {
-    _tff_create_sample_doh_project "$DOH_PROJECT_DIR" >/dev/null
+    _tff_create_sample_doh_project >/dev/null
     _tff_setup_workspace_for_helpers
 }
 
 # For version-related tests  
 _tf_setup() {
-    _tff_create_version_test_project "$DOH_PROJECT_DIR" >/dev/null
+    _tff_create_version_test_project >/dev/null
     _tff_setup_workspace_for_helpers
 }
 
 # For minimal/custom tests
 _tf_setup() {
-    _tff_create_minimal_doh_project "$DOH_PROJECT_DIR" >/dev/null
+    _tff_create_minimal_doh_project >/dev/null
     _tff_setup_workspace_for_helpers
     
     # Add custom test data as needed
-    cat > "$DOH_PROJECT_DIR/prds/custom-prd.md" << 'EOF'
+    local project_dir=$(doh_project_dir)
+    cat > "$project_dir/prds/custom-prd.md" << 'EOF'
 ---
 name: custom-prd
 status: backlog

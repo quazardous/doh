@@ -12,12 +12,12 @@ source "$LIB_DIR/dohenv.sh"
 source "$LIB_DIR/frontmatter.sh"
 
 _tf_setup() {
-    # Use the DOH_PROJECT_DIR set by test launcher
+    # JUSTIFIED: Test launcher validation - checking if test environment is properly set up
     if [[ -n "$DOH_PROJECT_DIR" ]]; then
         # Create minimal cache test structure
-        _tff_create_cache_test_project "$(dirname "$DOH_PROJECT_DIR")" >/dev/null 2>&1 || {
+        _tff_create_cache_test_project >/dev/null 2>&1 || {
             # Fallback: create basic structure
-            _tff_create_minimal_doh_project "$(dirname "$DOH_PROJECT_DIR")" >/dev/null
+            _tff_create_minimal_doh_project >/dev/null
         }
         
         # Create a simple task file for testing

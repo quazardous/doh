@@ -16,13 +16,14 @@ _tf_setup() {
     TEST_DIR=$(mktemp -d)
     cd "$TEST_DIR"
     
-    # Set DOH environment variables for test isolation
-    export DOH_PROJECT_DIR="$TEST_DIR/.doh"
-    export DOH_VERSION_FILE="$TEST_DIR/VERSION"
+    # Use normal DOH tools for project setup
+    source "$(dirname "${BASH_SOURCE[0]}")/../helpers/doh_fixtures.sh"
+    _tff_create_minimal_doh_project
     
-    # Initialize complete DOH project structure
-    mkdir -p .doh/{versions,epics,tasks,prds} .git
-    echo "0.1.0" > VERSION
+    # Initialize git repo and set version
+    mkdir -p .git
+    local version_file=$(doh_version_file)
+    echo "0.1.0" > "$version_file"
     
     # Initialize git repo for version tracking
     git init . > /dev/null 2>&1
