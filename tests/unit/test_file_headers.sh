@@ -11,8 +11,8 @@ source "$(dirname "${BASH_SOURCE[0]}")/../helpers/doh_fixtures.sh"
 # Test setup
 _tf_setup() {
     # Use skeleton fixture system for proper test isolation
-    _tff_create_helper_test_project
-    _tff_setup_workspace_for_helpers
+    _tff_create_helper_test_project >/dev/null
+    _tff_setup_workspace_for_helpers >/dev/null
     
     # Source the library after environment is set up
     source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/file-headers.sh"
@@ -76,27 +76,28 @@ _tf_teardown() {
 
 # Test: Basic functionality - shell script without shebang
 test_add_header_shell_no_shebang() {
-    echo 'echo "test"' > simple.sh
-    
-    file_headers_add_version "simple.sh" "1.0.0"
-    local result=$?
-    
-    _tf_assert_equals "Should succeed adding header to shell script" "0" "$result"
-    _tf_assert_file_contains "Should contain version header" "simple.sh" "# DOH Version: 1.0.0"
-    _tf_assert_file_contains "Should contain creation date" "simple.sh" "# Created: "
-    _tf_assert_file_contains "Should preserve original content" "simple.sh" 'echo "test"'
+    local temp_dir=$(_tf_test_container_tmpdir)
+    local file_path="$temp_dir/simple.sh"
+    echo 'echo "test"' > "$file_path"
+
+    _tf_assert "Should succeed adding header to shell script" file_headers_add_version "$file_path" "1.0.0"
+    _tf_assert_file_contains "Should contain version header" "$file_path" "# DOH Version: 1.0.0"
+    _tf_assert_file_contains "Should contain creation date" "$file_path" "# Created: "
+    _tf_assert_file_contains "Should preserve original content" "$file_path" 'echo "test"'
 }
 
 # Test: Shell script with shebang
 test_add_header_shell_with_shebang() {
-    file_headers_add_version "test.sh" "1.2.3"
-    local result=$?
+    local temp_dir=$(_tf_test_container_tmpdir)
+    local file_path="$temp_dir/test.sh"
+    echo '#!/bin/bash' > "$file_path"
+    echo 'echo "hello"' >> "$file_path"
     
-    _tf_assert_equals "Should succeed adding header to shell script with shebang" "0" "$result"
+    _tf_assert "Should succeed adding header to shell script with shebang" file_headers_add_version "$file_path" "1.2.3"
     
     # Check header placement after shebang
-    local first_line=$(head -n 1 "test.sh")
-    local second_line=$(head -n 2 "test.sh" | tail -n 1)
+    local first_line=$(head -n 1 "$file_path")
+    local second_line=$(head -n 2 "$file_path" | tail -n 1)
     
     _tf_assert_equals "Shebang should remain first line" "#!/bin/bash" "$first_line"
     _tf_assert_equals "Version header should be second line" "# DOH Version: 1.2.3" "$second_line"
@@ -104,46 +105,46 @@ test_add_header_shell_with_shebang() {
 
 # Test: Markdown file without frontmatter (should use HTML comments)
 test_add_header_markdown_no_frontmatter() {
+    local temp_dir=$(_tf_test_container_tmpdir)
+    local file_path="$temp_dir/plain.md"
+    
     # Create a markdown file without frontmatter
-    echo '# Plain Markdown' > plain.md
-    echo 'No frontmatter here' >> plain.md
+    echo '# Plain Markdown' > "$file_path"
+    echo 'No frontmatter here' >> "$file_path"
     
-    file_headers_add_version "plain.md" "2.0.0"
-    local result=$?
+    _tf_assert "Should succeed adding header to plain markdown" file_headers_add_version "$file_path" "2.0.0"
     
-    _tf_assert_equals "Should succeed adding header to plain markdown" "0" "$result"
-    
-    local first_line=$(head -n 1 "plain.md")
+    local first_line=$(head -n 1 "$file_path")
     _tf_assert_equals "Should start with HTML comment" "<!-- DOH Version: 2.0.0 -->" "$first_line"
     
-    _tf_assert_file_contains "Should contain version in HTML comment" "plain.md" "<!-- DOH Version: 2.0.0"
-    _tf_assert_file_contains "Should preserve original content" "plain.md" "# Plain Markdown"
+    _tf_assert_file_contains "Should contain version in HTML comment" "$file_path" "<!-- DOH Version: 2.0.0"
+    _tf_assert_file_contains "Should preserve original content" "$file_path" "# Plain Markdown"
 }
 
 # Test: Markdown file with existing frontmatter (should use frontmatter)
 test_add_header_markdown_with_frontmatter() {
-    file_headers_add_version "test.md" "2.0.0"  # test.md has frontmatter from setup
-    local result=$?
+    local project_dir=$(doh_project_dir)
+    local file_path="$project_dir/test.md"  # test.md has frontmatter from setup
     
-    _tf_assert_equals "Should succeed adding to frontmatter" "0" "$result"
+    _tf_assert "Should succeed adding to frontmatter" file_headers_add_version "$file_path" "2.0.0"
     
-    local first_line=$(head -n 1 "test.md")
+    local first_line=$(head -n 1 "$file_path")
     _tf_assert_equals "Should start with frontmatter delimiter" "---" "$first_line"
     
-    _tf_assert_file_contains "Should contain version in frontmatter" "test.md" "file_version: 2.0.0"
-    _tf_assert_file_contains "Should preserve original frontmatter" "test.md" "title: Test Document"
-    _tf_assert_file_contains "Should preserve original content" "test.md" "# Test Markdown"
+    _tf_assert_file_contains "Should contain version in frontmatter" "$file_path" "file_version: 2.0.0"
+    _tf_assert_file_contains "Should preserve original frontmatter" "$file_path" "title: Test Document"
+    _tf_assert_file_contains "Should preserve original content" "$file_path" "# Test Markdown"
 }
 
 # Test: Python file with shebang
 test_add_header_python_with_shebang() {
-    file_headers_add_version "test.py" "3.1.4"
-    local result=$?
+    local project_dir=$(doh_project_dir)
+    local file_path="$project_dir/test.py"  # test.py from setup
     
-    _tf_assert_equals "Should succeed adding header to Python file" "0" "$result"
+    _tf_assert "Should succeed adding header to Python file" file_headers_add_version "$file_path" "3.1.4"
     
-    local first_line=$(head -n 1 "test.py")
-    local second_line=$(head -n 2 "test.py" | tail -n 1)
+    local first_line=$(head -n 1 "$file_path")
+    local second_line=$(head -n 2 "$file_path" | tail -n 1)
     
     _tf_assert_equals "Shebang should remain first" "#!/usr/bin/env python3" "$first_line"
     _tf_assert_equals "Version header should follow shebang" "# DOH Version: 3.1.4" "$second_line"
@@ -151,147 +152,145 @@ test_add_header_python_with_shebang() {
 
 # Test: JavaScript and TypeScript files
 test_add_header_javascript() {
-    file_headers_add_version "test.js" "1.5.0"
-    file_headers_add_version "test.ts" "1.5.0"
+    local project_dir=$(doh_project_dir)
     
-    _tf_assert_file_contains "JS should have // comment style" "test.js" "// DOH Version: 1.5.0"
-    _tf_assert_file_contains "TS should have // comment style" "test.ts" "// DOH Version: 1.5.0"
-    _tf_assert_file_contains "JS content should be preserved" "test.js" 'console.log("hello");'
-    _tf_assert_file_contains "TS content should be preserved" "test.ts" 'const x: string = "hello";'
+    file_headers_add_version "$project_dir/test.js" "1.5.0"
+    file_headers_add_version "$project_dir/test.ts" "1.5.0"
+    
+    _tf_assert_file_contains "JS should have // comment style" "$project_dir/test.js" "// DOH Version: 1.5.0"
+    _tf_assert_file_contains "TS should have // comment style" "$project_dir/test.ts" "// DOH Version: 1.5.0"
+    _tf_assert_file_contains "JS content should be preserved" "$project_dir/test.js" 'console.log("hello");'
+    _tf_assert_file_contains "TS content should be preserved" "$project_dir/test.ts" 'const x: string = "hello";'
 }
 
 # Test: YAML files
 test_add_header_yaml() {
-    file_headers_add_version "test.yml" "0.9.0"
-    file_headers_add_version "test.yaml" "0.9.0"
+    local project_dir=$(doh_project_dir)
     
-    _tf_assert_file_contains "YML should have # comment style" "test.yml" "# DOH Version: 0.9.0"
-    _tf_assert_file_contains "YAML should have # comment style" "test.yaml" "# DOH Version: 0.9.0"
+    file_headers_add_version "$project_dir/test.yml" "0.9.0"
+    file_headers_add_version "$project_dir/test.yaml" "0.9.0"
+    
+    _tf_assert_file_contains "YML should have # comment style" "$project_dir/test.yml" "# DOH Version: 0.9.0"
+    _tf_assert_file_contains "YAML should have # comment style" "$project_dir/test.yaml" "# DOH Version: 0.9.0"
 }
 
 # Test: File already has header
 test_skip_existing_headers() {
-    file_headers_add_version "existing_shell.sh" "2.0.0"
-    local result=$?
+    local project_dir=$(doh_project_dir)
+    local file_path="$project_dir/existing_shell.sh"
     
-    _tf_assert_equals "Should return success when header already exists" "0" "$result"
-    _tf_assert_file_contains "Should keep original version" "existing_shell.sh" "# DOH Version: 0.0.1"
-    _tf_assert_not "Should not add new version" grep -q "# DOH Version: 2.0.0" "existing_shell.sh"
+    _tf_assert "Should return success when header already exists" file_headers_add_version "$file_path" "2.0.0"
+    _tf_assert_file_contains "Should keep original version" "$file_path" "# DOH Version: 0.0.1"
+    _tf_assert_not "Should not add new version" grep -q "# DOH Version: 2.0.0" "$file_path"
 }
 
 # Test: Error handling - missing file
 test_error_missing_file() {
-    file_headers_add_version "nonexistent.sh" "1.0.0" 2>/dev/null
-    local result=$?
-    
-    _tf_assert_equals "Should fail when file doesn't exist" "1" "$result"
+    _tf_assert_not "Should fail when file doesn't exist" file_headers_add_version "nonexistent.sh" "1.0.0"
 }
 
 # Test: Error handling - missing file path
 test_error_missing_path() {
-    file_headers_add_version "" "1.0.0" 2>/dev/null
-    local result=$?
-    
-    _tf_assert_equals "Should fail when no file path provided" "1" "$result"
+    _tf_assert_not "Should fail when no file path provided" file_headers_add_version "" "1.0.0"
 }
 
 # Test: Error handling - invalid version
 test_error_invalid_version() {
-    file_headers_add_version "test.sh" "invalid.version" 2>/dev/null
-    local result=$?
+    local temp_dir=$(_tf_test_container_tmpdir)
+    local file_path="$temp_dir/test.sh"
+    echo 'echo "test"' > "$file_path"
     
     # Should still succeed as we don't validate version format in this function
-    _tf_assert_equals "Should handle invalid version gracefully" "0" "$result"
+    _tf_assert "Should handle invalid version gracefully" file_headers_add_version "$file_path" "invalid.version"
 }
 
 # Test: Unsupported file type
 test_unsupported_file_type() {
-    file_headers_add_version "test.bin" "1.0.0" 2>/dev/null
-    local result=$?
+    local project_dir=$(doh_project_dir)
+    local file_path="$project_dir/test.bin"
     
-    _tf_assert_equals "Should return success for unsupported types" "0" "$result"
-    _tf_assert_not "Should not modify unsupported files" grep -q "DOH Version:" "test.bin"
+    _tf_assert "Should return success for unsupported types" file_headers_add_version "$file_path" "1.0.0"
+    _tf_assert_not "Should not modify unsupported files" grep -q "DOH Version:" "$file_path"
 }
 
 # Test: Empty file
 test_empty_file() {
-    file_headers_add_version "empty.sh" "1.0.0"
-    local result=$?
+    local project_dir=$(doh_project_dir)
+    local file_path="$project_dir/empty.sh"
     
-    _tf_assert_equals "Should handle empty files" "0" "$result"
-    _tf_assert_file_contains "Should add header to empty file" "empty.sh" "# DOH Version: 1.0.0"
+    _tf_assert "Should handle empty files" file_headers_add_version "$file_path" "1.0.0"
+    _tf_assert_file_contains "Should add header to empty file" "$file_path" "# DOH Version: 1.0.0"
 }
 
 # Test: File without newline at end
 test_no_newline_file() {
-    file_headers_add_version "no_newline.py" "1.0.0"
-    local result=$?
+    local project_dir=$(doh_project_dir)
+    local file_path="$project_dir/no_newline.py"
     
-    _tf_assert_equals "Should handle files without trailing newline" "0" "$result"
-    _tf_assert_file_contains "Should add header" "no_newline.py" "# DOH Version: 1.0.0"
-    _tf_assert_file_contains "Should preserve content" "no_newline.py" "no newline"
+    _tf_assert "Should handle files without trailing newline" file_headers_add_version "$file_path" "1.0.0"
+    _tf_assert_file_contains "Should add header" "$file_path" "# DOH Version: 1.0.0"
+    _tf_assert_file_contains "Should preserve content" "$file_path" "no newline"
 }
 
 # Test: File with only whitespace
 test_whitespace_only_file() {
-    file_headers_add_version "whitespace_only.js" "1.0.0"
-    local result=$?
+    local project_dir=$(doh_project_dir)
+    local file_path="$project_dir/whitespace_only.js"
     
-    _tf_assert_equals "Should handle whitespace-only files" "0" "$result"
-    _tf_assert_file_contains "Should add header" "whitespace_only.js" "// DOH Version: 1.0.0"
+    _tf_assert "Should handle whitespace-only files" file_headers_add_version "$file_path" "1.0.0"
+    _tf_assert_file_contains "Should add header" "$file_path" "// DOH Version: 1.0.0"
 }
 
 # Test: file_headers_file_has_version detection
 test_header_detection() {
-    # Test positive cases
-    file_headers_file_has_version "existing_shell.sh"
-    _tf_assert_equals "Should detect existing shell header" "0" "$?"
+    local project_dir=$(doh_project_dir)
     
-    file_headers_file_has_version "existing_markdown.md"
-    _tf_assert_equals "Should detect existing markdown header" "0" "$?"
+    # Test positive cases
+    _tf_assert "Should detect existing shell header" file_headers_file_has_version "$project_dir/existing_shell.sh"
+    _tf_assert "Should detect existing markdown header" file_headers_file_has_version "$project_dir/existing_markdown.md"
     
     # Test negative cases
-    file_headers_file_has_version "test.sh"
-    _tf_assert_equals "Should not detect header in file without one" "1" "$?"
+    local temp_dir=$(_tf_test_container_tmpdir)
+    local file_path="$temp_dir/test.sh"
+    echo 'echo "no header"' > "$file_path"
+    
+    _tf_assert_not "Should not detect header in file without one" file_headers_file_has_version "$file_path"
 }
 
 # Test: file_headers_batch_add function
 test_batch_processing() {
+    local temp_dir=$(_tf_test_container_tmpdir)
     # Create multiple files
-    echo 'echo "batch1"' > batch1.sh
-    echo 'echo "batch2"' > batch2.sh
-    echo 'print("batch3")' > batch3.py
-    
-    file_headers_batch_add batch1.sh batch2.sh batch3.py 2>/dev/null
-    local result=$?
-    
-    _tf_assert_equals "Batch processing should succeed" "0" "$result"
-    _tf_assert_file_contains "First file should have header" "batch1.sh" "# DOH Version:"
-    _tf_assert_file_contains "Second file should have header" "batch2.sh" "# DOH Version:"
-    _tf_assert_file_contains "Third file should have header" "batch3.py" "# DOH Version:"
+    echo 'echo "batch1"' > "$temp_dir/batch1.sh"
+    echo 'echo "batch2"' > "$temp_dir/batch2.sh"
+    echo 'print("batch3")' > "$temp_dir/batch3.py"
+
+    _tf_assert "Batch processing should succeed" file_headers_batch_add "$temp_dir/batch1.sh" "$temp_dir/batch2.sh" "$temp_dir/batch3.py"
+    _tf_assert_file_contains "First file should have header" "$temp_dir/batch1.sh" "# DOH Version:"
+    _tf_assert_file_contains "Second file should have header" "$temp_dir/batch2.sh" "# DOH Version:"
+    _tf_assert_file_contains "Third file should have header" "$temp_dir/batch3.py" "# DOH Version:"
 }
 
 # Test: batch processing with some failures
 test_batch_processing_with_failures() {
-    echo 'echo "good"' > good.sh
+    local temp_dir=$(_tf_test_container_tmpdir)
+    echo 'echo "good"' > "$temp_dir/good.sh"
     # nonexistent.sh doesn't exist
-    
-    file_headers_batch_add good.sh nonexistent.sh 2>/dev/null
-    local result=$?
-    
-    _tf_assert_equals "Batch processing should fail if any file fails" "1" "$result"
-    _tf_assert_file_contains "Good file should still be processed" "good.sh" "# DOH Version:"
+
+    _tf_assert_not "Batch processing should fail if any file fails" file_headers_batch_add "$temp_dir/good.sh" "$temp_dir/nonexistent.sh"
+    _tf_assert_file_contains "Good file should still be processed" "$temp_dir/good.sh" "# DOH Version:"
 }
 
 # Test: file_headers_find_missing_files function
 test_find_missing_headers() {
+    local temp_dir=$(_tf_test_container_tmpdir)
     # Create files with and without headers
-    echo 'echo "no header"' > missing.sh
-    echo 'print("no header")' > missing.py
-    file_headers_add_version "existing_shell.sh" "1.0.0" 2>/dev/null  # This already has header
-    
-    local missing_files=$(file_headers_find_missing_files .)
-    
+    echo 'echo "no header"' > "$temp_dir/missing.sh"
+    echo 'print("no header")' > "$temp_dir/missing.py"
+    file_headers_add_version "$temp_dir/existing_shell.sh" "1.0.0"  # This already has header
+
+    local missing_files=$(file_headers_find_missing_files "$temp_dir")
+
     _tf_assert_contains "Should find shell file missing header" "$missing_files" "missing.sh"
     _tf_assert_contains "Should find python file missing header" "$missing_files" "missing.py"
     _tf_assert_not_contains "Should not include files with headers" "$missing_files" "existing_shell.sh"
@@ -299,19 +298,18 @@ test_find_missing_headers() {
 
 # Test: Version retrieval from VERSION file
 test_version_from_file() {
-    echo "1.5.7" > VERSION
-    echo 'echo "test"' > version_test.sh
-    
-    file_headers_add_version "version_test.sh"  # No explicit version provided
-    local result=$?
-    
-    _tf_assert_equals "Should succeed getting version from VERSION file" "0" "$result"
-    _tf_assert_file_contains "Should use version from VERSION file" "version_test.sh" "# DOH Version: 0.2.0"
+    local temp_dir=$(_tf_test_container_tmpdir)
+    echo "1.5.7" > "$temp_dir/VERSION"
+    echo 'echo "test"' > "$temp_dir/version_test.sh"
+
+    _tf_assert "Should succeed getting version from VERSION file" file_headers_add_version "$temp_dir/version_test.sh"  # No explicit version provided
+    _tf_assert_file_contains "Should use version from VERSION file" "$temp_dir/version_test.sh" "# DOH Version: 0.2.0"
 }
 
 # Test: Markdown with existing frontmatter
 test_markdown_existing_frontmatter() {
-    cat > existing_fm.md << 'EOF'
+    local temp_dir=$(_tf_test_container_tmpdir)
+    cat > "$temp_dir/existing_fm.md" << 'EOF'
 ---
 title: Test Document
 author: Test Author
@@ -319,50 +317,45 @@ author: Test Author
 
 # Content
 EOF
-    
-    file_headers_add_version "existing_fm.md" "1.0.0"
-    local result=$?
-    
-    _tf_assert_equals "Should handle existing frontmatter" "0" "$result"
-    _tf_assert_file_contains "Should add version to frontmatter" "existing_fm.md" "file_version: 1.0.0"
-    _tf_assert_file_contains "Should preserve existing frontmatter" "existing_fm.md" "title: Test Document"
-    _tf_assert_file_contains "Should preserve content" "existing_fm.md" "# Content"
+
+    _tf_assert "Should handle existing frontmatter" file_headers_add_version "$temp_dir/existing_fm.md" "1.0.0"
+    _tf_assert_file_contains "Should add version to frontmatter" "$temp_dir/existing_fm.md" "file_version: 1.0.0"
+    _tf_assert_file_contains "Should preserve existing frontmatter" "$temp_dir/existing_fm.md" "title: Test Document"
+    _tf_assert_file_contains "Should preserve content" "$temp_dir/existing_fm.md" "# Content"
 }
 
 # Test: Large file handling
 test_large_file() {
+    local temp_dir=$(_tf_test_container_tmpdir)
+
+    touch "$temp_dir/large.sh"
     # Create a larger file
     for i in {1..1000}; do
-        echo "Line $i of test content" >> large.sh
+        echo "Line $i of test content" >> "$temp_dir/large.sh"
     done
-    
-    file_headers_add_version "large.sh" "1.0.0"
-    local result=$?
-    
-    _tf_assert_equals "Should handle large files" "0" "$result"
-    _tf_assert_file_contains "Should add header to large file" "large.sh" "# DOH Version: 1.0.0"
-    
+
+    _tf_assert "Should handle large files" file_headers_add_version "$temp_dir/large.sh" "1.0.0"
+    _tf_assert_file_contains "Should add header to large file" "$temp_dir/large.sh" "# DOH Version: 1.0.0"
+
     # Check that all content is preserved
-    local line_count=$(wc -l < large.sh)
+    local line_count=$(wc -l < "$temp_dir/large.sh")
     _tf_assert "Should preserve all content lines plus header" test "$line_count" -gt 1000
 }
 
 # Test: Special characters in file content
 test_special_characters() {
-    cat > special.sh << 'EOF'
+    local temp_dir=$(_tf_test_container_tmpdir)
+    cat > "$temp_dir/special.sh" << 'EOF'
 #!/bin/bash
 echo "Special chars: éñüñiöns & símb0ls $@#%"
 echo 'Single quotes with "nested doubles"'
 echo "Double quotes with 'nested singles'"
 EOF
-    
-    file_headers_add_version "special.sh" "1.0.0"
-    local result=$?
-    
-    _tf_assert_equals "Should handle special characters" "0" "$result"
-    _tf_assert_file_contains "Should add header" "special.sh" "# DOH Version: 1.0.0"
-    _tf_assert_file_contains "Should preserve special characters" "special.sh" "éñüñiöns & símb0ls"
-    _tf_assert_file_contains "Should preserve nested quotes" "special.sh" 'Single quotes with "nested doubles"'
+
+    _tf_assert "Should handle special characters" file_headers_add_version "$temp_dir/special.sh" "1.0.0"
+    _tf_assert_file_contains "Should add header" "$temp_dir/special.sh" "# DOH Version: 1.0.0"
+    _tf_assert_file_contains "Should preserve special characters" "$temp_dir/special.sh" "éñüñiöns & símb0ls"
+    _tf_assert_file_contains "Should preserve nested quotes" "$temp_dir/special.sh" 'Single quotes with "nested doubles"'
 }
 
 # Run tests if script executed directly

@@ -31,8 +31,6 @@ _tf_teardown() {
     echo "  [Teardown] Cleaning up..."
     
     # Clean up temporary files
-    _tf_cleanup_temp "$TEMP_DIR"
-    _tf_cleanup_temp "$TEMP_FILE"
     
     # Reset test variables
     unset TEST_VALUE TEST_NUMBER TEMP_DIR TEMP_FILE
@@ -152,10 +150,6 @@ test_temp_file_utilities() {
     _tf_assert_file_exists "File in temp dir should exist" "$temp_dir1/test.txt"
     
     # Clean up
-    _tf_cleanup_temp "$temp_file1"
-    _tf_cleanup_temp "$temp_file2" 
-    _tf_cleanup_temp "$temp_dir1"
-    _tf_cleanup_temp "$temp_dir2"
     
     # Verify cleanup
     _tf_assert_not "First temp file should be cleaned up" test -f "$temp_file1"

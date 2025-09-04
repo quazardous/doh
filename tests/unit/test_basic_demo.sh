@@ -22,7 +22,6 @@ test_file_operations() {
     _tf_assert_file_exists "Temp file should exist" "$temp_file"
     _tf_assert_file_contains "File should contain test content" "$temp_file" "test content"
     
-    _tf_cleanup_temp "$temp_file"
 }
 
 test_command_assertions() {

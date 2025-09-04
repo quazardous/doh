@@ -108,6 +108,11 @@ _tf_test_result() {
 }
 
 # Core assertion functions
+
+# Assert that two values are equal
+# @param $1 Test description message
+# @param $2 Expected value
+# @param $3 Actual value
 _tf_assert_equals() {
     local message="$1"
     local expected="$2"
@@ -120,6 +125,10 @@ _tf_assert_equals() {
     fi
 }
 
+# Assert that two values are not equal
+# @param $1 Test description message
+# @param $2 Expected value (should be different)
+# @param $3 Actual value
 _tf_assert_not_equals() {
     local message="$1"
     local expected="$2"
@@ -132,6 +141,9 @@ _tf_assert_not_equals() {
     fi
 }
 
+# Assert that a condition is true
+# @param $1 Test description message  
+# @param $2 Condition value (should be "true" or "0")
 _tf_assert_true() {
     local message="$1"
     local condition="$2"
@@ -143,6 +155,11 @@ _tf_assert_true() {
     fi
 }
 
+# Assert that a command executes successfully
+# @param $1 Test description message
+# @param $@ Command and arguments to execute
+# @exitcode 0 If command succeeds, adds passing test
+# @exitcode 0 If command fails, adds failing test but doesn't exit
 _tf_assert() {
     local message="$1"
     shift
@@ -155,6 +172,11 @@ _tf_assert() {
     fi
 }
 
+# Assert that a command fails to execute successfully  
+# @param $1 Test description message
+# @param $@ Command and arguments to execute
+# @exitcode 0 If command fails, adds passing test
+# @exitcode 0 If command succeeds, adds failing test but doesn't exit
 _tf_assert_not() {
     local message="$1"
     shift
@@ -166,6 +188,9 @@ _tf_assert_not() {
     fi
 }
 
+# Assert that a condition is false
+# @param $1 Test description message
+# @param $2 Condition value (should be "false" or not "0"/"true")
 _tf_assert_false() {
     local message="$1"
     local condition="$2"
@@ -177,6 +202,10 @@ _tf_assert_false() {
     fi
 }
 
+# Assert that a string contains a substring
+# @param $1 Test description message
+# @param $2 String to search in (haystack)
+# @param $3 Substring to search for (needle)
 _tf_assert_contains() {
     local message="$1"
     local haystack="$2"
@@ -189,6 +218,10 @@ _tf_assert_contains() {
     fi
 }
 
+# Assert that a string does not contain a substring
+# @param $1 Test description message
+# @param $2 String to search in (haystack)
+# @param $3 Substring that should not be found (needle)
 _tf_assert_not_contains() {
     local message="$1"
     local haystack="$2"
@@ -201,6 +234,9 @@ _tf_assert_not_contains() {
     fi
 }
 
+# Assert that a file exists
+# @param $1 Test description message
+# @param $2 Path to file that should exist
 _tf_assert_file_exists() {
     local message="$1"
     local file="$2"
@@ -212,6 +248,10 @@ _tf_assert_file_exists() {
     fi
 }
 
+# Assert that a file contains specific content
+# @param $1 Test description message
+# @param $2 Path to file to check
+# @param $3 Content that should be present in the file
 _tf_assert_file_contains() {
     local message="$1"
     local file="$2"
@@ -309,29 +349,44 @@ _tf_run_test_file() {
     return $exit_code
 }
 
+# Get the temporary directory within the test container
+# @stdout Path to the temporary directory within the test container
+# @exitcode 0 If successful
+# @exitcode 1 If container directory is not available
+_tf_test_container_tmpdir() {
+    local container_dir=$(_tf_test_container_dir) || return 1
+    local temp_dir="$container_dir/tmp"
+    mkdir -p "$temp_dir" || return 1
+    echo "$temp_dir"
+}
+
 # Utility functions for test setup
+
+# Create a temporary directory in the test container
+# @param $1 Pattern prefix (optional, defaults to "doh_test")
+# @stdout Path to the created temporary directory
+# @exitcode 0 If successful
+# @exitcode 1 If container directory is not available
 _tf_create_temp_dir() {
-    mktemp -d -t doh_test_XXXXXX
+    local pattern="${1:-doh_test}_XXXXXX"
+    local temp_dir=$(_tf_test_container_tmpdir) || return 1
+    mktemp -d -t "$pattern" -p "$temp_dir"
 }
 
+# Create a temporary file in the test container
+# @param $1 File extension (optional)
+# @param $2 Pattern prefix (optional, defaults to "doh_test")
+# @stdout Path to the created temporary file
+# @exitcode 0 If successful
+# @exitcode 1 If container directory is not available
 _tf_create_temp_file() {
+    local temp_dir=$(_tf_test_container_tmpdir) || return 1
     local extension="${1:-}"
-    local temp_file=$(mktemp -t doh_test_XXXXXX)
-    
+    local pattern="${2:-doh_test}_XXXXXX"
     if [[ -n "$extension" ]]; then
-        local new_file="${temp_file}${extension}"
-        mv "$temp_file" "$new_file"
-        echo "$new_file"
-    else
-        echo "$temp_file"
+        pattern="${pattern}${extension}"
     fi
-}
-
-_tf_cleanup_temp() {
-    local path="$1"
-    if [[ -n "$path" && "$path" =~ /tmp.*doh_test ]]; then
-        rm -rf "$path"
-    fi
+    mktemp -t "$pattern" -p "$temp_dir"
 }
 
 # Get the DOH test container directory
@@ -349,6 +404,11 @@ _tf_test_container_dir() {
 }
 
 # Mock function support
+# Replace a function with a mock implementation for the duration of a command
+# @param $1 Name of the function to mock
+# @param $2 Name of the mock function
+# @param $@ Command to run with the mock in place
+# @exitcode Exit code of the executed command
 _tf_with_mock() {
     local original_func="$1"
     local mock_func="$2"
@@ -414,6 +474,8 @@ _tf_log_trace() {
 }
 
 # Helper function to show error when test is directly executed
+# Shows usage instructions for proper test execution
+# @exitcode 1 Always exits with error code
 _tf_direct_execution_error() {
     echo "Error: This test file cannot be executed directly" >&2
     echo "" >&2
@@ -433,7 +495,7 @@ if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
     export -f _tf_assert_equals _tf_assert_not_equals _tf_assert_true _tf_assert_false _tf_assert _tf_assert_not
     export -f _tf_assert_contains _tf_assert_not_contains _tf_assert_file_exists _tf_assert_file_contains
     export -f _tf_run_test_function _tf_run_test_file
-    export -f _tf_create_temp_dir _tf_create_temp_file _tf_cleanup_temp _tf_test_container_dir _tf_with_mock
+    export -f _tf_create_temp_dir _tf_create_temp_file _tf_test_container_dir _tf_test_container_tmpdir _tf_with_mock
     export -f _tf_log_info _tf_log_success _tf_log_error _tf_log_warn _tf_log_debug _tf_log_trace
     export -f _tf_direct_execution_error
 fi

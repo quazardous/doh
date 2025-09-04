@@ -39,7 +39,6 @@ EOF
         export DOH_GLOBAL_DIR="$original_doh_global"
     fi
     
-    _tf_cleanup_temp "$temp_dir"
 }
 
 test_existing_env_vars_preserved() {
@@ -73,7 +72,6 @@ EOF
     
     # Cleanup
     unset DOH_GLOBAL_DIR DOH_TEST_VAR DOH_PRIORITY_TEST DOH_NEW_VAR
-    _tf_cleanup_temp "$temp_dir"
 }
 
 test_api_script_respects_environment() {
@@ -131,7 +129,6 @@ EOF
     
     # Cleanup
     unset DOH_GLOBAL_DIR DOH_NEW_VAR
-    _tf_cleanup_temp "$temp_dir"
 }
 
 test_special_characters_in_env_file() {
@@ -168,7 +165,6 @@ EOF
     
     # Cleanup
     unset DOH_TEST_PATH DOH_TEST_QUOTES DOH_TEST_SINGLE DOH_TILDE_PATH DOH_TEST_COLON DOH_TEST_EQUALS
-    _tf_cleanup_temp "$temp_dir"
 }
 
 test_battle_test_concurrent_environments() {
@@ -196,8 +192,6 @@ test_battle_test_concurrent_environments() {
     )
     
     # Cleanup
-    _tf_cleanup_temp "$temp_dir1"
-    _tf_cleanup_temp "$temp_dir2"
 }
 
 test_isolation_simulation() {

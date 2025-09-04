@@ -79,7 +79,6 @@ _tf_teardown() {
         rm -rf "$DOH_TEST_DIR"
     fi
     if [[ -n "$DOH_TEST_PROJECT_ROOT" ]]; then
-        _tf_cleanup_temp "$DOH_TEST_PROJECT_ROOT"
     fi
 }
 

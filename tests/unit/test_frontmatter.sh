@@ -40,7 +40,6 @@ EOF
     echo "$result" | grep -q "tags:"
     _tf_assert_true "Frontmatter contains complex structures" $?
     
-    _tf_cleanup_temp "$test_file"
 }
 
 # Test frontmatter extraction with empty frontmatter
@@ -60,7 +59,6 @@ EOF
     
     _tf_assert_equals "Empty frontmatter extraction" "" "$result"
     
-    _tf_cleanup_temp "$test_file"
 }
 
 # Test frontmatter extraction with no frontmatter
@@ -77,7 +75,6 @@ EOF
     
     _tf_assert_equals "No frontmatter extraction" "" "$result"
     
-    _tf_cleanup_temp "$test_file"
 }
 
 # Test getting specific fields with various formats
@@ -111,7 +108,6 @@ EOF
     _tf_assert_equals "Get space-only quoted field" " " "$(frontmatter_get_field "$test_file" "space_value")"
     _tf_assert_equals "Get nonexistent field" "" "$(frontmatter_get_field "$test_file" "nonexistent")"
     
-    _tf_cleanup_temp "$test_file"
 }
 
 # Test updating existing frontmatter fields
@@ -142,7 +138,6 @@ EOF
     echo "$content" | grep -q "# Test Content"
     _tf_assert_true "Content preserved after update" $?
     
-    _tf_cleanup_temp "$test_file"
 }
 
 # Test adding new frontmatter fields
@@ -164,7 +159,6 @@ EOF
     _tf_assert_equals "New field added" "Test Author" "$(frontmatter_get_field "$test_file" "author")"
     _tf_assert_equals "Existing fields preserved" "Test Document" "$(frontmatter_get_field "$test_file" "name")"
     
-    _tf_cleanup_temp "$test_file"
 }
 
 # Test updating file with no frontmatter
@@ -180,7 +174,6 @@ EOF
     frontmatter_update_field "$test_file" "new_field" "value" 2>/dev/null
     _tf_assert_false "Correctly fails when no frontmatter exists" $?
     
-    _tf_cleanup_temp "$test_file"
 }
 
 # Test frontmatter validation
@@ -210,7 +203,6 @@ EOF
     frontmatter_validate "$test_file"
     _tf_assert_true "Validation passes with no required fields" $?
     
-    _tf_cleanup_temp "$test_file"
 }
 
 # Test frontmatter_has detection
@@ -256,9 +248,6 @@ EOF
     frontmatter_has "/nonexistent/file.md"
     _tf_assert_false "Correctly handles nonexistent file" $?
     
-    _tf_cleanup_temp "$test_file_with"
-    _tf_cleanup_temp "$test_file_without"
-    _tf_cleanup_temp "$test_file_partial"
 }
 
 # Test complex frontmatter with nested structures
@@ -302,7 +291,6 @@ EOF
     echo "$raw_frontmatter" | grep -q "author: John Doe"
     _tf_assert_true "Complex: nested structure preserved" $?
     
-    _tf_cleanup_temp "$test_file"
 }
 
 # Test error handling
@@ -365,7 +353,6 @@ EOF
     content=$(frontmatter_get_field "$test_file" "name")
     _tf_assert_equals "Content preserved through version operations" "Version Test" "$content"
     
-    _tf_cleanup_temp "$test_file"
 }
 
 # Test whitespace and special character handling
@@ -397,7 +384,6 @@ EOF
     frontmatter_update_field "$test_file" "name" "Updated Name"
     _tf_assert_equals "Whitespace: update works correctly" "Updated Name" "$(frontmatter_get_field "$test_file" "name")"
     
-    _tf_cleanup_temp "$test_file"
 }
 
 # Test large frontmatter performance
@@ -432,7 +418,6 @@ test_large_frontmatter_performance() {
         _tf_assert_false "Performance: operation took too long (${duration_ms}ms)" 0
     fi
     
-    _tf_cleanup_temp "$test_file"
 }
 
 # Run tests if script executed directly

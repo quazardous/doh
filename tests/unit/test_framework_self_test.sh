@@ -15,7 +15,6 @@ test_tf_assert_equals() {
     local actual=$(cat "$temp_file")
     
     _tf_assert_equals "String equality should work" "expected_value" "$actual"
-    _tf_cleanup_temp "$temp_file"
 }
 
 test_tf_assert_not_equals() {
@@ -40,7 +39,6 @@ test_tf_file_assertions() {
     _tf_assert_file_exists "Temp file should exist" "$temp_file"
     _tf_assert_file_contains "File should contain expected content" "$temp_file" "test content"
     
-    _tf_cleanup_temp "$temp_file"
 }
 
 test_tf_command_assertions() {
@@ -64,8 +62,6 @@ test_tf_temp_utilities() {
     _tf_assert_file_exists "Should create files in temp dir" "$temp_dir/test.txt"
     
     # Test cleanup
-    _tf_cleanup_temp "$temp_file"
-    _tf_cleanup_temp "$temp_dir"
     _tf_assert_not "Temp file should be cleaned up" test -f "$temp_file"
     _tf_assert_not "Temp directory should be cleaned up" test -d "$temp_dir"
 }
@@ -91,7 +87,6 @@ _tf_setup() {
 
 # Test teardown function (called after each test)
 _tf_teardown() {
-    _tf_cleanup_temp "$TEST_DATA_FILE"
     unset TEST_SETUP_CALLED TEST_DATA_FILE
 }
 

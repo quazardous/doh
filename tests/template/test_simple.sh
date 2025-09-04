@@ -17,7 +17,6 @@ _tf_setup() {
 # Optional: Teardown function (called after each test) 
 _tf_teardown() {
     # Clean up test environment
-    _tf_cleanup_temp "$TEMP_FILE"
     unset TEST_DATA TEMP_FILE
 }
 

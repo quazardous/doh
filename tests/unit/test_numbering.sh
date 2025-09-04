@@ -31,7 +31,6 @@ create_temp_project() {
 cleanup_temp_project() {
     local project_dir="$1"
     if [[ -n "$project_dir" ]]; then
-        _tf_cleanup_temp "$project_dir"
         unset TEST_PROJECT_NAME DOH_TEST_PROJECT_ROOT
     fi
 }
