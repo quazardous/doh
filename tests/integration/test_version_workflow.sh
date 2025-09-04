@@ -139,7 +139,6 @@ EOF
     git add . > /dev/null 2>&1
     git commit -m "Initial version structure" > /dev/null 2>&1
     
-    cd - > /dev/null
 }
 
 _tf_teardown() {
@@ -154,8 +153,6 @@ _tf_teardown() {
 }
 
 test_version_release_workflow() {
-    cd "$TEST_DIR"
-    
     echo "🧪 Testing complete version release workflow..."
     
     # Step 1: Validate current project state
@@ -227,13 +224,9 @@ EOF
     local inconsistencies
     inconsistencies=$(find_version_inconsistencies 2>/dev/null || echo "")
     _tf_assert_equals "Should have no version inconsistencies after release" "" "$inconsistencies"
-    
-    cd - > /dev/null
 }
 
 test_version_hierarchy_inheritance() {
-    cd "$TEST_DIR"
-    
     echo "🧪 Testing version hierarchy inheritance..."
     
     # Test PRD -> Epic -> Task version inheritance
@@ -249,13 +242,9 @@ test_version_hierarchy_inheritance() {
     local task_target
     task_target=$(frontmatter_get_field "$doh_dir/epics/002.md" "target_version")
     _tf_assert_equals "Task should inherit epic target version" "0.2.0" "$task_target"
-    
-    cd - > /dev/null
 }
 
 test_version_dependency_tracking() {
-    cd "$TEST_DIR"
-    
     echo "🧪 Testing version dependency tracking..."
     
     # Check task dependencies
@@ -272,13 +261,9 @@ test_version_dependency_tracking() {
     dependent_version=$(version_get_file "$doh_dir/epics/003.md")
     
     _tf_assert_equals "Dependent tasks should have consistent versions" "$dep_version" "$dependent_version"
-    
-    cd - > /dev/null
 }
 
 test_major_version_workflow() {
-    cd "$TEST_DIR"
-    
     echo "🧪 Testing major version workflow..."
     
     # Simulate breaking change scenario
@@ -323,19 +308,15 @@ See docs/migration-1.0.md for detailed migration instructions.
 EOF
     
     # Verify version file was created
-    _tf_assert_file_exists "Major version file should be created" ".doh/versions/1.0.0.md"
+    _tf_assert_file_exists "Major version file should be created" "$TEST_DIR/.doh/versions/1.0.0.md"
     
     local version_type
-    version_type=$(frontmatter_get_field ".doh/versions/1.0.0.md" "type")
+    version_type=$(frontmatter_get_field "$TEST_DIR/.doh/versions/1.0.0.md" "type")
     _tf_assert_equals "Version type should be major" "major" "$version_type"
-    
-    cd - > /dev/null
 }
 
 
 test_concurrent_version_operations() {
-    cd "$TEST_DIR"
-    
     echo "🧪 Testing concurrent version operations safety..."
     
     # Simulate concurrent file version updates
@@ -362,8 +343,6 @@ test_concurrent_version_operations() {
     local version2
     version2=$(version_get_file "$doh_dir/epics/003.md")
     _tf_assert_equals "Concurrent version update 2 should succeed" "0.3.0" "$version2"
-    
-    cd - > /dev/null
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
