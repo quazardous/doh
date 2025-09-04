@@ -5,17 +5,17 @@
 # Test Suite for file-headers.sh library
 # Comprehensive testing of version header functionality
 
-source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/file-headers.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/../helpers/test_framework.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../helpers/doh_fixtures.sh"
 
 # Test setup
 _tf_setup() {
-    TEST_DIR=$(mktemp -d)
-    cd "$TEST_DIR"
+    # Use skeleton fixture system for proper test isolation
+    _tff_create_helper_test_project "$DOH_PROJECT_DIR" >/dev/null
+    _tff_setup_workspace_for_helpers
     
-    # Create a mock DOH project structure
-    mkdir -p .doh/versions
-    echo "0.1.0" > VERSION
+    # Source the library after environment is set up
+    source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/file-headers.sh"
     
     # Create test files for each supported type
     echo '#!/bin/bash' > test.sh
@@ -66,8 +66,8 @@ EOF
 }
 
 _tf_teardown() {
-    cd /
-    rm -rf "$TEST_DIR" 2>/dev/null || true
+    # Cleanup handled by test launcher isolation
+    return 0
 }
 
 # Test: Basic functionality - shell script without shebang

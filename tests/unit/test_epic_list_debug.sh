@@ -6,6 +6,9 @@
 source "$(dirname "${BASH_SOURCE[0]}")/../helpers/test_framework.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/../helpers/doh_fixtures.sh"
 
+# Source DOH library for direct function calls
+source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/doh.sh"
+
 _tf_setup() {
     # Create sample DOH project in test environment
     _tff_create_sample_doh_project "$DOH_PROJECT_DIR" >/dev/null
@@ -79,7 +82,7 @@ test_epic_count() {
 # Test doh_project_dir function returns test environment .doh path
 test_doh_project_dir_function() {
     local result
-    result=$(./.claude/scripts/doh/api.sh doh project_dir 2>&1)
+    result=$(doh_project_dir 2>&1)
     local exit_code=$?
     
     _tf_assert_equals "doh_project_dir should work (output: $result)" "0" "$exit_code"
@@ -117,7 +120,7 @@ test_helper_epic_list_debug() {
     
     # Check doh_project_dir output
     local doh_root
-    doh_root=$(./.claude/scripts/doh/api.sh doh project_dir 2>&1)
+    doh_root=$(doh_project_dir 2>&1)
     local exit_code=$?
     _tf_debug "doh_project_dir returned: '$doh_root' (exit code: $exit_code)"
     
@@ -146,6 +149,7 @@ test_helper_epic_list_debug() {
 }
 
 # Test helper call with debug
+# USING LEGITIMATE helper.sh call to debug epic list integration
 test_epic_list_helper_call() {
     _tf_debug "Calling ./.claude/scripts/doh/helper.sh epic list in test environment..."
     

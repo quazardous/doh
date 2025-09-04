@@ -7,9 +7,47 @@
 [[ -n "${DOH_TEST_FIXTURES_LOADED:-}" ]] && return 0
 DOH_TEST_FIXTURES_LOADED=1
 
+# Copy skeleton project to test directory
+# @arg $1 string Skeleton name (minimal, helper-test, sample, version-test, cache-test)  
+# @arg $2 string Target container directory (defaults to DOH_PROJECT_DIR parent)
+# @stdout Path to the container directory
+# @exitcode 0 If successful
+# @exitcode 1 If copy fails
+_tff_copy_skeleton() {
+    local skeleton_name="$1"
+    local container_dir="${2:-$(dirname "${DOH_PROJECT_DIR:-}")}"
+    
+    if [[ -z "$skeleton_name" ]]; then
+        echo "Error: Skeleton name required" >&2
+        return 1
+    fi
+    
+    if [[ -z "$container_dir" ]]; then
+        echo "Error: No container directory specified" >&2
+        return 1
+    fi
+    
+    local skeleton_dir="$(dirname "${BASH_SOURCE[0]}")/../fixtures/skl/$skeleton_name"
+    
+    if [[ ! -d "$skeleton_dir" ]]; then
+        echo "Error: Skeleton '$skeleton_name' not found at $skeleton_dir" >&2
+        return 1
+    fi
+    
+    # Copy entire skeleton structure directly
+    # Now skeleton structure matches target structure:
+    # skeleton/VERSION → container/VERSION
+    # skeleton/project_doh/ → container/project_doh/ 
+    # skeleton/global_doh/ → container/global_doh/ (if exists)
+    # skeleton/.git/ → container/.git/
+    cp -r "$skeleton_dir"/* "$container_dir/" || return 1
+    
+    echo "$container_dir"
+}
+
 # Create a minimal DOH project structure in the given directory
 # @arg $1 string Directory where to create the .doh structure (defaults to DOH_PROJECT_DIR)
-# @stdout Path to the project directory
+# @stdout Path to the container directory
 # @exitcode 0 If successful
 # @exitcode 1 If directory creation fails
 _tff_create_minimal_doh_project() {
@@ -21,21 +59,13 @@ _tff_create_minimal_doh_project() {
     fi
     
     # DOH_PROJECT_DIR points to the .doh directory itself
-    # Project root is the parent directory
-    local project_root="$(dirname "$doh_dir")"
+    # Container directory is the parent directory
+    local container_dir="$(dirname "$doh_dir")"
     
-    # Create basic DOH structure
-    mkdir -p "$doh_dir/epics" || return 1
-    mkdir -p "$doh_dir/prds" || return 1
-    mkdir -p "$doh_dir/quick" || return 1
+    # Copy minimal skeleton
+    _tff_copy_skeleton "minimal" "$container_dir" || return 1
     
-    # Create a minimal VERSION file in project root
-    echo "0.1.0" > "$project_root/VERSION"
-    
-    # Create .git directory in project root to satisfy doh_project_dir requirements
-    mkdir -p "$project_root/.git"
-    
-    echo "$project_root"
+    echo "$container_dir"
 }
 
 # Create a DOH project with sample epics and tasks
@@ -181,8 +211,54 @@ EOF
     echo "$project_dir"
 }
 
+# Create a DOH project for helper testing (PRD, epic, etc.)
+# @arg $1 string Directory where to create the .doh structure (defaults to DOH_PROJECT_DIR)
+# @stdout Path to the container directory
+# @exitcode 0 If successful
+# @exitcode 1 If directory creation fails
+_tff_create_helper_test_project() {
+    local doh_dir="${1:-${DOH_PROJECT_DIR:-}}"
+    
+    if [[ -z "$doh_dir" ]]; then
+        echo "Error: No DOH directory specified" >&2
+        return 1
+    fi
+    
+    # DOH_PROJECT_DIR points to the .doh directory itself
+    # Container directory is the parent directory
+    local container_dir="$(dirname "$doh_dir")"
+    
+    # Copy helper-test skeleton
+    _tff_copy_skeleton "helper-test" "$container_dir" || return 1
+    
+    echo "$container_dir"
+}
+
+# Create workspace environment for testing helper functions
+# @arg $1 string Project name (defaults to test_project_RANDOM)
+# @exitcode 0 If successful
+# @exitcode 1 If setup fails
+_tff_setup_workspace_for_helpers() {
+    local project_name="${1:-test_project_$(basename "${DOH_PROJECT_DIR}")}"
+    
+    export TEST_PROJECT_NAME="$project_name"
+    
+    # Override workspace function for testing
+    workspace_get_current_project_id() {
+        echo "$TEST_PROJECT_NAME"
+    }
+    
+    # Export the override function
+    export -f workspace_get_current_project_id
+    
+    return 0
+}
+
 # Export functions for use in tests
+export -f _tff_copy_skeleton
 export -f _tff_create_minimal_doh_project
 export -f _tff_create_sample_doh_project
 export -f _tff_create_version_test_project
 export -f _tff_create_cache_test_project
+export -f _tff_create_helper_test_project
+export -f _tff_setup_workspace_for_helpers

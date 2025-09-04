@@ -2,6 +2,9 @@
 
 # Test: DOH path functions without environment variables
 # Verifies that doh_project_dir returns doh_project_root/.doh when no env vars are set
+#
+# USING LEGITIMATE api.sh calls to test DOH path resolution without environment variables.
+# This test validates the fallback behavior of api.sh path functions.
 
 source "$(dirname "${BASH_SOURCE[0]}")/../helpers/test_framework.sh"
 

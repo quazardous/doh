@@ -236,6 +236,8 @@ helper_prd_help() {
     echo "Usage: helper.sh prd <command> [options]"
     echo ""
     echo "Commands:"
+    echo "  new <prd-name> [description]  Create a new PRD"
+    echo "  parse <prd-name>        Parse and analyze existing PRD"
     echo "  list                    List all PRDs categorized by status"
     echo "  status                  Show comprehensive PRD status report"
     echo "  by-status <status>      List PRDs filtered by specific status"
@@ -249,11 +251,187 @@ helper_prd_help() {
     echo "  all           - All PRDs regardless of status"
     echo ""
     echo "Examples:"
+    echo "  helper.sh prd new my-feature \"Feature description\""
+    echo "  helper.sh prd parse existing-prd"
     echo "  helper.sh prd list"
     echo "  helper.sh prd status"
     echo "  helper.sh prd by-status backlog"
     echo "  helper.sh prd count implemented"
     echo "  helper.sh prd count"
+    return 0
+}
+
+# @description Créer un nouveau PRD
+# @arg $1 string Nom du PRD
+# @arg $2 string Description (optionnel)
+# @stdout Chemin vers le PRD créé
+# @exitcode 0 Si création réussie
+# @exitcode 1 Si erreur de paramètres
+helper_prd_new() {
+    local prd_name="${1:-}"
+    local description="${2:-}"
+    
+    # Validation
+    if [[ -z "$prd_name" ]]; then
+        echo "Error: PRD name required" >&2
+        echo "Usage: helper.sh prd new <prd-name> [description]" >&2
+        return 1
+    fi
+    
+    # Check if PRD already exists
+    local prd_path=".doh/prds/${prd_name}.md"
+    if [[ -f "$prd_path" ]]; then
+        echo "Error: PRD already exists: $prd_path" >&2
+        return 1
+    fi
+    
+    echo "Creating PRD: $prd_name"
+    
+    # Create PRDs directory if it doesn't exist
+    mkdir -p ".doh/prds"
+    
+    # Create PRD using frontmatter API
+    local created_date
+    created_date="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+    
+    # Create PRD file with frontmatter
+    frontmatter_create_markdown "$prd_path" \
+        "name" "$prd_name" \
+        "description" "$description" \
+        "status" "backlog" \
+        "created" "$created_date" \
+        "target_version" "1.0.0" \
+        "file_version" "0.1.0"
+    
+    # Add PRD content template
+    {
+        echo ""
+        echo "# PRD: $prd_name"
+        echo ""
+        echo "## Executive Summary"
+        if [[ -n "$description" ]]; then
+            echo "$description"
+        else
+            echo "<!-- Brief overview and value proposition -->"
+        fi
+        echo ""
+        echo "## Problem Statement"
+        echo "<!-- What problem are we solving? -->"
+        echo ""
+        echo "## User Stories"
+        echo "<!-- Primary user personas and detailed user journeys -->"
+        echo ""
+        echo "## Requirements"
+        echo ""
+        echo "### Functional Requirements"
+        echo "<!-- Core features and capabilities -->"
+        echo ""
+        echo "### Non-Functional Requirements"
+        echo "<!-- Performance, security, scalability needs -->"
+        echo ""
+        echo "## Success Criteria"
+        echo "<!-- Measurable outcomes and KPIs -->"
+        echo ""
+        echo "## Constraints & Assumptions"
+        echo "<!-- Technical limitations, timeline constraints -->"
+        echo ""
+        echo "## Out of Scope"
+        echo "<!-- What we're explicitly NOT building -->"
+        echo ""
+        echo "## Dependencies"
+        echo "<!-- External and internal dependencies -->"
+    } >> "$prd_path"
+    
+    echo "✅ PRD created: $prd_path"
+    echo "   Status: backlog"
+    echo "   Target version: 1.0.0"
+    
+    return 0
+}
+
+# @description Parser et analyser un PRD
+# @arg $1 string Nom du PRD
+# @stdout Analyse du PRD
+# @exitcode 0 Si parsing réussi
+# @exitcode 1 Si PRD non trouvé ou erreur
+helper_prd_parse() {
+    local prd_name="$1"
+    
+    if [[ -z "$prd_name" ]]; then
+        echo "Error: PRD name required" >&2
+        echo "Usage: helper.sh prd parse <prd-name>" >&2
+        return 1
+    fi
+    
+    # Check if PRD exists
+    local prd_path=".doh/prds/${prd_name}.md"
+    if [[ ! -f "$prd_path" ]]; then
+        echo "Error: PRD not found: $prd_path" >&2
+        echo "Available PRDs:" >&2
+        if [[ -d ".doh/prds" ]]; then
+            ls -1 .doh/prds/*.md 2>/dev/null | sed 's|.doh/prds/||; s|.md$||' | sed 's/^/  - /' || echo "  (none)"
+        fi
+        return 1
+    fi
+    
+    echo "Parsing PRD: $prd_name"
+    echo "========================"
+    
+    # Extract PRD metadata
+    local description status target_version created
+    description="$(frontmatter_get_field "$prd_path" "description" 2>/dev/null || echo "")"
+    status="$(frontmatter_get_field "$prd_path" "status" 2>/dev/null || echo "")"
+    target_version="$(frontmatter_get_field "$prd_path" "target_version" 2>/dev/null || echo "")"
+    created="$(frontmatter_get_field "$prd_path" "created" 2>/dev/null || echo "")"
+    
+    # Display PRD summary
+    echo "📋 PRD Information:"
+    echo "   Name: $prd_name"
+    echo "   Status: ${status:-unknown}"
+    echo "   Target Version: ${target_version:-not specified}"
+    echo "   Created: ${created:-unknown}"
+    if [[ -n "$description" ]]; then
+        echo "   Description: $description"
+    fi
+    
+    # Analyze PRD content
+    local word_count section_count
+    word_count=$(wc -w < "$prd_path" 2>/dev/null || echo "0")
+    section_count=$(grep -c "^## " "$prd_path" 2>/dev/null || echo "0")
+    
+    echo ""
+    echo "📊 Content Analysis:"
+    echo "   Word count: $word_count"
+    echo "   Sections: $section_count"
+    
+    # Check for common sections
+    echo ""
+    echo "📝 Section Completeness:"
+    local sections=("Executive Summary" "Problem Statement" "User Stories" "Requirements" "Success Criteria")
+    for section in "${sections[@]}"; do
+        if grep -q "## $section" "$prd_path"; then
+            echo "   ✅ $section"
+        else
+            echo "   ❌ Missing: $section"
+        fi
+    done
+    
+    # Readiness assessment
+    echo ""
+    echo "🚀 Readiness Assessment:"
+    if [[ "$status" == "backlog" && "$word_count" -gt 500 && "$section_count" -ge 5 ]]; then
+        echo "   ✅ PRD appears ready for epic creation"
+        echo "   💡 Suggestion: Run 'helper.sh epic parse $prd_name' to create epic"
+    else
+        echo "   ⚠️ PRD may need more development before epic creation"
+        if [[ "$word_count" -lt 500 ]]; then
+            echo "   - Consider adding more detail (current: $word_count words)"
+        fi
+        if [[ "$section_count" -lt 5 ]]; then
+            echo "   - Consider adding more sections (current: $section_count)"
+        fi
+    fi
+    
     return 0
 }
 

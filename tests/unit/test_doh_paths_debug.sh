@@ -1,6 +1,9 @@
 #!/bin/bash
 
 # Quick debug test for DOH path functions
+#
+# USING LEGITIMATE api.sh calls to test DOH path resolution.
+# This test validates that api.sh correctly resolves project paths in isolation.
 source "$(dirname "${BASH_SOURCE[0]}")/../helpers/test_framework.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/../helpers/doh_fixtures.sh"
 

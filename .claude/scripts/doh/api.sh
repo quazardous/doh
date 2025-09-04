@@ -6,6 +6,11 @@
 # Example: api.sh version get_current
 # Example: api.sh frontmatter get_field "/path/to/file.md" "field_name"
 # Example: api.sh --private version to_number "1.0.0"
+#
+# IMPORTANT: This is an EXTERNAL INTERFACE for user consumption.
+# NEVER use api.sh from inside helper scripts - those should source DOH libraries
+# directly for performance and to avoid circular dependencies.
+# See docs/writing-good-scripts.md for complete usage rules.
 
 set -eo pipefail
 

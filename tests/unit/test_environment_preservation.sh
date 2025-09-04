@@ -99,6 +99,7 @@ test_helper_script_respects_environment() {
     local original_value="$DOH_GLOBAL_DIR"
     
     # Call helper script
+    # USING LEGITIMATE helper.sh call to test environment preservation
     ./.claude/scripts/doh/helper.sh prd help >/dev/null 2>&1 || true
     
     _tf_assert_equals "Helper script should preserve DOH_GLOBAL_DIR" "$original_value" "$DOH_GLOBAL_DIR"

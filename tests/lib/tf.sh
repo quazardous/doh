@@ -77,6 +77,11 @@ _tf_run_single_test() {
         local total_assertions=$(echo "$output" | grep "^1\.\." | head -1 | cut -d'.' -f3 | tr -d ' ')
         local passed_assertions=$(echo "$output" | grep "# Passed:" | head -1 | cut -d'/' -f1 | cut -d':' -f2 | tr -d ' ')
         
+        # Extract function counts from TAP output
+        local function_counts=$(echo "$output" | grep "# Functions:" | head -1 | cut -d':' -f2 | tr -d ' ')
+        local passed_functions=$(echo "$function_counts" | cut -d'/' -f1)
+        local total_functions=$(echo "$function_counts" | cut -d'/' -f2)
+        
         # If no TAP output, try to count legacy _tf_pass/_tf_fail calls
         if [[ -z "$total_assertions" || "$total_assertions" == "0" ]]; then
             local pass_count=$(echo "$output" | grep -c "✅ PASS:" 2>/dev/null || echo "0")
@@ -101,7 +106,11 @@ _tf_run_single_test() {
         
         # Show compact test result with timing
         if [[ $result -eq 0 ]]; then
-            echo "✅ ${passed_assertions:-0}/${total_assertions:-0} ${relative_path} (${duration}s)"
+            if [[ -n "${total_functions:-}" && "${total_functions:-0}" -gt 0 ]]; then
+                echo "✅ ${relative_path}: functions: ${passed_functions:-0}/${total_functions:-0}, assertions: ${passed_assertions:-0}/${total_assertions:-0} (${duration}s)"
+            else
+                echo "✅ ${relative_path}: assertions: ${passed_assertions:-0}/${total_assertions:-0} (${duration}s)"
+            fi
         else
             echo "❌ ${relative_path}: failed (${duration}s)"
         fi

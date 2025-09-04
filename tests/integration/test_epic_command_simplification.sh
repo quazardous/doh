@@ -4,6 +4,9 @@
 # Verifies that epic commands using helpers are simpler and more maintainable
 #
 # NOTE: This test performs static analysis only - no dangerous git operations
+#
+# USING LEGITIMATE helper.sh calls to test system integration.
+# This test validates that the helper system provides a clean user interface.
 
 source "$(dirname "${BASH_SOURCE[0]}")/../helpers/test_framework.sh"
 

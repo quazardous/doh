@@ -15,11 +15,21 @@
 # Once DRYRUN support is added, uncomment the dangerous tests and use --dry-run flag
 
 source "$(dirname "${BASH_SOURCE[0]}")/../helpers/test_framework.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../helpers/doh_fixtures.sh"
+
+# Source DOH libraries for proper path resolution
+source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/doh.sh"
+# Source epic helper directly
+source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/helper/epic.sh"
 
 _tf_setup() {
+    # Use skeleton fixture system for proper test isolation
+    _tff_create_helper_test_project "$DOH_PROJECT_DIR" >/dev/null
+    _tff_setup_workspace_for_helpers
+    
     # Create isolated test environment
     TEST_EPIC_NAME="test-epic-$$"
-    TEST_EPIC_PATH=".doh/epics/$TEST_EPIC_NAME"
+    TEST_EPIC_PATH="$DOH_PROJECT_DIR/epics/$TEST_EPIC_NAME"
     TEST_BRANCH_NAME="epic/$TEST_EPIC_NAME"
     
     # Create test epic directory and file
@@ -147,7 +157,7 @@ _tf_teardown() {
 # Test ready task identification (safe - only reads files)
 test_epic_identify_ready_tasks() {
     local result
-    result=$(./.claude/scripts/doh/helper.sh epic identify_ready_tasks "$TEST_EPIC_NAME" 2>&1)
+    result=$(helper_epic_identify_ready_tasks "$TEST_EPIC_NAME" 2>&1)
     local exit_code=$?
     
     _tf_assert_equals "Should successfully identify ready tasks" "0" "$exit_code"
@@ -161,7 +171,7 @@ test_epic_identify_ready_tasks() {
 # Test ready task identification with no tasks
 test_epic_identify_ready_tasks_no_tasks() {
     local empty_epic="test-epic-empty-$$"
-    local empty_path=".doh/epics/$empty_epic"
+    local empty_path="$DOH_PROJECT_DIR/epics/$empty_epic"
     
     mkdir -p "$empty_path"
     cat > "$empty_path/epic.md" << EOF
@@ -174,7 +184,7 @@ number: 997
 EOF
 
     local result
-    result=$(./.claude/scripts/doh/helper.sh epic identify_ready_tasks "$empty_epic" 2>&1)
+    result=$(helper_epic_identify_ready_tasks "$empty_epic" 2>&1)
     local exit_code=$?
     
     _tf_assert_not_equals "Should fail when no ready tasks found" "$exit_code" "0"
@@ -187,7 +197,7 @@ EOF
 # Test ready task identification with nonexistent epic
 test_epic_identify_ready_tasks_missing_epic() {
     local result
-    result=$(./.claude/scripts/doh/helper.sh epic identify_ready_tasks "nonexistent-epic" 2>&1)
+    result=$(helper_epic_identify_ready_tasks "nonexistent-epic" 2>&1)
     local exit_code=$?
     
     _tf_assert_not_equals "Should fail for nonexistent epic" "$exit_code" "0"
@@ -203,7 +213,7 @@ test_epic_branch_operations_function_exists() {
     
     # Verify it's documented in help
     local result
-    result=$(./.claude/scripts/doh/helper.sh epic help 2>&1)
+    result=$(helper_epic_help 2>&1)
     _tf_assert_contains "Helper should include branch creation function" "$result" "create-branch"
     _tf_assert_contains "Helper should include validation function" "$result" "validate"
     _tf_assert_contains "Helper should include ready tasks function" "$result" "ready-tasks"
@@ -216,8 +226,8 @@ test_epic_helper_uses_api_functions() {
     
     _tf_assert_file_exists "Epic helper should exist" "$helper_file"
     
-    # Should use API functions
-    _tf_assert_file_contains "Should use frontmatter API" "$helper_file" "api\.sh frontmatter get_field"
+    # Should use frontmatter functions directly (not api.sh wrapper)
+    _tf_assert_file_contains "Should use frontmatter functions" "$helper_file" "frontmatter_get_field"
     
     # Check that new lifecycle functions use API (not all helper functions)
     _tf_assert_file_contains "Should include new validation function" "$helper_file" "validate_prerequisites"
@@ -255,13 +265,13 @@ test_epic_helper_uses_api_functions() {
 test_epic_helper_integration() {
     # Verify helper integrates with existing epic functionality
     local result
-    result=$(./.claude/scripts/doh/helper.sh epic list 2>&1)
+    result=$(helper_epic_list 2>&1)
     
     # Should work without errors (whether epics exist or not)
     _tf_assert_true "Epic list function should be accessible" "true"
     
     # Test status function exists
-    result=$(./.claude/scripts/doh/helper.sh epic help 2>&1)
+    result=$(helper_epic_help 2>&1)
     _tf_assert_contains "Should include status function in help" "$result" "status.*Get epic status"
 }
 

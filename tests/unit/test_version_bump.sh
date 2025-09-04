@@ -12,46 +12,8 @@ else
     source "$(dirname "$0")/../helpers/test_framework.sh"
 fi
 
-# Get the project root directory for API calls
-if [[ -n "${_TF_LAUNCHER_EXECUTION:-}" ]]; then
-    # Running through test launcher from project root
-    DOH_API_PATH="$(pwd)/.claude/scripts/doh/api.sh"
-else
-    # Running directly from test directory - find project root
-    DOH_API_PATH="$(cd "$(dirname "$0")/../.." && pwd)/.claude/scripts/doh/api.sh"
-fi
-
-# Use DOH API for version functions
-version_validate() {
-    "$DOH_API_PATH" version validate "$@"
-}
-version_compare() {
-    "$DOH_API_PATH" version compare "$@"  
-}
-version_increment() {
-    "$DOH_API_PATH" version increment "$@"
-}
-version_get_current() {
-    "$DOH_API_PATH" version get_current "$@"
-}
-version_get_file() {
-    "$DOH_API_PATH" version get_file "$@"
-}
-version_set_file() {
-    "$DOH_API_PATH" version set_file "$@"
-}
-version_set_current() {
-    "$DOH_API_PATH" version set_current "$@"
-}
-version_find_files_without_file_version() {
-    "$DOH_API_PATH" version find_files_without_file_version "$@"
-}
-version_bump_file() {
-    "$DOH_API_PATH" version bump_file "$@"
-}
-version_bump_current() {
-    "$DOH_API_PATH" version bump_current "$@"
-}
+# Source DOH version library directly for better performance
+source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/version.sh"
 
 # Use proper DOH API function names directly - no wrapper functions
 

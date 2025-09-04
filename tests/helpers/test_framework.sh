@@ -9,6 +9,10 @@ declare -g _TF_TEST_COUNT=0
 declare -g _TF_TEST_PASSED=0
 declare -g _TF_TEST_FAILED=0
 declare -g _TF_TEST_CURRENT=""
+# Function execution state
+declare -g _TF_FUNCTION_COUNT=0
+declare -g _TF_FUNCTION_PASSED=0
+declare -g _TF_FUNCTION_FAILED=0
 
 # Check VERBOSE flag - defaults to true for compatibility
 _TF_VERBOSE="${VERBOSE:-true}"
@@ -49,6 +53,9 @@ _tf_test_suite_start() {
     _TF_TEST_COUNT=0
     _TF_TEST_PASSED=0
     _TF_TEST_FAILED=0
+    _TF_FUNCTION_COUNT=0
+    _TF_FUNCTION_PASSED=0
+    _TF_FUNCTION_FAILED=0
 }
 
 # Finalize test suite
@@ -58,9 +65,10 @@ _tf_test_suite_end() {
         echo "1..$_TF_TEST_COUNT"
         echo "# Passed: $_TF_TEST_PASSED/$_TF_TEST_COUNT"
         echo "# Failed: $_TF_TEST_FAILED/$_TF_TEST_COUNT"
+        echo "# Functions: $_TF_FUNCTION_PASSED/$_TF_FUNCTION_COUNT"
         
-        if [[ $_TF_TEST_FAILED -gt 0 ]]; then
-            echo -e "# ${_TF_RED}FAILURE${_TF_NC}: $_TF_TEST_FAILED test(s) failed"
+        if [[ $_TF_TEST_FAILED -gt 0 || $_TF_FUNCTION_FAILED -gt 0 ]]; then
+            echo -e "# ${_TF_RED}FAILURE${_TF_NC}: $_TF_TEST_FAILED test(s) failed, $_TF_FUNCTION_FAILED function(s) failed"
             return 1
         else
             echo -e "# ${_TF_GREEN}SUCCESS${_TF_NC}: All tests passed"
@@ -71,6 +79,7 @@ _tf_test_suite_end() {
         echo "1..0"
         echo "# Passed: 0/0"
         echo "# Failed: 0/0"
+        echo "# Functions: 0/0"
         echo -e "# ${_TF_GREEN}SUCCESS${_TF_NC}: All tests passed"
         return 0
     fi
@@ -225,6 +234,7 @@ _tf_assert_file_contains() {
 # Test discovery and execution
 _tf_run_test_function() {
     local test_function="$1"
+    local function_start_failures=$_TF_TEST_FAILED
     
     # Setup if function exists
     if declare -f _tf_setup >/dev/null; then
@@ -234,6 +244,14 @@ _tf_run_test_function() {
     # Run the test
     _TF_TEST_CURRENT="$test_function"
     "$test_function"
+    
+    # Count this function and check if it passed
+    ((_TF_FUNCTION_COUNT++))
+    if [[ $_TF_TEST_FAILED -eq $function_start_failures ]]; then
+        ((_TF_FUNCTION_PASSED++))
+    else
+        ((_TF_FUNCTION_FAILED++))
+    fi
     
     # Teardown if function exists
     if declare -f _tf_teardown >/dev/null; then

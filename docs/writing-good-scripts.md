@@ -61,7 +61,39 @@ version_number="$(./.claude/scripts/doh/api.sh --private version to_number "1.0.
 - **Error Handling**: Clear messages and proper exit codes
 - **Public/Private**: Access to both public and private functions
 
-## COMMAND FILES: USE API.SH OR HELPER.SH
+## CRITICAL USAGE RULES
+
+### RULE 1: HELPERS AND APIS - NEVER USE HELPER.SH OR API.SH
+
+**CRITICAL RULE**: Helper scripts (`helper/*.sh`) and API scripts (`api.sh`) are **external interfaces** and should **NEVER** call each other internally.
+
+#### ❌ FORBIDDEN in Helper Scripts (`.claude/scripts/doh/helper/*.sh`):
+```bash
+# ❌ DON'T: Using api.sh from inside helper scripts
+epic_number="$(./.claude/scripts/doh/api.sh numbering get_next "epic")"
+status="$(./.claude/scripts/doh/api.sh frontmatter get_field "$file" "status")"
+
+# ❌ DON'T: Using helper.sh from inside API scripts
+result="$(./.claude/scripts/doh/helper.sh epic list)"
+```
+
+#### ✅ USE THIS INSTEAD in Helper Scripts:
+```bash
+# ✅ CORRECT: Direct library sourcing and function calls
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/numbering.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/frontmatter.sh"
+
+epic_number="$(numbering_get_next "epic")"
+status="$(frontmatter_get_field "$file" "status")"
+```
+
+**Why this rule exists:**
+- `helper.sh` and `api.sh` are **external interfaces** for user consumption
+- Internal usage creates circular dependencies and performance overhead
+- Helper scripts should source DOH libraries directly for optimal performance
+- This maintains clean architecture separation between interface and implementation
+
+### RULE 2: COMMAND FILES - USE API.SH OR HELPER.SH
 
 **CRITICAL RULE**: Command markdown files should use `api.sh` or `helper.sh` instead of directly sourcing libraries.
 
@@ -331,14 +363,15 @@ doh/
 
 #### **TIER 2: Helpers** (`helper/`) - CLI Consolidation
 - **Naming**: `helper_domain_action()` (e.g., `helper_epic_list()`)
-- **Usage**: Via helper bootstrap system (`source helper.sh`)
-- **Discovery**: Dynamic discovery from helper directory
+- **Usage**: Via helper bootstrap system (`helper.sh domain action`)
+- **Discovery**: Dynamic discovery from helper directory structure
+- **Architecture**: Each `helper/domain.sh` file contains normalized helper functions
 - **Characteristics**:
   - Consolidate related CLI operations
   - Handle argument parsing and user interaction
   - Format output for human consumption
-  - Cannot be called directly - must use bootstrap
-  - Example: `helper_prd_status()`, `helper_workflow_standup()`
+  - Functions are called through bootstrap, not directly
+  - Example: `helper_epic_list()`, `helper_prd_status()`
 
 #### **TIER 3: API** (`api.sh`) - Clean External Interface
 - **Usage**: `./.claude/scripts/doh/api.sh library function [args]`
@@ -390,13 +423,10 @@ next_epic="$(numbering_get_next "epic")" || {
 ### TIER 2: Helper Bootstrap Usage (CLI Scripts)
 
 ```bash
-# Source helper bootstrap
-source ".claude/scripts/doh/helper.sh"
-
-# Use helper functions with automatic discovery
-helper_epic_list "active"                    # Lists active epics
-helper_prd_status "003"                      # Shows PRD status
-helper_workflow_next                         # Shows next tasks
+# Use helper bootstrap with domain/action pattern
+./.claude/scripts/doh/helper.sh epic list "active"        # Lists active epics
+./.claude/scripts/doh/helper.sh prd status "003"          # Shows PRD status  
+./.claude/scripts/doh/helper.sh workflow next             # Shows next tasks
 ```
 
 ### RECOMMENDED: API Helper (External Scripts)
@@ -687,5 +717,319 @@ while [[ $next_seq -lt 100 ]] || is_number_reserved "$next_seq"; do
     ((next_seq++))
 done
 ```
+
+## Writing Helper Functions
+
+### Helper Architecture Pattern
+
+Le système de helpers DOH utilise un pattern de **classes de helpers** où chaque fichier `.claude/scripts/doh/helper/domain.sh` contient des fonctions normalisées pour un domaine spécifique.
+
+#### Structure des Helpers
+
+```
+.claude/scripts/doh/helper/
+├── epic.sh          # Classe de helpers pour les epics
+├── prd.sh           # Classe de helpers pour les PRDs  
+├── task.sh          # Classe de helpers pour les tasks
+├── version.sh       # Classe de helpers pour les versions
+└── frontmatter.sh   # Classe de helpers pour la logique métier frontmatter
+```
+
+### Convention de Nommage des Fonctions Helper
+
+**Pattern**: `helper_{domain}_{action}()`
+
+Exemples:
+- `helper_epic_create()` - Créer un epic
+- `helper_epic_list()` - Lister les epics
+- `helper_prd_new()` - Créer un nouveau PRD
+- `helper_task_decompose()` - Décomposer un epic en tasks
+- `helper_frontmatter_create_epic()` - Créer le frontmatter d'un epic
+
+### Exemple d'Implémentation: `.claude/scripts/doh/helper/epic.sh`
+
+```bash
+#!/bin/bash
+# Epic Helper Functions
+# Une "classe" de helpers pour la gestion des epics
+
+set -euo pipefail
+
+# Source des dépendances
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/dohenv.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/numbering.sh" 
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/frontmatter.sh"
+
+# @description Créer un nouvel epic
+# @arg $1 string Nom de l'epic
+# @arg $2 string Description (optionnel)
+# @stdout Chemin vers l'epic créé
+# @exitcode 0 Si création réussie
+# @exitcode 1 Si erreur de paramètres
+helper_epic_create() {
+    local epic_name="$1"
+    local description="${2:-}"
+    
+    # Validation
+    if [[ -z "$epic_name" ]]; then
+        echo "Error: Epic name required" >&2
+        return 1
+    fi
+    
+    # Utiliser l'API numbering pour obtenir le prochain numéro
+    local epic_number
+    epic_number="$(./.claude/scripts/doh/api.sh numbering get_next "epic")" || {
+        echo "Error: Could not generate epic number" >&2
+        return 1
+    }
+    
+    # Utiliser le helper frontmatter pour créer le fichier
+    local epic_path
+    epic_path="$(./.claude/scripts/doh/helper.sh frontmatter create-epic "$epic_name" "$epic_number" "$description")" || {
+        echo "Error: Could not create epic file" >&2
+        return 1
+    }
+    
+    echo "Epic created: $epic_path"
+    return 0
+}
+
+# @description Lister les epics selon un statut
+# @arg $1 string Statut à filtrer (optional, default: all)
+# @stdout Liste des epics
+# @exitcode 0 Toujours
+helper_epic_list() {
+    local status_filter="${1:-all}"
+    
+    # Logique de listing des epics
+    # Utilise les APIs DOH pour récupérer les données
+    echo "Listing epics with status: $status_filter"
+    # Implementation...
+}
+
+# @description Parser un PRD vers un epic
+# @arg $1 string Nom du PRD source
+# @stdout Chemin vers l'epic créé
+# @exitcode 0 Si parsing réussi
+# @exitcode 1 Si PRD non trouvé ou erreur
+helper_epic_parse() {
+    local prd_name="$1"
+    
+    if [[ -z "$prd_name" ]]; then
+        echo "Error: PRD name required" >&2
+        return 1
+    fi
+    
+    # Vérifier que le PRD existe
+    local prd_path=".doh/prds/${prd_name}.md"
+    if [[ ! -f "$prd_path" ]]; then
+        echo "Error: PRD not found: $prd_path" >&2
+        return 1
+    fi
+    
+    # Parser le PRD et créer l'epic
+    # Implementation de la logique de parsing...
+    echo "Epic created from PRD: $prd_name"
+}
+```
+
+### Exemple d'Implémentation: `.claude/scripts/doh/helper/frontmatter.sh`
+
+```bash
+#!/bin/bash
+# Frontmatter Business Logic Helpers
+# Logique métier pour la création de frontmatter spécialisé
+
+set -euo pipefail
+
+# Source des dépendances
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/frontmatter.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/numbering.sh"
+
+# @description Créer un fichier epic avec frontmatter complet
+# @arg $1 string Nom de l'epic
+# @arg $2 string Numéro de l'epic 
+# @arg $3 string Description (optionnel)
+# @stdout Chemin vers le fichier créé
+# @exitcode 0 Si création réussie
+helper_frontmatter_create_epic() {
+    local epic_name="$1"
+    local epic_number="$2" 
+    local description="${3:-}"
+    local created_date
+    
+    created_date="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+    
+    # Créer le répertoire si nécessaire
+    local epic_dir=".doh/epics/${epic_name}"
+    mkdir -p "$epic_dir"
+    
+    # Créer le frontmatter avec l'API
+    local epic_path="${epic_dir}/epic.md"
+    
+    # Utiliser l'API frontmatter pour créer le fichier
+    ./.claude/scripts/doh/api.sh frontmatter create_markdown "$epic_path" \
+        "name" "$epic_name" \
+        "number" "$epic_number" \
+        "status" "backlog" \
+        "created" "$created_date" \
+        "progress" "0%" \
+        "file_version" "0.1.0"
+    
+    # Ajouter le contenu de base de l'epic
+    {
+        echo ""
+        echo "# Epic: $epic_name"
+        echo ""
+        if [[ -n "$description" ]]; then
+            echo "## Description"
+            echo "$description"
+            echo ""
+        fi
+        echo "## Overview"
+        echo "<!-- Epic overview goes here -->"
+        echo ""
+        echo "## Implementation Strategy"
+        echo "<!-- Implementation details go here -->"
+    } >> "$epic_path"
+    
+    # Registrer l'epic dans le système de numérotation
+    ./.claude/scripts/doh/api.sh numbering register_epic "$epic_number" "$epic_path" "$epic_name"
+    
+    echo "$epic_path"
+}
+
+# @description Créer un fichier task avec frontmatter complet  
+# @arg $1 string Nom de la task
+# @arg $2 string Numéro de la task
+# @arg $3 string Epic parent
+# @stdout Chemin vers le fichier créé
+helper_frontmatter_create_task() {
+    local task_name="$1"
+    local task_number="$2"
+    local epic_name="$3"
+    local created_date
+    
+    created_date="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+    
+    # Créer le fichier task avec frontmatter
+    local task_path=".doh/epics/${epic_name}/${task_number}.md"
+    
+    ./.claude/scripts/doh/api.sh frontmatter create_markdown "$task_path" \
+        "name" "$task_name" \
+        "number" "$task_number" \
+        "status" "open" \
+        "created" "$created_date" \
+        "updated" "$created_date" \
+        "epic" "$epic_name" \
+        "parallel" "true" \
+        "file_version" "0.1.0"
+    
+    # Ajouter le contenu de base de la task
+    {
+        echo ""
+        echo "# Task: $task_name"
+        echo ""
+        echo "## Description"
+        echo "<!-- Task description goes here -->"
+        echo ""
+        echo "## Acceptance Criteria"
+        echo "- [ ] Criterion 1"
+        echo "- [ ] Criterion 2"
+        echo ""
+        echo "## Technical Details"
+        echo "<!-- Implementation details go here -->"
+    } >> "$task_path"
+    
+    echo "$task_path"
+}
+```
+
+### Utilisation des Helpers
+
+#### Via le Bootstrap Helper
+
+```bash
+# Créer un epic
+./.claude/scripts/doh/helper.sh epic create "my-new-feature" "Epic description"
+
+# Lister les epics actifs  
+./.claude/scripts/doh/helper.sh epic list "active"
+
+# Parser un PRD vers un epic
+./.claude/scripts/doh/helper.sh epic parse "my-prd-name"
+
+# Créer un frontmatter d'epic via helper frontmatter
+./.claude/scripts/doh/helper.sh frontmatter create-epic "feature-name" "001" "Description"
+```
+
+#### Dans les Commands DOH
+
+```bash
+# Dans un fichier .claude/commands/doh/epic-new.md
+./.claude/scripts/doh/helper.sh epic create "$ARGUMENTS" "Auto-created epic"
+```
+
+#### Depuis un Script Bash
+
+```bash
+#!/bin/bash
+# Script exemple utilisant des helpers
+
+# ✅ PERMIS: Sourcer directement dans un script bash
+source ".claude/scripts/doh/helper/epic.sh"
+epic_path="$(helper_epic_create "my-feature" "Description")"
+status="$(helper_epic_list "active")"
+
+# ✅ AUSSI PERMIS: Utiliser helper.sh (plus verbeux mais marche aussi)
+epic_path="$(./.claude/scripts/doh/helper.sh epic create "my-feature" "Description")"
+status="$(./.claude/scripts/doh/helper.sh epic list "active")"
+```
+
+### Règles d'Usage des Helpers
+
+#### Commands Markdown (.claude/commands/doh/*.md)
+- **OBLIGATOIRE**: Utiliser `helper.sh domain action`
+- **INTERDIT**: Sourcer directement les fichiers helper
+- **Raison**: Les commands sont exécutées dans un contexte spécial
+
+```bash
+# ✅ Dans .claude/commands/doh/epic-new.md
+./.claude/scripts/doh/helper.sh epic create "$ARGUMENTS"
+
+# ❌ INTERDIT dans commands
+source ".claude/scripts/doh/helper/epic.sh"
+```
+
+#### Scripts Bash Normaux (*.sh)
+- **PERMIS**: Sourcer directement `source "helper/domain.sh"`
+- **PERMIS**: Utiliser `helper.sh domain action` (plus verbeux)
+- **RECOMMANDÉ**: Sourcer directement pour de meilleures performances
+
+```bash
+# ✅ RECOMMANDÉ dans scripts bash
+source ".claude/scripts/doh/helper/epic.sh"
+result="$(helper_epic_create "name")"
+
+# ✅ AUSSI PERMIS mais plus lent
+result="$(./.claude/scripts/doh/helper.sh epic create "name")"
+```
+
+### Principes des Helpers
+
+1. **Un Helper = Une Fonction**: Chaque helper est une fonction normalisée dans un fichier de classe
+2. **Classe = Domaine**: Chaque fichier `helper/domain.sh` regroupe les fonctions d'un domaine
+3. **Fonctions Normalisées**: Pattern `helper_domain_action()` strict
+4. **Business Logic**: Les helpers encapsulent la logique métier complexe
+5. **API Calls**: Les helpers utilisent l'API DOH pour les opérations de base
+6. **Contexte d'Usage**: Commands MD → `helper.sh`, Scripts → sourcing direct OK
+
+### Avantages du Pattern
+
+- **Découvrabilité**: `helper.sh domain help` liste les actions disponibles
+- **Testabilité**: Chaque fonction helper est testable individuellement  
+- **Réutilisabilité**: Les helpers peuvent être utilisés par multiple commands
+- **Séparation**: Logique métier séparée des APIs de base
+- **Cohérence**: Interface uniforme pour toutes les opérations
 
 This document serves as the foundation for writing maintainable, testable, and robust shell scripts in the DOH project.

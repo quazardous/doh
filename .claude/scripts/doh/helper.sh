@@ -4,6 +4,11 @@
 # Bootstrap script for calling user-facing helper functions
 # Usage: ./helper.sh <helper_name> <function_name> [arguments...]
 # Example: ./helper.sh epic show data-api-sanity
+#
+# IMPORTANT: This is an EXTERNAL INTERFACE for user consumption.
+# NEVER use helper.sh from inside helper scripts or api.sh - those should
+# source DOH libraries directly for performance and to avoid circular dependencies.
+# See docs/writing-good-scripts.md for complete usage rules.
 
 set -euo pipefail
 

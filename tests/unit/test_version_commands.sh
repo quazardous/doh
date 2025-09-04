@@ -41,8 +41,8 @@ _tf_teardown() {
 
 test_version_validate_basic() {
     # Test that version validation works
-    _tf_assert "Valid version should pass validation" ./.claude/scripts/doh/api.sh version validate "1.0.0"
-    _tf_assert_not "Invalid version should fail validation" ./.claude/scripts/doh/api.sh version validate "invalid"
+    _tf_assert "Valid version should pass validation" version_validate "1.0.0"
+    _tf_assert_not "Invalid version should fail validation" version_validate "invalid"
 }
 
 test_version_get_current_basic() {

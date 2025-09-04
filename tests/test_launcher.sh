@@ -53,9 +53,11 @@ export _TF_LAUNCHER_EXECUTION="true"
 export DOH_TEST_CLEANUP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/doh.XXXXXX")"
 export DOH_GLOBAL_DIR="${DOH_TEST_CLEANUP_DIR}/global_doh"
 export DOH_PROJECT_DIR="${DOH_TEST_CLEANUP_DIR}/project_doh"
+export DOH_VERSION_FILE="${DOH_TEST_CLEANUP_DIR}/VERSION"
 if [[ "${DOH_TEST_DEBUG:-false}" == "true" ]]; then
     echo "DEBUG: DOH_GLOBAL_DIR = '$DOH_GLOBAL_DIR'"
     echo "DEBUG: DOH_PROJECT_DIR = '$DOH_PROJECT_DIR'"
+    echo "DEBUG: DOH_VERSION_FILE = '$DOH_VERSION_FILE'"
 fi
 
 # Load DOH environment with isolation in place

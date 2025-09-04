@@ -6,22 +6,8 @@
 # Source the framework
 source "$(dirname "$0")/../helpers/test_framework.sh" 2>/dev/null || source "../helpers/test_framework.sh" 2>/dev/null || source "tests/helpers/test_framework.sh"
 
-# Use DOH API for frontmatter functions
-frontmatter_extract() {
-    ./.claude/scripts/doh/api.sh frontmatter extract "$@"
-}
-frontmatter_get_field() {
-    ./.claude/scripts/doh/api.sh frontmatter get_field "$@"
-}
-frontmatter_update_field() {
-    ./.claude/scripts/doh/api.sh frontmatter update_field "$@"
-}
-frontmatter_has() {
-    ./.claude/scripts/doh/api.sh frontmatter has "$@"
-}
-frontmatter_validate() {
-    ./.claude/scripts/doh/api.sh frontmatter validate "$@"
-}
+# Source DOH frontmatter library directly for better performance
+source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/frontmatter.sh"
 
 # Test frontmatter extraction from valid files
 test_frontmatter_extract_basic() {

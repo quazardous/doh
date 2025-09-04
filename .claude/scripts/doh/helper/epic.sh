@@ -5,6 +5,8 @@
 
 # Source required dependencies
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/epic.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/frontmatter.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/numbering.sh"
 
 # Guard against multiple sourcing
 [[ -n "${DOH_HELPER_EPIC_LOADED:-}" ]] && return 0
@@ -239,6 +241,8 @@ helper_epic_help() {
     echo "Usage: helper.sh epic <command> [options]"
     echo ""
     echo "Commands:"
+    echo "  create <epic-name> [description]  Create a new epic"
+    echo "  parse <prd-name>        Create epic from existing PRD"
     echo "  list                    List all epics categorized by status"
     echo "  show <epic-name>        Show detailed epic information"
     echo "  status <epic-name>      Get epic status with progress and tasks"
@@ -255,6 +259,8 @@ helper_epic_help() {
     echo "  blocked     - Tasks that are blocked"
     echo ""
     echo "Examples:"
+    echo "  helper.sh epic create my-feature \"Feature description\""
+    echo "  helper.sh epic parse my-prd-name"
     echo "  helper.sh epic list"
     echo "  helper.sh epic show data-api-sanity"
     echo "  helper.sh epic status versioning"
@@ -273,7 +279,12 @@ helper_epic_help() {
 # @exitcode 1 If validation fails
 helper_epic_validate_prerequisites() {
     local epic_name="$1"
-    local epic_path=".doh/epics/$epic_name"
+    local doh_root
+    doh_root=$(doh_project_dir) || {
+        echo "Error: Not in DOH project" >&2
+        return 1
+    }
+    local epic_path="$doh_root/epics/$epic_name"
     local validation_errors=()
     
     # Check epic exists
@@ -284,7 +295,7 @@ helper_epic_validate_prerequisites() {
     # Check GitHub sync
     if [[ -f "$epic_path/epic.md" ]]; then
         local github_field
-        github_field=$(./.claude/scripts/doh/api.sh frontmatter get_field "$epic_path/epic.md" "github")
+        github_field=$(frontmatter_get_field "$epic_path/epic.md" "github")
         if [[ -z "$github_field" ]]; then
             validation_errors+=("Epic not synced to GitHub. Run: /doh:epic-sync $epic_name")
         fi
@@ -355,7 +366,12 @@ helper_epic_create_or_enter_branch() {
 # @exitcode 0 If successful
 helper_epic_identify_ready_tasks() {
     local epic_name="$1"
-    local epic_path=".doh/epics/$epic_name"
+    local doh_root
+    doh_root=$(doh_project_dir) || {
+        echo "Error: Not in DOH project" >&2
+        return 1
+    }
+    local epic_path="$doh_root/epics/$epic_name"
     local ready_tasks=()
     
     echo "Analyzing task readiness in epic: $epic_name"
@@ -373,18 +389,18 @@ helper_epic_identify_ready_tasks() {
         [[ -n "$task_file" ]] || continue
         
         local task_status
-        task_status=$(./.claude/scripts/doh/api.sh frontmatter get_field "$task_file" "status")
+        task_status=$(frontmatter_get_field "$task_file" "status")
         
         local task_number
-        task_number=$(./.claude/scripts/doh/api.sh frontmatter get_field "$task_file" "number")
+        task_number=$(frontmatter_get_field "$task_file" "number")
         
         local task_title  
-        task_title=$(./.claude/scripts/doh/api.sh frontmatter get_field "$task_file" "title")
+        task_title=$(frontmatter_get_field "$task_file" "title")
         
         # Check if task is ready (status=pending and no blocking dependencies)
         if [[ "$task_status" == "pending" ]]; then
             local depends_on
-            depends_on=$(./.claude/scripts/doh/api.sh frontmatter get_field "$task_file" "depends_on")
+            depends_on=$(frontmatter_get_field "$task_file" "depends_on")
             
             # For now, simple ready check - can be enhanced with dependency resolution
             if [[ -z "$depends_on" ]]; then
@@ -405,6 +421,163 @@ helper_epic_identify_ready_tasks() {
     
     echo "Found ${#ready_tasks[@]} ready task(s)"
     printf '%s\n' "${ready_tasks[@]}"
+    return 0
+}
+
+# @description Créer un nouvel epic
+# @arg $1 string Nom de l'epic
+# @arg $2 string Description (optionnel)
+# @stdout Chemin vers l'epic créé
+# @exitcode 0 Si création réussie
+# @exitcode 1 Si erreur de paramètres
+helper_epic_create() {
+    local epic_name="${1:-}"
+    local description="${2:-}"
+    
+    # Validation
+    if [[ -z "$epic_name" ]]; then
+        echo "Error: Epic name required" >&2
+        echo "Usage: helper.sh epic create <epic-name> [description]" >&2
+        return 1
+    fi
+    
+    # Check if epic already exists
+    local doh_root
+    doh_root=$(doh_project_dir) || {
+        echo "Error: Not in DOH project" >&2
+        return 1
+    }
+    local epic_path="$doh_root/epics/${epic_name}/epic.md"
+    if [[ -f "$epic_path" ]]; then
+        echo "Error: Epic already exists: $epic_path" >&2
+        return 1
+    fi
+    
+    echo "Creating epic: $epic_name"
+    
+    # Get next epic number
+    local epic_number
+    epic_number="$(numbering_get_next "epic")" || {
+        echo "Error: Could not generate epic number" >&2
+        return 1
+    }
+    
+    # Create epic directory
+    mkdir -p "$doh_root/epics/${epic_name}"
+    
+    # Create epic using frontmatter API
+    local created_date
+    created_date="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+    
+    # Create epic file with frontmatter
+    frontmatter_create_markdown "$epic_path" \
+        "name" "$epic_name" \
+        "number" "$epic_number" \
+        "status" "backlog" \
+        "created" "$created_date" \
+        "progress" "0%" \
+        "github" "[Will be updated when synced to GitHub]" \
+        "file_version" "0.1.0"
+    
+    # Add epic content
+    {
+        echo ""
+        echo "# Epic: $epic_name"
+        echo ""
+        if [[ -n "$description" ]]; then
+            echo "## Description"
+            echo "$description"
+            echo ""
+        fi
+        echo "## Overview"
+        echo "<!-- Epic overview goes here -->"
+        echo ""
+        echo "## Implementation Strategy"
+        echo "<!-- Implementation details go here -->"
+        echo ""
+        echo "## Tasks"
+        echo "<!-- Tasks will be added during decomposition -->"
+    } >> "$epic_path"
+    
+    # Register epic in numbering system
+    numbering_register_epic "$epic_number" "$epic_path" "$epic_name"
+    
+    echo "✅ Epic created: $epic_path"
+    echo "   Number: $epic_number"
+    echo "   Status: backlog"
+    
+    return 0
+}
+
+# @description Parser un PRD vers un epic
+# @arg $1 string Nom du PRD source
+# @stdout Chemin vers l'epic créé
+# @exitcode 0 Si parsing réussi
+# @exitcode 1 Si PRD non trouvé ou erreur
+helper_epic_parse() {
+    local prd_name="$1"
+    
+    if [[ -z "$prd_name" ]]; then
+        echo "Error: PRD name required" >&2
+        echo "Usage: helper.sh epic parse <prd-name>" >&2
+        return 1
+    fi
+    
+    # Check if PRD exists
+    local doh_root
+    doh_root=$(doh_project_dir) || {
+        echo "Error: Not in DOH project" >&2
+        return 1
+    }
+    local prd_path="$doh_root/prds/${prd_name}.md"
+    if [[ ! -f "$prd_path" ]]; then
+        echo "Error: PRD not found: $prd_path" >&2
+        echo "Available PRDs:" >&2
+        if [[ -d "$doh_root/prds" ]]; then
+            ls -1 "$doh_root/prds"/*.md 2>/dev/null | sed "s|$doh_root/prds/||; s|.md$||" | sed 's/^/  - /' || echo "  (none)"
+        fi
+        return 1
+    fi
+    
+    echo "Parsing PRD '$prd_name' to create epic..."
+    
+    # Extract PRD metadata
+    local prd_description target_version
+    prd_description="$(frontmatter_get_field "$prd_path" "description" 2>/dev/null || echo "")"
+    target_version="$(frontmatter_get_field "$prd_path" "target_version" 2>/dev/null || echo "")"
+    
+    # Check if epic already exists
+    local epic_path="$doh_root/epics/${prd_name}/epic.md"
+    if [[ -f "$epic_path" ]]; then
+        echo "Warning: Epic already exists: $epic_path" >&2
+        echo "Do you want to overwrite? (yes/no)" >&2
+        read -r response
+        if [[ "$response" != "yes" ]]; then
+            echo "Epic parsing cancelled" >&2
+            return 1
+        fi
+    fi
+    
+    # Create epic using the create function
+    helper_epic_create "$prd_name" "$prd_description" || {
+        echo "Error: Failed to create epic from PRD" >&2
+        return 1
+    }
+    
+    # Update epic with PRD-specific information
+    if [[ -n "$target_version" ]]; then
+        frontmatter_update_field "$epic_path" "target_version" "$target_version"
+    fi
+    
+    # Add PRD reference
+    frontmatter_update_field "$epic_path" "prd" "$prd_path"
+    
+    echo "✅ Epic created from PRD: $epic_path"
+    echo "   Source PRD: $prd_path"
+    if [[ -n "$target_version" ]]; then
+        echo "   Target version: $target_version"
+    fi
+    
     return 0
 }
 

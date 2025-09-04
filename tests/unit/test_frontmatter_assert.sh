@@ -30,7 +30,7 @@ This file will get frontmatter with file creation time.
 TESTEOF
     
     # Test frontmatter_assert without explicit date
-    ./.claude/scripts/doh/api.sh frontmatter assert "$test_file"
+    frontmatter_assert "$test_file"
     _tf_assert "File should still exist after frontmatter_assert" test -f "$test_file"
     
     # Verify frontmatter was added
@@ -38,7 +38,7 @@ TESTEOF
     
     # Verify created timestamp exists and is reasonable (recent)
     local created_value
-    created_value=$(./.claude/scripts/doh/api.sh frontmatter get_field "$test_file" "created")
+    created_value=$(frontmatter_get_field "$test_file" "created")
     _tf_assert "created timestamp should exist" test -n "$created_value"
     
     # Verify it's in ISO format
@@ -60,17 +60,17 @@ This file will get explicit created date.
 TESTEOF
     
     # Test frontmatter_assert with explicit date
-    ./.claude/scripts/doh/api.sh frontmatter assert "$test_file" "$explicit_date"
+    frontmatter_assert "$test_file" "$explicit_date"
     _tf_assert "File should exist after frontmatter_assert with explicit date" test -f "$test_file"
     
     # Verify created timestamp uses explicit date
     local created_value
-    created_value=$(./.claude/scripts/doh/api.sh frontmatter get_field "$test_file" "created")
+    created_value=$(frontmatter_get_field "$test_file" "created")
     _tf_assert_equals "Should use explicit created date" "$explicit_date" "$created_value"
     
     # Verify no temp placeholder
     local temp_value
-    temp_value=$(./.claude/scripts/doh/api.sh frontmatter get_field "$test_file" "temp")
+    temp_value=$(frontmatter_get_field "$test_file" "temp")
     _tf_assert "Should not have temp placeholder" test -z "$temp_value"
 }
 
@@ -85,25 +85,25 @@ Content here.
 TESTEOF
     
     # First call to frontmatter_assert
-    ./.claude/scripts/doh/api.sh frontmatter assert "$test_file"
+    frontmatter_assert "$test_file"
     _tf_assert "First call should succeed" test -f "$test_file"
     
     local first_created
-    first_created=$(./.claude/scripts/doh/api.sh frontmatter get_field "$test_file" "created")
+    first_created=$(frontmatter_get_field "$test_file" "created")
     
     # Second call should not change anything
-    ./.claude/scripts/doh/api.sh frontmatter assert "$test_file"
+    frontmatter_assert "$test_file"
     _tf_assert "Second call should succeed" test -f "$test_file"
     
     local second_created
-    second_created=$(./.claude/scripts/doh/api.sh frontmatter get_field "$test_file" "created")
+    second_created=$(frontmatter_get_field "$test_file" "created")
     
     _tf_assert_equals "Created timestamp should not change on second call" "$first_created" "$second_created"
 }
 
 test_frontmatter_assert_file_not_exists() {
     # Try to assert frontmatter on non-existent file
-    _tf_assert_not "Should fail for non-existent file" ./.claude/scripts/doh/api.sh frontmatter assert '/non/existent/file.md' 2>/dev/null
+    _tf_assert_not "Should fail for non-existent file" frontmatter_assert '/non/existent/file.md' 2>/dev/null
 }
 
 test_frontmatter_assert_existing_frontmatter() {
@@ -122,21 +122,21 @@ This file already has frontmatter.
 TESTEOF
     
     # Test frontmatter_assert on file with existing frontmatter
-    ./.claude/scripts/doh/api.sh frontmatter assert "$test_file"
+    frontmatter_assert "$test_file"
     _tf_assert "Should succeed with existing frontmatter" test -f "$test_file"
     
     # Verify existing fields are preserved
     local title
-    title=$(./.claude/scripts/doh/api.sh frontmatter get_field "$test_file" "title")
+    title=$(frontmatter_get_field "$test_file" "title")
     _tf_assert_equals "Existing title should be preserved" "Existing Title" "$title"
     
     local status
-    status=$(./.claude/scripts/doh/api.sh frontmatter get_field "$test_file" "status")
+    status=$(frontmatter_get_field "$test_file" "status")
     _tf_assert_equals "Existing status should be preserved" "draft" "$status"
     
     # Verify no created field was added (since frontmatter already exists)
     local created_value
-    created_value=$(./.claude/scripts/doh/api.sh frontmatter get_field "$test_file" "created")
+    created_value=$(frontmatter_get_field "$test_file" "created")
     _tf_assert "Should not add created field to existing frontmatter" test -z "$created_value"
 }
 
@@ -166,7 +166,7 @@ More content here.
 TESTEOF
     
     # Apply frontmatter_assert
-    ./.claude/scripts/doh/api.sh frontmatter assert "$test_file"
+    frontmatter_assert "$test_file"
     _tf_assert "Should add frontmatter successfully" test -f "$test_file"
     
     # Verify all original content is still present after the frontmatter
