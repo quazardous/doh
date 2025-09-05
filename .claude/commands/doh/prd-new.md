@@ -4,207 +4,277 @@ allowed-tools: Bash, Read, Write, LS
 
 # PRD New
 
-Launch brainstorming for new product requirement document.
+Create a new Product Requirements Document (PRD) with comprehensive understanding of the feature context.
 
 ## Usage
 ```
-/doh:prd-new <feature_name>
+/doh:prd-new <natural language description>
 ```
 
-## Required Rules
-
-**IMPORTANT:** Before executing this command, read and follow:
-- `.claude/rules/datetime.md` - For getting real current date/time
-
-## Preflight Checklist
-
-Before proceeding, complete these validation steps.
-Do not bother the user with preflight checks progress ("I'm not going to ..."). Just do them and move on.
-
-### Input Validation
-1. **Validate feature name format:**
-   - Must contain only lowercase letters, numbers, and hyphens
-   - Must start with a letter
-   - No spaces or special characters allowed
-   - If invalid, tell user: "❌ Feature name must be kebab-case (lowercase letters, numbers, hyphens only). Examples: user-auth, payment-v2, notification-system"
-
-2. **Check for existing PRD:**
-   - Check if `.doh/prds/$ARGUMENTS.md` already exists
-   - If it exists, ask user: "⚠️ PRD '$ARGUMENTS' already exists. Do you want to overwrite it? (yes/no)"
-   - Only proceed with explicit 'yes' confirmation
-   - If user says no, suggest: "Use a different name or run: /doh:prd-parse $ARGUMENTS to create an epic from the existing PRD"
-
-3. **Verify DOH project structure:**
-   - Ensure we're in a DOH project (`.doh/` directory exists)
-   - The helper will automatically create `.doh/prds/` directory if needed
-   - No manual directory creation required
+## Examples
+- `/doh:prd-new gitlab support`
+- `/doh:prd-new add OAuth2 authentication to the API`
+- `/doh:prd-new version 2.0 database migration`
+- `/doh:prd-new user-notifications`
 
 ## Instructions
 
-You are a product manager creating a comprehensive Product Requirements Document (PRD) for: **$ARGUMENTS**
+### 1. Initial Context Gathering
 
-Follow this structured approach:
+From `$ARGUMENTS`, begin understanding the feature request, but first gather project context:
 
-### 1. Discovery & Context
-- Ask clarifying questions about the feature/product "$ARGUMENTS"
-- Understand the problem being solved
-- Identify target users and use cases
-- Gather constraints and requirements
+**Silently check (don't announce these checks):**
+1. Read `VERSION` file to understand current version
+2. Check `.doh/versions/` for planned versions and roadmap
+3. List `.doh/prds/` to see existing PRDs and avoid duplication
+4. Check `.doh/epics/` for related work in progress
 
-### 1.5. AI-Powered Version Planning
-After understanding the scope, perform intelligent version analysis:
+### 2. Comprehensive Discovery Phase (MANDATORY)
 
-1. **Read current project version** from `VERSION` file
-2. **Analyze existing versions** in `.doh/versions/` directory  
-3. **Determine version impact**:
-   - **Patch (x.y.Z+1)**: Bug fixes, minor improvements, documentation
-   - **Minor (x.Y+1.0)**: New features, backwards compatible changes
-   - **Major (X+1.0.0)**: Breaking changes, major architecture updates
-4. **Suggest target_version** based on scope analysis with reasoning
-5. **Check version compatibility** with existing version goals
-6. **Offer version creation** if no suitable version exists
+**ALWAYS conduct a thorough discovery session before suggesting parameters:**
 
-**Version Suggestion Process:**
 ```
-🎯 AI Version Analysis for "$ARGUMENTS"
+📋 Let's plan the PRD for: "$ARGUMENTS"
+
+Before we create the PRD, I need to understand the full context:
+
+1. **What problem does this solve?**
+   - Who are the primary users affected?
+   - What pain points does it address?
+   - Why is this important now?
+
+2. **What's the scope and goal?**
+   - Core functionality needed?
+   - Expected outcomes?
+   - Success metrics?
+
+3. **Where does this fit in the roadmap?**
+   - Is this a bug fix, new feature, or breaking change?
+   - Should this target an existing version or need a new one?
+   - Dependencies on other features?
+
+4. **Any constraints or considerations?**
+   - Technical limitations?
+   - Timeline requirements?
+   - Security/performance needs?
+
+Please provide context on these points (answer what you can, skip what's not relevant).
+```
+
+### 3. Intelligent Parameter Synthesis
+
+After gathering context, synthesize the information:
+
+**Determine Feature Name:**
+- **MUST capture the main idea/purpose** (not just literal conversion)
+- Convert to meaningful kebab-case that conveys intent
+- Examples of good naming:
+  - "gitlab support" → `gitlab-integration` (not just "gitlab-support")
+  - "fix login bugs" → `auth-stability` (captures the goal)
+  - "make it faster" → `performance-optimization` (descriptive of purpose)
+  - "add users page" → `user-management` (broader feature context)
+- Ensure it's unique and check against existing PRDs
+- Should be self-documenting (someone should understand the feature from the name)
+
+**Craft Description:**
+- Concise summary (max 100 chars) that expands on the name
+- Captures the business value and outcome
+- Complements the feature name with additional context
+
+**Analyze Version Impact:**
+Based on discovery answers, determine:
+- **Patch (x.y.Z+1)**: Bug fixes, minor improvements
+- **Minor (x.Y+1.0)**: New features, backwards compatible
+- **Major (X+1.0.0)**: Breaking changes, major features
+
+**Check existing versions:**
+```bash
+# Check if suitable version exists
+ls -la .doh/versions/
+```
+
+If no suitable version exists, suggest creating one first.
+
+### 4. Present Comprehensive Understanding (MANDATORY)
+
+**Show full context before creating PRD:**
+
+```
+📊 PRD Planning Summary for "$ARGUMENTS"
 =====================================
 
-Current project version: [from VERSION file]
-Existing planned versions: [list from .doh/versions/]
+**Understanding of the Feature:**
+${SUMMARIZE_PROBLEM_AND_SOLUTION}
 
-📊 Scope Analysis:
-- Feature complexity: [High/Medium/Low]
-- Breaking changes: [Yes/No]
-- API impact: [Major/Minor/None]
-- Architecture changes: [Yes/No]
+**Proposed PRD Parameters:**
+   Feature name: ${FEATURE_NAME}
+   Description: ${DESCRIPTION}
+   Target version: ${TARGET_VERSION} (${VERSION_REASONING})
 
-💡 Suggested target_version: [X.Y.Z]
-Reasoning: [Explain why this version level is appropriate]
+**Scope Assessment:**
+   - Complexity: ${HIGH/MEDIUM/LOW}
+   - User impact: ${DESCRIPTION}
+   - Breaking changes: ${YES/NO}
+   - Dependencies: ${LIST_OR_NONE}
 
-Available options:
-1. ✅ Accept suggested version: [X.Y.Z]
-2. 🔄 Suggest different version
-3. 📋 Create new version [X.Y.Z] interactively
-4. 🔍 View existing version details
+**Roadmap Alignment:**
+   - Current version: ${CURRENT_VERSION}
+   - Fits in version: ${TARGET_VERSION}
+   - Related PRDs: ${LIST_OR_NONE}
+   - Related epics: ${LIST_OR_NONE}
 
-[Wait for user choice before proceeding]
+**Key Requirements Identified:**
+   ${BULLET_LIST_OF_KEY_REQUIREMENTS}
+
+Is this understanding correct? Should I proceed with these parameters?
+1. ✅ Yes, create the PRD
+2. 📝 Let me provide more context
+3. ✏️ Adjust the parameters
+4. 📋 Create a new version first
 ```
 
-**If user chooses option 3 (Create new version):**
-- Launch `/doh:version-new` workflow with PRD context
-- Create strategic version file with goals derived from PRD scope  
-- Use natural language processing to categorize features into must/should/must-not have
-- Link the new version back to the PRD automatically
-- Continue with PRD creation using the newly created target_version
+### 5. Handle User Response
 
-### 2. PRD Structure
-Create a comprehensive PRD with these sections:
+Based on user choice:
 
-#### Executive Summary
-- Brief overview and value proposition
+**Option 1 (Proceed):**
+- Continue to validation and creation
 
-#### Problem Statement
-- What problem are we solving?
-- Why is this important now?
+**Option 2 (More context):**
+- Ask specific follow-up questions
+- Refine understanding
+- Present updated summary
 
-#### User Stories
-- Primary user personas
-- Detailed user journeys
-- Pain points being addressed
+**Option 3 (Adjust):**
+```
+Which parameters need adjustment?
+- Feature name (current: ${FEATURE_NAME})
+- Description (current: ${DESCRIPTION})  
+- Target version (current: ${TARGET_VERSION})
+- Other aspects of scope/requirements
 
-#### Requirements
-**Functional Requirements**
-- Core features and capabilities
-- User interactions and flows
+Please provide the corrections.
+```
 
-**Non-Functional Requirements**
-- Performance expectations
-- Security considerations
-- Scalability needs
+**Option 4 (New version):**
+- **DELEGATE to version command**: Execute `/doh:version-new for ${FEATURE_NAME} - ${DESCRIPTION}`
+- **Let version-new handle:** Version number inference, discovery, and creation
+- After version creation completes, return to PRD creation with the created version
+- DO NOT manually create version files or specify version numbers
 
-#### Success Criteria
-- Measurable outcomes
-- Key metrics and KPIs
+### 6. Pre-Creation Validation
 
-#### Constraints & Assumptions
-- Technical limitations
-- Timeline constraints
-- Resource limitations
+**After confirmation, silently validate:**
 
-#### Out of Scope
-- What we're explicitly NOT building
+1. **Check PRD doesn't exist:**
+   ```bash
+   [ -f ".doh/prds/${FEATURE_NAME}.md" ]
+   ```
+   If exists: "⚠️ PRD '${FEATURE_NAME}' already exists. Options:
+   - Edit existing: /doh:prd-edit ${FEATURE_NAME}
+   - Use different name
+   - Overwrite (loses content)"
 
-#### Dependencies
-- External dependencies
-- Internal team dependencies
+2. **Validate feature name:**
+   - Must be kebab-case
+   - Must start with letter
+   - No special characters
 
-### 3. PRD Creation using Helper Backend
-After completing the brainstorming and determining the target_version, create the PRD using the helper backend:
+3. **Verify target version exists (if specified):**
+   ```bash
+   [ -f ".doh/versions/${TARGET_VERSION}.md" ]
+   ```
+   If not: 
+   ```
+   Version ${TARGET_VERSION} doesn't exist yet.
+   
+   Should I create it for you?
+   1. ✅ Yes, create version ${TARGET_VERSION}
+   2. 🔄 Choose a different version
+   3. ❌ Cancel PRD creation
+   ```
+   
+   If user agrees, **DELEGATE**: `/doh:version for ${FEATURE_NAME} - ${DESCRIPTION}`
+   
+   **Let /doh:version handle:**
+   - Version number inference from feature scope
+   - Discovery of appropriate version increment
+   - Context-aware version creation
 
-**Step 1: Create PRD with helper**
+### 7. Create PRD Using Helper (ONLY After Full Understanding)
+
+**MANDATORY: Use helper script with EXACT parameter order:**
+
 ```bash
-./.claude/scripts/doh/helper.sh prd new "$ARGUMENTS" "$DESCRIPTION" "$TARGET_VERSION"
+./.claude/scripts/doh/helper.sh prd new "${FEATURE_NAME}" "${DESCRIPTION}" "${TARGET_VERSION}"
 ```
 
-Where:
-- `$ARGUMENTS` = feature name from command arguments
-- `$DESCRIPTION` = brief one-line description gathered during brainstorming
-- `$TARGET_VERSION` = version determined from AI analysis
+**Parameter Order (NEVER CHANGE):**
+1. `prd` - command group
+2. `new` - subcommand  
+3. `"${FEATURE_NAME}"` - required, kebab-case
+4. `"${DESCRIPTION}"` - optional, brief description or ""
+5. `"${TARGET_VERSION}"` - optional, version or ""
 
-**Step 2: Enhance the generated PRD**
-The helper creates a basic PRD template. Now enhance it by:
+### 8. Post-Creation Enhancement
 
-1. **Read the created file**: `.doh/prds/$ARGUMENTS.md`
-2. **Replace template sections** with detailed content from brainstorming:
-   - Executive Summary (expand from description)
-   - Problem Statement (from discovery phase)
-   - User Stories (from requirements gathering)
-   - Functional/Non-functional Requirements
-   - Success Criteria (measurable outcomes)
-   - Constraints & Assumptions
-   - Dependencies
-   - Out of Scope items
+After successful creation:
 
-3. **Preserve the frontmatter** (automatically generated by helper):
-   - ✅ `name`, `status`, `created`, `updated`, `file_version` auto-generated
-   - ✅ `target_version` set from your analysis
-   - ✅ `description` set from brainstorming summary
+```
+✅ PRD created: .doh/prds/${FEATURE_NAME}.md
 
-### 4. Quality Enhancement Guidelines
+Based on our discovery discussion, would you like me to:
+1. 📝 Populate the PRD with the requirements we discussed
+2. ✏️ Keep as template for you to fill
+3. 🚀 Start creating the epic immediately
+```
 
-Since the helper automatically handles frontmatter creation with proper timestamps and versioning, focus on content quality:
+If option 1 chosen:
+- Read the created PRD
+- Fill in sections based on discovery conversation:
+  - Problem statement from user's answers
+  - User stories from identified users
+  - Requirements from discussed scope
+  - Success criteria from goals
+  - Dependencies identified
+  - Constraints mentioned
+- Preserve all frontmatter
 
-**Content Requirements:**
-- Replace all template placeholders with specific, actionable content
-- Ensure user stories include clear acceptance criteria
-- Make success criteria measurable with specific metrics
-- List concrete dependencies (not vague references)
-- Explicitly state what's out of scope to prevent feature creep
+### 9. Final Summary
 
-**Validation Checklist:**
-- [ ] All sections contain real content (no "<!-- comments -->")
-- [ ] User stories follow "As a [user], I want [goal] so that [benefit]" format
-- [ ] Requirements are testable and verifiable
-- [ ] Dependencies include specific teams, systems, or external factors
-- [ ] Success criteria include quantifiable metrics
+```
+✅ PRD Creation Complete
+========================
 
-### 5. Post-Creation Confirmation
+**Created:** .doh/prds/${FEATURE_NAME}.md
+**Description:** ${DESCRIPTION}
+**Target Version:** ${TARGET_VERSION}
 
-After successfully enhancing the PRD:
+**Key Points Captured:**
+${BULLET_LIST_OF_MAIN_REQUIREMENTS}
 
-1. **Verify creation**: Check that `.doh/prds/$ARGUMENTS.md` exists and contains enhanced content
-2. **Confirm completion**: "✅ PRD brainstorming complete: .doh/prds/$ARGUMENTS.md"
-3. **Show summary**: Brief overview of sections completed during brainstorming
-4. **Display version**: "🎯 Target version: [determined target_version]"
-5. **Version context** (if applicable): "📋 Version goals: .doh/versions/[X.Y.Z].md"
-6. **Next steps**: "Ready to create implementation epic? Run: /doh:prd-parse $ARGUMENTS"
-7. **Helper commands**: "Manage PRD with: helper.sh prd status, helper.sh prd list"
+**Next Steps:**
+• Review and refine: /doh:prd-edit ${FEATURE_NAME}
+• Create epic: /doh:prd-parse ${FEATURE_NAME}
+• View all PRDs: ./.claude/scripts/doh/helper.sh prd list
+• Check version plan: /doh:version-show ${TARGET_VERSION}
+```
 
-## Error Recovery
+## Important Rules
 
-If any step fails:
-- Clearly explain what went wrong
-- Provide specific steps to fix the issue
-- Never leave partial or corrupted files
+1. **UNDERSTAND FIRST** - Never create without comprehensive context
+2. **ROADMAP AWARENESS** - Always check versions and existing work
+3. **USER CONFIRMATION** - Explicit approval required at each step
+4. **HELPER ONLY** - Always use helper script, never manual creation
+5. **EXACT PARAMETERS** - Helper requires: name, description, target_version (in that order)
+6. **VALIDATE EVERYTHING** - Check names, versions, duplicates before creation
+7. **VERSION DELEGATION** - NEVER manually create version files; always use `/doh:version-new` or `/doh:version-edit`
 
-Conduct a thorough brainstorming session before writing the PRD. Ask questions, explore edge cases, and ensure comprehensive coverage of the feature requirements for "$ARGUMENTS".
+## Error Handling
+
+- Show exact helper errors
+- Never attempt manual recovery
+- Suggest `./.claude/scripts/doh/helper.sh prd help` for issues
+- If version doesn't exist, **DELEGATE to /doh:version** with feature context (let it infer version)
+- If version needs editing, **DELEGATE to /doh:version** with update context
+- If PRD exists, never overwrite without explicit confirmation

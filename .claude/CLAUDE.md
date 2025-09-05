@@ -110,3 +110,148 @@ source .claude/scripts/doh/lib/library.sh && library_function
 - ALWAYS VERIFY CURRENT CODE - Always inspect the codebase before analyzing or suggesting fixes. Do not rely on outdated tasks, backlog items, or prior context.
 - NO PREMATURE SCRIPTING IN REFACTOR - Do not extract logic into separate scripts or automation tools unless the same operation will be repeated across multiple files or contexts. 
 
+## DOH NATURAL LANGUAGE COMMAND DETECTION
+
+When users make requests in natural language that correspond to DOH commands, automatically execute the appropriate `/doh:` command instead of implementing the functionality manually.
+
+### PRD Domain Commands
+
+| Natural Language Pattern | DOH Command | Notes |
+|---------------------------|-------------|--------|
+| "Create a new PRD/feature/epic for..." | `/doh:prd-new` | Initial feature planning |
+| "Turn this PRD into an epic" | `/doh:prd-parse` | PRD → Epic conversion |
+| "Show me all PRDs" | `/doh:prd-list` | PRD overview |
+| "What's the status of PRDs?" | `/doh:prd-status` | PRD progress |
+| "Edit PRD X" | `/doh:prd-edit X` | PRD modification |
+
+### Epic Domain Commands
+
+| Natural Language Pattern | DOH Command | Notes |
+|---------------------------|-------------|--------|
+| "Break down this epic into tasks" | `/doh:epic-decompose` | Task creation |
+| "Sync epic to GitHub" | `/doh:epic-sync` | GitHub integration |
+| "Start working on epic X" | `/doh:epic-start X` | Begin development |
+| "Show me all epics" | `/doh:epic-list` | Epic overview |
+| "What's the status of epic X?" | `/doh:epic-status X` | Progress check |
+| "Show me details of epic X" | `/doh:epic-show X` | Detailed view |
+| "Update epic progress" | `/doh:epic-refresh` | Sync progress |
+| "Edit epic X" | `/doh:epic-edit X` | Modify epic |
+| "Close/complete epic X" | `/doh:epic-close X` | Mark done |
+| "Merge epic X back to main" | `/doh:epic-merge X` | Deployment |
+| "Do everything for epic X" | `/doh:epic-oneshot X` | Full workflow |
+
+### Task/Issue Domain Commands
+
+| Natural Language Pattern | DOH Command | Notes |
+|---------------------------|-------------|--------|
+| "Start working on issue #123" | `/doh:issue-start 123` | Begin task work |
+| "Show me issue #123" | `/doh:issue-show 123` | Task details |
+| "What's the status of issue #123?" | `/doh:issue-status 123` | Status check |
+| "Update issue #123 on GitHub" | `/doh:issue-sync 123` | Sync progress |
+| "Analyze issue #123" | `/doh:issue-analyze 123` | Work planning |
+| "Edit issue #123" | `/doh:issue-edit 123` | Modify task |
+| "Close issue #123" | `/doh:issue-close 123` | Mark complete |
+| "Reopen issue #123" | `/doh:issue-reopen 123` | Undo completion |
+| "Close task 001" / "Mark task 001 as done" | Execute: `./.claude/scripts/doh/helper.sh task update 001 status:completed` | Task completion |
+| "How does task 123 affect versions?" | `/doh:task-versions 123` | Version impact analysis |
+
+### Version Domain Commands
+
+| Natural Language Pattern | DOH Command | Notes |
+|---------------------------|-------------|--------|
+| "Create a new version" | `/doh:version-new` | Version planning |
+| "Show me version X.Y.Z" | `/doh:version-show X.Y.Z` | Version details |
+| "Edit version X.Y.Z" | `/doh:version-edit X.Y.Z` | Modify version |
+| "What's the version status?" | `/doh:version-status` | Version overview |
+| "Check if version is ready" | `/doh:version-validate` | Release readiness |
+| "Delete version X.Y.Z" | `/doh:version-delete X.Y.Z` | Remove version |
+| "Bump the version" | `/doh:version-bump` | Increment version |
+| "Initialize versioning" | `/doh:version-init` | Setup versioning |
+| "Migrate to versioning" | `/doh:version-migrate` | Convert project |
+
+### Project Status & Planning Commands
+
+| Natural Language Pattern | DOH Command | Notes |
+|---------------------------|-------------|--------|
+| "What should I work on next?" | `/doh:next` | Task prioritization |
+| "What's the overall project status?" | `/doh:status` | High-level view |
+| "What am I currently working on?" | `/doh:in-progress` | Active work |
+| "What's blocked?" | `/doh:blocked` | Dependency issues |
+| "Generate standup report" | `/doh:standup` | Daily meetings |
+| "Search for..." | `/doh:search` | Content search |
+
+### System & Maintenance Commands
+
+| Natural Language Pattern | DOH Command | Notes |
+|---------------------------|-------------|--------|
+| "Clean up old work" | `/doh:clean` | Housekeeping |
+| "Sync everything with GitHub" | `/doh:sync` | Full sync |
+| "Check system health" | `/doh:validate` | System check |
+| "Import GitHub issues" | `/doh:import` | External import |
+| "Check workspace" | `/doh:workspace` | Workspace status |
+| "Show me help" | `/doh:help` | Documentation |
+| "Initialize new project" | `/doh:init` | Project setup |
+| "Add version headers" | `/doh:add-file-headers` | File management |
+
+### Command Detection Rules
+
+1. **Exact Pattern Matching**: When user input matches patterns above, execute the corresponding command immediately
+2. **Argument Inference**: If the command requires specific arguments, try to infer them from:
+   - User input context (epic names, issue numbers, versions mentioned)
+   - Current working directory or active epic context
+   - Recent conversation history
+   - File names or paths visible in the workspace
+3. **Parameter Extraction**: Extract and validate arguments before command execution:
+   - Epic names (e.g., "command-with-helper", "data-api-sanity")
+   - Issue numbers (e.g., "#123", "issue 456", "task 001") 
+   - Version numbers (e.g., "1.2.3", "v2.0.0")
+   - File paths and entity identifiers
+4. **Context Awareness**: Consider current working context (epic, task, etc.) when resolving ambiguous requests
+5. **Smart Defaults**: Use reasonable defaults when arguments can be inferred:
+   - Current epic if working within an epic directory
+   - Latest version for version operations
+   - Current task if in task context
+6. **Argument Validation**: Verify arguments exist before executing commands:
+   - Check if epic exists before running epic commands
+   - Validate issue numbers are valid
+   - Confirm version numbers follow semantic versioning
+7. **Fallback**: If arguments cannot be inferred or validated, ask for clarification with specific examples
+
+### Implementation Examples
+
+```bash
+# User says: "Show me the status of epic command-with-helper"
+# Infer: epic name = "command-with-helper"
+# Execute: /doh:epic-status command-with-helper
+
+# User says: "Close task 001"  
+# Infer: task number = "001"
+# Execute: ./.claude/scripts/doh/helper.sh task update 001 status:completed
+
+# User says: "What should I work on next?"
+# No arguments needed
+# Execute: /doh:next
+
+# User says: "Edit the current epic"
+# Infer: epic name from current directory (.doh/epics/command-with-helper/)
+# Execute: /doh:epic-edit command-with-helper
+
+# User says: "Show issue 123"
+# Infer: issue number = "123"
+# Execute: /doh:issue-show 123
+
+# User says: "Start working on the data API epic" 
+# Infer: epic name = "data-api-sanity" (closest match)
+# Execute: /doh:epic-start data-api-sanity
+
+# User says: "Bump version to 2.1.0"
+# Infer: target version = "2.1.0"
+# Execute: /doh:version-bump 2.1.0
+
+# User says: "Sync everything to GitHub" 
+# No arguments needed
+# Execute: /doh:sync
+```
+
+**Priority**: Always use DOH commands over manual implementation when natural language matches available command functionality.
+

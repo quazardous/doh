@@ -20,16 +20,18 @@ DOH_HELPER_VERSION_LOADED=1
 
 # @description Définir une nouvelle version
 # @arg $1 string Version à définir (ex: 1.0.0)
+# @arg $2 string Description de la version (optionnel)
 # @stdout Confirmation de la version définie
 # @exitcode 0 Si définition réussie
 # @exitcode 1 Si version invalide ou erreur
 helper_version_new() {
     local version="$1"
+    local description="${2:-}"
     
     if [[ -z "$version" ]]; then
         echo "Error: Version required" >&2
-        echo "Usage: helper.sh version new <version>" >&2
-        echo "Example: helper.sh version new 1.0.0" >&2
+        echo "Usage: helper.sh version new <version> [description]" >&2
+        echo "Example: helper.sh version new 1.0.0 'New release'" >&2
         return 1
     fi
     
@@ -40,35 +42,32 @@ helper_version_new() {
         return 1
     fi
     
-    echo "Setting new version: $version"
-    
-    # Get current version for comparison
-    local current_version
-    current_version="$(version_get_current 2>/dev/null || echo "unknown")"
-    
-    # Set the new version
-    version_set_current "$version" || {
-        echo "Error: Failed to set version $version" >&2
-        return 1
-    }
-    
-    echo "✅ Version updated:"
-    echo "   From: $current_version"
-    echo "   To: $version"
-    
     local doh_dir
     doh_dir=$(doh_project_dir) || {
         echo "Error: Not in DOH project" >&2
         return 1
     }
 
-    # Check if this creates a new version file
     local version_file="$doh_dir/versions/${version}.md"
-    if [[ ! -f "$version_file" ]]; then
-        echo ""
-        echo "💡 Suggestion: Create version file with goals"
-        echo "   Run: /doh:version-new $version"
+    
+    # Check if version file already exists
+    if [[ -f "$version_file" ]]; then
+        echo "Error: Version file already exists: $version_file" >&2
+        echo "Use 'helper.sh version edit $version' to modify existing version" >&2
+        return 1
     fi
+    
+    echo "Creating version: $version"
+    
+    # Create version file using version_create from lib/version.sh
+    if ! version_create "$version_file" "$version" "release" "$description"; then
+        echo "Error: Failed to create version file" >&2
+        return 1
+    fi
+    
+    echo "✅ Version file created: $version_file"
+    echo "💡 Version created as milestone only"
+    echo "   Use 'helper.sh version bump $version' to set as current if needed"
     
     return 0
 }
