@@ -10,26 +10,6 @@ source "$(dirname "${BASH_SOURCE[0]}")/doh.sh"
 [[ -n "${DOH_LIB_WORKSPACE_LOADED:-}" ]] && return 0
 DOH_LIB_WORKSPACE_LOADED=1
 
-# @description Get current project ID based on directory
-# @stdout Unique project ID: basename + short hash of absolute path
-# @exitcode 0 If successful
-# @exitcode 1 If unable to find DOH root
-workspace_get_current_project_id() {
-    # Allow override via environment variable
-    if [[ -n "${DOH_PROJECT_ID:-}" ]]; then
-        echo "$DOH_PROJECT_ID"
-        return 0
-    fi
-    
-    local project_root
-    project_root="$(doh_project_root)" || return 1
-    
-    local project_name=$(basename "$project_root")
-    local abs_path=$(realpath "$project_root")
-    local path_hash=$(echo "$abs_path" | sha256sum | cut -c1-8)
-    
-    echo "${project_name}_${path_hash}"
-}
 
 # @description Ensure project state directory exists
 # @arg $1 string Optional project ID (default: current project)
@@ -38,7 +18,7 @@ workspace_get_current_project_id() {
 # @exitcode 0 If successful
 # @exitcode 1 If unable to determine project ID or create directory
 ensure_project_state_dir() {
-    local project_id="${1:-$(workspace_get_current_project_id)}"
+    local project_id="${1:-$(doh_project_id)}"
     
     if [[ -z "$project_id" ]]; then
         echo "Error: Could not determine project ID" >&2
@@ -61,7 +41,7 @@ ensure_project_state_dir() {
 # @exitcode 0 If successful
 # @exitcode 1 If project ID or path missing
 register_project_mapping() {
-    local project_id="${1:-$(workspace_get_current_project_id)}"
+    local project_id="${1:-$(doh_project_id)}"
     local project_path="${2:-$(_find_doh_root)}"
     
     if [[ -z "$project_id" || -z "$project_path" ]]; then
@@ -115,7 +95,7 @@ detect_workspace_mode() {
 # @exitcode 0 If successful
 # @exitcode 1 If unable to ensure project state directory
 get_workspace_state_file() {
-    local project_id="${1:-$(workspace_get_current_project_id)}"
+    local project_id="${1:-$(doh_project_id)}"
     local state_dir
     
     state_dir="$(ensure_project_state_dir "$project_id")" || return 1
@@ -128,7 +108,7 @@ get_workspace_state_file() {
 # @exitcode 0 If successful
 # @exitcode 1 If unable to get state file path
 load_workspace_state() {
-    local project_id="${1:-$(workspace_get_current_project_id)}"
+    local project_id="${1:-$(doh_project_id)}"
     local state_file
     
     state_file="$(get_workspace_state_file "$project_id")" || return 1
@@ -158,7 +138,7 @@ EOF
 # @exitcode 1 If unable to acquire lock or write file
 save_workspace_state() {
     local yaml_content="$1"
-    local project_id="${2:-$(workspace_get_current_project_id)}"
+    local project_id="${2:-$(doh_project_id)}"
     local state_file
     
     state_file="$(get_workspace_state_file "$project_id")" || return 1
@@ -237,7 +217,7 @@ choose_workspace_mode() {
 # @exitcode 0 If no issues found
 # @exitcode 1 If integrity issues found
 check_workspace_integrity() {
-    local project_id="${1:-$(workspace_get_current_project_id)}"
+    local project_id="${1:-$(doh_project_id)}"
     local issues=()
     
     # Load workspace state
@@ -321,7 +301,7 @@ safety_prompt() {
 # @exitcode 0 If successful
 # @exitcode 1 If user cancels or unable to save state
 reset_workspace() {
-    local project_id="${1:-$(workspace_get_current_project_id)}"
+    local project_id="${1:-$(doh_project_id)}"
     
     safety_prompt "Reset workspace state for project: $project_id" || return 1
     
@@ -373,7 +353,7 @@ workspace_diagnostic() {
 
     # Project Information
     local project_id
-    project_id="$(workspace_get_current_project_id)"
+    project_id="$(doh_project_id)"
     echo "Project: $project_id"
     echo "DOH Global Dir: $(doh_global_dir)"
     echo ""

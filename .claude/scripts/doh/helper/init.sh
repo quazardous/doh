@@ -165,22 +165,22 @@ EOF
     echo ""
     echo "📄 Creating CLAUDE.md..."
     cat > "$project_root/CLAUDE.md" << 'EOF'
-  # CLAUDE.md
+# CLAUDE.md
 
-  > Think carefully and implement the most concise solution that changes as little code as possible.
+> Think carefully and implement the most concise solution that changes as little code as possible.
 
-  ## Project-Specific Instructions
+## Project-Specific Instructions
 
-  Add your project-specific instructions here.
+Add your project-specific instructions here.
 
-  ## Testing
+## Testing
 
-  Always run tests before committing:
-  - `npm test` or equivalent for your stack
+Always run tests before committing:
+- `npm test` or equivalent for your stack
 
-  ## Code Style
+## Code Style
 
-  Follow existing patterns in the codebase.
+Follow existing patterns in the codebase.
 EOF
     echo "  ✅ CLAUDE.md created"
   fi

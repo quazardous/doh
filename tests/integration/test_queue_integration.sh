@@ -16,7 +16,7 @@ _tf_setup() {
     export DOH_TEST_QUEUE_NAME="test_queue"
     
     # Override functions for testing
-    workspace_get_current_project_id() {
+    doh_project_id() {
         echo "$DOH_TEST_PROJECT_ID"
     }
 }

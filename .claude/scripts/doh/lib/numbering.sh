@@ -6,7 +6,6 @@
 
 # Source core library dependencies
 source "$(dirname "${BASH_SOURCE[0]}")/doh.sh"
-source "$(dirname "${BASH_SOURCE[0]}")/workspace.sh"
 
 # Guard against multiple sourcing
 [[ -n "${DOH_LIB_NUMBERING_LOADED:-}" ]] && return 0
@@ -95,7 +94,7 @@ EOF
 # @exitcode 1 If project ID cannot be determined
 _numbering_get_registry_path() {
     local project_id
-    project_id="$(workspace_get_current_project_id)" || {
+    project_id="$(doh_project_id)" || {
         echo "Error: Could not determine project ID" >&2
         return 1
     }
@@ -114,7 +113,7 @@ _numbering_ensure_registry() {
     registry_file="$(_numbering_get_registry_path)" || return 1
     
     local project_id
-    project_id="$(workspace_get_current_project_id)" || return 1
+    project_id="$(doh_project_id)" || return 1
     
     # Create registry if it doesn't exist
     if [[ ! -f "$registry_file" ]]; then
@@ -239,10 +238,10 @@ numbering_get_current() {
 # @exitcode 0 If successful
 # @exitcode 1 If invalid type or sequence generation fails
 numbering_get_next() {
-    local type="$1"  # "epic" or "task"
+    local type="$1"  # "epic", "task", or "prd"
     
-    if [[ "$type" != "epic" && "$type" != "task" ]]; then
-        echo "Error: Invalid type '$type'. Must be 'epic' or 'task'" >&2
+    if [[ "$type" != "epic" && "$type" != "task" && "$type" != "prd" ]]; then
+        echo "Error: Invalid type '$type'. Must be 'epic', 'task', or 'prd'" >&2
         return 1
     fi
     

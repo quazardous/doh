@@ -4,7 +4,9 @@
 # Pure library for YAML frontmatter parsing and manipulation (no automatic execution)
 # File version: 0.1.0 | Created: 2025-09-01
 
-# Source core library dependencies (zero dependencies for this library)
+# Source core library dependencies (zero dependencies to avoid circular issues)
+# This library uses the API helper for external dependencies
+
 # Guard against multiple sourcing
 [[ -n "${DOH_LIB_FRONTMATTER_LOADED:-}" ]] && return 0
 DOH_LIB_FRONTMATTER_LOADED=1
@@ -356,13 +358,60 @@ frontmatter_merge() {
 # @arg $1 string Path to the new file
 # @arg $2 string Markdown content (optional, pass empty string "" if no content)
 # @arg $... string Field:value pairs for frontmatter
+# @option -a <type>,--auto-number=<type> Auto-generate number field with type (epic|task|prd)
 # @stderr Error messages
 # @exitcode 0 If successful
 # @exitcode 1 If error
 frontmatter_create_markdown() {
+    local OPTIND opt
+    local auto_number=""
+    
+    # Parse options using getopts
+    while getopts "a:-:" opt; do
+        case "$opt" in
+            a)
+                if [[ -z "$OPTARG" ]]; then
+                    echo "Error: Option -a requires a value (epic|task|prd)" >&2
+                    return 1
+                fi
+                auto_number="$OPTARG"
+                ;;
+            -)
+                case "$OPTARG" in
+                    auto-number=*)
+                        auto_number="${OPTARG#*=}"
+                        if [[ -z "$auto_number" ]]; then
+                            echo "Error: --auto-number requires a value (epic|task|prd)" >&2
+                            return 1
+                        fi
+                        ;;
+                    auto-number)
+                        echo "Error: --auto-number requires a value. Use --auto-number=<type>" >&2
+                        return 1
+                        ;;
+                    *)
+                        echo "Error: Unknown option --$OPTARG" >&2
+                        return 1
+                        ;;
+                esac
+                ;;
+            *)
+                echo "Error: Unknown option -$opt" >&2
+                return 1
+                ;;
+        esac
+    done
+    shift $((OPTIND-1))
+    
+    # Now get the positional arguments
     local file="$1"
     local content="$2"
-    shift 2
+    shift 2 2>/dev/null || true
+    
+    if [[ -z "$file" ]]; then
+        echo "Error: Missing file argument" >&2
+        return 1
+    fi
     
     if [[ -f "$file" ]]; then
         echo "Error: File already exists: $file" >&2
@@ -377,7 +426,12 @@ frontmatter_create_markdown() {
     fi
     
     # Use frontmatter_update_many to add frontmatter with field:value pairs
-    frontmatter_update_many "$file" "$@"
+    # Include -a flag if it was provided
+    if [[ -n "$auto_number" ]]; then
+        frontmatter_update_many "$file" -a "$auto_number" "$@"
+    else
+        frontmatter_update_many "$file" "$@"
+    fi
 }
 
 # @description Query frontmatter with complex yq expressions
@@ -493,7 +547,7 @@ EOF
 # @public
 # @arg $1 string Path to the markdown file (must exist, use touch to create)
 # @arg $... string Options and Field:value pairs
-# @option --auto-number Auto-generate number field if not provided
+# @option -a <type>,--auto-number=<type> Auto-generate number field with type (epic|task|prd)
 # @stdout Complete frontmatter YAML content after updates
 # @stderr Error messages
 # @exitcode 0 If successful
@@ -502,22 +556,48 @@ frontmatter_update_many() {
     local file="$1"
     shift
     
-    local auto_number=false
-    local field_pairs=()
+    local OPTIND opt
+    local auto_number=""
     
-    # Parse arguments for flags and field pairs
-    while [[ $# -gt 0 ]]; do
-        case "$1" in
-            --auto-number)
-                auto_number=true
-                shift
+    # Parse options using getopts
+    while getopts "a:-:" opt; do
+        case "$opt" in
+            a)
+                if [[ -z "$OPTARG" ]]; then
+                    echo "Error: Option -a requires a value (epic|task|prd)" >&2
+                    return 1
+                fi
+                auto_number="$OPTARG"
+                ;;
+            -)
+                case "$OPTARG" in
+                    auto-number=*)
+                        auto_number="${OPTARG#*=}"
+                        if [[ -z "$auto_number" ]]; then
+                            echo "Error: --auto-number requires a value (epic|task|prd)" >&2
+                            return 1
+                        fi
+                        ;;
+                    auto-number)
+                        echo "Error: --auto-number requires a value. Use --auto-number=<type>" >&2
+                        return 1
+                        ;;
+                    *)
+                        echo "Error: Unknown option --$OPTARG" >&2
+                        return 1
+                        ;;
+                esac
                 ;;
             *)
-                field_pairs+=("$1")
-                shift
+                echo "Error: Unknown option -$opt" >&2
+                return 1
                 ;;
         esac
     done
+    shift $((OPTIND-1))
+    
+    # Remaining arguments are field pairs
+    local field_pairs=("$@")
     
     # Check if file exists
     if [[ ! -f "$file" ]]; then
@@ -552,14 +632,17 @@ frontmatter_update_many() {
         frontmatter_assert "$file"
     fi
     
-    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    local api_script="$script_dir/../api.sh"
     local current_timestamp=$(date -Iseconds)
     
+    # Source version library if not already loaded
+    if [[ -z "${DOH_LIB_VERSION_LOADED:-}" ]]; then
+        source "$(dirname "${BASH_SOURCE[0]}")/version.sh"
+    fi
+    
     # Auto-inject file_version if not provided
-    if [[ "$has_file_version" == false ]] && [[ -x "$api_script" ]]; then
+    if [[ "$has_file_version" == false ]]; then
         local current_version
-        current_version=$("$api_script" version get_current 2>/dev/null)
+        current_version=$(version_get_current 2>/dev/null)
         if [[ -n "$current_version" ]]; then
             frontmatter_update_field "$file" "file_version" "$current_version"
         fi
@@ -579,10 +662,15 @@ frontmatter_update_many() {
         frontmatter_update_field "$file" "updated" "$current_timestamp"
     fi
     
+    # Source numbering library if not already loaded
+    if [[ -n "$auto_number" ]] && [[ -z "${DOH_LIB_NUMBERING_LOADED:-}" ]]; then
+        source "$(dirname "${BASH_SOURCE[0]}")/numbering.sh"
+    fi
+    
     # Auto-inject number if requested and not provided
-    if [[ "$auto_number" == true ]] && [[ "$has_number" == false ]] && [[ -x "$api_script" ]]; then
+    if [[ -n "$auto_number" ]] && [[ "$has_number" == false ]]; then
         local next_number
-        next_number=$("$api_script" numbering get_next "task" 2>/dev/null)
+        next_number=$(numbering_get_next "$auto_number" 2>/dev/null)
         if [[ -n "$next_number" ]]; then
             frontmatter_update_field "$file" "number" "$next_number"
         fi

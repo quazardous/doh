@@ -280,28 +280,15 @@ _helper_migration_initialize_version_system() {
     # Create versions directory
     mkdir -p "$doh_dir/versions"
     
-    # Create initial version milestone file
-    cat > "$doh_dir/versions/$initial_version.md" << EOF
----
-version: $initial_version
-type: initial
-created: $(date -u +%Y-%m-%dT%H:%M:%SZ)
-migration: true
----
-
-# Version $initial_version - Migration Baseline
-
-Initial version created during DOH versioning system migration.
+    # Create initial version milestone file using centralized function
+    local description="Initial version created during DOH versioning system migration.
 
 ## Migration Details
 - Migration date: $(date)
 - Migration tool: doh:version-migrate
-- Baseline version for existing project
-
-## Changes
-- Added versioning system to existing DOH project
-- All existing files preserved with baseline version
-EOF
+- Baseline version for existing project"
+    
+    version_create "$doh_dir/versions/$initial_version.md" "$initial_version" "initial" "$description"
     
     echo "✅ Created initial version milestone file"
 }
@@ -402,26 +389,16 @@ _helper_migration_import_git_history() {
             tag_date=$(git -C "$project_root" log -1 --format=%ai "$tag" 2>/dev/null)
             local tag_message
             tag_message=$(git -C "$project_root" tag -l -n1 "$tag" | cut -d' ' -f2-)
-            
-            # Create version file
-            cat > "$doh_dir/versions/$version.md" << EOF
----
-version: $version
-type: release
-created: $(date -d "$tag_date" -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)
-git_tag: $tag
-imported: true
----
 
-# Version $version
-
-$(if [[ -n "$tag_message" ]]; then echo "$tag_message"; else echo "Release version $version"; fi)
+            # Create version file using centralized function
+            local import_description="$tag_message
 
 ## Import Details
 - Imported from git tag: \`$tag\`
 - Original tag date: $tag_date
-- Migration tool: doh:version-migrate
-EOF
+- Migration tool: doh:version-migrate"
+            
+            version_create "$doh_dir/versions/$version.md" "$version" "release" "$import_description" "$tag"
             
             echo "✅ Created version file for $version"
         else

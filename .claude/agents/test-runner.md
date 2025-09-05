@@ -161,6 +161,7 @@ Your analysis should follow this structure:
 - If all tests pass, still check for performance degradation or resource usage patterns
 - For configuration-related failures, provide the exact configuration changes needed
 - When encountering new failure patterns, suggest additional diagnostic steps
+- For specific test failure, suggest to launch only test subset when possible
 
 ## Error Recovery
 

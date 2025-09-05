@@ -7,7 +7,6 @@
 
 # Source core library dependencies
 source "$(dirname "${BASH_SOURCE[0]}")/doh.sh"
-source "$(dirname "${BASH_SOURCE[0]}")/workspace.sh"
 
 # Guard against multiple sourcing
 [[ -n "${DOH_LIB_FILE_CACHE_LOADED:-}" ]] && return 0
@@ -22,7 +21,7 @@ readonly FILE_CACHE_LIB_VERSION="1.0.0"
 # @exitcode 1 If unable to get project ID
 _file_cache_get_path() {
     local project_id
-    project_id="$(workspace_get_current_project_id)" || return 1
+    project_id="$(doh_project_id)" || return 1
     
     echo "$(doh_global_dir)/projects/$project_id/file_cache.csv"
 }

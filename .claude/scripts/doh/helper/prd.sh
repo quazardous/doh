@@ -325,35 +325,37 @@ helper_prd_count() {
 # @stdout Help information for PRD commands
 # @exitcode 0 Always successful
 helper_prd_help() {
-    echo "DOH PRD Management"
-    echo "=================="
-    echo ""
-    echo "Usage: helper.sh prd <command> [options]"
-    echo ""
-    echo "Commands:"
-    echo "  new <prd-name> [description] [target_version]  Create a new PRD"
-    echo "  parse <prd-name>                              Parse and analyze existing PRD"
-    echo "  list                                          List all PRDs categorized by status"
-    echo "  status                                        Show comprehensive PRD status report"
-    echo "  by-status <status>                            List PRDs filtered by specific status"
-    echo "  count [status]                                Count PRDs by status or show all counts"
-    echo "  help                                          Show this help message"
-    echo ""
-    echo "Status values:"
-    echo "  backlog       - PRDs in backlog/draft phase"
-    echo "  in-progress   - PRDs currently being implemented"
-    echo "  implemented   - Completed/done PRDs"
-    echo "  all           - All PRDs regardless of status"
-    echo ""
-    echo "Examples:"
-    echo "  helper.sh prd new my-feature \"Feature description\""
-    echo "  helper.sh prd new my-feature \"Feature description\" \"2.0.0\""
-    echo "  helper.sh prd parse existing-prd"
-    echo "  helper.sh prd list"
-    echo "  helper.sh prd status"
-    echo "  helper.sh prd by-status backlog"
-    echo "  helper.sh prd count implemented"
-    echo "  helper.sh prd count"
+    cat <<EOF
+DOH PRD Management
+==================
+
+Usage: helper.sh prd <command> [options]
+
+Commands:
+    new <prd-name> [description] [target_version]  Create a new PRD
+    parse <prd-name>                              Parse and analyze existing PRD
+    list                                          List all PRDs categorized by status
+    status                                        Show comprehensive PRD status report
+    by-status <status>                            List PRDs filtered by specific status
+    count [status]                                Count PRDs by status or show all counts
+    help                                          Show this help message
+
+Status values:
+    backlog       - PRDs in backlog/draft phase
+    in-progress   - PRDs currently being implemented
+    implemented   - Completed/done PRDs
+    all           - All PRDs regardless of status
+
+Examples:
+    helper.sh prd new my-feature "Feature description"
+    helper.sh prd new my-feature "Feature description" "2.0.0"
+    helper.sh prd parse existing-prd
+    helper.sh prd list
+    helper.sh prd status
+    helper.sh prd by-status backlog
+    helper.sh prd count implemented
+    helper.sh prd count
+EOF
     return 0
 }
 
@@ -367,7 +369,7 @@ helper_prd_help() {
 helper_prd_new() {
     local prd_name="${1:-}"
     local description="${2:-}"
-    local target_version="${3:-1.0.0}"
+    local target_version="${3:-}"
 
     # Validation
     if [[ -z "$prd_name" ]]; then
@@ -394,49 +396,8 @@ helper_prd_new() {
     # Create PRDs directory if it doesn't exist
     mkdir -p "$doh_dir/prds"
 
-    # Prepare PRD content template
-    local prd_content
-    prd_content=$(cat <<EOF
-
-# PRD: $prd_name
-
-## Executive Summary
-$(if [[ -n "$description" ]]; then echo "$description"; else echo "<!-- Brief overview and value proposition -->"; fi)
-
-## Problem Statement
-<!-- What problem are we solving? -->
-
-## User Stories
-<!-- Primary user personas and detailed user journeys -->
-
-## Requirements
-
-### Functional Requirements
-<!-- Core features and capabilities -->
-
-### Non-Functional Requirements
-<!-- Performance, security, scalability needs -->
-
-## Success Criteria
-<!-- Measurable outcomes and KPIs -->
-
-## Constraints & Assumptions
-<!-- Technical limitations, timeline constraints -->
-
-## Out of Scope
-<!-- What we're explicitly NOT building -->
-
-## Dependencies
-<!-- External and internal dependencies -->
-EOF
-)
-    
-    # Create PRD file with frontmatter using field:value format
-    frontmatter_create_markdown "$prd_path" "$prd_content" \
-        "name:$prd_name" \
-        "description:$description" \
-        "status:backlog" \
-        "target_version:$target_version"
+    # Use centralized PRD creation function
+    prd_create "$prd_path" "$prd_name" "$description" "$target_version"
 
     echo "✅ PRD created: $prd_path"
     echo "   Status: backlog"

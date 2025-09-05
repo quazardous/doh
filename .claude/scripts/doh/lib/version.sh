@@ -484,3 +484,93 @@ version_list() {
     } | sort -u
 }
 
+# @description Create version milestone content with proper formatting
+# @arg $1 string Version number
+# @arg $2 string Version type (initial|release|patch|minor|major)
+# @arg $3 string Description (optional)
+# @stdout Version milestone markdown content
+# @exitcode 0 Always succeeds
+version_create_content() {
+    local version="$1"
+    local type="${2:-release}"
+    local description="${3:-}"
+    
+    local description_section=""
+    if [[ -n "$description" ]]; then
+        description_section="$description
+
+"
+    fi
+    
+    # Escape special characters for sed
+    local escaped_version="${version//\//\\/}"
+    local escaped_desc="${description_section//\//\\/}"
+    escaped_desc="${escaped_desc//$'\n'/\\n}"
+    
+    cat <<'VERSION_TEMPLATE' | sed "s/VERSION_PLACEHOLDER/$escaped_version/g" | sed "s/DESCRIPTION_SECTION_PLACEHOLDER/$escaped_desc/g"
+
+# Version VERSION_PLACEHOLDER
+
+DESCRIPTION_SECTION_PLACEHOLDER## Changes
+<!-- List of changes in this version -->
+
+## Breaking Changes
+<!-- List any breaking changes that require user action -->
+
+## Migration Notes
+<!-- Instructions for migrating from previous version -->
+
+## Contributors
+<!-- List contributors to this version -->
+VERSION_TEMPLATE
+}
+
+# @description Create new version milestone file with frontmatter
+# @arg $1 string Version path
+# @arg $2 string Version number
+# @arg $3 string Version type (initial|release|patch|minor|major)
+# @arg $4 string Description (optional)
+# @arg $5 string Git tag (optional)
+# @stdout Creation status messages
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If creation failed
+version_create() {
+    local version_path="$1"
+    local version="$2"
+    local type="${3:-release}"
+    local description="${4:-}"
+    local git_tag="${5:-}"
+    
+    if [[ -z "$version_path" || -z "$version" ]]; then
+        echo "Error: Missing required parameters" >&2
+        echo "Usage: version_create <path> <version> [type] [description] [git_tag]" >&2
+        return 1
+    fi
+    
+    # Validate version format
+    if ! version_validate "$version"; then
+        echo "Error: Invalid version format: $version" >&2
+        return 1
+    fi
+    
+    # Generate content using the content creation function
+    local version_content
+    version_content=$(version_create_content "$version" "$type" "$description")
+    
+    # Build frontmatter fields
+    local -a frontmatter_fields=(
+        "version:$version"
+        "type:$type"
+    )
+    
+    if [[ -n "$git_tag" ]]; then
+        frontmatter_fields+=("git_tag:$git_tag")
+    fi
+    
+    # Create version file with frontmatter
+    frontmatter_create_markdown "$version_path" "$version_content" "${frontmatter_fields[@]}"
+    
+    return $?
+}
+

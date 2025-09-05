@@ -494,7 +494,7 @@ helper_workflow_workspace() {
 
     # Project Information
     local project_id
-    project_id="$(workspace_get_current_project_id)"
+    project_id="$(doh_project_id)"
     echo "Project: $project_id"
     echo "DOH Global Dir: $(doh_global_dir)"
     echo ""

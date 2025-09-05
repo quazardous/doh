@@ -19,8 +19,8 @@ _tf_setup() {
     local project_name="test_project_$(basename "$DOH_PROJECT_DIR")"
     export TEST_PROJECT_NAME="$project_name"
     
-    # Override workspace_get_current_project_id for testing
-    workspace_get_current_project_id() {
+    # Override doh_project_id for testing
+    doh_project_id() {
         echo "$TEST_PROJECT_NAME"
     }
 }
@@ -28,7 +28,7 @@ _tf_setup() {
 _tf_teardown() {
     # Cleanup test environment
     unset TEST_PROJECT_NAME
-    unset -f workspace_get_current_project_id
+    unset -f doh_project_id
 }
 
 # Helper to reset numbering sequence and registry

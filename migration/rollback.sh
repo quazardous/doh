@@ -5,7 +5,7 @@
 
 # Source required dependencies
 LIB_DIR="$(dirname "$0")/../.claude/scripts/doh/lib"
-source "$LIB_DIR/workspace.sh"
+source "$LIB_DIR/doh.sh"
 source "$LIB_DIR/dohenv.sh"
 
 # Colors for output
@@ -18,7 +18,7 @@ NC='\033[0m' # No Color
 # List available backups
 list_backups() {
     local project_id
-    project_id="$(workspace_get_current_project_id)" || return 1
+    project_id="$(doh_project_id)" || return 1
     
     local backup_root="$HOME/.doh/projects/$project_id/backups"
     
@@ -119,7 +119,7 @@ create_pre_rollback_backup() {
     project_root="$(_find_doh_root)" || return 1
     
     local project_id timestamp
-    project_id="$(workspace_get_current_project_id)" || return 1
+    project_id="$(doh_project_id)" || return 1
     timestamp=$(date +"%Y%m%d_%H%M%S")
     
     local backup_dir="$HOME/.doh/projects/$project_id/backups/pre_rollback_$timestamp"
@@ -200,7 +200,7 @@ restore_from_backup() {
     
     # Restore registry files
     local project_id registry_dir
-    project_id="$(workspace_get_current_project_id)" || return 1
+    project_id="$(doh_project_id)" || return 1
     registry_dir="$HOME/.doh/projects/$project_id"
     
     # Clean current registry files
@@ -297,7 +297,7 @@ interactive_rollback() {
     
     # List available backups
     local project_id
-    project_id="$(workspace_get_current_project_id)" || return 1
+    project_id="$(doh_project_id)" || return 1
     
     local backup_root="$HOME/.doh/projects/$project_id/backups"
     

@@ -236,12 +236,12 @@ _tff_setup_workspace_for_helpers() {
     export TEST_PROJECT_NAME="$project_name"
     
     # Override workspace function for testing
-    workspace_get_current_project_id() {
+    doh_project_id() {
         echo "$TEST_PROJECT_NAME"
     }
     
     # Export the override function
-    export -f workspace_get_current_project_id
+    export -f doh_project_id
     
     return 0
 }

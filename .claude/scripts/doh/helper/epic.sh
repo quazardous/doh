@@ -465,36 +465,8 @@ helper_epic_create() {
     # Create epic directory
     mkdir -p "$doh_dir/epics/${epic_name}"
     
-    # Create epic using frontmatter API
-    local created_date
-    created_date="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-    
-    # Prepare epic content
-    local epic_content
-    epic_content=$(cat <<EOF
-
-# Epic: $epic_name
-
-$(if [[ -n "$description" ]]; then echo "## Description"; echo "$description"; echo ""; fi)## Overview
-<!-- Epic overview goes here -->
-
-## Implementation Strategy
-<!-- Implementation details go here -->
-
-## Tasks
-<!-- Tasks will be added during decomposition -->
-EOF
-)
-    
-    # Create epic file with frontmatter using field:value format
-    frontmatter_create_markdown "$epic_path" "$epic_content" \
-        "name:$epic_name" \
-        "number:$epic_number" \
-        "status:backlog" \
-        "created:$created_date" \
-        "progress:0%" \
-        "github:[Will be updated when synced to GitHub]" \
-        "file_version:0.1.0"
+    # Create epic using centralized library function
+    epic_create "$epic_path" "$epic_name" "$epic_number" "$description"
     
     # Register epic in numbering system
     numbering_register_epic "$epic_number" "$epic_path" "$epic_name"

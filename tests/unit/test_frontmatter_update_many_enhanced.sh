@@ -101,7 +101,7 @@ test_auto_number_flag() {
     touch "$TEST_DIR/numbered.md"
     
     # Initialize with auto-number flag
-    frontmatter_update_many "$TEST_DIR/numbered.md" --auto-number "name:Numbered Task" "status:backlog"
+    frontmatter_update_many "$TEST_DIR/numbered.md" --auto-number=task "name:Numbered Task" "status:backlog"
     _tf_assert "Should initialize file with auto-number"
     
     # Verify number field is present
@@ -177,8 +177,7 @@ test_explicit_override_auto_fields() {
 test_file_not_exists_error() {
     
     # Try to update non-existent file
-    frontmatter_update_many "/non/existent/file.md" "status:test" 2>/dev/null
-    _tf_assert_failure "Should fail for non-existent file"
+    _tf_assert_not "Should fail for non-existent file" frontmatter_update_many "/non/existent/file.md" "status:test"
 }
 
 test_auto_number_with_explicit_number() {
@@ -188,7 +187,7 @@ test_auto_number_with_explicit_number() {
     
     # Initialize with explicit number and auto-number flag
     frontmatter_update_many "$TEST_DIR/explicit_number.md" \
-        --auto-number \
+        --auto-number=task \
         "number:999" \
         "name:Explicit Number Task"
     _tf_assert "Should handle explicit number with auto-number flag"
@@ -347,8 +346,8 @@ test_mixed_flags_and_fields() {
     
     # Initialize with flag in middle of arguments
     frontmatter_update_many "$TEST_DIR/mixed.md" \
+        --auto-number=task \
         "name:Mixed Args" \
-        --auto-number \
         "status:backlog" \
         "priority:medium"
     _tf_assert "Should handle mixed flags and fields"

@@ -163,3 +163,97 @@ prd_list() {
     echo ""
     echo "Total: $count PRDs$filter_text"
 }
+
+# @description Create PRD content with proper formatting
+# @arg $1 string PRD name
+# @arg $2 string PRD description (optional)
+# @stdout PRD markdown content
+# @exitcode 0 Always succeeds
+prd_create_content() {
+    local prd_name="$1"
+    local description="${2:-<!-- Brief overview and value proposition -->}"
+    
+    # Escape special characters for sed
+    local escaped_name="${prd_name//\//\\/}"
+    local escaped_desc="${description//\//\\/}"
+    escaped_desc="${escaped_desc//$'\n'/\\n}"
+    
+    cat <<'PRD_TEMPLATE' | sed "s/PRD_NAME_PLACEHOLDER/$escaped_name/g" | sed "s|DESCRIPTION_PLACEHOLDER|$escaped_desc|g"
+
+# PRD: PRD_NAME_PLACEHOLDER
+
+## Executive Summary
+DESCRIPTION_PLACEHOLDER
+
+## Problem Statement
+<!-- What problem are we solving? -->
+
+## User Stories
+<!-- Primary user personas and detailed user journeys -->
+
+## Requirements
+
+### Functional Requirements
+<!-- Core features and capabilities -->
+
+### Non-Functional Requirements
+<!-- Performance, security, scalability needs -->
+
+## Success Criteria
+<!-- Measurable outcomes and KPIs -->
+
+## Constraints & Assumptions
+<!-- Technical limitations, timeline constraints -->
+
+## Out of Scope
+<!-- What we're explicitly NOT building -->
+
+## Dependencies
+<!-- External and internal dependencies -->
+PRD_TEMPLATE
+}
+
+# @description Create new PRD with frontmatter
+# @arg $1 string PRD path
+# @arg $2 string PRD name
+# @arg $3 string PRD description (optional)
+# @arg $4 string Target version (optional)
+# @stdout Creation status messages
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If creation failed
+prd_create() {
+    local prd_path="$1"
+    local prd_name="$2"
+    local description="${3:-}"
+    local target_version="${4:-}"
+    
+    if [[ -z "$prd_path" || -z "$prd_name" ]]; then
+        echo "Error: Missing required parameters" >&2
+        echo "Usage: prd_create <path> <name> [description] [target_version]" >&2
+        return 1
+    fi
+    
+    # Generate content using the content creation function
+    local prd_content
+    prd_content=$(prd_create_content "$prd_name" "$description")
+    
+    # Build frontmatter fields
+    local -a frontmatter_fields=(
+        "name:$prd_name"
+        "status:backlog"
+    )
+    
+    if [[ -n "$description" ]]; then
+        frontmatter_fields+=("description:$description")
+    fi
+    
+    if [[ -n "$target_version" ]]; then
+        frontmatter_fields+=("target_version:$target_version")
+    fi
+    
+    # Create PRD file with frontmatter
+    frontmatter_create_markdown --auto-number=prd "$prd_path" "$prd_content" "${frontmatter_fields[@]}"
+
+    return $?
+}

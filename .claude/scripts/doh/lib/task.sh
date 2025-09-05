@@ -86,3 +86,96 @@ task_transition_status() {
         fi
     fi
 }
+
+# @description Create task content with proper formatting
+# @arg $1 string Task name
+# @arg $2 string Task description (optional)
+# @stdout Task markdown content
+# @exitcode 0 Always succeeds
+task_create_content() {
+    local task_name="$1"
+    local description="${2:-}"
+    
+    local description_section=""
+    if [[ -n "$description" ]]; then
+        description_section="## Description
+$description
+
+"
+    fi
+    
+    # Escape special characters for sed
+    local escaped_name="${task_name//\//\\/}"
+    local escaped_desc="${description_section//\//\\/}"
+    escaped_desc="${escaped_desc//$'\n'/\\n}"
+    
+    cat <<'TASK_TEMPLATE' | sed "s/TASK_NAME_PLACEHOLDER/$escaped_name/g" | sed "s/DESCRIPTION_SECTION_PLACEHOLDER/$escaped_desc/g"
+
+# Task: TASK_NAME_PLACEHOLDER
+
+DESCRIPTION_SECTION_PLACEHOLDER## Acceptance Criteria
+<!-- Define what "done" means for this task -->
+
+## Implementation Details
+<!-- Technical approach and considerations -->
+
+## Testing Requirements
+<!-- How to verify the task is complete -->
+
+## Notes
+<!-- Additional context or considerations -->
+TASK_TEMPLATE
+}
+
+# @description Create new task with frontmatter
+# @arg $1 string Task path
+# @arg $2 string Task name
+# @arg $4 string Epic name
+# @arg $5 string Task description (optional)
+# @arg $6 string Dependencies (optional, comma-separated task numbers)
+# @arg $7 string Parallel flag (optional, true/false)
+# @stdout Creation status messages
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If creation failed
+task_create() {
+    local task_path="$1"
+    local task_name="$2"
+    local epic_name="$3"
+    local description="${4:-}"
+    local dependencies="${5:-}"
+    local parallel="${6:-false}"
+
+    if [[ -z "$task_path" || -z "$task_name" || -z "$epic_name" ]]; then
+        echo "Error: Missing required parameters" >&2
+        echo "Usage: task_create <path> <name> <epic> [description] [dependencies] [parallel]" >&2
+        return 1
+    fi
+    
+    # Generate content using the content creation function
+    local task_content
+    task_content=$(task_create_content "$task_name" "$description")
+    
+    # Build frontmatter fields
+    local -a frontmatter_fields=(
+        "name:$task_name"
+        "epic:$epic_name"
+        "status:pending"
+        "parallel:$parallel"
+    )
+    
+    if [[ -n "$description" ]]; then
+        frontmatter_fields+=("description:$description")
+    fi
+    
+    if [[ -n "$dependencies" ]]; then
+        # Format dependencies as array
+        local formatted_deps="[$(echo "$dependencies" | sed 's/,/, /g')]"
+        frontmatter_fields+=("depends_on:$formatted_deps")
+    fi
+    
+    # Create task file with frontmatter
+    frontmatter_create_markdown --auto-number=task "$task_path" "$task_content" "${frontmatter_fields[@]}"
+
+    return $?
+}

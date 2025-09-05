@@ -284,3 +284,73 @@ epic_get_tasks() {
         fi
     done
 }
+
+# @description Create epic content with proper formatting
+# @arg $1 string Epic name
+# @arg $2 string Epic description (optional)
+# @stdout Epic markdown content
+# @exitcode 0 Always succeeds
+epic_create_content() {
+    local epic_name="$1"
+    local description="${2:-}"
+    
+    local description_section=""
+    if [[ -n "$description" ]]; then
+        description_section="## Description
+$description
+
+"
+    fi
+    
+    # Escape special characters for sed
+    local escaped_name="${epic_name//\//\\/}"
+    local escaped_desc="${description_section//\//\\/}"
+    escaped_desc="${escaped_desc//$'\n'/\\n}"
+
+    cat <<'EPIC_TEMPLATE' | sed "s/EPIC_NAME_PLACEHOLDER/$escaped_name/g" | sed "s/DESCRIPTION_SECTION_PLACEHOLDER/$escaped_desc/g"
+
+# Epic: EPIC_NAME_PLACEHOLDER
+
+DESCRIPTION_SECTION_PLACEHOLDER## Overview
+<!-- Epic overview goes here -->
+
+## Implementation Strategy
+<!-- Implementation details go here -->
+
+## Tasks
+<!-- Tasks will be added during decomposition -->
+EPIC_TEMPLATE
+}
+
+# @description Create new epic with frontmatter
+# @arg $1 string Epic path
+# @arg $2 string Epic name
+# @arg $3 string Epic description (optional)
+# @stdout Creation status messages
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If creation failed
+epic_create() {
+    local epic_path="$1"
+    local epic_name="$2"
+    local description="${3:-}"
+
+    if [[ -z "$epic_path" || -z "$epic_name" ]]; then
+        echo "Error: Missing required parameters" >&2
+        echo "Usage: epic_create <path> <name> [description]" >&2
+        return 1
+    fi
+    
+    # Generate content using the content creation function
+    local epic_content
+    epic_content=$(epic_create_content "$epic_name" "$description")
+    
+    # Create epic file with frontmatter
+    frontmatter_create_markdown --auto-number=epic "$epic_path" "$epic_content" \
+        "name:$epic_name" \
+        "status:backlog" \
+        "progress:0%" \
+        "github:[Will be updated when synced to GitHub]"
+    
+    return $?
+}

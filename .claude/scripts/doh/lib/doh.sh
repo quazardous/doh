@@ -40,6 +40,28 @@ doh_project_dir() {
     echo "$project_root/.doh"
 }
 
+# @description Get current project ID based on directory
+# @public
+# @stdout Unique project ID: basename + short hash of absolute path
+# @exitcode 0 If successful
+# @exitcode 1 If unable to find DOH root
+doh_project_id() {
+    # Allow override via environment variable
+    if [[ -n "${DOH_PROJECT_ID:-}" ]]; then
+        echo "$DOH_PROJECT_ID"
+        return 0
+    fi
+    
+    local project_root
+    project_root="$(doh_project_root)" || return 1
+    
+    local project_name=$(basename "$project_root")
+    local abs_path=$(realpath "$project_root")
+    local path_hash=$(echo "$abs_path" | sha256sum | cut -c1-8)
+    
+    echo "${project_name}_${path_hash}"
+}
+
 # @description Get DOH project root (relative to library location)
 # @public
 # @stdout Path to DOH project root

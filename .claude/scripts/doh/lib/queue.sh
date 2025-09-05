@@ -5,7 +5,6 @@
 
 # Source required dependencies
 source "$(dirname "${BASH_SOURCE[0]}")/doh.sh"
-source "$(dirname "${BASH_SOURCE[0]}")/workspace.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/numbering.sh"
 
 # Guard against multiple sourcing
@@ -44,7 +43,7 @@ queue_get_dir() {
     local queue_name="${1:-$DEFAULT_QUEUE_NAME}"
     
     local project_id
-    project_id="$(workspace_get_current_project_id)" || return 1
+    project_id="$(doh_project_id)" || return 1
     
     echo "$(doh_global_dir)/projects/$project_id/queues/$queue_name"
 }

@@ -785,6 +785,38 @@ The test runner is designed for continuous integration:
 6. **Test edge cases**: Empty inputs, boundary conditions, error paths
 7. **One assertion per test**: Makes failures easier to diagnose
 8. **Test files don't need executable permissions**: Test files are sourced by the test launcher, not executed directly
+9. **Always use absolute file paths**: Never create files without full paths to avoid artifacts in project root
+
+### File Path Best Practices
+
+**❌ WRONG - Creates artifacts in project root:**
+```bash
+# These create files in the current directory!
+frontmatter_create_markdown "content" "test data"
+echo "test" > "output.txt"  
+some_command "filename.md"
+```
+
+**✅ CORRECT - Use absolute paths:**
+```bash
+# Use test framework temp functions
+local temp_file=$(_tf_create_temp_file ".md")
+frontmatter_create_markdown "$temp_file" "test data"
+
+# Or use explicit temp directories
+local test_file="/tmp/test_${RANDOM}.md"
+echo "test" > "$test_file"
+
+# For DOH project testing, use proper paths
+local project_file="$TEST_DIR/test_file.md"
+some_command "$project_file"
+```
+
+**Key Rules:**
+- Never use filenames without directory paths (`"content"`, `"output.txt"`)
+- Always use `$TEST_DIR`, `/tmp/`, or `_tf_create_temp_*` functions
+- Clean up temporary files in `_tf_teardown()` when needed
+- Use `$(_tf_create_temp_dir)` for temporary directories
 
 ## Troubleshooting
 
