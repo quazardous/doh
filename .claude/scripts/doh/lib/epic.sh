@@ -354,3 +354,31 @@ epic_create() {
     
     return $?
 }
+
+# @description Update epic fields using frontmatter
+# @arg $1 string Epic file path
+# @arg $... string Field:value pairs to update
+# @stdout Update status messages
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If update failed
+epic_update() {
+    local epic_path="$1"
+    shift
+    
+    if [[ -z "$epic_path" ]]; then
+        echo "Error: Missing epic file path" >&2
+        echo "Usage: epic_update <path> field:value [field:value ...]" >&2
+        return 1
+    fi
+    
+    if [[ ! -f "$epic_path" ]]; then
+        echo "Error: Epic file not found: $epic_path" >&2
+        return 1
+    fi
+    
+    # Update epic fields using frontmatter_update_many
+    frontmatter_update_many "$epic_path" "$@"
+    
+    return $?
+}

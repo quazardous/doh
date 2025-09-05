@@ -68,8 +68,8 @@ test_task_create_with_auto_number() {
     local test_task="test-auto-task"
     local result
     
-    # Create task with -a task to test auto-numbering for tasks
-    result="$(./.claude/scripts/doh/api.sh task create /tmp/test_task.md "$test_task" "test-epic" "Task with auto-numbering test" 2>&1)"
+    # Create task with -a task to test auto-numbering for tasks (using new key:value format)
+    result="$(./.claude/scripts/doh/api.sh task create /tmp/test_task.md "$test_task" "test-epic" "description:Task with auto-numbering test" "parallel:true" 2>&1)"
     local exit_code=$?
     
     _tf_assert_equals "Task creation should succeed" 0 $exit_code
@@ -79,6 +79,11 @@ test_task_create_with_auto_number() {
         local has_number
         has_number=$(./.claude/scripts/doh/api.sh frontmatter get_field /tmp/test_task.md number 2>/dev/null)
         _tf_assert_not_equals "Task should have auto-generated number field" "" "$has_number"
+        
+        # Verify key:value fields were applied
+        local parallel_value
+        parallel_value=$(./.claude/scripts/doh/api.sh frontmatter get_field /tmp/test_task.md parallel 2>/dev/null)
+        _tf_assert_equals "Parallel field should be set" "true" "$parallel_value"
         
         # Clean up  
         rm -f "/tmp/test_task.md"

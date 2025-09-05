@@ -498,5 +498,64 @@ helper_prd_parse() {
     return 0
 }
 
+# @description Update PRD fields
+# @arg $1 string PRD name  
+# @arg $... string Field:value pairs to update
+# @stdout Update status messages
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If update failed
+helper_prd_update() {
+    local prd_name="${1:-}"
+    shift
+    
+    # Validation
+    if [[ -z "$prd_name" ]]; then
+        echo "Error: PRD name required" >&2
+        echo "Usage: prd update <prd-name> field:value [field:value ...]" >&2
+        return 1
+    fi
+    
+    # Get DOH directory
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
+        echo "Error: Not in DOH project" >&2
+        return 1
+    }
+    
+    # Check if PRD exists
+    local prd_path="$doh_dir/prds/$prd_name.md"
+    if [[ ! -f "$prd_path" ]]; then
+        echo "Error: PRD not found: $prd_name" >&2
+        echo "Available PRDs:" >&2
+        find "$doh_dir/prds" -name "*.md" -type f 2>/dev/null | while read -r file; do
+            [ -f "$file" ] && echo "  • $(basename "$file" .md)" >&2
+        done
+        return 1
+    fi
+    
+    # Update PRD fields using library function
+    echo "📝 Updating PRD: $prd_name"
+    prd_update "$prd_path" "$@"
+    local result=$?
+    
+    if [[ $result -eq 0 ]]; then
+        echo "✅ PRD updated successfully"
+        
+        # Show updated fields
+        for field_value in "$@"; do
+            if [[ "$field_value" =~ ^([^:]+):(.*)$ ]]; then
+                local field="${BASH_REMATCH[1]}"
+                local value="${BASH_REMATCH[2]}"
+                echo "   • $field: $value"
+            fi
+        done
+    else
+        echo "❌ Failed to update PRD" >&2
+    fi
+    
+    return $result
+}
+
 # Helpers should only be called through helper.sh bootstrap
 # Direct execution is not allowed

@@ -257,3 +257,31 @@ prd_create() {
 
     return $?
 }
+
+# @description Update PRD fields using frontmatter
+# @arg $1 string PRD file path
+# @arg $... string Field:value pairs to update
+# @stdout Update status messages
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If update failed
+prd_update() {
+    local prd_path="$1"
+    shift
+    
+    if [[ -z "$prd_path" ]]; then
+        echo "Error: Missing PRD file path" >&2
+        echo "Usage: prd_update <path> field:value [field:value ...]" >&2
+        return 1
+    fi
+    
+    if [[ ! -f "$prd_path" ]]; then
+        echo "Error: PRD file not found: $prd_path" >&2
+        return 1
+    fi
+    
+    # Update PRD fields using frontmatter_update_many
+    frontmatter_update_many "$prd_path" "$@"
+    
+    return $?
+}

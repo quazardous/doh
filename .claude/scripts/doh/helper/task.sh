@@ -11,6 +11,7 @@ source "${DOH_ROOT}/.claude/scripts/doh/lib/dohenv.sh"
 source "${DOH_ROOT}/.claude/scripts/doh/lib/doh.sh"
 source "${DOH_ROOT}/.claude/scripts/doh/lib/numbering.sh" 
 source "${DOH_ROOT}/.claude/scripts/doh/lib/frontmatter.sh"
+source "${DOH_ROOT}/.claude/scripts/doh/lib/task.sh"
 
 # Load DOH environment
 dohenv_load
@@ -19,17 +20,29 @@ dohenv_load
 [[ -n "${DOH_HELPER_TASK_LOADED:-}" ]] && return 0
 DOH_HELPER_TASK_LOADED=1
 
-# @description Décomposer un epic en tâches
+# @description Créer une nouvelle tâche pour un epic
 # @arg $1 string Nom de l'epic
-# @stdout Résultats de la décomposition
-# @exitcode 0 Si décomposition réussie
-# @exitcode 1 Si erreur ou epic non trouvé
-helper_task_decompose() {
-    local epic_name="$1"
+# @arg $2 string Titre de la tâche
+# @arg $3 string Target version (optionnel, hérite de l'epic par défaut)
+# @stdout Messages de création
+# @stderr Messages d'erreur  
+# @exitcode 0 Si création réussie
+# @exitcode 1 Si erreur
+helper_task_new() {
+    local epic_name="${1:-}"
+    local task_title="${2:-}"
+    local target_version="${3:-}"
     
+    # Validation
     if [[ -z "$epic_name" ]]; then
         echo "Error: Epic name required" >&2
-        echo "Usage: helper.sh task decompose <epic-name>" >&2
+        echo "Usage: helper.sh task new <epic-name> <task-title> [target_version]" >&2
+        return 1
+    fi
+    
+    if [[ -z "$task_title" ]]; then
+        echo "Error: Task title required" >&2
+        echo "Usage: helper.sh task new <epic-name> <task-title> [target_version]" >&2
         return 1
     fi
 
@@ -45,53 +58,60 @@ helper_task_decompose() {
         echo "Error: Epic not found: $epic_path" >&2
         echo "Available epics:" >&2
         if [[ -d "$doh_dir/epics" ]]; then
-            ls -1 "$doh_dir/epics" 2>/dev/null | sed 's/^/  - /' || echo "  (none)"
+            find "$doh_dir/epics" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | while read -r dir; do
+                [ -d "$dir" ] && echo "  • $(basename "$dir")" >&2
+            done
         fi
         return 1
     fi
     
-    echo "Decomposing epic '$epic_name' into tasks..."
-    echo "==========================================="
+    # Extract target_version from epic if not provided
+    if [[ -z "$target_version" ]]; then
+        target_version="$(frontmatter_get_field "$epic_path" "target_version" 2>/dev/null || echo "")"
+        if [[ -n "$target_version" ]]; then
+            echo "📋 Inherited target_version from epic: $target_version"
+        fi
+    fi
     
-    # For now, this is a placeholder that demonstrates the concept
-    # The actual implementation would analyze the epic content and create tasks
-    echo "📋 Epic Analysis:"
-    local epic_description
-    epic_description="$(frontmatter_get_field "$epic_path" "description" 2>/dev/null || echo "")"
+    echo "Creating task: $task_title"
+    echo "For epic: $epic_name"
+    
+    # Create task file path with next available number
+    local task_dir="$doh_dir/epics/${epic_name}"
+    local task_number
+    task_number="$(numbering_get_next "task")" || {
+        echo "Error: Could not generate task number" >&2
+        return 1
+    }
+    
+    local task_path="$task_dir/${task_number}.md"
+    
+    # Build additional fields for task creation
+    local -a additional_fields=()
+    if [[ -n "$target_version" ]]; then
+        additional_fields+=("target_version:$target_version")
+        echo "🎯 Set target_version: $target_version"
+    fi
+    
+    # Create task using library function with auto-numbering
+    task_create "$task_path" "$task_title" "$epic_name" "${additional_fields[@]}"
+    
+    # Get the generated number for display
+    local actual_task_number
+    actual_task_number=$(frontmatter_get_field "$task_path" "number")
+    
+    echo "✅ Task created: $task_path"
+    echo "   Number: $actual_task_number"
+    echo "   Title: $task_title"
     echo "   Epic: $epic_name"
-    if [[ -n "$epic_description" ]]; then
-        echo "   Description: $epic_description"
-    fi
-    
-    # Count existing tasks
-    local task_count=0
-    if [[ -d "$doh_dir/epics/${epic_name}" ]]; then
-        task_count=$(find "$doh_dir/epics/${epic_name}" -name "[0-9][0-9][0-9].md" -type f 2>/dev/null | wc -l)
-    fi
-    
-    echo "   Existing tasks: $task_count"
-    
-    if [[ "$task_count" -gt 0 ]]; then
-        echo ""
-        echo "⚠️ Epic already has $task_count tasks. Task decomposition should be done manually."
-        echo "   Use /doh:epic-decompose $epic_name for interactive task creation."
-        echo ""
-        echo "📋 Existing tasks:"
-        find "$doh_dir/epics/${epic_name}" -name "[0-9][0-9][0-9].md" -type f 2>/dev/null | sort | while read -r task_file; do
-            local task_number
-            task_number="$(basename "$task_file" .md)"
-            local task_name
-            task_name="$(frontmatter_get_field "$task_file" "name" 2>/dev/null || echo "Unnamed task")"
-            echo "   - Task $task_number: $task_name"
-        done
-    else
-        echo ""
-        echo "💡 Suggestion: Use /doh:epic-decompose $epic_name to create tasks interactively"
-        echo "   This will analyze the epic and create appropriate tasks with proper numbering."
+    echo "   Status: pending"
+    if [[ -n "$target_version" ]]; then
+        echo "   Target version: $target_version"
     fi
     
     return 0
 }
+
 
 # @description Obtenir le statut d'une tâche
 # @arg $1 string Numéro de la tâche
@@ -194,7 +214,7 @@ helper_task_status() {
 # @stdout Confirmation de la mise à jour
 # @exitcode 0 Si mise à jour réussie
 # @exitcode 1 Si erreur
-helper_task_update() {
+helper_task_update_status() {
     local task_number="$1"
     local new_status="$2"
     
@@ -252,6 +272,71 @@ helper_task_update() {
     return 0
 }
 
+# @description Update task fields
+# @arg $1 string Task number
+# @arg $... string Field:value pairs to update
+# @stdout Update status messages
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If update failed
+helper_task_update() {
+    local task_number="${1:-}"
+    shift
+    
+    # Check if this is the old status-only update syntax
+    if [[ $# -eq 1 && ! "$1" =~ : ]]; then
+        # Legacy syntax: task update <number> <status>
+        helper_task_update_status "$task_number" "$1"
+        return $?
+    fi
+    
+    # Validation
+    if [[ -z "$task_number" ]]; then
+        echo "Error: Task number required" >&2
+        echo "Usage: task update <task-number> field:value [field:value ...]" >&2
+        echo "   Or: task update <task-number> <status> (legacy)" >&2
+        return 1
+    fi
+    
+    # Get DOH directory
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
+        echo "Error: Not in DOH project" >&2
+        return 1
+    }
+    
+    # Find task file
+    local task_file
+    task_file=$(find "$doh_dir/epics" -name "${task_number}.md" -type f 2>/dev/null | head -1)
+    
+    if [[ -z "$task_file" ]]; then
+        echo "Error: Task #$task_number not found" >&2
+        return 1
+    fi
+    
+    # Update task fields using library function
+    echo "📝 Updating task: #$task_number"
+    task_update "$task_file" "$@"
+    local result=$?
+    
+    if [[ $result -eq 0 ]]; then
+        echo "✅ Task updated successfully"
+        
+        # Show updated fields
+        for field_value in "$@"; do
+            if [[ "$field_value" =~ ^([^:]+):(.*)$ ]]; then
+                local field="${BASH_REMATCH[1]}"
+                local value="${BASH_REMATCH[2]}"
+                echo "   • $field: $value"
+            fi
+        done
+    else
+        echo "❌ Failed to update task" >&2
+    fi
+    
+    return $result
+}
+
 # @description Afficher l'aide des commandes task
 # @stdout Informations d'aide
 # @exitcode 0 Toujours
@@ -262,10 +347,11 @@ helper_task_help() {
     echo "Usage: helper.sh task <command> [options]"
     echo ""
     echo "Commands:"
-    echo "  decompose <epic-name>       Decompose epic into tasks (analysis)"
-    echo "  status <task-number>        Show detailed task status"
-    echo "  update <task-number> <status>  Update task status"
-    echo "  help                        Show this help message"
+    echo "  new <epic-name> <task-title> [target_version]  Create new task for epic"
+    echo "  status <task-number>                           Show detailed task status"
+    echo "  update <task-number> <status>                  Update task status"
+    echo "  update <task-number> field:value [...]         Update task fields"
+    echo "  help                                           Show this help message"
     echo ""
     echo "Valid status values:"
     echo "  open          - Task is ready to be worked on"
@@ -274,10 +360,10 @@ helper_task_help() {
     echo "  blocked       - Task is blocked and cannot proceed"
     echo ""
     echo "Examples:"
-    echo "  helper.sh task decompose command-with-helper"
+    echo "  helper.sh task new command-with-helper 'Add error handling' 2.1.0"
     echo "  helper.sh task status 003"
     echo "  helper.sh task update 003 in_progress"
-    echo "  helper.sh task update 003 completed"
+    echo "  helper.sh task update 003 status:completed parallel:true"
     return 0
 }
 

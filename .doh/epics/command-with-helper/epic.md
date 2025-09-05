@@ -39,8 +39,27 @@ Transform DOH commands into thin orchestration layers by extracting complex logi
 ### Frontmatter Integration
 - Replace all manual frontmatter construction with library API calls
 - Use `api.sh frontmatter create_markdown` for new file creation
-- Use `api.sh frontmatter update_field` for modifications
+- Use `api.sh frontmatter update_field` for single field modifications
+- **NEW: Use domain-specific `*_update()` functions for multi-field updates**
 - Leverage validation functions to ensure consistency
+
+### Update Helper Functions (COMPLETED)
+- ✅ `epic_update()` - Update multiple epic fields via frontmatter_update_many
+- ✅ `prd_update()` - Update multiple PRD fields via frontmatter_update_many
+- ✅ `task_update()` - Update multiple task fields via frontmatter_update_many  
+- ✅ `version_update()` - Update multiple version fields via frontmatter_update_many
+- ✅ All helper wrappers: `helper_epic_update()`, `helper_prd_update()`, etc.
+
+### Usage Patterns (ENFORCE)
+```bash
+# Library API - For direct file operations
+./.claude/scripts/doh/api.sh epic update /path/to/epic.md "status:completed" "progress:100%"
+./.claude/scripts/doh/api.sh prd update /path/to/prd.md "status:implemented"
+
+# Helper API - For entity-based operations
+./.claude/scripts/doh/helper.sh epic update "epic-name" "status:in_progress" "priority:high"
+./.claude/scripts/doh/helper.sh task update "042" "status:completed" "assignee:john"
+```
 
 ## Implementation Strategy
 
@@ -92,9 +111,39 @@ High-level tasks to implement this epic (keeping under 10 total):
 - **Command Simplification**: All DOH commands reduced to <10 lines (target: 1-3 lines)
 - **Helper Coverage**: 100% of complex logic extracted to testable helpers
 - **API Adoption**: Zero manual frontmatter construction in codebase
+- **Update Function Usage**: All multi-field updates use domain-specific `*_update()` functions
 - **Performance**: Helper overhead <100ms per invocation
 - **Test Coverage**: Each helper has comprehensive test suite
 - **Backwards Compatibility**: All existing command interfaces preserved
+
+## Update Helper Enforcement (CRITICAL)
+
+**MANDATORY USAGE PATTERNS:**
+
+1. **Multi-field Updates**: Always use `frontmatter_update_many()` via domain helpers
+   ```bash
+   # ✅ CORRECT - Use domain update functions
+   epic_update "$epic_path" "status:completed" "progress:100%" "assignee:john"
+   task_update "$task_path" "status:in_progress" "priority:high" "due_date:2025-10-01"
+   
+   # ❌ WRONG - Multiple single-field calls
+   frontmatter_update_field "$path" "status" "completed"
+   frontmatter_update_field "$path" "progress" "100%"
+   ```
+
+2. **Helper Integration**: All complex operations must use helper wrappers
+   ```bash  
+   # ✅ CORRECT - Use helper for entity-based operations
+   helper_epic_update "my-epic" "status:active" "target_version:1.2.0"
+   
+   # ❌ WRONG - Direct file path manipulation in commands  
+   epic_path="$doh_dir/epics/$epic_name/epic.md"
+   epic_update "$epic_path" "status:active"
+   ```
+
+3. **API Consistency**: Use appropriate API level for the operation
+   - **Library API**: When you have the file path and want direct operations
+   - **Helper API**: When you have entity names and want business logic
 
 ## Estimated Effort
 

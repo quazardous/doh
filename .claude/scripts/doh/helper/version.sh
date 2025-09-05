@@ -328,5 +328,69 @@ helper_version_help() {
     return 0
 }
 
+# @description Update version fields
+# @arg $1 string Version identifier
+# @arg $... string Field:value pairs to update
+# @stdout Update status messages
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If update failed
+helper_version_update() {
+    local version="${1:-}"
+    shift
+    
+    # Validation
+    if [[ -z "$version" ]]; then
+        echo "Error: Version identifier required" >&2
+        echo "Usage: version update <version> field:value [field:value ...]" >&2
+        return 1
+    fi
+    
+    # Get DOH directory
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
+        echo "Error: Not in DOH project" >&2
+        return 1
+    }
+    
+    # Find version file
+    local version_file="$doh_dir/versions/${version}.md"
+    
+    if [[ ! -f "$version_file" ]]; then
+        # Try with v prefix
+        version_file="$doh_dir/versions/v${version}.md"
+        if [[ ! -f "$version_file" ]]; then
+            echo "Error: Version not found: $version" >&2
+            echo "Available versions:" >&2
+            find "$doh_dir/versions" -name "*.md" -type f 2>/dev/null | while read -r file; do
+                [ -f "$file" ] && echo "  • $(basename "$file" .md)" >&2
+            done
+            return 1
+        fi
+    fi
+    
+    # Update version fields using library function
+    echo "📝 Updating version: $version"
+    version_update "$version_file" "$@"
+    local result=$?
+    
+    if [[ $result -eq 0 ]]; then
+        echo "✅ Version updated successfully"
+        
+        # Show updated fields
+        for field_value in "$@"; do
+            if [[ "$field_value" =~ ^([^:]+):(.*)$ ]]; then
+                local field="${BASH_REMATCH[1]}"
+                local value="${BASH_REMATCH[2]}"
+                echo "   • $field: $value"
+            fi
+        done
+    else
+        echo "❌ Failed to update version" >&2
+    fi
+    
+    return $result
+}
+
 # Helpers should only be called through helper.sh bootstrap
 # Direct execution is not allowed

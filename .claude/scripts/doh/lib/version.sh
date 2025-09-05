@@ -574,3 +574,31 @@ version_create() {
     return $?
 }
 
+# @description Update version fields using frontmatter
+# @arg $1 string Version file path
+# @arg $... string Field:value pairs to update
+# @stdout Update status messages
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If update failed
+version_update() {
+    local version_path="$1"
+    shift
+    
+    if [[ -z "$version_path" ]]; then
+        echo "Error: Missing version file path" >&2
+        echo "Usage: version_update <path> field:value [field:value ...]" >&2
+        return 1
+    fi
+    
+    if [[ ! -f "$version_path" ]]; then
+        echo "Error: Version file not found: $version_path" >&2
+        return 1
+    fi
+    
+    # Update version fields using frontmatter_update_many
+    frontmatter_update_many "$version_path" "$@"
+    
+    return $?
+}
+

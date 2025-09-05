@@ -15,7 +15,7 @@ Break epic into concrete, actionable tasks.
 
 **IMPORTANT:** Before executing this command, read and follow:
 - `.claude/rules/datetime.md` - For getting real current date/time
-- Use DOH API for numbering operations: `./.claude/scripts/doh/api.sh numbering get_next "task"`
+- Use DOH helper for task creation: `./.claude/scripts/doh/helper.sh task new <epic-name> <task-title> [target_version]`
 
 ## Preflight Checklist
 
@@ -71,83 +71,73 @@ Task:
     - {list of 3-4 tasks for this batch}
 
     For each task:
-    1. Get task number: TASK_NUM=$(./.claude/scripts/doh/api.sh numbering get_next "task")
-    2. Create file: .doh/epics/$ARGUMENTS/$TASK_NUM.md
-    3. Use exact format with frontmatter and all sections
+    1. Create task: ./.claude/scripts/doh/helper.sh task new "$ARGUMENTS" "[Task Title]" "[target_version]"
+       The command outputs the generated TASK_NUM (e.g., "Number: 003")
+    2. Extract TASK_NUM from helper output for subsequent operations
+    3. Update task fields if needed: ./.claude/scripts/doh/helper.sh task update TASK_NUM parallel:true depends_on:"[001,002]"
     4. Follow task breakdown from epic
-    5. Set parallel/depends_on fields appropriately
-    6. Register task: ./.claude/scripts/doh/api.sh numbering register_task "$TASK_NUM" "[epic_number]" ".doh/epics/$ARGUMENTS/$TASK_NUM.md" "[Task Title]" "$ARGUMENTS"
+    5. Use helper functions for all operations
+
+    The helper.sh task new command will:
+    - Auto-generate task number and display it in output
+    - Create file with proper frontmatter  
+    - Inherit target_version from epic if not specified
+    - Handle all numbering registration automatically
+    - Output: "Number: XXX" line contains the generated TASK_NUM
 
     Return: List of files created
 ```
 
-### 4. Task File Format with Frontmatter
-For each task, create a file with this exact structure:
+### 4. Task Creation with Helper
 
-```markdown
----
-name: [Task Title]
-number: [Task Number from get_next_number]
-status: open
-created: [Current ISO date/time]
-updated: [Current ISO date/time]
-github: [Will be updated when synced to GitHub]
-epic: $ARGUMENTS
-depends_on: []  # List of task numbers this depends on, e.g., [001, 002]
-parallel: true  # Can this run in parallel with other tasks?
-conflicts_with: []  # Tasks that modify same files, e.g., [003, 004]
-file_version: 0.1.0
----
+Use the DOH helper for task creation:
 
-# Task: [Task Title]
+```bash
+# Create new task - outputs "Number: XXX" line with generated TASK_NUM
+./.claude/scripts/doh/helper.sh task new "$ARGUMENTS" "Task Title" "target_version"
 
-## Description
-Clear, concise description of what needs to be done
-
-## Acceptance Criteria
-- [ ] Specific criterion 1
-- [ ] Specific criterion 2
-- [ ] Specific criterion 3
-
-## Technical Details
-- Implementation approach
-- Key considerations
-- Code locations/files affected
-
-## Dependencies
-- [ ] Task/Issue dependencies
-- [ ] External dependencies
-
-## Effort Estimate
-- Size: XS/S/M/L/XL
-- Hours: estimated hours
-- Parallel: true/false (can run in parallel with other tasks)
-
-## Definition of Done
-- [ ] Code implemented
-- [ ] Tests written and passing
-- [ ] Documentation updated
-- [ ] Code reviewed
-- [ ] Deployed to staging
+# Extract TASK_NUM from the helper output (look for "Number: XXX" line)
+# Then update task fields if needed using the extracted TASK_NUM
+./.claude/scripts/doh/helper.sh task update TASK_NUM parallel:true depends_on:"[001,002]" conflicts_with:"[003,004]"
 ```
 
-### 3. Task Naming Convention
-Save tasks as: `.doh/epics/$ARGUMENTS/{task_number}.md`
-- Use numbering from DOH API: TASK_NUM=$(./.claude/scripts/doh/api.sh numbering get_next "task"), then $TASK_NUM.md
-- Task numbers are globally sequential across all epics
-- Keep task titles short but descriptive
+The helper automatically creates tasks with this structure:
+- Auto-generated task number (displayed in "Number: XXX" output line)
+- Proper frontmatter with all required fields
+- Inherits target_version from epic if not specified
+- Standard task content template
+- Proper DOH numbering registration
 
-### 4. Frontmatter Guidelines
-- **name**: Use a descriptive task title (without "Task:" prefix)
-- **number**: Use the task number from DOH API: $(./.claude/scripts/doh/api.sh numbering get_next "task")
-- **status**: Always start with "open" for new tasks
-- **created**: Get REAL current datetime by running: `date -u +"%Y-%m-%dT%H:%M:%SZ"`
-- **updated**: Use the same real datetime as created for new tasks
-- **github**: Leave placeholder text - will be updated during sync
-- **epic**: Use $ARGUMENTS to reference the parent epic
-- **depends_on**: List task numbers that must complete before this can start (e.g., [001, 002])
+**Important**: The `helper.sh task new` command outputs the generated task number. Look for the "Number: XXX" line to get TASK_NUM for subsequent operations.
+
+### 3. Task Creation Process
+
+1. **Create tasks using helper:**
+   ```bash
+   ./.claude/scripts/doh/helper.sh task new "$ARGUMENTS" "Task Title" "target_version"
+   ```
+
+2. **Task files are automatically saved as:** `.doh/epics/$ARGUMENTS/{task_number}.md`
+   - Task numbers are auto-generated and globally sequential
+   - Helper handles all file creation and numbering
+   - Keep task titles short but descriptive
+
+### 4. Task Field Updates
+
+The helper creates tasks with default values. Update specific fields as needed:
+
+```bash
+# Update task fields after creation
+./.claude/scripts/doh/helper.sh task update TASK_NUM \
+  depends_on:"[001,002]" \
+  parallel:true \
+  conflicts_with:"[003,004]"
+```
+
+- **depends_on**: List task numbers that must complete first (e.g., [001, 002])
 - **parallel**: Set to true if this can run alongside other tasks without conflicts
 - **conflicts_with**: List task numbers that modify the same files (helps coordination)
+- All other fields (name, number, status, created, epic) are set automatically by helper
 
 ### 5. Task Types to Consider
 - **Setup tasks**: Environment, dependencies, scaffolding

@@ -427,17 +427,19 @@ helper_epic_identify_ready_tasks() {
 # @description Créer un nouvel epic
 # @arg $1 string Nom de l'epic
 # @arg $2 string Description (optionnel)
+# @arg $3 string Target version (optionnel, auto-extracted from PRD if exists)
 # @stdout Chemin vers l'epic créé
 # @exitcode 0 Si création réussie
 # @exitcode 1 Si erreur de paramètres
 helper_epic_create() {
     local epic_name="${1:-}"
     local description="${2:-}"
+    local target_version="${3:-}"
     
     # Validation
     if [[ -z "$epic_name" ]]; then
         echo "Error: Epic name required" >&2
-        echo "Usage: helper.sh epic create <epic-name> [description]" >&2
+        echo "Usage: helper.sh epic create <epic-name> [description] [target_version]" >&2
         return 1
     fi
     
@@ -453,27 +455,53 @@ helper_epic_create() {
         return 1
     fi
     
-    echo "Creating epic: $epic_name"
+    # Extract target_version from PRD if not provided and PRD exists
+    if [[ -z "$target_version" ]]; then
+        local prd_path="$doh_dir/prds/${epic_name}.md"
+        if [[ -f "$prd_path" ]]; then
+            target_version="$(frontmatter_get_field "$prd_path" "target_version" 2>/dev/null || echo "")"
+            if [[ -n "$target_version" ]]; then
+                echo "📋 Extracted target_version from PRD: $target_version"
+            fi
+        fi
+    fi
     
-    # Get next epic number
-    local epic_number
-    epic_number="$(numbering_get_next "epic")" || {
-        echo "Error: Could not generate epic number" >&2
-        return 1
-    }
+    echo "Creating epic: $epic_name"
     
     # Create epic directory
     mkdir -p "$doh_dir/epics/${epic_name}"
     
-    # Create epic using centralized library function
-    epic_create "$epic_path" "$epic_name" "$epic_number" "$description"
+    # Generate epic content
+    local epic_content
+    epic_content=$(epic_create_content "$epic_name" "$description")
     
-    # Register epic in numbering system
-    numbering_register_epic "$epic_number" "$epic_path" "$epic_name"
+    # Build frontmatter fields
+    local -a frontmatter_fields=(
+        "name:$epic_name"
+        "status:backlog"
+        "progress:0%"
+        "github:[Will be updated when synced to GitHub]"
+    )
+    
+    # Add target_version if available
+    if [[ -n "$target_version" ]]; then
+        frontmatter_fields+=("target_version:$target_version")
+        echo "🎯 Set target_version: $target_version"
+    fi
+    
+    # Create epic using frontmatter_create_markdown with --auto-number=epic
+    frontmatter_create_markdown --auto-number=epic "$epic_path" "$epic_content" "${frontmatter_fields[@]}"
+    
+    # Get the generated number for display
+    local epic_number
+    epic_number=$(frontmatter_get_field "$epic_path" "number")
     
     echo "✅ Epic created: $epic_path"
     echo "   Number: $epic_number"
     echo "   Status: backlog"
+    if [[ -n "$target_version" ]]; then
+        echo "   Target version: $target_version"
+    fi
     
     return 0
 }
@@ -527,16 +555,11 @@ helper_epic_parse() {
         fi
     fi
     
-    # Create epic using the create function
-    helper_epic_create "$prd_name" "$prd_description" || {
+    # Create epic using the create function with target_version
+    helper_epic_create "$prd_name" "$prd_description" "$target_version" || {
         echo "Error: Failed to create epic from PRD" >&2
         return 1
     }
-    
-    # Update epic with PRD-specific information
-    if [[ -n "$target_version" ]]; then
-        frontmatter_update_field "$epic_path" "target_version" "$target_version"
-    fi
     
     # Add PRD reference
     frontmatter_update_field "$epic_path" "prd" "$prd_path"
@@ -548,6 +571,65 @@ helper_epic_parse() {
     fi
     
     return 0
+}
+
+# @description Update epic fields
+# @arg $1 string Epic name
+# @arg $... string Field:value pairs to update
+# @stdout Update status messages
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If update failed
+helper_epic_update() {
+    local epic_name="${1:-}"
+    shift
+    
+    # Validation
+    if [[ -z "$epic_name" ]]; then
+        echo "Error: Epic name required" >&2
+        echo "Usage: epic update <epic-name> field:value [field:value ...]" >&2
+        return 1
+    fi
+    
+    # Get DOH directory
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
+        echo "Error: Not in DOH project" >&2
+        return 1
+    }
+    
+    # Check if epic exists
+    local epic_path="$doh_dir/epics/$epic_name/epic.md"
+    if [[ ! -f "$epic_path" ]]; then
+        echo "Error: Epic not found: $epic_name" >&2
+        echo "Available epics:" >&2
+        find "$doh_dir/epics" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | while read -r dir; do
+            [ -d "$dir" ] && echo "  • $(basename "$dir")" >&2
+        done
+        return 1
+    fi
+    
+    # Update epic fields using library function
+    echo "📝 Updating epic: $epic_name"
+    epic_update "$epic_path" "$@"
+    local result=$?
+    
+    if [[ $result -eq 0 ]]; then
+        echo "✅ Epic updated successfully"
+        
+        # Show updated fields
+        for field_value in "$@"; do
+            if [[ "$field_value" =~ ^([^:]+):(.*)$ ]]; then
+                local field="${BASH_REMATCH[1]}"
+                local value="${BASH_REMATCH[2]}"
+                echo "   • $field: $value"
+            fi
+        done
+    else
+        echo "❌ Failed to update epic" >&2
+    fi
+    
+    return $result
 }
 
 # Helpers should only be called through helper.sh bootstrap

@@ -130,10 +130,8 @@ TASK_TEMPLATE
 # @description Create new task with frontmatter
 # @arg $1 string Task path
 # @arg $2 string Task name
-# @arg $4 string Epic name
-# @arg $5 string Task description (optional)
-# @arg $6 string Dependencies (optional, comma-separated task numbers)
-# @arg $7 string Parallel flag (optional, true/false)
+# @arg $3 string Epic name
+# @arg $... string Additional field:value pairs (optional)
 # @stdout Creation status messages
 # @stderr Error messages
 # @exitcode 0 If successful
@@ -142,40 +140,71 @@ task_create() {
     local task_path="$1"
     local task_name="$2"
     local epic_name="$3"
-    local description="${4:-}"
-    local dependencies="${5:-}"
-    local parallel="${6:-false}"
+    shift 3
 
     if [[ -z "$task_path" || -z "$task_name" || -z "$epic_name" ]]; then
         echo "Error: Missing required parameters" >&2
-        echo "Usage: task_create <path> <name> <epic> [description] [dependencies] [parallel]" >&2
+        echo "Usage: task_create <path> <name> <epic> [field:value ...]" >&2
         return 1
     fi
+    
+    # Build base frontmatter fields
+    local -a frontmatter_fields=(
+        "name:$task_name"
+        "epic:$epic_name"
+        "status:pending"
+        "parallel:false"
+    )
+    
+    # Process additional field:value pairs
+    local description=""
+    for field_value in "$@"; do
+        if [[ "$field_value" =~ ^([^:]+):(.*)$ ]]; then
+            local field="${BASH_REMATCH[1]}"
+            local value="${BASH_REMATCH[2]}"
+            
+            if [[ "$field" == "description" ]]; then
+                description="$value"
+            else
+                frontmatter_fields+=("$field_value")
+            fi
+        fi
+    done
     
     # Generate content using the content creation function
     local task_content
     task_content=$(task_create_content "$task_name" "$description")
     
-    # Build frontmatter fields
-    local -a frontmatter_fields=(
-        "name:$task_name"
-        "epic:$epic_name"
-        "status:pending"
-        "parallel:$parallel"
-    )
-    
-    if [[ -n "$description" ]]; then
-        frontmatter_fields+=("description:$description")
-    fi
-    
-    if [[ -n "$dependencies" ]]; then
-        # Format dependencies as array
-        local formatted_deps="[$(echo "$dependencies" | sed 's/,/, /g')]"
-        frontmatter_fields+=("depends_on:$formatted_deps")
-    fi
-    
     # Create task file with frontmatter
     frontmatter_create_markdown --auto-number=task "$task_path" "$task_content" "${frontmatter_fields[@]}"
 
+    return $?
+}
+
+# @description Update task fields using frontmatter
+# @arg $1 string Task file path
+# @arg $... string Field:value pairs to update
+# @stdout Update status messages
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If update failed
+task_update() {
+    local task_path="$1"
+    shift
+    
+    if [[ -z "$task_path" ]]; then
+        echo "Error: Missing task file path" >&2
+        echo "Usage: task_update <path> field:value [field:value ...]" >&2
+        return 1
+    fi
+    
+    if [[ ! -f "$task_path" ]]; then
+        echo "Error: Task file not found: $task_path" >&2
+        return 1
+    fi
+    
+    # Update task fields using frontmatter_update_many
+    frontmatter_update_many "$task_path" "$@"
+    
     return $?
 }

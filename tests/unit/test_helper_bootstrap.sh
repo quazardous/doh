@@ -63,7 +63,7 @@ test_helper_bootstrap_task_routing() {
     
     # Should contain task-specific help content
     _tf_assert_contains "Should show task domain help" "$result" "DOH Task Management"
-    _tf_assert_contains "Should show task decompose command" "$result" "decompose"
+    _tf_assert_contains "Should show task new command" "$result" "new"
     _tf_assert_contains "Should show task status command" "$result" "status"
     _tf_assert_contains "Should show task update command" "$result" "update"
 }

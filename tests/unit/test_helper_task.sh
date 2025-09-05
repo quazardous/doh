@@ -33,7 +33,7 @@ test_helper_task_help() {
     _tf_assert_contains "Should have header" "$result" "DOH Task Management"
     _tf_assert_contains "Should have usage" "$result" "Usage:"
     _tf_assert_contains "Should list commands" "$result" "Commands:"
-    _tf_assert_contains "Should include decompose command" "$result" "decompose"
+    _tf_assert_contains "Should include new command" "$result" "new"
     _tf_assert_contains "Should include status command" "$result" "status"
     _tf_assert_contains "Should include update command" "$result" "update"
     _tf_assert_contains "Should have examples" "$result" "Examples:"
