@@ -23,12 +23,6 @@ helper_prd_list() {
     echo ""
     echo ""
 
-    local doh_dir
-    doh_dir=$(doh_project_dir) || {
-        echo "Error: Not in DOH project" >&2
-        return 1
-    }
-
     # Check if PRD directory exists
     if [ ! -d "$doh_dir/prds" ]; then
         echo "📁 No PRD directory found. Create your first PRD with: /doh:prd-new <feature-name>"
@@ -56,9 +50,9 @@ helper_prd_list() {
         # Extract metadata using frontmatter if available, fallback to grep
         local status name desc
         if command -v frontmatter_get_field >/dev/null 2>&1; then
-            status=$(frontmatter_get_field "$file" "status" 2>/dev/null)
-            name=$(frontmatter_get_field "$file" "name" 2>/dev/null)
-            desc=$(frontmatter_get_field "$file" "description" 2>/dev/null)
+            status=$(frontmatter_get_field "$file" "status" 2>/dev/null || echo "")
+            name=$(frontmatter_get_field "$file" "name" 2>/dev/null || echo "")
+            desc=$(frontmatter_get_field "$file" "description" 2>/dev/null || echo "")
         else
             # Fallback to grep
             status=$(grep "^status:" "$file" | head -1 | sed 's/^status: *//')
@@ -74,9 +68,9 @@ helper_prd_list() {
             local relative_file
             relative_file=$(realpath --relative-to="$doh_dir" "$file")
             echo "   📋 $relative_file - $desc"
-            ((backlog_count++))
+            ((backlog_count++)) || true
         fi
-        ((total_count++))
+        ((total_count++)) || true
     done
     [ $backlog_count -eq 0 ] && echo "   (none)"
 
@@ -87,9 +81,9 @@ helper_prd_list() {
         
         local status name desc
         if command -v frontmatter_get_field >/dev/null 2>&1; then
-            status=$(frontmatter_get_field "$file" "status" 2>/dev/null)
-            name=$(frontmatter_get_field "$file" "name" 2>/dev/null)
-            desc=$(frontmatter_get_field "$file" "description" 2>/dev/null)
+            status=$(frontmatter_get_field "$file" "status" 2>/dev/null || echo "")
+            name=$(frontmatter_get_field "$file" "name" 2>/dev/null || echo "")
+            desc=$(frontmatter_get_field "$file" "description" 2>/dev/null || echo "")
         else
             status=$(grep "^status:" "$file" | head -1 | sed 's/^status: *//')
             name=$(grep "^name:" "$file" | head -1 | sed 's/^name: *//')
@@ -103,7 +97,7 @@ helper_prd_list() {
             local relative_file
             relative_file=$(realpath --relative-to="$doh_dir" "$file")
             echo "   📋 $relative_file - $desc"
-            ((in_progress_count++))
+            ((in_progress_count++)) || true
         fi
     done
     [ $in_progress_count -eq 0 ] && echo "   (none)"
@@ -115,9 +109,9 @@ helper_prd_list() {
         
         local status name desc
         if command -v frontmatter_get_field >/dev/null 2>&1; then
-            status=$(frontmatter_get_field "$file" "status" 2>/dev/null)
-            name=$(frontmatter_get_field "$file" "name" 2>/dev/null)
-            desc=$(frontmatter_get_field "$file" "description" 2>/dev/null)
+            status=$(frontmatter_get_field "$file" "status" 2>/dev/null || echo "")
+            name=$(frontmatter_get_field "$file" "name" 2>/dev/null || echo "")
+            desc=$(frontmatter_get_field "$file" "description" 2>/dev/null || echo "")
         else
             status=$(grep "^status:" "$file" | head -1 | sed 's/^status: *//')
             name=$(grep "^name:" "$file" | head -1 | sed 's/^name: *//')
@@ -131,7 +125,7 @@ helper_prd_list() {
             local relative_file
             relative_file=$(realpath --relative-to="$doh_dir" "$file")
             echo "   📋 $relative_file - $desc"
-            ((implemented_count++))
+            ((implemented_count++)) || true
         fi
     done
     [ $implemented_count -eq 0 ] && echo "   (none)"

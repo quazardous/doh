@@ -58,7 +58,7 @@ _tff_create_minimal_doh_project() {
     local container_dir="$(dirname "$doh_dir")"
     
     # Copy minimal skeleton
-    _tff_copy_skeleton "minimal" "$container_dir" || return 1
+    _tff_copy_skeleton "minimal" || return 1
     
     echo "$container_dir"
 }
@@ -221,7 +221,7 @@ _tff_create_helper_test_project() {
     local container_dir="$(dirname "$doh_dir")"
     
     # Copy helper-test skeleton
-    _tff_copy_skeleton "helper-test" "$container_dir" || return 1
+    _tff_copy_skeleton "helper-test" || return 1
     
     echo "$container_dir"
 }

@@ -10,19 +10,19 @@ github: [Will be updated when synced to GitHub]
 # Epic: prd-committee
 
 ## Overview
-Implementation of a multi-agent collaborative PRD creation system that transforms the existing single-agent `/doh:prd-new` workflow into a sophisticated 4-agent committee with specialized roles (DevOps, Lead Dev, UX, PO) plus CTO validation through a 2-round iterative process with cross-rating and convergence mechanisms.
+Implementation of a multi-agent collaborative PRD creation system through a NEW `/doh:prd-evo` command (keeping existing `/doh:prd-new` unchanged). Creates sophisticated 4-agent committee with specialized roles (DevOps, Lead Dev, UX, PO) plus CTO validation through a 2-round iterative process with cross-rating and convergence mechanisms.
 
 ## Architecture Decisions
 - **Agent Framework Extension**: Build upon existing DOH agent system with 4 specialized agent personalities
 - **File-Based Session Storage**: Use structured markdown files under `.claude/committees/{feature}/` for complete audit trail
 - **Convergence Algorithm**: Mathematical threshold-based consensus detection with automatic CTO escalation
-- **Backward Compatibility**: Maintain existing PRD output format while adding optional committee mode via `--solo` opt-out
-- **Command Integration**: Extend `/doh:prd-new` with committee mode as default, preserving all existing workflows
+- **Dual Command Approach**: New `/doh:prd-evo` command alongside existing `/doh:prd-new` (unchanged)
+- **Output Compatibility**: Same PRD format as existing system, works with `/doh:prd-parse`
 
 ## Technical Approach
 
 ### Frontend Components
-- **Command Interface Enhancement**: Modify `/doh:prd-new` command to support committee mode by default
+- **New Command Creation**: Create `/doh:prd-evo` command with committee workflow
 - **Progress Visualization**: Real-time session progress display during 2-round process
 - **Escalation Interface**: User decision prompts when CTO agent detects irreconcilable differences
 
@@ -42,7 +42,7 @@ Implementation of a multi-agent collaborative PRD creation system that transform
 - **Phase 1**: Develop 4 specialized agents with realistic personalities and tension generation
 - **Phase 2**: Implement 2-round workflow engine with rating system and convergence detection
 - **Phase 3**: Build CTO agent with sophisticated arbitration logic and escalation triggers
-- **Phase 4**: Integrate with existing DOH commands and validate backward compatibility
+- **Phase 4**: Create `/doh:prd-evo` command and integrate with existing DOH workflows
 - **Phase 5**: Performance optimization and timeout implementation
 
 ## Task Breakdown Preview
@@ -51,7 +51,7 @@ High-level task categories that will be created:
 - [ ] **Session Engine**: Build 2-round workflow orchestrator with rating collection and convergence detection
 - [ ] **CTO Agent**: Implement sophisticated arbitration system with escalation logic
 - [ ] **File Structure**: Design and implement committee session storage system
-- [ ] **Command Integration**: Modify `/doh:prd-new` to support committee mode while maintaining compatibility
+- [ ] **Command Creation**: Create new `/doh:prd-evo` command with committee workflow (keeping `/doh:prd-new` unchanged)
 - [ ] **Performance Systems**: Add timeout mechanisms and parallel processing optimization
 - [ ] **Testing & Validation**: Comprehensive testing of agent interactions and workflow edge cases
 
@@ -66,7 +66,7 @@ High-level task categories that will be created:
 - **Convergence Accuracy**: 80% of sessions reach consensus within threshold without human escalation
 - **Performance**: Complete process under 15 minutes (vs 3-5 minutes for solo PRD creation)
 - **Compatibility**: 100% compatibility with existing `/doh:prd-parse` and epic workflows
-- **Adoption**: Default committee mode with functional `--solo` opt-out mechanism
+- **Adoption**: Functional `/doh:prd-evo` command alongside existing `/doh:prd-new` (dual approach)
 - **Audit Trail**: Complete session historization with traceable decision rationale
 
 ## Tasks Created
@@ -78,12 +78,13 @@ High-level task categories that will be created:
 - [ ] 006.md - Create convergence algorithm system (parallel: false, Size: M)
 - [ ] 007.md - Build CTO agent with arbitration logic (parallel: true, Size: M)
 - [ ] 008.md - Design committee session file structure (parallel: true, Size: M)
-- [ ] 009.md - Modify /doh:prd-new command integration (parallel: false, Size: M)
-- [ ] 010.md - Add performance optimization and timeouts (parallel: true, Size: S)
+- [ ] 009.md - Create orchestrator agent for committee management (parallel: false, Size: M)
+- [ ] 010.md - Add performance optimization and timeouts (parallel: true, Size: S)  
+- [ ] 011.md - Create /doh:prd-evo command implementation (parallel: false, Size: L)
 
-Total tasks: 10
-Parallel tasks: 6
-Sequential tasks: 4
+Total tasks: 11
+Parallel tasks: 6  
+Sequential tasks: 5
 Estimated total effort: 20-24 days
 
 ## Estimated Effort

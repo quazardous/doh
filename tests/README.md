@@ -3,6 +3,19 @@
 
 This directory contains the complete test infrastructure for the DOH project, organized to support both unit and integration testing with a lightweight bash testing framework.
 
+## 🎯 NEW TO TESTING? START HERE!
+
+**See the current best practices in action:**
+```bash
+# Review the comprehensive template showing all current patterns
+cat tests/template/test_best_patterns.sh
+
+# Run it to see it working
+./tests/run.sh tests/template/test_best_patterns.sh --verbose
+```
+
+This template demonstrates all current best practices with extensive comments explaining the WHY behind each pattern.
+
 ## Directory Structure
 
 ```
@@ -19,6 +32,15 @@ tests/
 ```
 
 ## Quick Start
+
+### Start with the Best Practices Template
+```bash
+# Review the recommended patterns and practices
+cat tests/template/test_best_patterns.sh
+
+# Copy it for your new test
+cp tests/template/test_best_patterns.sh tests/unit/test_my_feature.sh
+```
 
 ### Run All Tests
 ```bash
@@ -39,6 +61,9 @@ tests/
 ### Run Specific Test File
 ```bash
 ./tests/run.sh tests/unit/test_example.sh
+
+# Run the best practices template to see it in action
+./tests/run.sh tests/template/test_best_patterns.sh
 ```
 
 ## Important: Test Launcher Requirement
@@ -73,15 +98,17 @@ This ensures proper:
 
 ### Unit Tests (`tests/unit/`)
 - Test individual functions and components in isolation
-- Fast execution (< 1 second each)
-- No external dependencies or file system modifications
+- Fast execution (< 1 second each)  
+- Use isolated container temp directory (not external dependencies)
 - Example: `test_numbering.sh`, `test_frontmatter.sh`
+- **Follow**: `tests/template/test_best_patterns.sh` for current patterns
 
 ### Integration Tests (`tests/integration/`)
 - Test complete workflows and command interactions
-- May involve temporary files and directories
-- Test DOH commands end-to-end
+- Use container temp directories for isolation
+- Test DOH commands end-to-end (source libraries directly, not wrappers)
 - Example: `test_epic_workflow.sh`, `test_prd_creation.sh`
+- **Follow**: `tests/template/test_best_patterns.sh` for current patterns
 
 ### Fixtures (`tests/fixtures/`)
 - Test data files (PRDs, epics, tasks)
@@ -90,6 +117,7 @@ This ensures proper:
 - Reusable across multiple tests
 
 ### Templates (`tests/template/`)
+- **`test_best_patterns.sh`** - RECOMMENDED: Current best practices and patterns (start here!)
 - `test_simple.sh` - Basic template for quick test creation
 - `test_example.sh` - Comprehensive template showing all framework features
 - Templates demonstrate proper test structure and patterns
@@ -105,37 +133,52 @@ This ensures proper:
 
 ### Available Templates
 
-#### `test_simple.sh` - Basic Template
-A minimal template showing the essential patterns for writing tests:
-- Basic setup/teardown with `_tf_setup()` and `_tf_teardown()`
+#### `test_best_patterns.sh` - RECOMMENDED Template ⭐
+The current best practices template showing all modern patterns:
+- Direct DOH library sourcing (NOT api.sh/helper.sh wrappers)
+- Current command testing with _tf_assert/_tf_assert_not
+- Container temp directory usage with _tf_test_container_tmpdir()
+- Local variables only (NO global variables)
+- DOH-specific patterns and fixture usage
+- Manual cleanup discouraged (prevents debugging)
+- Performance patterns and anti-patterns to avoid
+- Extensive comments explaining WHY behind each pattern
+
+**Use this template for:** ALL new tests, learning current patterns, best practices reference.
+
+#### `test_simple.sh` - Legacy Basic Template
+Minimal template showing older patterns (consider using test_best_patterns.sh instead):
+- Basic setup/teardown structure
 - Core assertion functions
-- File and command testing
-- Proper test structure
+- Simple file and command testing
 
-**Use this template for:** Simple unit tests, quick test prototypes, learning the framework.
+**Use this template for:** Quick prototypes (but prefer test_best_patterns.sh for consistency).
 
-#### `test_example.sh` - Comprehensive Template  
-A complete reference showing all available test framework functions:
+#### `test_example.sh` - Legacy Comprehensive Template  
+Complete reference showing all framework functions (consider using test_best_patterns.sh instead):
 - All assertion types with examples (76 different test cases)
-- Advanced utility functions
-- Mocking capabilities
-- Edge case testing
-- Integration test patterns
-- Performance considerations
+- Advanced utility functions and mocking capabilities
+- Edge case and integration patterns
 
-**Use this template for:** Complex tests, integration testing, reference documentation.
+**Use this template for:** Framework reference (but prefer test_best_patterns.sh for actual tests).
 
 ### Using Templates
 
-1. **Copy a template:**
+**RECOMMENDED: Always start with the best practices template:**
+
+1. **Copy the best practices template:**
    ```bash
-   cp tests/template/test_simple.sh tests/unit/test_my_feature.sh
+   # RECOMMENDED: Always use the current best practices template
+   cp tests/template/test_best_patterns.sh tests/unit/test_my_feature.sh
    ```
 
 2. **Customize the test:**
    ```bash
    # Edit the copied file
    vim tests/unit/test_my_feature.sh
+   
+   # Source the DOH libraries you need (examples already shown in template)
+   # The template includes extensive comments for guidance
    ```
 
 3. **Run your test:**
@@ -143,27 +186,113 @@ A complete reference showing all available test framework functions:
    ./tests/run.sh tests/unit/test_my_feature.sh
    ```
 
+**Alternative starting points (discouraged - prefer best_patterns.sh):**
+```bash
+# For quick prototypes (but prefer best practices template)
+cp tests/template/test_simple.sh tests/unit/test_basic_feature.sh
+
+# For framework reference (but prefer best practices template)
+cp tests/template/test_example.sh tests/unit/test_complex_feature.sh
+```
+
 ## Writing Tests
 
+### CRITICAL: Source Libraries Directly in Tests
+
+**⚠️ IMPORTANT: Tests MUST source DOH libraries directly for performance and proper testing.**
+
+```bash
+# ✅ CORRECT: Source libraries directly in tests
+source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/version.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/frontmatter.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/task.sh"
+
+# Then call functions directly
+test_version_operations() {
+    _tf_assert "Should validate version" version_validate "1.2.3"
+    _tf_assert_not "Should reject invalid" version_validate "invalid"
+    
+    local current=$(version_get_current)
+    _tf_assert_equals "Should get version" "1.0.0" "$current"
+}
+
+# ❌ WRONG: Using api.sh or helper.sh in tests (slow and unnecessary)
+test_bad_pattern() {
+    # DON'T DO THIS IN TESTS!
+    _tf_assert "Bad" ./.claude/scripts/doh/api.sh version validate "1.2.3"
+    _tf_assert "Bad" ./.claude/scripts/doh/helper.sh prd list
+}
+```
+
+**Why source libraries directly in tests:**
+- **Performance**: 10x faster - no subprocess overhead
+- **Direct testing**: Test the actual functions, not wrapper scripts
+- **Better debugging**: Direct stack traces and error messages
+- **Proper isolation**: Test functions in controlled environment
+- **Standard practice**: All existing tests follow this pattern
+
+**Exception**: Only use `api.sh`/`helper.sh` in tests when specifically testing those wrapper scripts themselves (e.g., `test_helper_prd.sh`).
+
 ### Basic Test Structure
+
+**IMPORTANT: Use the best practices template as your starting point instead of this basic example:**
+
+```bash
+# RECOMMENDED: Copy and customize the best practices template
+cp tests/template/test_best_patterns.sh tests/unit/test_my_feature.sh
+```
+
+**For reference, here's the essential structure (but the template has much more guidance):**
 ```bash
 #!/bin/bash
 # Test description
 # File version: 0.1.0 | Created: 2025-09-01
 
-# Source the framework
+# Source the test framework (MANDATORY)
 source "$(dirname "${BASH_SOURCE[0]}")/../helpers/test_framework.sh"
 
-# Test functions
+# Source DOH fixtures helper for setup
+source "$(dirname "${BASH_SOURCE[0]}")/../helpers/doh_fixtures.sh"
+
+# Source DOH libraries directly (MANDATORY - NOT api.sh/helper.sh)
+source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/doh.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/version.sh"
+# Add other libraries as needed for your tests
+
+# Setup (optional)
+_tf_setup() {
+    # Use fixtures for consistent test data
+    _tff_create_minimal_doh_project >/dev/null
+}
+
+# Test functions (MUST be self-contained with local variables only)
 test_my_function() {
-    # Arrange
-    local input="test_value"
+    # CRITICAL: Each test declares its own local variables
+    # NO global variables - tests are self-contained
     
-    # Act
-    local result=$(my_function "$input")
+    # Get paths when needed (DON'T store globally)
+    local tmp_base=$(_tf_test_container_tmpdir)
+    local doh_dir=$(doh_project_dir)
+    local test_file="$tmp_base/test_data_${RANDOM}.txt"
     
-    # Assert
-    _tf_assert_equals "Function should return expected value" "expected" "$result"
+    echo "data" > "$test_file"
+    
+    # PREFERRED: Direct function calls after sourcing libraries
+    _tf_assert "Function should succeed with valid input" version_validate "1.0.0"
+    _tf_assert_not "Function should fail with invalid input" version_validate "invalid"
+    
+    # For testing output values
+    local result=$(version_get_current)
+    _tf_assert_equals "Should return current version" "1.0.0" "$result"
+    
+    # All variables are local - container handles cleanup
+}
+
+# Teardown (optional)
+_tf_teardown() {
+    # NO manual cleanup - prevents debugging and is unnecessary
+    # Container cleanup handles temp files automatically
+    :  # No-op - just comments explaining why we don't clean up
 }
 
 # Prevent direct execution - tests must run through launcher
@@ -175,13 +304,18 @@ fi
 ### Available Functions
 
 #### Lifecycle Functions (Optional)
-- `_tf_setup()` - Called before each test function
-- `_tf_teardown()` - Called after each test function
+- `_tf_setup()` - Called before each test function (use for creating test data)
+- `_tf_teardown()` - Called after each test function (NO manual cleanup recommended)
 
 #### Assertion Functions
 
 **Message-First Pattern**: All assertion functions use a **message-first** parameter pattern for consistency.
 
+**🎯 Most Important for Command Testing:**
+- **`_tf_assert <message> <command> [args...]`** - Assert command succeeds (exit code 0) - **USE THIS FOR TESTING COMMANDS**
+- **`_tf_assert_not <message> <command> [args...]`** - Assert command fails (exit code != 0) - **USE THIS FOR TESTING EXPECTED FAILURES**
+
+**Other Assertions:**
 - `_tf_assert_equals <message> <expected> <actual>` - Assert two values are equal
 - `_tf_assert_not_equals <message> <expected> <actual>` - Assert two values are different  
 - `_tf_assert_true <message> <condition>` - Assert condition is true
@@ -189,47 +323,85 @@ fi
 - `_tf_assert_contains <message> <haystack> <needle>` - Assert haystack contains needle
 - `_tf_assert_file_exists <message> <file>` - Assert file exists
 - `_tf_assert_file_contains <message> <file> <content>` - Assert file contains content
-- `_tf_assert <message> <command> [args...]` - Assert command succeeds (exit code 0)
-- `_tf_assert_not <message> <command> [args...]` - Assert command fails (exit code != 0)
 
-#### Testing Exit Codes - Best Practices
+#### Testing Commands and Exit Codes - PREFERRED PATTERNS
 
-**For testing commands/functions directly:**
+**🎯 PRIMARY RECOMMENDATION: Use `_tf_assert` and `_tf_assert_not` for testing commands directly**
+
+These functions are specifically designed for testing command success/failure and provide cleaner, more readable tests:
+
 ```bash
-# ✅ CORRECT: Test command execution directly  
-_tf_assert "Should succeed with valid input" my_function "valid_input"
-_tf_assert_not "Should fail with invalid input" my_function "invalid_input"
+# ✅ BEST PRACTICE: Test DOH functions directly (after sourcing libraries)
+# This is 10x faster than using api.sh/helper.sh wrappers
+_tf_assert "Version should validate" version_validate "1.2.3"
+_tf_assert_not "Should reject invalid version" version_validate "invalid"
+_tf_assert "Task should be completed" task_is_completed "$task_file"
+_tf_assert "Should get frontmatter field" frontmatter_get_field "$file" "status"
 
-# ✅ CORRECT: Test complex commands with pipes
+# ✅ BEST PRACTICE: Test with specific arguments
+_tf_assert "Should increment patch version" version_increment "1.0.0" "patch"
+_tf_assert_not "Should reject invalid increment" version_increment "1.0.0" "invalid"
+
+# ✅ BEST PRACTICE: Test file operations
+_tf_assert "Should create file" touch "$test_file"
+_tf_assert "File should exist after creation" test -f "$test_file"
+_tf_assert_not "Should fail on missing file" cat "/nonexistent/file"
+
+# ✅ BEST PRACTICE: Test complex commands with bash -c
 _tf_assert "Should find pattern in data" bash -c 'echo "$data" | grep -q "pattern"'
+_tf_assert_not "Should not find missing pattern" bash -c 'echo "$data" | grep -q "missing"'
+
+# ⚠️ EXCEPTION: Only test wrapper scripts when specifically testing them
+# (e.g., in test_helper_prd.sh when testing the helper.sh interface)
+_tf_assert "Helper should work" ./.claude/scripts/doh/helper.sh prd list
+_tf_assert_not "Should fail without args" ./.claude/scripts/doh/helper.sh prd new
+
+# ❌ WRONG: Using api.sh/helper.sh for testing library functions (slow!)
+# _tf_assert "Bad" ./.claude/scripts/doh/api.sh version validate "1.2.3"  # 10x slower!
 ```
 
-**For testing stored exit codes:**
-```bash  
-# ✅ CORRECT: When you need to capture exit code for other reasons
-local result=$(my_function "input")
-local exit_code=$?
-_tf_assert_equals "Function should succeed" 0 $exit_code
+**Why `_tf_assert` and `_tf_assert_not` are preferred:**
+- **Direct execution**: Tests the actual command, not a stored exit code
+- **Clear intent**: Explicitly shows expected success or failure
+- **Better error messages**: Framework reports which command failed
+- **Cleaner code**: No need for intermediate variables or exit code capture
+- **Consistent pattern**: Same approach for all command testing
 
-# ✅ CORRECT: When testing specific non-zero exit codes
-my_function "bad_input"
+**When to capture exit codes (less common):**
+```bash  
+# Only when you need BOTH output AND specific exit code
+local result=$(my_function "input" 2>&1)
 local exit_code=$?
 _tf_assert_equals "Should return specific error code" 2 $exit_code
+_tf_assert_contains "Should have error message" "$result" "Expected error"
+
+# When testing exact non-zero exit codes
+my_function "bad_input"
+local exit_code=$?
+_tf_assert_equals "Should return code 2 for missing file" 2 $exit_code
 ```
 
-**Common patterns to avoid:**
+**Common anti-patterns to avoid:**
 ```bash
-# ❌ WRONG: Using $? after command execution
-my_function "input"
-_tf_assert "Function should succeed" $?  # Use _tf_assert with command directly
-
-# ❌ WRONG: Unnecessary exit code capture for simple success/failure
-local result=$(my_function "input") 
+# ❌ WRONG: Capturing exit code when you only care about success/failure
+local result=$(my_function "input")
 local exit_code=$?
-_tf_assert_equals "Function should succeed" 0 $exit_code  # Use _tf_assert instead
+_tf_assert_equals "Function should succeed" 0 $exit_code  # Use _tf_assert instead!
+
+# ❌ WRONG: Testing $? separately
+my_function "input"
+_tf_assert_equals "Should succeed" 0 $?  # Use _tf_assert my_function "input"
+
+# ❌ WRONG: Verbose exit code checking
+if my_function "input"; then
+    _tf_assert_true "Should succeed" true
+else
+    _tf_assert_true "Should succeed" false
+fi
+# Just use: _tf_assert "Should succeed" my_function "input"
 
 # ❌ WRONG: Message not first
-_tf_assert_equals 0 $exit_code "Function should succeed"  # Message should be first
+_tf_assert my_function "input" "Should succeed"  # Message must be first!
 ```
 
 #### Utility Functions
@@ -253,69 +425,118 @@ _tf_assert_equals 0 $exit_code "Function should succeed"  # Message should be fi
 
 ### Example Patterns
 
-#### Testing Functions
+#### Testing Functions (Self-Contained Pattern)
 ```bash
 test_my_function() {
-    # Arrange
+    # CRITICAL: All variables are local - no global dependencies
     local input="test_value"
     
-    # Act  
+    # Act
     local result=$(my_function "$input")
     
     # Assert
     _tf_assert_equals "Function should transform input correctly" "expected_output" "$result"
+    
+    # No cleanup needed - all variables are local
 }
 ```
 
-#### Testing File Operations
+#### Testing File Operations (Container Temp Pattern)
 ```bash
 test_file_processing() {
-    local test_file=$(_tf_create_temp_file)
+    # Use container's temp directory for isolation
+    local tmp_base=$(_tf_test_container_tmpdir)
+    local test_file="$tmp_base/test_${RANDOM}.txt"
     echo "test data" > "$test_file"
     
     process_file "$test_file"
     
     _tf_assert_file_contains "File should be processed" "$test_file" "processed"
-    _tf_cleanup_temp "$test_file"
+    
+    # NO manual cleanup - container handles this automatically
+    # Manual cleanup prevents debugging and is unnecessary
 }
 ```
 
-#### Testing Commands
+#### Testing Commands (CURRENT BEST PATTERN)
 ```bash
+# MANDATORY: Source DOH libraries directly at the top of your test file
+source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/version.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/task.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/frontmatter.sh"
+
 test_command_behavior() {
-    _tf_assert "Should accept valid flag" my_command --valid-flag
-    _tf_assert_not "Should reject invalid flag" my_command --invalid-flag
+    # PREFERRED: Test sourced functions directly (10x faster than wrappers)
+    _tf_assert "Should validate version" version_validate "1.0.0"
+    _tf_assert_not "Should reject invalid" version_validate "not-a-version"
+    
+    # Create test files with local variables (no globals)
+    local tmp_base=$(_tf_test_container_tmpdir)
+    local completed_task="$tmp_base/completed.md"
+    local pending_task="$tmp_base/pending.md"
+    
+    # Set up test data
+    cat > "$completed_task" <<'EOF'
+---
+status: completed
+---
+# Task
+EOF
+    
+    cat > "$pending_task" <<'EOF'
+---
+status: pending  
+---
+# Task
+EOF
+    
+    # Test with prepared data
+    _tf_assert "Should detect completed task" task_is_completed "$completed_task"
+    _tf_assert_not "Should detect incomplete" task_is_completed "$pending_task"
+    
+    # Test with arguments
+    _tf_assert "Should increment version" version_increment "1.0.0" "patch"
+    _tf_assert_not "Should fail on invalid type" version_increment "1.0.0" "invalid"
+    
+    # All variables are local - no cleanup needed
 }
 ```
 
-#### Using Logging Functions
+#### Using Logging Functions (Self-Contained Pattern)
 ```bash
 test_with_logging() {
     _tf_log_info "Starting complex test operation"
     _tf_log_debug "Debug info: processing input data"
     
-    # Arrange
-    local result=$(complex_operation)
+    # All variables are local
+    local input_data="test_input"
+    local result=$(complex_operation "$input_data")
     
     if [[ -n "$result" ]]; then
         _tf_log_success "Operation completed successfully"
-        _tf_assert_equals "expected" "$result" "Should return expected result"
+        _tf_assert_equals "Should return expected result" "expected" "$result"
     else
         _tf_log_error "Operation failed to produce result"
-        _tf_assert_true "false" "Operation should not fail"
+        _tf_assert_true "Operation should not fail" "false"
     fi
     
     _tf_log_trace "Detailed trace: operation took ${SECONDS} seconds"
+    
+    # No cleanup needed - all variables are local
 }
 ```
 
 ### Best Practices
 
 1. **Test Function Naming**: Always prefix with `test_`
-2. **Descriptive Messages**: Use clear, specific assertion messages
-3. **Clean Up**: Use `_tf_teardown()` or `_tf_cleanup_temp` for cleanup
-4. **One Concept Per Test**: Keep test functions focused
+2. **Descriptive Messages**: Use clear, specific assertion messages (message first!)
+3. **NO Manual Cleanup**: DON'T use manual cleanup in `_tf_teardown()` - prevents debugging
+4. **One Concept Per Test**: Keep test functions focused and self-contained
 5. **Test Both Success and Failure**: Include positive and negative test cases
+6. **Local Variables Only**: NO global variables - each test is self-contained
+7. **Source Libraries Directly**: NEVER use api.sh/helper.sh wrappers in tests (10x slower)
+8. **Use Container Temp**: Always use `_tf_test_container_tmpdir()` for temp files
+9. **Follow Best Practices Template**: Use `tests/template/test_best_patterns.sh` as your starting point
 
 ## Running Tests
 
@@ -362,14 +583,17 @@ Options:
 # List all available test files
 ./tests/run.sh --list
 
-# Run template examples to see the framework in action
-./tests/run.sh tests/template/test_simple.sh
-./tests/run.sh tests/template/test_example.sh
+# RECOMMENDED: Run the best practices template to see current patterns
+./tests/run.sh tests/template/test_best_patterns.sh
+
+# Run other template examples (legacy patterns - prefer best_patterns.sh)
+./tests/run.sh tests/template/test_simple.sh     # Basic patterns
+./tests/run.sh tests/template/test_example.sh    # Comprehensive reference
 
 # Run with different logging levels
-VERBOSE=true ./tests/run.sh tests/unit/test_logging_demo.sh    # Shows debug messages
-DOH_TEST_DEBUG=true ./tests/run.sh tests/unit/test_logging_demo.sh  # Shows trace messages
-QUIET=true ./tests/run.sh tests/unit/test_logging_demo.sh     # Minimal output
+VERBOSE=true ./tests/run.sh tests/template/test_best_patterns.sh    # Shows debug messages
+DOH_TEST_DEBUG=true ./tests/run.sh tests/template/test_best_patterns.sh  # Shows trace messages
+QUIET=true ./tests/run.sh tests/template/test_best_patterns.sh     # Minimal output
 ```
 
 ### Running Individual Tests
@@ -379,6 +603,9 @@ You can also run tests directly using the test launcher:
 ```bash
 # Run a single test with full framework enforcement
 ./tests/test_launcher.sh tests/unit/test_basic_demo.sh
+
+# RECOMMENDED: Run the best practices template (shows current patterns)
+./tests/test_launcher.sh tests/template/test_best_patterns.sh
 
 # This ensures:
 # - Test file sources framework properly
@@ -409,7 +636,7 @@ The `test_launcher.sh` automatically sets up environment variables for isolated 
 source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/doh.sh"
 
 # ✅ CORRECT: Use DOH library path functions
-local project_dir=$(doh_project_dir)    # Get DOH project directory
+local doh_dir=$(doh_project_dir)    # Get DOH project directory
 local global_dir=$(doh_global_dir)      # Get DOH global directory  
 local version_file=$(doh_version_file)  # Get VERSION file path
 
@@ -463,26 +690,30 @@ These variables ensure complete test isolation:
 - **Between test files**: Complete isolation with separate temp directories
 - **Within test file**: Shared environment allows state accumulation across test functions
 
-When writing tests that use DOH functions, the launcher handles environment setup automatically. **Use DOH library functions for consistent behavior:**
+When writing tests that use DOH functions, the launcher handles environment setup automatically. **ALWAYS source DOH libraries directly for testing:**
 
 ```bash
-# Source DOH libraries directly in tests
+# ✅ MANDATORY: Source DOH libraries directly in tests (NOT api.sh or helper.sh)
 source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/version.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/doh.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/frontmatter.sh"
 
 # DOH library functions will automatically use test directories and create structure as needed
 test_version_operations() {
-    # DOH functions work correctly because environment is set by test_launcher
-    # Operations affect test temp directory, not actual project or global config
+    # Direct function calls - fast and proper for testing
     version_set_current "1.0.0"
     local result=$(version_get_current)
     _tf_assert_equals "Version should be updated in test environment" "1.0.0" "$result"
+    
+    # ❌ AVOID: Don't use wrapper scripts in tests
+    # local result=$(./.claude/scripts/doh/api.sh version get_current)  # SLOW!
 }
 
 test_project_structure_access() {
-    # ✅ RECOMMENDED: Use DOH library functions for path access
-    local project_dir=$(doh_project_dir)
-    local epic_file="$project_dir/epics/test-epic.md"
+    # ✅ BEST PRACTICE: Use DOH library function directly in each test
+    # Don't store in global variables - call when needed
+    local doh_dir=$(doh_project_dir)
+    local epic_file="$doh_dir/epics/test-epic.md"
     
     # DOH functions automatically create directory structure as needed
     echo "test content" > "$epic_file"
@@ -491,10 +722,10 @@ test_project_structure_access() {
 
 test_direct_variable_usage() {
     # ❌ AVOID: Direct variable access (use only for specific test cases)
-    local project_dir="$DOH_PROJECT_DIR"  # Avoid this pattern
+    local doh_dir="$DOH_PROJECT_DIR"  # Avoid this pattern
     
     # ✅ PREFER: DOH library function call
-    local project_dir=$(doh_project_dir)
+    local doh_dir=$(doh_project_dir)
 }
 ```
 
@@ -506,6 +737,8 @@ The test launcher creates a fully isolated DOH environment that includes:
 ```
 /tmp/doh.XXXXXX/                    # Secure temporary container (DOH_TEST_CONTAINER_DIR)
 ├── VERSION                         # DOH_VERSION_FILE (project VERSION, copied from skeleton)
+├── tmp/                            # Test-specific temp directory (_tf_test_container_tmpdir)
+│   └── [test temp files]           # All temp files created by _tf_create_temp_* go here
 ├── global_doh/                     # DOH_GLOBAL_DIR
 │   ├── projects/                   # Workspace project registry (created as needed)
 │   └── caches/                     # DOH caches and logs (created as needed)
@@ -515,10 +748,14 @@ The test launcher creates a fully isolated DOH environment that includes:
     └── versions/                   # Project versions (copied from skeleton project_doh/versions/)
 ```
 
-**Direct structure mapping**: Skeleton directories now mirror the target structure exactly:
-- `skeleton/VERSION` → `/tmp/doh.XXXXXX/VERSION` (DOH_VERSION_FILE)
-- `skeleton/project_doh/` → `/tmp/doh.XXXXXX/project_doh/` (DOH_PROJECT_DIR)  
-- `skeleton/global_doh/` → `/tmp/doh.XXXXXX/global_doh/` (optional, for DOH_GLOBAL_DIR)
+**Important Paths:**
+- `DOH_TEST_CONTAINER_DIR`: The root `/tmp/doh.XXXXXX/` directory
+- `_tf_test_container_tmpdir()`: Returns `${DOH_TEST_CONTAINER_DIR}/tmp/` for test temp files
+- `doh_project_dir()`: Returns `${DOH_TEST_CONTAINER_DIR}/project_doh/` (uses `DOH_PROJECT_DIR`)
+- `doh_global_dir()`: Returns `${DOH_TEST_CONTAINER_DIR}/global_doh/` (uses `DOH_GLOBAL_DIR`)
+- `doh_version_file()`: Returns `${DOH_TEST_CONTAINER_DIR}/VERSION` for version operations (uses `DOH_VERSION_FILE`)
+
+**Advanced Testing Note:** While the underlying environment variables (`DOH_PROJECT_DIR`, `DOH_GLOBAL_DIR`, `DOH_VERSION_FILE`) can be modified for very advanced test scenarios, **best practice is to always use the DOH library path functions** for consistency, automatic structure creation, and proper abstraction.
 
 #### Isolation Benefits
 - **No interference**: Tests never affect developer's real DOH configuration
@@ -591,14 +828,14 @@ source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/doh.sh"
 
 _tf_setup() {
     # ✅ PREFERRED: Use DOH library function - automatically creates structure as needed
-    local project_dir=$(doh_project_dir)
+    local doh_dir=$(doh_project_dir)
     
     # Create parent project with VERSION file
-    local project_root="$(dirname "$project_dir")"
+    local project_root="$(dirname "$doh_dir")"
     echo "0.2.0" > "$project_root/VERSION"
     
     # Create test-specific data files - directory structure created automatically
-    cat > "$project_dir/prds/test-prd.md" << 'EOF'
+    cat > "$doh_dir/prds/test-prd.md" << 'EOF'
 ---
 name: test-prd
 status: backlog
@@ -611,9 +848,9 @@ EOF
 # ❌ AVOID: Manual directory creation (unless testing missing directory scenarios)
 _tf_setup_manual() {
     # Only use this pattern for specific test cases that need manual control
-    local project_dir=$(doh_project_dir)
-    mkdir -p "$project_dir/epics" "$project_dir/prds" "$project_dir/versions"
-    local project_root="$(dirname "$project_dir")"
+    local doh_dir=$(doh_project_dir)
+    mkdir -p "$doh_dir/epics" "$doh_dir/prds" "$doh_dir/versions"
+    local project_root="$(dirname "$doh_dir")"
     echo "0.2.0" > "$project_root/VERSION"
 }
 ```
@@ -695,8 +932,9 @@ _tf_setup() {
     _tff_setup_workspace_for_helpers
     
     # Add custom test data as needed
-    local project_dir=$(doh_project_dir)
-    cat > "$project_dir/prds/custom-prd.md" << 'EOF'
+    # BEST PRACTICE: Call doh_project_dir() directly when needed
+    local doh_dir=$(doh_project_dir)
+    cat > "$doh_dir/prds/custom-prd.md" << 'EOF'
 ---
 name: custom-prd
 status: backlog
@@ -720,17 +958,46 @@ Using fixture functions provides several advantages:
 This pattern ensures tests have a consistent DOH project structure while accurately simulating real-world DOH usage patterns.
 
 ### Temporary Files
-```bash
-# Create temporary files/directories
-temp_dir=$(_tf_create_temp_dir)
-temp_file=$(_tf_create_temp_file)
 
-# Always clean up in teardown
+**IMPORTANT:** All temporary files must be created within the test container's isolated tmp directory using the test framework functions. Never use `/tmp` directly or create files in the project root.
+
+```bash
+# ✅ CORRECT: Use test framework functions (automatically uses container's tmp/)
+temp_dir=$(_tf_create_temp_dir)              # Creates in container's tmp/
+temp_file=$(_tf_create_temp_file)            # Creates in container's tmp/
+temp_file=$(_tf_create_temp_file ".json")    # With specific extension
+
+# ✅ CORRECT: For manual paths, use _tf_test_container_tmpdir()
+local tmp_base=$(_tf_test_container_tmpdir)  # Get container's tmp directory
+local custom_file="$tmp_base/my_test_file.txt"
+echo "test data" > "$custom_file"
+
+# ❌ WRONG: Never use /tmp directly
+local bad_file="/tmp/test_file.txt"          # DON'T DO THIS!
+
+# ❌ WRONG: Never create files without full paths
+echo "data" > "output.txt"                   # Creates in unpredictable location!
+
+# IMPORTANT: NO manual cleanup needed in _tf_teardown()!
 _tf_teardown() {
-    _tf_cleanup_temp "$temp_dir"
-    _tf_cleanup_temp "$temp_file"
+    # DON'T clean up temp files - prevents debugging and is unnecessary
+    # The test launcher automatically cleans the entire container
+    
+    # Only unset variables to prevent pollution
+    unset temp_dir temp_file
+    
+    # ❌ WRONG: Manual cleanup interferes with debugging
+    # _tf_cleanup_temp "$temp_dir"    # DON'T DO THIS!
+    # rm -f "$temp_file"              # DON'T DO THIS!
 }
 ```
+
+**Why use container's tmp directory without manual cleanup?**
+- Complete isolation between test runs
+- **Automatic cleanup** when test container is destroyed
+- **Debugging friendly** - files remain for inspection after test failure
+- No pollution of system /tmp
+- Predictable location for debugging and inspection
 
 ### Mocking
 ```bash
@@ -745,18 +1012,35 @@ test_with_mocked_date() {
 }
 ```
 
-### Setup and Teardown
+### Setup and Teardown (Current Best Practices)
 ```bash
-# Called before each test function
+# Setup: Create test data (NOT global variables)
 _tf_setup() {
-    TEST_DIR=$(_tf_create_temp_dir)
-    cd "$TEST_DIR"
+    # Use fixtures for consistent DOH project structure
+    _tff_create_minimal_doh_project >/dev/null
+    
+    # Create test data in DOH structure (not temp directories)
+    local doh_dir=$(doh_project_dir)
+    mkdir -p "$doh_dir/epics/test-epic"
+    cat > "$doh_dir/epics/test-epic/001.md" <<'EOF'
+---
+task_number: "001"
+name: Test Task
+status: completed
+---
+# Test Task
+EOF
 }
 
-# Called after each test function
+# Teardown: NO manual cleanup recommended
 _tf_teardown() {
-    cd - >/dev/null
-    _tf_cleanup_temp "$TEST_DIR"
+    # IMPORTANT: NO manual cleanup needed when using container's tmp directory!
+    # The test launcher automatically cleans up the entire container after tests.
+    # Manual cleanup can interfere with debugging - leave files for inspection.
+    
+    # No global variables to unset - each test uses local variables
+    # This is the best practice for test isolation
+    :  # No-op - just comments explaining why we don't clean up
 }
 ```
 
@@ -777,15 +1061,73 @@ The test runner is designed for continuous integration:
 
 ## Best Practices
 
-1. **Keep tests fast**: Unit tests should run in < 1 second
-2. **Test behavior, not implementation**: Focus on what functions do, not how
-3. **Use descriptive names**: Test names should explain what is being tested
-4. **Clean up resources**: Always clean up temporary files and directories
-5. **Mock external dependencies**: Don't rely on network, external services
-6. **Test edge cases**: Empty inputs, boundary conditions, error paths
-7. **One assertion per test**: Makes failures easier to diagnose
-8. **Test files don't need executable permissions**: Test files are sourced by the test launcher, not executed directly
-9. **Always use absolute file paths**: Never create files without full paths to avoid artifacts in project root
+**CRITICAL: Follow the patterns in `tests/template/test_best_patterns.sh` - it demonstrates all current best practices with extensive comments.**
+
+1. **Source libraries directly**: ALWAYS source DOH libraries in tests, NEVER use api.sh/helper.sh wrappers (10x faster)
+2. **Keep tests self-contained**: Use local variables ONLY, NO global variables (improves isolation and clarity)
+3. **Keep tests fast**: Unit tests should run in < 1 second (direct library calls help achieve this)
+4. **Test behavior, not implementation**: Focus on what functions do, not how they do it
+5. **Use descriptive names**: Test names should explain what is being tested
+6. **NO manual cleanup**: Container handles temp file cleanup automatically (manual cleanup prevents debugging)
+7. **Mock external dependencies**: Don't rely on network, external services, or system state
+8. **Test edge cases**: Empty inputs, boundary conditions, error paths
+9. **One assertion per test concept**: Makes failures easier to diagnose
+10. **Test files don't need executable permissions**: Test files are sourced by the test launcher, not executed directly
+11. **Always use absolute file paths**: Never create files without full paths to avoid artifacts in project root
+12. **Use container temp directory**: Always use `_tf_test_container_tmpdir()` for temporary files, never `/tmp` directly
+13. **Call DOH path functions when needed**: Use `doh_project_dir()` in tests, don't store in globals
+
+### Library Sourcing Rules for Tests
+
+**MANDATORY: Source DOH libraries directly in all tests:**
+
+```bash
+# ✅ CORRECT: Source libraries at the top of test files
+source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/version.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/task.sh"
+
+# Then test functions directly
+_tf_assert "Should work" version_validate "1.0.0"
+
+# ❌ WRONG: Using wrapper scripts (except when testing the wrappers themselves)
+_tf_assert "Slow!" ./.claude/scripts/doh/api.sh version validate "1.0.0"
+```
+
+**Exceptions:**
+- Only use `api.sh` or `helper.sh` in tests specifically designed to test those wrapper scripts
+- Examples: `test_helper_prd.sh`, `test_api_wrapper.sh`
+
+### Test Variable Scope Best Practices
+
+**MANDATORY: Keep all test variables local for proper isolation:**
+
+```bash
+# ✅ CORRECT: Self-contained test with local variables
+test_good_example() {
+    # All variables are local to this test
+    local tmp_base=$(_tf_test_container_tmpdir)
+    local test_file="$tmp_base/test_${RANDOM}.txt"
+    local doh_dir=$(doh_project_dir)
+    
+    echo "test data" > "$test_file"
+    _tf_assert_file_exists "File should exist" "$test_file"
+}
+
+# ❌ WRONG: Using global variables
+TEST_FILE="/tmp/shared.txt"  # DON'T DO THIS!
+
+test_bad_example() {
+    echo "data" > "$TEST_FILE"  # Hidden dependency on global
+    _tf_assert_file_exists "File exists" "$TEST_FILE"
+}
+```
+
+**Why avoid global variables in tests:**
+- **Hidden dependencies**: Tests become coupled and order-dependent
+- **Reduced clarity**: Not clear what each test needs
+- **Harder debugging**: State leaks between tests
+- **Poor isolation**: Tests can interfere with each other
+- **Maintenance issues**: Changes affect multiple tests unexpectedly
 
 ### File Path Best Practices
 
@@ -797,26 +1139,36 @@ echo "test" > "output.txt"
 some_command "filename.md"
 ```
 
-**✅ CORRECT - Use absolute paths:**
+**❌ WRONG - Uses system /tmp directly:**
 ```bash
-# Use test framework temp functions
+# Don't use /tmp directly - breaks test isolation!
+local test_file="/tmp/test_${RANDOM}.md"
+echo "test" > "$test_file"
+```
+
+**✅ CORRECT - Use test framework functions:**
+```bash
+# Use test framework temp functions (creates in container's tmp/)
 local temp_file=$(_tf_create_temp_file ".md")
 frontmatter_create_markdown "$temp_file" "test data"
 
-# Or use explicit temp directories
-local test_file="/tmp/test_${RANDOM}.md"
+# For custom paths, use container's tmp directory
+local tmp_base=$(_tf_test_container_tmpdir)
+local test_file="$tmp_base/test_${RANDOM}.md"
 echo "test" > "$test_file"
 
 # For DOH project testing, use proper paths
-local project_file="$TEST_DIR/test_file.md"
+local doh_dir=$(doh_project_dir)
+local project_file="$doh_dir/test_file.md"
 some_command "$project_file"
 ```
 
 **Key Rules:**
 - Never use filenames without directory paths (`"content"`, `"output.txt"`)
-- Always use `$TEST_DIR`, `/tmp/`, or `_tf_create_temp_*` functions
-- Clean up temporary files in `_tf_teardown()` when needed
-- Use `$(_tf_create_temp_dir)` for temporary directories
+- Never use `/tmp` directly - always use `_tf_test_container_tmpdir()` or `_tf_create_temp_*` functions
+- Always use absolute paths from framework functions
+- Clean up temporary files in `_tf_teardown()` if needed (though container cleanup handles this)
+- Use `$(_tf_create_temp_dir)` for temporary directories (automatically in container's tmp/)
 
 ## Troubleshooting
 
@@ -846,6 +1198,13 @@ bash -x tests/unit/test_example.sh
 
 # Enable framework debugging
 DOH_TEST_DEBUG=1 ./tests/run.sh tests/unit/test_example.sh
+
+# DEBUGGING TIP: Inspect temp files after test failure
+# Since tests don't clean up temp files, you can examine them:
+# 1. Run failing test: ./tests/test_launcher.sh tests/unit/failing_test.sh
+# 2. Note container path in error message: /tmp/doh.XXXXXX/
+# 3. Examine files: ls -la /tmp/doh.XXXXXX/tmp/
+# 4. Container auto-cleanup happens later, preserving debug files
 ```
 
 ## Contributing
@@ -859,9 +1218,23 @@ When adding new tests:
 5. Add appropriate documentation
 6. Test both success and failure paths
 
+## Further Reading
+
 For more information, see:
-- Template examples: `tests/template/test_simple.sh` and `tests/template/test_example.sh`
+
+**ESSENTIAL:**
+- **RECOMMENDED STARTING POINT**: Best practices template: `tests/template/test_best_patterns.sh`
+- **Run to see current patterns**: `./tests/run.sh tests/template/test_best_patterns.sh --verbose`
+- **Copy for new tests**: `cp tests/template/test_best_patterns.sh tests/unit/test_my_feature.sh`
+
+**REFERENCE (legacy patterns - prefer best_patterns.sh):**
+- Basic template: `tests/template/test_simple.sh` 
+- Comprehensive template: `tests/template/test_example.sh`
 - Self-test example: `tests/unit/test_framework_self_test.sh`
-- Run templates to see framework in action: `./tests/run.sh tests/template/test_example.sh --verbose`
+
+**DOCUMENTATION:**
 - [DOH Test-Inspired Development Guide](../docs/doh-tdd.md)
 - [General TDD Rules](../rules/tdd.md)
+- [DOH Project Documentation](../README.md)
+
+**REMEMBER**: Always start with the best practices template - it contains the most current patterns with extensive explanatory comments.

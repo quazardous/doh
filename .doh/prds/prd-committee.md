@@ -82,9 +82,17 @@ The DOH framework with specialized agents finally enables **simulating a complet
 - **CTO decisions** and rationale
 
 #### FR5: DOH Integration
-- **Default**: `/doh:prd-new feature` launches committee
-- **Opt-out**: `/doh:prd-new feature --solo --reason "prototype"`
-- **Compatibility**: Same output as existing PRDs
+
+**Dual Command Approach:**
+- **Legacy**: `/doh:prd-new feature` - Solo PRD creation (kept as-is)
+- **Evolution**: `/doh:prd-evo feature` - Committee workflow (new)
+- **User choice**: Two distinct commands for different approaches
+- **Testing**: Validate `/doh:prd-evo` thoroughly before broader adoption
+
+**Committee Command Features:**
+- **Full workflow**: Context gathering → Orchestrator → 4 agents + CTO → Final PRD
+- **Historization**: Complete session records in `.claude/committees/{feature}/`
+- **Compatibility**: Same PRD output format as `/doh:prd-new`
 - **Workflow**: PRD → `/doh:prd-parse` → Standard epic
 
 ### Non-Functional Requirements
@@ -226,27 +234,99 @@ else:
 │       └── final-decision.md     # Final decision
 ```
 
+## `/doh:prd-evo` Workflow Specification
+
+### Main Stream (Claude Principal) - Context Phase
+
+**Step 1: Initial Context Gathering**
+- Read project context (VERSION, .doh/versions/, .doh/prds/, .doh/epics/)
+- Conduct comprehensive discovery with user (same as `/doh:prd-new` steps 1-4)
+- Synthesize parameters: feature name, description, target version
+
+**Step 2: Present Committee Approach**
+```
+🏛️ PRD Evolution - Multi-Agent Committee
+=========================================
+
+Feature: ${FEATURE_NAME}
+Description: ${DESCRIPTION}  
+Target: ${TARGET_VERSION}
+
+This PRD will be created through collaborative committee process:
+• 🏗️ DevOps Architect • 💻 Lead Developer • 🎨 UX Designer • 💼 Product Owner
+• 👨‍💼 CTO Arbitrator
+
+Process: 2 rounds → Cross-rating → Convergence → Final PRD
+Duration: ~15 minutes vs 5 min solo
+
+Ready to launch committee? [Y/n]
+```
+
+**Step 3: Orchestrator Handoff**
+- Package complete context for orchestrator agent
+- Launch orchestrator with: `{feature_name, description, target_version, user_context, project_context}`
+- Monitor orchestrator progress (optional status updates)
+
+### Orchestrator Agent - Committee Management
+
+**Step 4: Committee Session Setup**
+- Create session workspace: `.claude/committees/{feature}/`
+- Initialize 4 specialized agents + CTO agent
+- Set up scoring and convergence system
+
+**Step 5: Round 1 - Exploration**
+- Launch 4 agents in parallel with shared context
+- Each agent creates their PRD version from their perspective
+- Cross-rating: Each agent scores others (1-5 ⭐) with arguments
+- CTO analysis: Identify tensions and feedback
+
+**Step 6: Round 2 - Convergence** 
+- Agents revise PRDs based on CTO feedback and peer ratings
+- Final cross-rating on revised versions
+- Convergence check: If scores converge → Final PRD
+- If divergence → CTO presents options
+
+**Step 7: Session Historization**
+- Save all PRD versions, scores, arguments, CTO decisions
+- Generate session minutes
+- Create final consolidated PRD
+
+### Main Stream - Final Phase
+
+**Step 8: Receive Committee Output**
+- Orchestrator returns: Final PRD OR multiple options if no convergence
+- If multiple options → User chooses final version
+- Save PRD to `.doh/prds/{feature}.md`
+
+**Step 9: Post-Creation**
+- Same as current `/doh:prd-new` (populate sections, next steps)
+- Plus: Show committee session summary and link to full minutes
+
 ## Implementation Strategy
 
-### Phase 1: Specialized Agents (Week 1)
-- Develop 4 agents with distinct personalities
-- Test realistic tensions and debates
-- Validate business perspective quality
+### Phase 1: Core Components (Week 1)
+- Create `/doh:prd-evo.md` command specification
+- Develop orchestrator agent framework  
+- Build 4 specialized agents with distinct personalities
+- Test agent interactions and realistic tensions
 
-### Phase 2: 2-Round Process (Week 2)
-- Implement complete workflow
-- Rating and convergence system
-- CTO agent and arbitration
+### Phase 2: Committee Process (Week 2)
+- Implement 2-round workflow with scoring
+- Build CTO agent with arbitration capabilities
+- Complete session historization system
+- Test convergence and divergence scenarios
 
 ### Phase 3: DOH Integration (Week 3)
-- Modify `/doh:prd-new` for default committee
-- Historization and minutes
-- Complex PRD testing
+- Full `/doh:prd-evo` command implementation
+- Context handoff between main stream and orchestrator
+- File structure and workspace management
+- Complex PRD testing and validation
 
 ### Phase 4: Optimization (Week 4)
-- Convergence threshold tuning
-- Performance and timeouts
-- User feedback
+- Performance tuning and timeout handling
+- User experience refinement
+- Convergence threshold calibration
+- Documentation and user guidance
 
 ## Example Sessions
 

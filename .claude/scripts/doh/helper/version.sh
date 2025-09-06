@@ -299,31 +299,33 @@ helper_version_compare() {
 # @stdout Informations d'aide
 # @exitcode 0 Toujours
 helper_version_help() {
-    echo "DOH Version Management"
-    echo "====================="
-    echo ""
-    echo "Usage: helper.sh version <command> [options]"
-    echo ""
-    echo "Commands:"
-    echo "  new <version>               Set new version (e.g., 1.0.0)"
-    echo "  show [file]                 Show version information"
-    echo "  bump <type>                 Increment version (major|minor|patch)"
-    echo "  list                        List all versions with status"
-    echo "  compare <version1> <version2>  Compare two versions"
-    echo "  help                        Show this help message"
-    echo ""
-    echo "Bump types:"
-    echo "  major     - Increment major version (1.0.0 → 2.0.0)"
-    echo "  minor     - Increment minor version (1.0.0 → 1.1.0)"
-    echo "  patch     - Increment patch version (1.0.0 → 1.0.1)"
-    echo ""
-    echo "Examples:"
-    echo "  helper.sh version new 1.0.0"
-    echo "  helper.sh version show"
-    echo "  helper.sh version show VERSION"
-    echo "  helper.sh version bump patch"
-    echo "  helper.sh version compare 1.0.0 2.0.0"
-    echo "  helper.sh version list"
+    cat <<'EOF'
+DOH Version Management
+=====================
+
+Usage: helper.sh version <command> [options]
+
+Commands:
+    new <version>               Set new version (e.g., 1.0.0)
+    show [file]                 Show version information
+    bump <type>                 Increment version (major|minor|patch)
+    list                        List all versions with status
+    compare <version1> <version2>  Compare two versions
+    help                        Show this help message
+
+Bump types:
+    major     - Increment major version (1.0.0 → 2.0.0)
+    minor     - Increment minor version (1.0.0 → 1.1.0)
+    patch     - Increment patch version (1.0.0 → 1.0.1)
+
+Examples:
+    helper.sh version new 1.0.0
+    helper.sh version show
+    helper.sh version show VERSION
+    helper.sh version bump patch
+    helper.sh version compare 1.0.0 2.0.0
+    helper.sh version list
+EOF
     return 0
 }
 
@@ -389,6 +391,235 @@ helper_version_update() {
     fi
     
     return $result
+}
+
+# @description Delete a version file (only planned/draft versions)
+# @arg $1 string Version to delete (ex: 1.0.0)
+# @arg $2 string Force flag (--force) to skip confirmation
+# @stdout Confirmation of deletion
+# @exitcode 0 Si suppression réussie
+# @exitcode 1 Si version introuvable ou erreur
+helper_version_delete() {
+    local version="$1"
+    local force="${2:-}"
+    
+    if [[ -z "$version" ]]; then
+        echo "Error: Version required" >&2
+        echo "Usage: helper.sh version delete <version> [--force]" >&2
+        return 1
+    fi
+    
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
+        echo "Error: Not in DOH project" >&2
+        return 1
+    }
+    
+    local version_file="$doh_dir/versions/${version}.md"
+    
+    if [[ ! -f "$version_file" ]]; then
+        echo "Error: Version not found: $version" >&2
+        return 1
+    fi
+    
+    # Check status to prevent deletion of released versions
+    local status
+    status=$(frontmatter_get_field "$version_file" "status" 2>/dev/null || echo "unknown")
+    
+    if [[ "$status" == "released" ]]; then
+        echo "Error: Cannot delete released version $version" >&2
+        echo "Released versions are preserved for project history" >&2
+        return 1
+    fi
+    
+    if [[ "$force" != "--force" ]]; then
+        echo "⚠️  Delete version $version (status: $status)?"
+        echo "This action cannot be undone."
+        echo ""
+        echo "1. ✅ Yes, delete version $version"
+        echo "2. ❌ No, cancel deletion"
+        echo ""
+        echo "Add --force to skip this confirmation"
+        return 1
+    fi
+    
+    rm "$version_file" || {
+        echo "Error: Failed to delete version file: $version_file" >&2
+        return 1
+    }
+    
+    echo "✅ Version deleted: $version"
+    return 0
+}
+
+# @description Show version status overview
+# @arg $1 string Optional flags (--all, --detailed)
+# @stdout Version status information
+# @exitcode 0 Si réussi
+helper_version_status() {
+    local flags="${1:-}"
+    
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
+        echo "Error: Not in DOH project" >&2
+        return 1
+    }
+    
+    local current_version
+    current_version=$(version_get_current 2>/dev/null || echo "unknown")
+    
+    echo "📊 Version Status"
+    echo "=================="
+    echo "Current version: $current_version"
+    echo ""
+    
+    if [[ "$flags" == "--all" || "$flags" == "--detailed" ]]; then
+        # Delegate to helper_version_list for detailed listing
+        helper_version_list
+    else
+        # Show summary
+        local version_count
+        version_count=$(find "$doh_dir/versions" -name "*.md" -type f 2>/dev/null | wc -l)
+        echo "Total versions: $version_count"
+        
+        if [[ $version_count -gt 0 ]]; then
+            echo ""
+            echo "Recent versions:"
+            find "$doh_dir/versions" -name "*.md" -type f 2>/dev/null | \
+                head -5 | while read -r file; do
+                    local ver=$(basename "$file" .md)
+                    local status=$(frontmatter_get_field "$file" "status" 2>/dev/null || echo "unknown")
+                    echo "  • $ver ($status)"
+                done
+        fi
+    fi
+    
+    return 0
+}
+
+# @description Validate version files and structure
+# @arg $1 string Optional specific version to validate
+# @stdout Validation results
+# @exitcode 0 Si validation réussie
+# @exitcode 1 Si erreurs trouvées
+helper_version_validate() {
+    local specific_version="${1:-}"
+    
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
+        echo "Error: Not in DOH project" >&2
+        return 1
+    }
+    
+    local errors=0
+    
+    echo "🔍 Validating versions..."
+    echo ""
+    
+    if [[ -n "$specific_version" ]]; then
+        # Validate specific version
+        local version_file="$doh_dir/versions/${specific_version}.md"
+        if [[ ! -f "$version_file" ]]; then
+            echo "❌ Version not found: $specific_version" >&2
+            return 1
+        fi
+        
+        if ! frontmatter_validate "$version_file"; then
+            echo "❌ Invalid frontmatter in $specific_version" >&2
+            errors=$((errors + 1))
+        else
+            echo "✅ $specific_version: Valid"
+        fi
+    else
+        # Validate all versions
+        if [[ -d "$doh_dir/versions" ]]; then
+            for version_file in "$doh_dir/versions"/*.md; do
+                [[ -f "$version_file" ]] || continue
+                
+                local version=$(basename "$version_file" .md)
+                
+                if ! frontmatter_validate "$version_file"; then
+                    echo "❌ $version: Invalid frontmatter"
+                    errors=$((errors + 1))
+                elif ! version_validate "$version"; then
+                    echo "❌ $version: Invalid version format"
+                    errors=$((errors + 1))
+                else
+                    echo "✅ $version: Valid"
+                fi
+            done
+        fi
+    fi
+    
+    echo ""
+    if [[ $errors -eq 0 ]]; then
+        echo "✅ All versions valid"
+        return 0
+    else
+        echo "❌ Found $errors validation errors"
+        return 1
+    fi
+}
+
+# @description Migrate project to use versioning system
+# @stdout Migration progress and results
+# @exitcode 0 Si migration réussie
+# @exitcode 1 Si erreur during migration
+helper_version_migrate() {
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
+        echo "Error: Not in DOH project" >&2
+        return 1
+    }
+    
+    echo "🔄 Migrating to versioning system..."
+    echo ""
+    
+    # Create versions directory if it doesn't exist
+    if [[ ! -d "$doh_dir/versions" ]]; then
+        mkdir -p "$doh_dir/versions" || {
+            echo "Error: Failed to create versions directory" >&2
+            return 1
+        }
+        echo "✅ Created versions directory"
+    fi
+    
+    # Check if VERSION file exists
+    if [[ ! -f "VERSION" ]]; then
+        echo "📝 Creating initial VERSION file..."
+        echo "0.1.0" > VERSION || {
+            echo "Error: Failed to create VERSION file" >&2
+            return 1
+        }
+        echo "✅ Created VERSION file with 0.1.0"
+    fi
+    
+    # Create initial version file if none exist
+    local version_count
+    version_count=$(find "$doh_dir/versions" -name "*.md" -type f 2>/dev/null | wc -l)
+    
+    if [[ $version_count -eq 0 ]]; then
+        local current_version
+        current_version=$(version_get_current 2>/dev/null || echo "0.1.0")
+        
+        echo "📄 Creating initial version file for $current_version..."
+        if version_create "$doh_dir/versions/${current_version}.md" "$current_version" "release" "Initial version"; then
+            echo "✅ Created initial version file: $current_version"
+        else
+            echo "Error: Failed to create initial version file" >&2
+            return 1
+        fi
+    fi
+    
+    echo ""
+    echo "✅ Migration to versioning system complete"
+    echo ""
+    echo "Next steps:"
+    echo "• Use '/doh:version' to manage versions"
+    echo "• Use '/doh:version status' to see current state"
+    echo "• Use '/doh:version 1.0.0' to create new versions"
+    
+    return 0
 }
 
 # Helpers should only be called through helper.sh bootstrap

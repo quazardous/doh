@@ -1,5 +1,5 @@
 ---
-name: version-init
+name: init-version
 description: "Initialize versioning system in existing DOH project"
 version: 1.0.0
 category: versioning
