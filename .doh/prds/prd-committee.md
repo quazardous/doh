@@ -91,7 +91,7 @@ The DOH framework with specialized agents finally enables **simulating a complet
 
 **Committee Command Features:**
 - **Full workflow**: Context gathering → Orchestrator → 4 agents + CTO → Final PRD
-- **Historization**: Complete session records in `.claude/committees/{feature}/`
+- **Historization**: Complete session records in `${doh_project_dir}/committees/{feature}/`
 - **Compatibility**: Same PRD output format as `/doh:prd-new`
 - **Workflow**: PRD → `/doh:prd-parse` → Standard epic
 
@@ -212,26 +212,29 @@ else:
 ### File Structure
 
 ```
-.claude/
-├── prds/
-│   └── {feature}.md              # Final PRD
-├── committees/
-│   └── {feature}/
-│       ├── session.md            # Session minutes
-│       ├── round1/
-│       │   ├── devops.md         # DevOps version round 1
-│       │   ├── lead.md           # Lead version round 1
-│       │   ├── ux.md             # UX version round 1
-│       │   ├── po.md             # PO version round 1
-│       │   └── scores.json       # Cross-rating
-│       ├── round2/
-│       │   ├── devops-v2.md      # Revised versions
-│       │   ├── lead-v2.md
-│       │   ├── ux-v2.md
-│       │   ├── po-v2.md
-│       │   └── final-scores.json
-│       ├── cto-feedback.md       # CTO feedback
-│       └── final-decision.md     # Final decision
+{doh_project_root}/
+└── .doh/                         # doh_project_dir()
+    ├── prds/
+    │   └── {feature}.md          # Final PRD
+    ├── committees/
+    │   └── {feature}/
+    │       ├── session.md        # Session minutes
+    │       ├── round1/
+    │       │   ├── devops.md     # DevOps version round 1
+    │       │   ├── lead.md       # Lead version round 1
+    │       │   ├── ux.md         # UX version round 1
+    │       │   ├── po.md         # PO version round 1
+    │       │   └── scores.json   # Cross-rating
+    │       ├── round2/
+    │       │   ├── devops-v2.md  # Revised versions
+    │       │   ├── lead-v2.md
+    │       │   ├── ux-v2.md
+    │       │   ├── po-v2.md
+    │       │   └── final-scores.json
+    │       ├── cto-feedback.md   # CTO feedback
+    │       └── final-decision.md # Final decision
+    ├── epics/
+    └── versions/
 ```
 
 ## `/doh:prd-evo` Workflow Specification
@@ -270,7 +273,7 @@ Ready to launch committee? [Y/n]
 ### Orchestrator Agent - Committee Management
 
 **Step 4: Committee Session Setup**
-- Create session workspace: `.claude/committees/{feature}/`
+- Create session workspace: `${doh_project_dir}/committees/{feature}/`
 - Initialize 4 specialized agents + CTO agent
 - Set up scoring and convergence system
 

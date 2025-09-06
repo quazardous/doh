@@ -21,48 +21,9 @@ Using the test-runner agent ensures:
 - All issues are properly surfaced
 - No approval dialogs interrupt the workflow
 
-## DOH API ENFORCEMENT
+## DOH API Usage
 
-### MANDATORY: Use DOH API for Markdown Commands and Interactive Usage
-
-**For DOH library functions in markdown commands and interactive contexts:**
-```bash
-# ✅ CORRECT: Use DOH API
-./.claude/scripts/doh/api.sh <library> <function> [args...]
-
-# ❌ WRONG: Direct library sourcing in markdown commands
-source .claude/scripts/doh/lib/library.sh && library_function
-```
-
-**For DOH commands and workflows in markdown commands:**
-```bash
-# ✅ CORRECT: Use DOH helper
-./.claude/scripts/doh/helper.sh <helper> <command> [args...]
-
-# ❌ WRONG: Direct script execution in markdown commands
-./.claude/scripts/doh/some-script.sh
-```
-
-**Rules:**
-- **For markdown commands and interactive usage**: Always use `api.sh` and `helper.sh` 
-- **For internal scripts and test files**: Direct library sourcing and script execution is allowed and recommended for performance
-- Scripts in `.claude/scripts/doh/` can source libraries directly using `source` statements
-- Test files in `tests/` can source DOH libraries directly for efficiency
-- The API enforcement applies primarily to user-facing commands and agent operations
-
-**Examples:**
-```bash
-# Numbering operations
-./.claude/scripts/doh/api.sh numbering get_next "epic"
-./.claude/scripts/doh/api.sh numbering register_epic "205" "path" "name"
-
-# PRD operations  
-./.claude/scripts/doh/helper.sh prd list
-./.claude/scripts/doh/helper.sh prd status
-
-# Workspace operations
-./.claude/scripts/doh/api.sh workspace get_current_project_id
-```
+Use `api.sh` for DOH library functions and `helper.sh` for user commands when needed. See [CLAUDE.md](CLAUDE.md) for complete usage patterns and examples.
 
 ## Philosophy
 
@@ -75,11 +36,7 @@ source .claude/scripts/doh/lib/library.sh && library_function
 
 ### Testing
 
-- Always use the test-runner agent to execute tests.
-- Do not use mock services for anything ever.
-- Do not move on to the next test until the current test is complete.
-- If the test fails, consider checking if the test is structured correctly before deciding we need to refactor the codebase.
-- Tests to be verbose so we can use them for debugging.
+Use the test-runner agent when needed. Follow DOH testing patterns documented in [tests/README.md](tests/README.md) and [docs/doh-tdd.md](docs/doh-tdd.md).
 
 
 ## Tone and Behavior

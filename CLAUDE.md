@@ -18,6 +18,8 @@ These files contain critical workflow patterns that should only be modified when
 This is the DOH (Development Operations Helper) project for task and epic management.
 
 See [DEVELOPMENT.md](DEVELOPMENT.md) for DOH-specific development context and versioning information.
+See [tests/README.md](tests/README.md) for how to write good tests.
+See [docs/writing-good-scripts.md](docs/writing-good-scripts.md) to know how to write good scripts using DOH libraries and helpers.
 
 ## Commands Available
 
@@ -29,68 +31,13 @@ Run commands using the format `/doh:command-name`
 
 ### Quick Usage
 ```bash
-# Call public DOH library functions (function names without library prefix)
+# Call DOH library functions
 ./.claude/scripts/doh/api.sh <library> <function> [args...]
 
-# Call private DOH library functions (with --private flag)
-./.claude/scripts/doh/api.sh --private <library> <function> [args...]
+# Call DOH helper commands  
+./.claude/scripts/doh/helper.sh <helper> <command> [args...]
 ```
 
-### Public Function Examples
-```bash
-# Version operations - call functions without version_ prefix
-./.claude/scripts/doh/api.sh version get_current
-./.claude/scripts/doh/api.sh version get_file ".doh/epics/versioning/005.md"
-./.claude/scripts/doh/api.sh version validate "1.2.3"
-./.claude/scripts/doh/api.sh version compare "1.0.0" "2.0.0"
-./.claude/scripts/doh/api.sh version increment "1.0.0" "patch"
-
-# Frontmatter operations - call functions without frontmatter_ prefix
-./.claude/scripts/doh/api.sh frontmatter get_field "file.md" "field_name"
-./.claude/scripts/doh/api.sh frontmatter update_field "file.md" "status" "completed"
-./.claude/scripts/doh/api.sh frontmatter has "file.md"
-./.claude/scripts/doh/api.sh frontmatter validate "file.md"
-
-# Task operations - call functions without task_ prefix
-./.claude/scripts/doh/api.sh task get_status ".doh/epics/data-api-sanity/032.md"
-./.claude/scripts/doh/api.sh task is_completed ".doh/epics/data-api-sanity/032.md"
-./.claude/scripts/doh/api.sh task get_name ".doh/epics/data-api-sanity/032.md"
-
-# DOH core operations
-./.claude/scripts/doh/api.sh doh find_root
-```
-
-### Private Function Examples
-```bash
-# Call private functions with --private flag (function names without _library_ prefix)
-./.claude/scripts/doh/api.sh --private version to_number "1.0.0"
-./.claude/scripts/doh/api.sh --private version prerelease_to_adjustment "1.0.0-alpha"
-```
-
-### Benefits
-- **Clean API**: Call functions without library prefixes
-- **Private function access**: Use `--private` flag to call internal functions
-- **Automatic dependency resolution**: Libraries source their dependencies automatically
-- **Error handling**: Shows available functions when function not found
-- **Return value handling**: Preserves exact exit codes from underlying functions
-
-### API Convention
-- **Public functions**: Call with function name only (library prefix handled internally)
-  - `api.sh version get_current` → calls `version_get_current()`
-  - `api.sh task is_completed "file.md"` → calls `task_is_completed()`
-- **Private functions**: Use `--private` flag with function name only
-  - `api.sh --private version to_number "1.0.0"` → calls `_version_to_number()`
-
-### Usage Examples
-```bash
-# Public function calls - function name without library prefix
-./.claude/scripts/doh/api.sh version get_current
-./.claude/scripts/doh/api.sh frontmatter get_field "file.md" "status"
-./.claude/scripts/doh/api.sh task is_completed "task.md"
-
-# Private function calls - requires --private flag
-./.claude/scripts/doh/api.sh --private version to_number "1.0.0"
-```
 
 ## DOH Library Reference
 
