@@ -219,19 +219,21 @@ else:
     ├── committees/
     │   └── {feature}/
     │       ├── session.md        # Session minutes
+    │       ├── seed.md           # Initial context (optional)
     │       ├── round1/
     │       │   ├── devops.md     # DevOps version round 1
     │       │   ├── lead.md       # Lead version round 1
     │       │   ├── ux.md         # UX version round 1
     │       │   ├── po.md         # PO version round 1
-    │       │   └── scores.json   # Cross-rating
+    │       │   ├── scores.json   # Cross-rating scores
+    │       │   └── cto-feedback.md # CTO feedback round 1
     │       ├── round2/
-    │       │   ├── devops-v2.md  # Revised versions
-    │       │   ├── lead-v2.md
-    │       │   ├── ux-v2.md
-    │       │   ├── po-v2.md
-    │       │   └── final-scores.json
-    │       ├── cto-feedback.md   # CTO feedback
+    │       │   ├── devops.md     # DevOps revised version
+    │       │   ├── lead.md       # Lead revised version
+    │       │   ├── ux.md         # UX revised version
+    │       │   ├── po.md         # PO revised version
+    │       │   ├── scores.json   # Final cross-rating scores
+    │       │   └── cto-feedback.md # CTO feedback round 2
     │       └── final-decision.md # Final decision
     ├── epics/
     └── versions/

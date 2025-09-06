@@ -1,16 +1,10 @@
 #!/bin/bash
 # Test suite for committee helper functions
-# Tests: helper committee commands via helper.sh
-#
-# LEGITIMATE EXCEPTION: This test specifically tests the helper.sh wrapper script
-# for committee commands, so it appropriately uses ./.claude/scripts/doh/helper.sh
-# instead of sourcing libraries directly.
-#
-# PATTERN: This test validates that committee helper functions work through the helper.sh bootstrap.
-# For testing individual committee library functions, use direct library sourcing instead.
+# Tests helper.sh committee commands through direct function calls
+# Following current best practices from test_best_patterns.sh
 
 # ==============================================================================
-# FRAMEWORK AND LIBRARY SOURCING
+# FRAMEWORK AND LIBRARY SOURCING (MANDATORY)
 # ==============================================================================
 
 # Source test framework (required)
@@ -19,9 +13,13 @@ source "$(dirname "${BASH_SOURCE[0]}")/../helpers/test_framework.sh"
 # Source DOH fixtures helper for test project setup
 source "$(dirname "${BASH_SOURCE[0]}")/../helpers/doh_fixtures.sh"
 
-# CRITICAL: Even though we're testing helper.sh, we need DOH library for path functions
-# This prevents creating file artifacts in project root by getting proper container paths
+# CRITICAL: Source DOH libraries directly (10x faster than api.sh/helper.sh)
 source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/doh.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/committee.sh"
+
+# Source helper functions directly for testing (avoiding main execution)
+DOH_HELPER_COMMITTEE_TEST_MODE=1
+source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/helper/committee.sh"
 
 # ==============================================================================
 # SETUP AND TEARDOWN
@@ -29,8 +27,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/../../.claude/scripts/doh/lib/doh.sh"
 
 _tf_setup() {
     # Use fixture helpers for consistent test data and workspace setup
-    # This provides a clean DOH structure for testing helper.sh integration
-    _tff_create_helper_test_project >/dev/null
+    _tff_create_minimal_doh_project >/dev/null
     _tff_setup_workspace_for_helpers
 }
 
@@ -45,259 +42,178 @@ _tf_teardown() {
 }
 
 # ==============================================================================
-# COMMAND TESTING PATTERNS (Testing helper.sh wrapper)
+# SEED MANAGEMENT TESTS (Current functions only)
 # ==============================================================================
 
-# =============================================================================
-# TEST: committee helper commands via helper.sh
-# =============================================================================
-
-test_committee_help_display() {
-    # Test help display via helper.sh - command should succeed
-    _tf_assert "Committee help should succeed" ./.claude/scripts/doh/helper.sh committee help
+test_helper_committee_seed_create_basic() {
+    # BEST PRACTICE: All variables are local - no global dependencies
+    local test_feature="test-auth"
+    local seed_content="Test content for committee session"
     
-    # Capture output for content validation
+    # Test seed creation using direct helper function call
+    _tf_assert "Seed create should succeed" helper_committee_seed_create "$test_feature" "$seed_content"
+    
+    # Verify seed was created
+    local doh_dir=$(doh_project_dir)
+    local seed_file="$doh_dir/committees/$test_feature/seed.md"
+    _tf_assert_file_exists "Seed file should be created" "$seed_file"
+    _tf_assert_file_contains "Seed should have correct content" "$seed_file" "$seed_content"
+}
+
+test_helper_committee_seed_create_missing_params() {
+    # Test with missing feature name
+    _tf_assert_not "Missing feature name should fail" helper_committee_seed_create ""
+    
+    # Test with missing content  
+    _tf_assert_not "Missing content should fail" helper_committee_seed_create "test-feature" ""
+    
+    # Test with both missing
+    _tf_assert_not "Both missing should fail" helper_committee_seed_create "" ""
+}
+
+test_helper_committee_seed_exists_basic() {
+    local test_feature="existence-test"
+    local seed_content="Content for existence check"
+    
+    # Initially should not exist
+    _tf_assert_not "Seed should not exist initially" helper_committee_seed_exists "$test_feature"
+    
+    # Create seed using library function directly (faster than helper)
+    committee_create_seed "$test_feature" "$seed_content" >/dev/null
+    
+    # Now should exist
+    _tf_assert "Seed should exist after creation" helper_committee_seed_exists "$test_feature"
+}
+
+test_helper_committee_seed_update_basic() {
+    local test_feature="update-test"
+    local original_content="Original seed content"
+    local updated_content="Updated seed content"
+    
+    # Create initial seed
+    committee_create_seed "$test_feature" "$original_content" >/dev/null
+    
+    # Update using helper function
+    _tf_assert "Seed update should succeed" helper_committee_seed_update "$test_feature" "$updated_content"
+    
+    # Verify content was updated
+    local doh_dir=$(doh_project_dir)
+    local seed_file="$doh_dir/committees/$test_feature/seed.md"
+    _tf_assert_file_contains "Should have updated content" "$seed_file" "$updated_content"
+    _tf_assert_not "Should not have old content" bash -c "grep -q '$original_content' '$seed_file'"
+}
+
+test_helper_committee_seed_update_missing() {
+    local test_feature="nonexistent-update"
+    local new_content="This should fail"
+    
+    _tf_assert_not "Update non-existent seed should fail" helper_committee_seed_update "$test_feature" "$new_content"
+}
+
+test_helper_committee_seed_delete_basic() {
+    local test_feature="delete-test" 
+    local seed_content="Content to be deleted"
+    
+    # Create seed
+    committee_create_seed "$test_feature" "$seed_content" >/dev/null
+    
+    # Verify it exists
+    _tf_assert "Seed should exist before deletion" committee_has_seed "$test_feature"
+    
+    # Delete using helper function 
+    # Note: This may require interactive input, so we test the non-interactive path
+    _tf_assert "Delete seed should succeed" helper_committee_seed_delete "$test_feature" <<< "y"
+    
+    # Verify it's gone
+    _tf_assert_not "Seed should not exist after deletion" committee_has_seed "$test_feature"
+}
+
+test_helper_committee_create_final_prd_basic() {
+    local test_feature="prd-test"
+    local seed_content="Test PRD seed content"
+    
+    # Create seed first (PRD template uses seed for context)
+    committee_create_seed "$test_feature" "$seed_content" >/dev/null
+    
+    # Test PRD template creation
     local output
-    output=$(./.claude/scripts/doh/helper.sh committee help 2>/dev/null)
+    output=$(helper_committee_create_final_prd "$test_feature" 2>/dev/null)
+    _tf_assert "Create final PRD should succeed" test $? -eq 0
     
-    # Validate help content using _tf_assert_contains
-    _tf_assert_contains "Help title displayed" "$output" "DOH Committee Management"
-    _tf_assert_contains "Create command listed" "$output" "create <feature>"
-    _tf_assert_contains "Round1 command listed" "$output" "round1 <feature>"
-    _tf_assert_contains "Round2 command listed" "$output" "round2 <feature>"
-    _tf_assert_contains "Converge command listed" "$output" "converge <feature>"
+    # Verify output contains expected PRD structure
+    _tf_assert_contains "Should contain frontmatter" "$output" "---"
+    _tf_assert_contains "Should contain feature title" "$output" "$(echo $test_feature | tr '-' ' ' | sed 's/\b\w/\U&/g')"
+    _tf_assert_contains "Should contain PRD sections" "$output" "Executive Summary"
+    _tf_assert_contains "Should contain technical section" "$output" "Technical Architecture"
 }
 
-test_committee_main_no_args() {
-    # Test calling help function explicitly - command should succeed
-    _tf_assert "Committee help should succeed" ./.claude/scripts/doh/helper.sh committee help
-    
-    # Capture output for content validation
-    local output
-    output=$(./.claude/scripts/doh/helper.sh committee help 2>/dev/null)
-    
-    # Validate that help is shown
-    _tf_assert_contains "Help shows usage" "$output" "DOH Committee Management"
+test_helper_committee_create_final_prd_missing_feature() {
+    _tf_assert_not "Missing feature name should fail" helper_committee_create_final_prd ""
 }
 
-test_committee_main_invalid_command() {
-    # Test invalid function - command should fail
-    _tf_assert_not "Invalid function should fail" ./.claude/scripts/doh/helper.sh committee invalid-function
-    
-    # Capture error output for content validation
-    local output
-    output=$(./.claude/scripts/doh/helper.sh committee invalid-function 2>&1 || true)
-    
-    # Validate error messages (helper.sh provides these messages)
-    _tf_assert_contains "Invalid function error shown" "$output" "Function 'invalid-function' not found"
-    _tf_assert_contains "Available functions listed" "$output" "Available functions in committee helper:"
+# ==============================================================================
+# ERROR HANDLING TESTS
+# ==============================================================================
+
+test_helper_committee_functions_missing_parameters() {
+    # Test all helper functions with missing feature name
+    _tf_assert_not "seed_create rejects empty feature" helper_committee_seed_create ""
+    _tf_assert_not "seed_exists rejects empty feature" helper_committee_seed_exists ""
+    _tf_assert_not "seed_update rejects empty feature" helper_committee_seed_update ""  
+    _tf_assert_not "seed_delete rejects empty feature" helper_committee_seed_delete ""
+    _tf_assert_not "create_final_prd rejects empty feature" helper_committee_create_final_prd ""
 }
 
-test_committee_create_basic() {
-    local test_feature="test-feature"
-    local doh_dir
-    doh_dir=$(doh_project_dir)
+test_helper_committee_validation_patterns() {
+    # Test invalid feature names (from validation function)
+    _tf_assert_not "Should reject invalid feature name" helper_committee_seed_create "Invalid_Name" "content"
+    _tf_assert_not "Should reject uppercase" helper_committee_seed_create "INVALID" "content" 
+    _tf_assert_not "Should reject spaces" helper_committee_seed_create "invalid name" "content"
     
-    # Test create command - should succeed
-    _tf_assert "Committee create should succeed" ./.claude/scripts/doh/helper.sh committee create "$test_feature"
-    
-    # Capture output for validation
-    local output
-    output=$(./.claude/scripts/doh/helper.sh committee create "$test_feature-2" 2>/dev/null)
-    
-    # Validate create messages
-    _tf_assert_contains "Create message shown" "$output" "Creating committee session for: $test_feature-2"
-    _tf_assert_contains "Next step guidance shown" "$output" "committee round1 $test_feature-2"
-    
-    # Verify session was created
-    _tf_assert "Session directory created" test -d "$doh_dir/committees/$test_feature"
-    _tf_assert "Session file created" test -f "$doh_dir/committees/$test_feature/session.md"
+    # Test valid feature names
+    _tf_assert "Should accept kebab-case" helper_committee_seed_create "valid-feature" "content"
+    _tf_assert "Should accept single word" helper_committee_seed_create "valid" "content"
 }
 
-test_committee_create_missing_feature() {
-    # Test create without feature name - should fail
-    _tf_assert_not "Create without feature should fail" ./.claude/scripts/doh/helper.sh committee create
-    
-    # Capture error output
-    local output
-    output=$(./.claude/scripts/doh/helper.sh committee create 2>&1 || true)
-    
-    # Validate error message
-    _tf_assert_contains "Missing feature error shown" "$output" "Feature name required for create command"
-}
-
-test_committee_create_invalid_name() {
-    # Test create with invalid feature name - should fail
-    _tf_assert_not "Create with invalid name should fail" ./.claude/scripts/doh/helper.sh committee create "Invalid_Name"
-    
-    # Capture error output  
-    local output
-    output=$(./.claude/scripts/doh/helper.sh committee create "Invalid_Name" 2>&1 || true)
-    
-    # Validate error message
-    _tf_assert_contains "Invalid name error shown" "$output" "Feature name must be kebab-case"
-}
-
-test_committee_list_no_sessions() {
-    # Test list with no sessions - should succeed
-    _tf_assert "Committee list should succeed" ./.claude/scripts/doh/helper.sh committee list
-    
-    # Capture output for content validation
-    local output
-    output=$(./.claude/scripts/doh/helper.sh committee list 2>/dev/null)
-    
-    # Validate list content
-    _tf_assert_contains "List title shown" "$output" "Committee Sessions"
-    _tf_assert_contains "No sessions message shown" "$output" "No committee sessions found"
-    _tf_assert_contains "Create guidance shown" "$output" "committee create <feature-name>"
-}
-
-test_committee_list_with_sessions() {
-    local doh_dir
-    doh_dir=$(doh_project_dir)
-    
-    # Create some test sessions using helper.sh - should succeed
-    _tf_assert "Create feature-1 should succeed" ./.claude/scripts/doh/helper.sh committee create feature-1
-    _tf_assert "Create feature-2 should succeed" ./.claude/scripts/doh/helper.sh committee create feature-2
-    
-    # Create additional structure to simulate progress
-    mkdir -p "$doh_dir/committees/feature-1/round2"
-    
-    # Test list command - should succeed
-    _tf_assert "Committee list should succeed" ./.claude/scripts/doh/helper.sh committee list
-    
-    # Capture output for validation
-    local output
-    output=$(./.claude/scripts/doh/helper.sh committee list 2>/dev/null)
-    
-    # Validate list content
-    _tf_assert_contains "Feature 1 listed" "$output" "🏛️ feature-1"
-    _tf_assert_contains "Feature 2 listed" "$output" "🏛️ feature-2" 
-    _tf_assert_contains "Round 1 status shown" "$output" "Round 1: ✅ Completed"
-    _tf_assert_contains "Round 2 status for feature-1" "$output" "Round 2: ✅ Completed"
-    _tf_assert_contains "Round 2 pending for feature-2" "$output" "Round 2: ⏳ Pending"
-}
-
-test_committee_status_valid() {
-    local test_feature="status-test"
-    
-    # Create session first - should succeed
-    _tf_assert "Create session should succeed" ./.claude/scripts/doh/helper.sh committee create "$test_feature"
-    
-    # Test status command - should succeed
-    _tf_assert "Committee status should succeed" ./.claude/scripts/doh/helper.sh committee status "$test_feature"
-    
-    # Capture output for validation
-    local output
-    output=$(./.claude/scripts/doh/helper.sh committee status "$test_feature" 2>/dev/null)
-    
-    # Validate status content
-    _tf_assert_contains "Status header shown" "$output" "Committee Session Status: $test_feature"
-    _tf_assert_contains "Commands guidance shown" "$output" "Available commands:"
-}
-
-test_committee_status_missing_feature() {
-    # Test status without feature name - should fail
-    _tf_assert_not "Status without feature should fail" ./.claude/scripts/doh/helper.sh committee status
-    
-    # Capture error output
-    local output
-    output=$(./.claude/scripts/doh/helper.sh committee status 2>&1 || true)
-    
-    # Validate error message
-    _tf_assert_contains "Missing feature error shown" "$output" "Feature name required for status command"
-}
-
-test_committee_validate_basic() {
-    local test_feature="validate-test"
-    
-    # Create session first - should succeed
-    _tf_assert "Create session should succeed" ./.claude/scripts/doh/helper.sh committee create "$test_feature"
-    
-    # Test validate command - should succeed
-    _tf_assert "Committee validate should succeed" ./.claude/scripts/doh/helper.sh committee validate "$test_feature"
-    
-    # Capture output for validation
-    local output
-    output=$(./.claude/scripts/doh/helper.sh committee validate "$test_feature" 2>/dev/null)
-    
-    # Validate content
-    _tf_assert_contains "Validate header shown" "$output" "Validating committee session: $test_feature"
-    _tf_assert_contains "Success indicators shown" "$output" "✅"
-}
-
-test_committee_commands_require_feature_names() {
-    local commands output
-    commands=("status" "clean" "validate" "round1" "round2" "score" "converge")
-    
-    for cmd in "${commands[@]}"; do
-        # Each command without feature should fail
-        _tf_assert_not "Command $cmd without feature should fail" ./.claude/scripts/doh/helper.sh committee "$cmd"
-        
-        # Capture error output
-        output=$(./.claude/scripts/doh/helper.sh committee "$cmd" 2>&1 || true)
-        
-        # Validate error message
-        _tf_assert_contains "Command $cmd requires feature name" "$output" "Feature name required for $cmd command"
-    done
-}
-
-# =============================================================================
+# ==============================================================================
 # INTEGRATION TESTS
-# =============================================================================
+# ==============================================================================
 
-test_committee_integration_create_and_status() {
+test_helper_committee_workflow_integration() {
     local test_feature="integration-test"
-    local doh_dir
-    doh_dir=$(doh_project_dir)
+    local seed_content="# Integration Test Feature
+
+## Requirements
+- Requirement 1
+- Requirement 2
+
+## Context  
+This is for integration testing."
     
-    # Create session using committee helper - should succeed
-    _tf_assert "Integration create should succeed" ./.claude/scripts/doh/helper.sh committee create "$test_feature"
+    # Complete workflow: create seed, verify exists, update, create PRD template
+    _tf_assert "Create seed should succeed" helper_committee_seed_create "$test_feature" "$seed_content"
+    _tf_assert "Seed should exist after creation" helper_committee_seed_exists "$test_feature"
     
-    # Verify session was created
-    _tf_assert "Integration: Session directory created" test -d "$doh_dir/committees/$test_feature"
-    _tf_assert "Integration: Session file created" test -f "$doh_dir/committees/$test_feature/session.md"
+    # Update seed content
+    local updated_content="$seed_content
+
+## Updated Context
+Added more requirements."
+    _tf_assert "Update should succeed" helper_committee_seed_update "$test_feature" "$updated_content"
     
-    # Check status works after creation - should succeed
-    _tf_assert "Integration status should succeed" ./.claude/scripts/doh/helper.sh committee status "$test_feature"
+    # Generate PRD template
+    local prd_output
+    prd_output=$(helper_committee_create_final_prd "$test_feature" 2>/dev/null)
+    _tf_assert "PRD template creation should succeed" test $? -eq 0
+    _tf_assert_contains "PRD should reference feature" "$prd_output" "$test_feature"
     
-    # Capture status output for validation
-    local output
-    output=$(./.claude/scripts/doh/helper.sh committee status "$test_feature" 2>/dev/null)
-    
-    # Validate integration
-    _tf_assert_contains "Integration: Status works after create" "$output" "Committee Session Status: $test_feature"
+    # All variables are local - no cleanup needed
 }
 
-# =============================================================================
-# RUN TESTS
-# =============================================================================
+# ==============================================================================
+# REQUIRED: Prevent direct execution
+# ==============================================================================
 
-# Main function tests  
-test_committee_help_display
-test_committee_main_no_args
-test_committee_main_invalid_command
-
-# Create command tests
-test_committee_create_basic
-test_committee_create_missing_feature
-test_committee_create_invalid_name
-
-# List command tests
-test_committee_list_no_sessions
-test_committee_list_with_sessions
-
-# Status command tests
-test_committee_status_valid
-test_committee_status_missing_feature
-
-# Validate command tests
-test_committee_validate_basic
-
-# Error handling tests
-test_committee_commands_require_feature_names
-
-# Integration tests
-test_committee_integration_create_and_status
-
-echo "✅ All committee helper tests passed"
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    _tf_direct_execution_error
+fi

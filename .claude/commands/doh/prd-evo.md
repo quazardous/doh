@@ -55,7 +55,7 @@ From cleaned `$FEATURE_REQUEST`, begin understanding the feature request, but fi
 2. Check `.doh/versions/` for planned versions and roadmap
 3. List `.doh/prds/` to see existing PRDs and avoid duplication
 4. Check `.doh/epics/` for related work in progress
-5. **Check for existing seed file**: `./.claude/scripts/doh/helper.sh committee seed-exists "${FEATURE_NAME}"`
+5. **Check for existing seed file**: `./.claude/scripts/doh/helper.sh committee seed_exists "${FEATURE_NAME}"`
 
 **If seed file exists:**
 ```
@@ -73,16 +73,16 @@ Options:
 
 If user chooses to use existing context:
 - Skip to step 7 (Committee Session Execution)
-- Use `./.claude/scripts/doh/helper.sh committee seed-read "${FEATURE_NAME}"` to retrieve context
+- Read seed file directly: `.doh/committees/${FEATURE_NAME}/seed.md`
 - Proceed directly to launching committee orchestrator
 
 If user chooses to review/update:
-- Display seed content: `./.claude/scripts/doh/helper.sh committee seed-read "${FEATURE_NAME}"`
+- Display seed content: Read `.doh/committees/${FEATURE_NAME}/seed.md`
 - Allow modifications through discovery questions
-- Update seed: `./.claude/scripts/doh/helper.sh committee seed-update "${FEATURE_NAME}" "$new_content"`
+- Update seed: `./.claude/scripts/doh/helper.sh committee seed_update "${FEATURE_NAME}" "$new_content"`
 
 If user chooses to start fresh:
-- Delete seed: `./.claude/scripts/doh/helper.sh committee seed-delete "${FEATURE_NAME}"`
+- Delete seed: `./.claude/scripts/doh/helper.sh committee seed_delete "${FEATURE_NAME}"`
 - Continue with normal discovery flow
 
 ### 3. Comprehensive Discovery Phase (MANDATORY)
@@ -280,45 +280,40 @@ Please provide the corrections.
 **First, save the gathered context to a seed file:**
 
 ```bash
-# Create seed content with all gathered information
-seed_content="---
-feature_name: ${FEATURE_NAME}
-description: ${DESCRIPTION}
-target_version: ${TARGET_VERSION}
-execution_mode: ${EXECUTION_MODE}
-created: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
-complexity: ${COMPLEXITY_LEVEL}
-user_impact: ${USER_IMPACT}
-breaking_changes: ${BREAKING_CHANGES}
-dependencies: ${DEPENDENCIES}
----
+# Source template library
+source "$SCRIPT_DIR/../lib/template.sh"
 
-# PRD Seed: ${FEATURE_NAME}
+# Build template variables from discovery context
+declare -a template_vars=(
+    "FEATURE_NAME=${FEATURE_NAME}"
+    "DESCRIPTION=${DESCRIPTION}"
+    "TARGET_VERSION=${TARGET_VERSION}"
+    "EXECUTION_MODE=${EXECUTION_MODE}"
+    "COMPLEXITY=${COMPLEXITY_LEVEL}"
+    "USER_IMPACT=${USER_IMPACT}"
+    "BREAKING_CHANGES=${BREAKING_CHANGES}"
+    "DEPENDENCIES=${DEPENDENCIES}"
+    "DEVOPS_REQUIREMENTS=${DEVOPS_SPECIFIC_REQS}"
+    "LEADDEV_REQUIREMENTS=${LEADDEV_SPECIFIC_REQS}"
+    "UX_REQUIREMENTS=${UX_SPECIFIC_REQS}"
+    "PO_REQUIREMENTS=${PO_SPECIFIC_REQS}"
+    "PROBLEM_SUMMARY=${PROBLEM_SUMMARY}"
+    "BUSINESS_CONTEXT=${BUSINESS_CONTEXT}"
+    "TECHNICAL_CONTEXT=${TECHNICAL_CONTEXT}"
+    "REQUIREMENTS_LIST=${REQUIREMENTS_LIST}"
+    "DISCOVERY_INSIGHTS=${DISCOVERY_INSIGHTS}"
+    "SUCCESS_CRITERIA=${SUCCESS_CRITERIA}"
+)
 
-## Problem Statement
-${PROBLEM_SUMMARY}
-
-## Scope
-${SCOPE_SUMMARY}
-
-## Requirements
-${REQUIREMENTS_LIST}
-
-## Key Context from Discovery
-- User stories identified
-- Technical constraints understood
-- Timeline requirements captured
-- Security/performance needs documented
-
-## Committee Focus Areas
-- 🏗️ DevOps: Infrastructure, security, scalability concerns
-- 💻 Lead Dev: Technical architecture, implementation feasibility
-- 🎨 UX: User experience, accessibility, design consistency
-- 💼 PO: Business requirements, market fit, success metrics
-"
-
-# Save seed file using committee helper
-./.claude/scripts/doh/helper.sh committee seed-create "${FEATURE_NAME}" "$seed_content"
+# Generate seed from template
+echo "📝 Generating committee seed from template..."
+if template_process_committee_prd "${FEATURE_NAME}" "${DESCRIPTION}" "${TARGET_VERSION}" "${EXECUTION_MODE}" "${template_vars[@]}" | \
+   ./.claude/scripts/doh/helper.sh committee seed_create "${FEATURE_NAME}"; then
+    echo "✅ Committee seed generated from template"
+else
+    echo "❌ Failed to generate seed from template" >&2
+    return 1
+fi
 ```
 
 #### 8b. Launch Committee Session
@@ -338,8 +333,8 @@ Launching committee orchestrator...
 **Use Task tool to launch committee-orchestrator agent:**
 
 The committee-orchestrator agent will:
-1. Use ./.claude/scripts/doh/helper.sh committee seed-read ${FEATURE_NAME} to retrieve context
-2. Use ./.claude/scripts/doh/helper.sh committee dir-init ${FEATURE_NAME} to initialize session structure
+1. Read seed file directly: .doh/committees/${FEATURE_NAME}/seed.md
+2. Session structure will be initialized automatically by seed_create
 3. Execute Round 1: Use Task tool to launch 4 parallel agents (devops-architect, lead-developer, ux-designer, product-owner) 
 4. Use committee.sh functions to collect ratings and manage feedback
 5. Execute Round 2: Use Task tool again for agent revisions based on feedback
@@ -352,7 +347,7 @@ subagent_type: committee-orchestrator
 prompt: Execute complete committee PRD workflow for "${FEATURE_NAME}".
 
 The seed file has been created at .doh/committees/${FEATURE_NAME}/seed.md with all context.
-Use ./.claude/scripts/doh/helper.sh committee seed-read "${FEATURE_NAME}" to retrieve the full context.
+Read the seed file directly at .doh/committees/${FEATURE_NAME}/seed.md for the full context.
 
 **EXECUTION MODE: ${EXECUTION_MODE}**
 - If "sequential": Launch agents one by one (memory efficient)
