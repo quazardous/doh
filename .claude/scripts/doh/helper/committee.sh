@@ -23,13 +23,22 @@ USAGE:
     helper.sh committee <command> [arguments...]
 
 COMMANDS:
+    # Seed management
+    seed-create <feature> <content>   Create seed file with initial context
+    seed-read <feature>               Read seed content for feature
+    seed-exists <feature>             Check if seed file exists
+    seed-update <feature> <content>   Update existing seed file
+    seed-delete <feature>             Delete seed file
+    seed-list                         List all features with seeds
+    
+    # Session management
     create <feature> [context]     Create new committee session
     status <feature>               Show session status and progress
     list                          List all committee sessions
     clean <feature>               Clean up session workspace
     validate <feature>            Validate session structure
     
-    # Session management
+    # Workflow execution
     round1 <feature>              Execute Round 1 (exploration)
     round2 <feature>              Execute Round 2 (convergence)  
     score <feature>               Collect and analyze scoring
@@ -54,10 +63,15 @@ EOF
 
 _committee_validate_feature_name() {
     local feature="$1"
+    local command="${2:-}"
     
     # Check if feature name is provided
     if [[ -z "$feature" ]]; then
-        echo "❌ Error: Feature name required" >&2
+        if [[ -n "$command" ]]; then
+            echo "❌ Error: Feature name required for $command command" >&2
+        else
+            echo "❌ Error: Feature name required" >&2
+        fi
         echo "Usage: committee <command> <feature> [args...]" >&2
         return 1
     fi
@@ -80,7 +94,7 @@ helper_committee_create() {
     local feature="${1:-}"
     local context="${2:-{}}"
     
-    _committee_validate_feature_name "$feature" || return 1
+    _committee_validate_feature_name "$feature" "create" || return 1
     
     echo "🏛️ Creating committee session for: $feature"
     
@@ -102,7 +116,7 @@ helper_committee_create() {
 helper_committee_status() {
     local feature="${1:-}"
     
-    _committee_validate_feature_name "$feature" || return 1
+    _committee_validate_feature_name "$feature" "status" || return 1
     
     echo "📊 Committee Session Status: $feature"
     echo "=================================="
@@ -179,7 +193,7 @@ helper_committee_list() {
 helper_committee_clean() {
     local feature="${1:-}"
     
-    _committee_validate_feature_name "$feature" || return 1
+    _committee_validate_feature_name "$feature" "clean" || return 1
     
     local doh_dir
     doh_dir=$(doh_project_dir)
@@ -215,7 +229,7 @@ helper_committee_clean() {
 helper_committee_validate() {
     local feature="${1:-}"
     
-    _committee_validate_feature_name "$feature" || return 1
+    _committee_validate_feature_name "$feature" "validate" || return 1
     
     echo "🔍 Validating committee session: $feature"
     
@@ -234,7 +248,7 @@ helper_committee_validate() {
 helper_committee_round1() {
     local feature="${1:-}"
     
-    _committee_validate_feature_name "$feature" || return 1
+    _committee_validate_feature_name "$feature" "round1" || return 1
     
     echo "🚀 Executing Round 1 (Exploration): $feature"
     echo "============================================="
@@ -269,7 +283,7 @@ helper_committee_round1() {
 helper_committee_round2() {
     local feature="${1:-}"
     
-    _committee_validate_feature_name "$feature" || return 1
+    _committee_validate_feature_name "$feature" "round2" || return 1
     
     echo "🔄 Executing Round 2 (Convergence): $feature"
     echo "============================================="
@@ -303,7 +317,7 @@ helper_committee_round2() {
 helper_committee_score() {
     local feature="${1:-}"
     
-    _committee_validate_feature_name "$feature" || return 1
+    _committee_validate_feature_name "$feature" "score" || return 1
     
     echo "📊 Analyzing Committee Scores: $feature"
     echo "======================================"
@@ -320,7 +334,7 @@ helper_committee_score() {
 helper_committee_converge() {
     local feature="${1:-}"
     
-    _committee_validate_feature_name "$feature" || return 1
+    _committee_validate_feature_name "$feature" "converge" || return 1
     
     echo "⚖️  Checking Convergence: $feature"
     echo "================================"
@@ -349,5 +363,164 @@ helper_committee_converge() {
         echo "Check: committee status $feature"
         return 1
     fi
+}
+
+# =============================================================================
+# SEED OPERATIONS
+# =============================================================================
+
+helper_committee_seed_create() {
+    local feature="${1:-}"
+    local content="${2:-}"
+    
+    _committee_validate_feature_name "$feature" "seed-create" || return 1
+    
+    if [[ -z "$content" ]]; then
+        echo "❌ Error: Seed content required" >&2
+        echo "Usage: committee seed-create <feature> <content>" >&2
+        return 1
+    fi
+    
+    echo "📝 Creating seed file for: $feature"
+    
+    if committee_create_seed "$feature" "$content"; then
+        local seed_file
+        seed_file=$(committee_get_seed "$feature")
+        echo "✅ Seed file created: $seed_file"
+        echo ""
+        echo "Next steps:"
+        echo "  committee create $feature     # Create session (will preserve seed)"
+        echo "  committee seed-read $feature  # View seed content"
+    else
+        echo "❌ Failed to create seed file" >&2
+        return 1
+    fi
+}
+
+helper_committee_seed_read() {
+    local feature="${1:-}"
+    
+    _committee_validate_feature_name "$feature" "seed-read" || return 1
+    
+    echo "📖 Reading seed content for: $feature"
+    echo "=================================="
+    
+    if committee_read_seed "$feature"; then
+        echo ""
+        echo "Commands:"
+        echo "  committee seed-update $feature \"<new content>\"  # Update content"
+        echo "  committee create $feature                        # Create session"
+    else
+        echo "❌ No seed file found for: $feature" >&2
+        return 1
+    fi
+}
+
+helper_committee_seed_exists() {
+    local feature="${1:-}"
+    
+    _committee_validate_feature_name "$feature" "seed-exists" || return 1
+    
+    if committee_has_seed "$feature"; then
+        echo "✅ Seed exists for: $feature"
+        local seed_file
+        seed_file=$(committee_get_seed "$feature")
+        echo "   Location: $seed_file"
+        return 0
+    else
+        echo "❌ No seed found for: $feature"
+        return 1
+    fi
+}
+
+helper_committee_seed_update() {
+    local feature="${1:-}"
+    local content="${2:-}"
+    
+    _committee_validate_feature_name "$feature" "seed-update" || return 1
+    
+    if [[ -z "$content" ]]; then
+        echo "❌ Error: New content required" >&2
+        echo "Usage: committee seed-update <feature> <content>" >&2
+        return 1
+    fi
+    
+    echo "✏️  Updating seed file for: $feature"
+    
+    if committee_update_seed "$feature" "$content"; then
+        echo "✅ Seed file updated successfully"
+        echo ""
+        echo "Commands:"
+        echo "  committee seed-read $feature  # View updated content"
+    else
+        echo "❌ Failed to update seed file" >&2
+        echo "Use 'committee seed-create $feature \"<content>\"' to create a new seed" >&2
+        return 1
+    fi
+}
+
+helper_committee_seed_delete() {
+    local feature="${1:-}"
+    
+    _committee_validate_feature_name "$feature" "seed-delete" || return 1
+    
+    echo "🗑️  Deleting seed file for: $feature"
+    echo "⚠️  This will permanently remove the seed content"
+    echo ""
+    read -p "Are you sure? [y/N]: " -n 1 -r
+    echo
+    
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        if committee_delete_seed "$feature"; then
+            echo "✅ Seed file deleted: $feature"
+        else
+            echo "❌ Failed to delete seed file" >&2
+            return 1
+        fi
+    else
+        echo "Cancelled."
+        return 1
+    fi
+}
+
+helper_committee_seed_list() {
+    echo "📋 Committee Seeds"
+    echo "=================="
+    
+    local seeds
+    seeds=$(committee_list_seeds)
+    
+    if [[ -z "$seeds" ]]; then
+        echo "No seed files found."
+        echo ""
+        echo "Create a seed with:"
+        echo "  committee seed-create <feature-name> \"<content>\""
+        return 0
+    fi
+    
+    echo ""
+    while IFS= read -r feature; do
+        echo "🌱 $feature"
+        
+        # Show seed file info
+        local seed_file
+        if seed_file=$(committee_get_seed "$feature" 2>/dev/null); then
+            local size
+            size=$(wc -c < "$seed_file" 2>/dev/null || echo "0")
+            echo "   Size: ${size} bytes"
+            
+            # Show first line as preview
+            local preview
+            preview=$(head -1 "$seed_file" 2>/dev/null || echo "")
+            if [[ -n "$preview" ]]; then
+                echo "   Preview: ${preview:0:50}..."
+            fi
+        fi
+        echo ""
+    done <<< "$seeds"
+    
+    echo "Commands:"
+    echo "  committee seed-read <feature>     # View full content"
+    echo "  committee create <feature>        # Create session from seed"
 }
 

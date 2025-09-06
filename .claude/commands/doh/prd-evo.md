@@ -8,14 +8,18 @@ Create a comprehensive Product Requirements Document (PRD) using an advanced mul
 
 ## Usage
 ```
-/doh:prd-evo <natural language description>
+/doh:prd-evo <natural language description> [--parallel]
 ```
 
 ## Examples
 - `/doh:prd-evo gitlab support`
 - `/doh:prd-evo add OAuth2 authentication to the API`
-- `/doh:prd-evo version 2.0 database migration`
+- `/doh:prd-evo version 2.0 database migration --parallel`  # Force parallel execution
 - `/doh:prd-evo user-notifications`
+
+## Execution Mode
+- **Default**: Sequential agent execution (memory efficient)
+- **--parallel**: Parallel agent execution (faster but uses more memory)
 
 ## Agents
 - **Committee Orchestrator**: `.claude/agents/committee-orchestrator.md`
@@ -26,22 +30,67 @@ Create a comprehensive Product Requirements Document (PRD) using an advanced mul
 
 ## Instructions
 
-### 1. Initial Context Gathering
+### 1. Parse Arguments and Execution Mode
 
-From `$ARGUMENTS`, begin understanding the feature request, but first gather project context:
+From `$ARGUMENTS`, extract feature request and execution mode:
+
+**Parse execution mode:**
+```bash
+# Check for --parallel flag
+if [[ "$ARGUMENTS" == *"--parallel"* ]]; then
+    EXECUTION_MODE="parallel"
+    FEATURE_REQUEST="${ARGUMENTS/--parallel/}"  # Remove flag from description
+else
+    EXECUTION_MODE="sequential"  # Default
+    FEATURE_REQUEST="$ARGUMENTS"
+fi
+```
+
+### 2. Initial Context Gathering
+
+From cleaned `$FEATURE_REQUEST`, begin understanding the feature request, but first gather project context:
 
 **Silently check (don't announce these checks):**
 1. Read `VERSION` file to understand current version
 2. Check `.doh/versions/` for planned versions and roadmap
 3. List `.doh/prds/` to see existing PRDs and avoid duplication
 4. Check `.doh/epics/` for related work in progress
+5. **Check for existing seed file**: `./.claude/scripts/doh/helper.sh committee seed-exists "${FEATURE_NAME}"`
 
-### 2. Comprehensive Discovery Phase (MANDATORY)
+**If seed file exists:**
+```
+📋 Found existing context for: ${FEATURE_NAME}
+=====================================
+
+A seed file already exists for this feature from a previous discovery session.
+
+Options:
+1. ✅ Use existing context and proceed to committee
+2. 🔄 Review and update the existing context
+3. 🗑️ Start fresh (delete existing seed)
+4. 👁️ View existing seed content
+```
+
+If user chooses to use existing context:
+- Skip to step 7 (Committee Session Execution)
+- Use `./.claude/scripts/doh/helper.sh committee seed-read "${FEATURE_NAME}"` to retrieve context
+- Proceed directly to launching committee orchestrator
+
+If user chooses to review/update:
+- Display seed content: `./.claude/scripts/doh/helper.sh committee seed-read "${FEATURE_NAME}"`
+- Allow modifications through discovery questions
+- Update seed: `./.claude/scripts/doh/helper.sh committee seed-update "${FEATURE_NAME}" "$new_content"`
+
+If user chooses to start fresh:
+- Delete seed: `./.claude/scripts/doh/helper.sh committee seed-delete "${FEATURE_NAME}"`
+- Continue with normal discovery flow
+
+### 3. Comprehensive Discovery Phase (MANDATORY)
 
 **ALWAYS conduct a thorough discovery session before suggesting parameters:**
 
 ```
-🏛️ Let's create a collaborative PRD for: "$ARGUMENTS"
+🏛️ Let's create a collaborative PRD for: "$FEATURE_REQUEST"
 
 The Committee Evolution process uses 4 specialized agents to create comprehensive PRDs:
 • 🏗️ DevOps Architect (security, scalability, infrastructure)
@@ -74,7 +123,7 @@ Before we start the committee session, I need to understand the full context:
 Please provide context on these points (answer what you can, skip what's not relevant).
 ```
 
-### 3. Intelligent Parameter Synthesis
+### 4. Intelligent Parameter Synthesis
 
 After gathering context, synthesize the information using the same logic as `/doh:prd-new`:
 
@@ -108,13 +157,13 @@ ls -la .doh/versions/
 
 If no suitable version exists, suggest creating one first.
 
-### 4. Present Comprehensive Understanding (MANDATORY)
+### 5. Present Comprehensive Understanding (MANDATORY)
 
 **Show full context before starting committee session:**
 
 ```
-🏛️ Committee PRD Planning Summary for "$ARGUMENTS"
-=================================================
+🏛️ Committee PRD Planning Summary for "$FEATURE_REQUEST"
+========================================================
 
 **Understanding of the Feature:**
 ${SUMMARIZE_PROBLEM_AND_SOLUTION}
@@ -124,12 +173,13 @@ ${SUMMARIZE_PROBLEM_AND_SOLUTION}
    Description: ${DESCRIPTION}
    Target version: ${TARGET_VERSION} (${VERSION_REASONING})
 
-**Committee Assessment:**
+**Committee Configuration:**
+   - Execution mode: ${EXECUTION_MODE} (memory ${EXECUTION_MODE == "sequential" ? "efficient" : "intensive"})
    - Complexity: ${HIGH/MEDIUM/LOW}
    - User impact: ${DESCRIPTION}
    - Breaking changes: ${YES/NO}
    - Dependencies: ${LIST_OR_NONE}
-   - Committee duration: ~15 minutes (vs ~3 minutes solo)
+   - Estimated duration: ~${EXECUTION_MODE == "sequential" ? "12-15" : "8-12"} minutes
 
 **Agent Focus Areas:**
    - 🏗️ DevOps: Infrastructure, security, scalability concerns
@@ -154,7 +204,7 @@ Is this understanding correct? Should I proceed with committee session?
 5. ⚡ Use solo mode instead (faster, simpler)
 ```
 
-### 5. Handle User Response
+### 6. Handle User Response
 
 Based on user choice:
 
@@ -187,7 +237,7 @@ Please provide the corrections.
 - **DELEGATE to prd-new command**: Execute `/doh:prd-new ${ARGUMENTS}`
 - Present option with reasoning: "Committee mode provides more comprehensive analysis but takes longer. Solo mode is faster for simple features."
 
-### 6. Pre-Committee Validation
+### 7. Pre-Committee Validation
 
 **After confirmation, silently validate:**
 
@@ -221,9 +271,57 @@ Please provide the corrections.
    
    If user agrees, **DELEGATE**: `/doh:version for ${FEATURE_NAME} - ${DESCRIPTION}`
 
-### 7. Committee Session Execution
+### 8. Committee Session Execution
 
-**After user confirmation, launch committee-orchestrator with Task tool:**
+**After user confirmation, create seed file and launch committee:**
+
+#### 8a. Create Seed File with Initial Context
+
+**First, save the gathered context to a seed file:**
+
+```bash
+# Create seed content with all gathered information
+seed_content="---
+feature_name: ${FEATURE_NAME}
+description: ${DESCRIPTION}
+target_version: ${TARGET_VERSION}
+execution_mode: ${EXECUTION_MODE}
+created: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
+complexity: ${COMPLEXITY_LEVEL}
+user_impact: ${USER_IMPACT}
+breaking_changes: ${BREAKING_CHANGES}
+dependencies: ${DEPENDENCIES}
+---
+
+# PRD Seed: ${FEATURE_NAME}
+
+## Problem Statement
+${PROBLEM_SUMMARY}
+
+## Scope
+${SCOPE_SUMMARY}
+
+## Requirements
+${REQUIREMENTS_LIST}
+
+## Key Context from Discovery
+- User stories identified
+- Technical constraints understood
+- Timeline requirements captured
+- Security/performance needs documented
+
+## Committee Focus Areas
+- 🏗️ DevOps: Infrastructure, security, scalability concerns
+- 💻 Lead Dev: Technical architecture, implementation feasibility
+- 🎨 UX: User experience, accessibility, design consistency
+- 💼 PO: Business requirements, market fit, success metrics
+"
+
+# Save seed file using committee helper
+./.claude/scripts/doh/helper.sh committee seed-create "${FEATURE_NAME}" "$seed_content"
+```
+
+#### 8b. Launch Committee Session
 
 ```
 🏛️ Starting Committee PRD Session...
@@ -233,40 +331,43 @@ Feature: ${FEATURE_NAME}
 Description: ${DESCRIPTION}
 Target Version: ${TARGET_VERSION}
 
+✅ Context saved to seed file
 Launching committee orchestrator...
 ```
 
 **Use Task tool to launch committee-orchestrator agent:**
 
 The committee-orchestrator agent will:
-1. Use ./.claude/scripts/doh/helper.sh committee create ${FEATURE_NAME} to initialize session
-2. Execute Round 1: Use Task tool to launch 4 parallel agents (devops-architect, lead-developer, ux-designer, product-owner) 
-3. Use committee.sh functions to collect ratings and manage feedback
-4. Execute Round 2: Use Task tool again for agent revisions based on feedback
-5. Perform convergence analysis and create final PRD
-6. Use ./.claude/scripts/doh/helper.sh to save final PRD to .doh/prds/${FEATURE_NAME}.md
+1. Use ./.claude/scripts/doh/helper.sh committee seed-read ${FEATURE_NAME} to retrieve context
+2. Use ./.claude/scripts/doh/helper.sh committee dir-init ${FEATURE_NAME} to initialize session structure
+3. Execute Round 1: Use Task tool to launch 4 parallel agents (devops-architect, lead-developer, ux-designer, product-owner) 
+4. Use committee.sh functions to collect ratings and manage feedback
+5. Execute Round 2: Use Task tool again for agent revisions based on feedback
+6. Perform convergence analysis and create final PRD
+7. Use ./.claude/scripts/doh/helper.sh to save final PRD to .doh/prds/${FEATURE_NAME}.md
 
 **Task invocation:**
 ```
 subagent_type: committee-orchestrator
 prompt: Execute complete committee PRD workflow for "${FEATURE_NAME}".
 
-Context:
-- Feature: ${FEATURE_NAME}  
-- Description: ${DESCRIPTION}
-- Target Version: ${TARGET_VERSION}
-- Problem: ${PROBLEM_SUMMARY}
-- Scope: ${SCOPE_SUMMARY}
-- Requirements: ${REQUIREMENTS_LIST}
+The seed file has been created at .doh/committees/${FEATURE_NAME}/seed.md with all context.
+Use ./.claude/scripts/doh/helper.sh committee seed-read "${FEATURE_NAME}" to retrieve the full context.
+
+**EXECUTION MODE: ${EXECUTION_MODE}**
+- If "sequential": Launch agents one by one (memory efficient)
+- If "parallel": Launch agents simultaneously (faster but memory intensive)
 
 Use existing DOH committee infrastructure:
-- helper.sh committee commands for session management
+- helper.sh committee commands for session management and seed access
 - committee.sh library for workflow coordination  
 - Task tool for agent coordination (devops-architect, lead-developer, ux-designer, product-owner)
 - Save final PRD in standard DOH format to .doh/prds/${FEATURE_NAME}.md
+
+IMPORTANT: Respect the execution mode specified in the seed file frontmatter.
 ```
 
-### 8. Post-Committee Processing
+### 9. Post-Committee Processing
 
 After committee session completes, validate and enhance results:
 
@@ -299,7 +400,7 @@ After committee session completes, validate and enhance results:
 The PRD incorporates multi-perspective analysis and cross-functional alignment.
 ```
 
-### 9. Final Summary
+### 10. Final Summary
 
 ```
 ✅ Committee PRD Creation Complete

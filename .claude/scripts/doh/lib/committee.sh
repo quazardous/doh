@@ -76,8 +76,8 @@ committee_init_session() {
     local committee_dir="$doh_dir/committees/$feature_name"
     local session_file="$committee_dir/session.md"
     
-    # Create committee workspace directory
-    if ! mkdir -p "$committee_dir/drafts" "$committee_dir/ratings" "$committee_dir/revisions"; then
+    # Create committee workspace directory with consistent round structure
+    if ! mkdir -p "$committee_dir/round1" "$committee_dir/round2"; then
         echo "Error: Failed to create committee workspace" >&2
         return 1
     fi
@@ -308,8 +308,8 @@ committee_start_round1() {
     for agent in "${COMMITTEE_AGENTS[@]}"; do
         echo "   Starting agent: $agent"
         
-        # Execute agent in background
-        committee_execute_agent_draft "$feature_name" "$agent" &
+        # Execute agent in background for Round 1
+        committee_execute_agent_draft "$feature_name" "$agent" "1" &
         local agent_pid=$!
         agent_pids+=("$agent_pid")
         
@@ -367,9 +367,10 @@ committee_start_round1() {
     fi
 }
 
-# @description Execute agent draft creation (internal function)
+# @description Execute agent draft creation for specific round (internal function)
 # @arg $1 string Feature name
 # @arg $2 string Agent name
+# @arg $3 string Round number (1 or 2)
 # @stdout Agent execution output
 # @stderr Error messages
 # @exitcode 0 If successful
@@ -377,13 +378,14 @@ committee_start_round1() {
 committee_execute_agent_draft() {
     local feature_name="$1"
     local agent_name="$2"
+    local round="${3:-1}"
     
     local doh_dir
     doh_dir=$(doh_project_dir) || return 1
     
     local committee_dir="$doh_dir/committees/$feature_name"
     local initial_prd="$committee_dir/initial_prd.txt"
-    local draft_file="$committee_dir/drafts/${agent_name}_draft.md"
+    local draft_file="$committee_dir/round${round}/${agent_name}.md"
     
     # Check if initial PRD exists
     if [[ ! -f "$initial_prd" ]]; then
@@ -424,16 +426,16 @@ EOF
     local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
     
     # Save agent prompt for debugging
-    echo "$agent_prompt" > "$committee_dir/drafts/${agent_name}_prompt.txt"
+    echo "$agent_prompt" > "$committee_dir/round${round}/${agent_name}_prompt.txt"
     
-    echo "[$timestamp] Starting draft creation for agent: $agent_name" >> "$committee_dir/drafts/${agent_name}_log.txt"
+    echo "[$timestamp] Starting draft creation for agent: $agent_name (Round $round)" >> "$committee_dir/round${round}/${agent_name}_log.txt"
     
     # Use the Agent tool to execute the specific agent
     # Note: This is a placeholder for the actual agent execution
     # In practice, this would use the Claude Code Agent tool with the specific agent file
-    if committee_call_agent "$agent_name" "$agent_prompt" > "$draft_file" 2>> "$committee_dir/drafts/${agent_name}_log.txt"; then
+    if committee_call_agent "$agent_name" "$agent_prompt" > "$draft_file" 2>> "$committee_dir/round${round}/${agent_name}_log.txt"; then
         local end_timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-        echo "[$end_timestamp] Draft creation completed successfully for agent: $agent_name" >> "$committee_dir/drafts/${agent_name}_log.txt"
+        echo "[$end_timestamp] Draft creation completed successfully for agent: $agent_name (Round $round)" >> "$committee_dir/round${round}/${agent_name}_log.txt"
         
         # Validate that draft has content
         if [[ -s "$draft_file" ]]; then
@@ -445,7 +447,7 @@ EOF
         fi
     else
         local end_timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-        echo "[$end_timestamp] Draft creation failed for agent: $agent_name" >> "$committee_dir/drafts/${agent_name}_log.txt"
+        echo "[$end_timestamp] Draft creation failed for agent: $agent_name (Round $round)" >> "$committee_dir/round${round}/${agent_name}_log.txt"
         echo "Error: Agent $agent_name draft creation failed" >&2
         return 1
     fi
@@ -570,7 +572,7 @@ committee_start_collection() {
             if [[ "$rater_agent" != "$target_agent" ]]; then
                 echo "   Starting rating: $rater_agent rates $target_agent"
                 
-                committee_execute_agent_rating "$feature_name" "$rater_agent" "$target_agent" &
+                committee_execute_agent_rating "$feature_name" "$rater_agent" "$target_agent" "1" &
                 local rating_pid=$!
                 rating_pids+=("$rating_pid")
                 
@@ -611,10 +613,11 @@ committee_start_collection() {
     fi
 }
 
-# @description Execute agent rating of another agent's draft
+# @description Execute agent rating of another agent's draft for specific round
 # @arg $1 string Feature name
 # @arg $2 string Rater agent name
 # @arg $3 string Target agent name (whose draft is being rated)
+# @arg $4 string Round number (1 or 2)
 # @stdout Rating execution status
 # @stderr Error messages
 # @exitcode 0 If successful
@@ -623,13 +626,14 @@ committee_execute_agent_rating() {
     local feature_name="$1"
     local rater_agent="$2"
     local target_agent="$3"
+    local round="${4:-1}"
     
     local doh_dir
     doh_dir=$(doh_project_dir) || return 1
     
     local committee_dir="$doh_dir/committees/$feature_name"
-    local target_draft="$committee_dir/drafts/${target_agent}_draft.md"
-    local rating_file="$committee_dir/ratings/${rater_agent}_rates_${target_agent}.md"
+    local target_draft="$committee_dir/round${round}/${target_agent}.md"
+    local rating_file="$committee_dir/round${round}/${rater_agent}_rates_${target_agent}.md"
     
     if [[ ! -f "$target_draft" ]]; then
         echo "Error: Target draft not found: $target_draft" >&2
@@ -1172,6 +1176,148 @@ committee_run_full_workflow() {
 }
 
 # =============================================================================
+# GENERIC ROUND EXECUTION
+# =============================================================================
+
+# @description Execute a committee round (drafting + rating)
+# @arg $1 string Feature name
+# @arg $2 string Round number (1 or 2)
+# @arg $3 string Round description
+# @stdout Round execution status
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If failed
+committee_execute_round() {
+    local feature_name="$1"
+    local round_number="$2"
+    local round_description="${3:-Round $round_number}"
+    
+    if [[ -z "$feature_name" || -z "$round_number" ]]; then
+        echo "Error: Feature name and round number required" >&2
+        return 1
+    fi
+    
+    local doh_dir
+    doh_dir=$(doh_project_dir) || return 1
+    
+    local committee_dir="$doh_dir/committees/$feature_name"
+    local round_dir="$committee_dir/round${round_number}"
+    
+    echo "🚀 Starting $round_description for '$feature_name'"
+    echo "   Agents: ${COMMITTEE_AGENTS[*]}"
+    echo "   Timeout: ${COMMITTEE_DEFAULT_TIMEOUT}s per agent"
+    
+    # Create round directory
+    mkdir -p "$round_dir" || return 1
+    
+    # Find available agents (check previous round or use all for round 1)
+    local -a available_agents=()
+    if [[ "$round_number" == "1" ]]; then
+        available_agents=("${COMMITTEE_AGENTS[@]}")
+    else
+        # For round 2, only include agents who completed round 1
+        for agent in "${COMMITTEE_AGENTS[@]}"; do
+            if [[ -f "$committee_dir/round1/${agent}.md" && -s "$committee_dir/round1/${agent}.md" ]]; then
+                available_agents+=("$agent")
+            fi
+        done
+    fi
+    
+    if [[ ${#available_agents[@]} -lt 2 ]]; then
+        echo "Error: Insufficient agents available for $round_description (need at least 2)" >&2
+        return 1
+    fi
+    
+    echo "   Available agents: ${available_agents[*]}"
+    
+    # Phase 1: Parallel agent drafting
+    local -a agent_pids=()
+    for agent in "${available_agents[@]}"; do
+        echo "   Starting agent: $agent"
+        
+        committee_execute_agent_draft "$feature_name" "$agent" "$round_number" &
+        local agent_pid=$!
+        agent_pids+=("$agent_pid")
+        
+        echo "     Agent $agent started (PID: $agent_pid)"
+    done
+    
+    # Wait for all agents to complete drafting
+    local success_count=0
+    for i in "${!agent_pids[@]}"; do
+        local pid="${agent_pids[$i]}"
+        local agent="${available_agents[$i]}"
+        
+        echo "   Waiting for agent $agent (PID: $pid)..."
+        
+        if committee_wait_with_timeout "$pid" "$COMMITTEE_DEFAULT_TIMEOUT"; then
+            if wait "$pid"; then
+                echo "   ✅ Agent $agent completed successfully"
+                ((success_count++))
+            else
+                echo "   ❌ Agent $agent failed"
+            fi
+        else
+            echo "   ⏱️ Agent $agent timed out"
+            kill "$pid" 2>/dev/null || true
+        fi
+    done
+    
+    # Phase 2: Cross-rating
+    echo ""
+    echo "🔄 Starting Cross-agent Rating Phase"
+    
+    local -a rating_pids=()
+    for rater_agent in "${available_agents[@]}"; do
+        for target_agent in "${available_agents[@]}"; do
+            if [[ "$rater_agent" != "$target_agent" ]]; then
+                local target_file="$round_dir/${target_agent}.md"
+                if [[ -f "$target_file" && -s "$target_file" ]]; then
+                    echo "   Starting rating: $rater_agent rates $target_agent"
+                    
+                    committee_execute_agent_rating "$feature_name" "$rater_agent" "$target_agent" "$round_number" &
+                    local rating_pid=$!
+                    rating_pids+=("$rating_pid")
+                    
+                    echo "     Rating started (PID: $rating_pid)"
+                fi
+            fi
+        done
+    done
+    
+    # Wait for all ratings to complete
+    local rating_success_count=0
+    for pid in "${rating_pids[@]}"; do
+        if committee_wait_with_timeout "$pid" "$COMMITTEE_DEFAULT_TIMEOUT"; then
+            if wait "$pid"; then
+                ((rating_success_count++))
+            fi
+        else
+            kill "$pid" 2>/dev/null || true
+        fi
+    done
+    
+    # Generate round scores summary
+    local scores_file="$round_dir/scores.json"
+    echo "{\"round\": $round_number, \"completed\": \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\", \"agents\": $success_count, \"ratings\": $rating_success_count}" > "$scores_file"
+    
+    echo ""
+    echo "$round_description Results:"
+    echo "   Successful agents: $success_count/${#available_agents[@]}"
+    echo "   Successful ratings: $rating_success_count"
+    echo "   Scores saved: $scores_file"
+    
+    # Determine success
+    if [[ $success_count -ge 2 ]]; then
+        echo "✅ $round_description completed successfully"
+        return 0
+    else
+        echo "❌ $round_description failed - insufficient successful agents"
+        return 1
+    fi
+}
+
+# =============================================================================
 # ROUND EXECUTION WRAPPERS
 # =============================================================================
 
@@ -1184,13 +1330,7 @@ committee_execute_round_1() {
         return 1
     fi
     
-    # Round 1: Parallel drafting
-    committee_start_round1 "$feature_name" || return 1
-    
-    # Collection phase: Cross-agent rating
-    committee_start_collection "$feature_name" || return 1
-    
-    return 0
+    committee_execute_round "$feature_name" "1" "Round 1 (Initial Drafting)"
 }
 
 # Execute Round 2: Revisions + final rating  
@@ -1202,11 +1342,274 @@ committee_execute_round_2() {
         return 1
     fi
     
-    # Round 2: Agent revisions based on feedback
-    committee_start_round2 "$feature_name" || return 1
+    committee_execute_round "$feature_name" "2" "Round 2 (Revised Drafting)"
+}
+
+# =============================================================================
+# SEED FILE MANAGEMENT
+# =============================================================================
+
+# @description Create seed file for committee session
+# @arg $1 string Feature name
+# @arg $2 string Seed content
+# @stdout Seed file path
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If failed
+committee_create_seed() {
+    local feature_name="$1"
+    local content="$2"
     
-    # Final rating collection
-    committee_start_final_rating "$feature_name" || return 1
+    if [[ -z "$feature_name" || -z "$content" ]]; then
+        echo "Error: Feature name and content required" >&2
+        return 1
+    fi
+    
+    local doh_dir
+    doh_dir=$(doh_project_dir) || {
+        echo "Error: Not in DOH project" >&2
+        return 1
+    }
+    
+    local committee_dir="$doh_dir/committees/$feature_name"
+    local seed_file="$committee_dir/seed.md"
+    
+    # Create committee directory if it doesn't exist
+    mkdir -p "$committee_dir" || {
+        echo "Error: Failed to create committee directory" >&2
+        return 1
+    }
+    
+    # Write seed content
+    echo "$content" > "$seed_file" || {
+        echo "Error: Failed to write seed file" >&2
+        return 1
+    }
+    
+    echo "$seed_file"
+    return 0
+}
+
+# @description Check if seed file exists for feature
+# @arg $1 string Feature name
+# @exitcode 0 If exists
+# @exitcode 1 If not exists or error
+committee_has_seed() {
+    local feature_name="$1"
+    
+    if [[ -z "$feature_name" ]]; then
+        echo "Error: Feature name required" >&2
+        return 1
+    fi
+    
+    local doh_dir
+    doh_dir=$(doh_project_dir) || return 1
+    
+    local seed_file="$doh_dir/committees/$feature_name/seed.md"
+    
+    [[ -f "$seed_file" ]]
+}
+
+# @description Get seed file path for feature
+# @arg $1 string Feature name
+# @stdout Seed file path
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If failed or not found
+committee_get_seed() {
+    local feature_name="$1"
+    
+    if [[ -z "$feature_name" ]]; then
+        echo "Error: Feature name required" >&2
+        return 1
+    fi
+    
+    local doh_dir
+    doh_dir=$(doh_project_dir) || return 1
+    
+    local seed_file="$doh_dir/committees/$feature_name/seed.md"
+    
+    if [[ ! -f "$seed_file" ]]; then
+        echo "Error: Seed file not found for feature: $feature_name" >&2
+        return 1
+    fi
+    
+    echo "$seed_file"
+    return 0
+}
+
+# @description Read seed content for feature
+# @arg $1 string Feature name
+# @stdout Seed content
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If failed or not found
+committee_read_seed() {
+    local feature_name="$1"
+    
+    if [[ -z "$feature_name" ]]; then
+        echo "Error: Feature name required" >&2
+        return 1
+    fi
+    
+    local seed_file
+    seed_file=$(committee_get_seed "$feature_name") || return 1
+    
+    cat "$seed_file"
+}
+
+# @description Delete seed file for feature
+# @arg $1 string Feature name
+# @exitcode 0 If successful (even if file didn't exist)
+# @exitcode 1 If failed
+committee_delete_seed() {
+    local feature_name="$1"
+    
+    if [[ -z "$feature_name" ]]; then
+        echo "Error: Feature name required" >&2
+        return 1
+    fi
+    
+    local doh_dir
+    doh_dir=$(doh_project_dir) || return 1
+    
+    local seed_file="$doh_dir/committees/$feature_name/seed.md"
+    
+    if [[ -f "$seed_file" ]]; then
+        rm "$seed_file" || {
+            echo "Error: Failed to delete seed file" >&2
+            return 1
+        }
+    fi
+    
+    return 0
+}
+
+# @description List all features with seed files
+# @stdout List of feature names (one per line)
+# @exitcode 0 Always succeeds
+committee_list_seeds() {
+    local doh_dir
+    doh_dir=$(doh_project_dir) || return 0
+    
+    local committee_dir="$doh_dir/committees"
+    
+    if [[ ! -d "$committee_dir" ]]; then
+        return 0
+    fi
+    
+    for feature_dir in "$committee_dir"/*; do
+        if [[ -d "$feature_dir" && -f "$feature_dir/seed.md" ]]; then
+            basename "$feature_dir"
+        fi
+    done
+}
+
+# @description Update seed file for feature
+# @arg $1 string Feature name
+# @arg $2 string New content
+# @exitcode 0 If successful
+# @exitcode 1 If failed or seed doesn't exist
+committee_update_seed() {
+    local feature_name="$1"
+    local content="$2"
+    
+    if [[ -z "$feature_name" || -z "$content" ]]; then
+        echo "Error: Feature name and content required" >&2
+        return 1
+    fi
+    
+    if ! committee_has_seed "$feature_name"; then
+        echo "Error: Seed file does not exist for feature: $feature_name" >&2
+        return 1
+    fi
+    
+    local seed_file
+    seed_file=$(committee_get_seed "$feature_name") || return 1
+    
+    echo "$content" > "$seed_file" || {
+        echo "Error: Failed to update seed file" >&2
+        return 1
+    }
+    
+    return 0
+}
+
+# @description Get committee directory for feature
+# @arg $1 string Feature name
+# @stdout Committee directory path
+# @stderr Error messages
+# @exitcode 0 If successful
+# @exitcode 1 If failed
+committee_get_dir() {
+    local feature_name="$1"
+    
+    if [[ -z "$feature_name" ]]; then
+        echo "Error: Feature name required" >&2
+        return 1
+    fi
+    
+    local doh_dir
+    doh_dir=$(doh_project_dir) || return 1
+    
+    echo "$doh_dir/committees/$feature_name"
+    return 0
+}
+
+# @description Initialize committee directory structure
+# @arg $1 string Feature name
+# @exitcode 0 If successful
+# @exitcode 1 If failed
+committee_init_dir() {
+    local feature_name="$1"
+    
+    if [[ -z "$feature_name" ]]; then
+        echo "Error: Feature name required" >&2
+        return 1
+    fi
+    
+    local doh_dir
+    doh_dir=$(doh_project_dir) || return 1
+    
+    local committee_dir="$doh_dir/committees/$feature_name"
+    
+    # Create directory structure
+    mkdir -p "$committee_dir/round1" || {
+        echo "Error: Failed to create round1 directory" >&2
+        return 1
+    }
+    
+    mkdir -p "$committee_dir/round2" || {
+        echo "Error: Failed to create round2 directory" >&2
+        return 1
+    }
+    
+    return 0
+}
+
+# @description Clean committee directory for feature
+# @arg $1 string Feature name
+# @exitcode 0 If successful (even if directory didn't exist)
+# @exitcode 1 If failed
+committee_clean_dir() {
+    local feature_name="$1"
+    
+    if [[ -z "$feature_name" ]]; then
+        echo "Error: Feature name required" >&2
+        return 1
+    fi
+    
+    local doh_dir
+    doh_dir=$(doh_project_dir) || return 1
+    
+    local committee_dir="$doh_dir/committees/$feature_name"
+    
+    if [[ -d "$committee_dir" ]]; then
+        rm -rf "$committee_dir" || {
+            echo "Error: Failed to clean committee directory" >&2
+            return 1
+        }
+    fi
     
     return 0
 }
