@@ -15,6 +15,7 @@ context:
   problem_statement: {{PROBLEM_STATEMENT}}
   business_context: {{BUSINESS_CONTEXT}}
   technical_context: {{TECHNICAL_CONTEXT}}
+  current_stack: {{CURRENT_STACK}}
   requirements: {{REQUIREMENTS_SUMMARY}}
   constraints: {{CONSTRAINTS}}
   success_criteria: {{SUCCESS_CRITERIA}}

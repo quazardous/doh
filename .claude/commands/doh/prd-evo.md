@@ -87,41 +87,104 @@ If user chooses to start fresh:
 
 ### 3. Comprehensive Discovery Phase (MANDATORY)
 
-**ALWAYS conduct a thorough discovery session before suggesting parameters:**
+**Act as Project Management Consultant - Audience-Aware Discovery:**
 
 ```
 🏛️ Let's create a collaborative PRD for: "$FEATURE_REQUEST"
 
-The Committee Evolution process uses 4 specialized agents to create comprehensive PRDs:
-• 🏗️ DevOps Architect (security, scalability, infrastructure)
-• 💻 Lead Developer (technical architecture, implementation)
-• 🎨 UX Designer (user experience, accessibility, design)
-• 💼 Product Owner (business requirements, market fit)
+As your Project Management Consultant, I'll tailor our discovery session to your expertise level.
+The Committee Evolution process uses 4 specialized agents as expert consultants.
 
-Before we start the committee session, I need to understand the full context:
+**First, help me understand your background:**
+What's your role/expertise? (e.g., Lead Developer, Product Manager, Sales, CEO, Designer, etc.)
 
-1. **What problem does this solve?**
-   - Who are the primary users affected?
-   - What pain points does it address?
-   - Why is this important now?
-
-2. **What's the scope and goal?**
-   - Core functionality needed?
-   - Expected outcomes?
-   - Success metrics?
-
-3. **Where does this fit in the roadmap?**
-   - Is this a bug fix, new feature, or breaking change?
-   - Should this target an existing version or need a new one?
-   - Dependencies on other features?
-
-4. **Any constraints or considerations?**
-   - Technical limitations?
-   - Timeline requirements?
-   - Security/performance needs?
-
-Please provide context on these points (answer what you can, skip what's not relevant).
+This helps me ask the right questions and leverage your knowledge effectively.
 ```
+
+**Based on user's role, adapt the discovery questions:**
+
+### For Technical Roles (Lead Dev, DevOps, Architect, etc.):
+```
+**Technical & Functional Discovery:**
+
+🎯 **Business Context:**
+   - What specific problem does "$FEATURE_REQUEST" solve?
+   - What's the user impact and business value?
+
+🔧 **Technical Deep Dive:**
+   - Any architectural constraints or preferences?
+   - Performance/scalability requirements you foresee?
+   - Integration challenges with current stack?
+   - Security/compliance considerations?
+   - Technical debt or refactoring opportunities?
+   - Database schema or API changes needed?
+   - Testing strategy concerns?
+
+🚀 **Implementation Context:**
+   - Timeline constraints or delivery pressures?
+   - Resource availability (team, budget)?
+   - Dependencies on other systems/teams?
+```
+
+### For Business Roles (Product Manager, CEO, etc.):
+```
+**Business & Functional Discovery:**
+
+🎯 **Business Context:**
+   - What specific problem does "$FEATURE_REQUEST" solve for users?
+   - Who are the main users affected by this issue?
+   - What happens if we don't build this feature?
+   - What does success look like from a user perspective?
+
+💼 **Strategic Context:**
+   - How does this align with business objectives?
+   - What's the expected ROI or business impact?
+   - Any competitive pressures or market drivers?
+   - User research or data supporting this need?
+
+📋 **Functional Requirements:**
+   - What key functionality would make users happy?
+   - Any critical requirements or deal-breakers?
+   - Integration with existing workflows?
+   - Compliance or regulatory considerations?
+```
+
+### For Non-Technical Roles (Sales, Marketing, etc.):
+```
+**Functional Discovery:**
+
+🎯 **User Problem:**
+   - What specific problem does "$FEATURE_REQUEST" solve for users?
+   - Who benefits and how do they currently handle this?
+   - What would successful implementation look like to users?
+
+💡 **Functional Vision:**
+   - What key functionality is essential?
+   - How should users interact with this feature?
+   - Any examples from competitors or other tools?
+   - What would make this feature a "must-have"?
+
+📈 **Business Impact:**
+   - How does this help achieve business goals?
+   - What's the urgency or priority level?
+   - Any constraints you're aware of (budget, timeline, etc.)?
+```
+
+**What I'll Auto-Discover Based on Your Technical Level:**
+✅ Technology stack and architecture (from your codebase)
+✅ Current version and roadmap alignment (from .doh files)  
+✅ Technical constraints and debt (through code analysis)
+✅ Integration points and dependencies (from project structure)
+✅ Security and infrastructure concerns (expert analysis)
+✅ Design patterns and UX consistency (existing system review)
+
+**Committee Consultant Expertise:**
+• 🏗️ DevOps Architect → Infrastructure, security, scalability analysis
+• 💻 Lead Developer → Technical feasibility, architecture decisions  
+• 🎨 UX Designer → User experience flow, accessibility review
+• 💼 Product Owner → Business case refinement, market positioning
+
+I'll match my questions to your expertise level and let the expert committee handle the gaps.
 
 ### 4. Intelligent Parameter Synthesis
 
@@ -239,9 +302,66 @@ Please provide the corrections.
 
 ### 7. Pre-Committee Validation
 
-**After confirmation, silently validate:**
+**After confirmation, validate gate check requirements:**
 
-1. **Check PRD doesn't exist:**
+1. **PM Consultant Gate Check (Client-Friendly Approach):**
+   Minimize requirements while maximizing auto-discovery:
+   ```bash
+   # Validate or generate feature name
+   if [[ -z "${FEATURE_NAME}" ]] || ! echo "${FEATURE_NAME}" | grep -qE '^[a-z][a-z0-9-]*[a-z0-9]$'; then
+       # Try to generate from description if needed
+       FEATURE_NAME=$(echo "${DESCRIPTION}" | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')
+   fi
+   
+   # Auto-discover technical context (PM consultant does the heavy lifting)
+   CURRENT_STACK=$(discover_tech_stack_from_project_files)  # Smart discovery from package.json, etc.
+   CURRENT_VERSION=$(cat VERSION 2>/dev/null || git describe --tags 2>/dev/null || echo "0.1.0")
+   TECHNICAL_CONTEXT=$(analyze_existing_architecture)  # Analyzes .doh, README, codebase
+   TARGET_VERSION=${TARGET_VERSION:-$(increment_version "$CURRENT_VERSION" "minor")}
+   EXECUTION_MODE=${EXECUTION_MODE:-"sequential"}
+   
+   # Only require basic business direction (understanding client limitations)
+   [ -n "${DESCRIPTION}" ] && ([ -n "${PROBLEM_SUMMARY}" ] || can_infer_business_context_from_description)
+   ```
+   
+   **Client-friendly messaging when business direction is insufficient:**
+   ```
+   💼 PM Consultant Check: Quick Business Context Needed
+   ====================================================
+   
+   I can handle all the technical discovery from your project, but need minimal business context:
+   
+   Missing:
+   ❓ What user problem does this solve?
+   ❓ What would successful implementation look like?
+   
+   ✅ I'll auto-discover: tech stack, architecture, constraints, dependencies, versions
+   ✅ Committee will refine: detailed requirements, technical solutions, implementation plan
+   
+   Just help me understand the "why" - I'll figure out the "how."
+   ```
+   
+   **Auto-discovery successful (emphasize value delivered):**
+   ```
+   ✅ PM Consultant Ready - Full Project Analysis Complete
+   =====================================================
+   
+   Auto-discovered technical context:
+   • Current stack: ${DISCOVERED_STACK}
+   • Version roadmap: ${CURRENT_VERSION} → ${TARGET_VERSION}
+   • Architecture patterns: ${DISCOVERED_ARCHITECTURE}
+   • Existing constraints: ${DISCOVERED_CONSTRAINTS}
+   
+   Committee consultants will now provide:
+   • Cross-functional technical analysis
+   • Implementation feasibility assessment  
+   • User experience optimization
+   • Business requirements refinement
+   
+   You've provided the business direction - we'll handle the technical complexity.
+   ```
+
+2. **Check PRD doesn't exist:**
    ```bash
    [ -f ".doh/prds/${FEATURE_NAME}.md" ]
    ```
@@ -249,11 +369,6 @@ Please provide the corrections.
    - Edit existing: /doh:prd-edit ${FEATURE_NAME}
    - Use different name
    - Overwrite (loses content)"
-
-2. **Validate feature name:**
-   - Must be kebab-case
-   - Must start with letter
-   - No special characters
 
 3. **Verify target version exists (if specified):**
    ```bash
@@ -280,40 +395,53 @@ Please provide the corrections.
 **First, save the gathered context to a seed file:**
 
 ```bash
-# Source template library
-source "$SCRIPT_DIR/../lib/template.sh"
+# Create seed directory structure
+doh_dir=$(doh_project_dir) || return 1
+seed_dir="$doh_dir/committees/${FEATURE_NAME}"
+seed_file="$seed_dir/seed.md"
 
-# Build template variables from discovery context
-declare -a template_vars=(
-    "FEATURE_NAME=${FEATURE_NAME}"
-    "DESCRIPTION=${DESCRIPTION}"
-    "TARGET_VERSION=${TARGET_VERSION}"
-    "EXECUTION_MODE=${EXECUTION_MODE}"
-    "COMPLEXITY=${COMPLEXITY_LEVEL}"
-    "USER_IMPACT=${USER_IMPACT}"
-    "BREAKING_CHANGES=${BREAKING_CHANGES}"
-    "DEPENDENCIES=${DEPENDENCIES}"
-    "DEVOPS_REQUIREMENTS=${DEVOPS_SPECIFIC_REQS}"
-    "LEADDEV_REQUIREMENTS=${LEADDEV_SPECIFIC_REQS}"
-    "UX_REQUIREMENTS=${UX_SPECIFIC_REQS}"
-    "PO_REQUIREMENTS=${PO_SPECIFIC_REQS}"
-    "PROBLEM_SUMMARY=${PROBLEM_SUMMARY}"
-    "BUSINESS_CONTEXT=${BUSINESS_CONTEXT}"
-    "TECHNICAL_CONTEXT=${TECHNICAL_CONTEXT}"
-    "REQUIREMENTS_LIST=${REQUIREMENTS_LIST}"
-    "DISCOVERY_INSIGHTS=${DISCOVERY_INSIGHTS}"
-    "SUCCESS_CRITERIA=${SUCCESS_CRITERIA}"
-)
+mkdir -p "$seed_dir" || {
+    echo "❌ Failed to create committee directory: $seed_dir" >&2
+    return 1
+}
 
-# Generate seed from template
-echo "📝 Generating committee seed from template..."
-if template_process_committee_prd "${FEATURE_NAME}" "${DESCRIPTION}" "${TARGET_VERSION}" "${EXECUTION_MODE}" "${template_vars[@]}" | \
-   ./.claude/scripts/doh/helper.sh committee seed_create "${FEATURE_NAME}"; then
-    echo "✅ Committee seed generated from template"
-else
-    echo "❌ Failed to generate seed from template" >&2
+echo "📝 Creating seed file from template..."
+
+# Process template directly
+template_file=".claude/orchestration/prd-committee/templates/seed.md"
+if [[ ! -f "$template_file" ]]; then
+    echo "❌ Error: Template not found: $template_file" >&2
     return 1
 fi
+
+# Generate seed file with discovered and provided context
+# Use discovered values with fallbacks, allowing committee to refine during analysis
+sed \
+    -e "s/{{FEATURE_NAME}}/${FEATURE_NAME}/g" \
+    -e "s/{{DESCRIPTION}}/${DESCRIPTION}/g" \
+    -e "s/{{TARGET_VERSION}}/${TARGET_VERSION}/g" \
+    -e "s/{{EXECUTION_MODE}}/${EXECUTION_MODE}/g" \
+    -e "s/{{TIMESTAMP}}/$(date -u +"%Y-%m-%dT%H:%M:%SZ")/g" \
+    -e "s/{{PROBLEM_STATEMENT}}/${PROBLEM_SUMMARY:-Committee to refine based on feature description}/g" \
+    -e "s/{{BUSINESS_CONTEXT}}/${BUSINESS_CONTEXT:-Committee to develop through analysis}/g" \
+    -e "s/{{TECHNICAL_CONTEXT}}/${TECHNICAL_CONTEXT:-Auto-discovered from project}/g" \
+    -e "s/{{CURRENT_STACK}}/${CURRENT_STACK:-Auto-discovered from project files}/g" \
+    -e "s/{{REQUIREMENTS_SUMMARY}}/${REQUIREMENTS_LIST:-Committee to define during draft phase}/g" \
+    -e "s/{{CONSTRAINTS}}/${CONSTRAINTS:-Committee to identify through technical debt analysis}/g" \
+    -e "s/{{SUCCESS_CRITERIA}}/${SUCCESS_CRITERIA:-Committee to establish measurable outcomes}/g" \
+    -e "s/{{COMPLEXITY}}/${COMPLEXITY_LEVEL:-Committee to assess}/g" \
+    -e "s/{{USER_IMPACT}}/${USER_IMPACT:-Committee to evaluate}/g" \
+    -e "s/{{BREAKING_CHANGES}}/${BREAKING_CHANGES:-Committee to determine}/g" \
+    -e "s/{{DEPENDENCIES}}/${DEPENDENCIES:-Committee to discover through project analysis}/g" \
+    -e "s/{{USER_SCALE}}/${USER_SCALE:-Committee to analyze}/g" \
+    -e "s/{{SITE_COUNT}}/${SITE_COUNT:-Committee to determine}/g" \
+    -e "s/{{CURRENT_VERSION}}/${CURRENT_VERSION}/g" \
+    "$template_file" > "$seed_file" || {
+    echo "❌ Failed to generate seed file" >&2
+    return 1
+}
+
+echo "✅ Committee seed created: $seed_file"
 ```
 
 #### 8b. Launch Committee Session
@@ -344,14 +472,27 @@ The committee-orchestrator agent will:
 **Task invocation:**
 ```
 subagent_type: committee-orchestrator
-prompt: Execute complete committee PRD workflow for "${FEATURE_NAME}".
+prompt: Execute complete committee PRD workflow for "${FEATURE_NAME}" using Project Management Consultant approach.
 
-The seed file has been created at .doh/committees/${FEATURE_NAME}/seed.md with all context.
+The seed file has been created at .doh/committees/${FEATURE_NAME}/seed.md with discovered and provided context.
 Read the seed file directly at .doh/committees/${FEATURE_NAME}/seed.md for the full context.
+
+**PROJECT MANAGEMENT CONSULTANT MODE:**
+The committee acts as consultants who can discover context during analysis:
+- Auto-discovered technical context is available in seed (current_stack, technical_context)
+- Some fields marked "Committee to [action]" should be developed by agents during draft phase
+- Agents should analyze existing project to discover technical debt, constraints, dependencies
+- Business context should be refined through cross-functional analysis
 
 **EXECUTION MODE: ${EXECUTION_MODE}**
 - If "sequential": Launch agents one by one (memory efficient)
 - If "parallel": Launch agents simultaneously (faster but memory intensive)
+
+**DISCOVERY EMPHASIS:**
+- DevOps: Analyze existing infrastructure, discover deployment patterns and security context
+- Lead Developer: Examine current codebase for technical debt, architecture patterns, integration points  
+- UX Designer: Evaluate existing design systems, user flows, accessibility considerations
+- Product Owner: Refine business requirements, develop success criteria, assess market positioning
 
 Use existing DOH committee infrastructure:
 - helper.sh committee commands for session management and seed access
