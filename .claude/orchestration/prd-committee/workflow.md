@@ -31,12 +31,23 @@ def execute_committee_workflow(seed, manifest):
                 context=build_context(session, phase, round_num)
             )
         
+        # Store round results
+        session.save_round(round_num)
+        
+        # USER CHECKPOINT - Present brief and ask for corrections
+        if config.user_checkpoints.enabled:
+            user_intervention = present_round_brief_and_ask_corrections(
+                session=session,
+                round_num=round_num
+            )
+            
+            # Apply user intervention if provided
+            if user_intervention:
+                apply_user_intervention(session, round_num, user_intervention)
+        
         # Check convergence (if past minimum rounds)
         if round_num >= config.rounds.min:
             converged = check_convergence(session, round_num, config)
-        
-        # Store round results
-        session.save_round(round_num)
     
     # Final synthesis
     return create_final_deliverable(session, config)
@@ -62,8 +73,8 @@ context_building:
       - cto_guidance (round N-1)
 
 execution:
-  constraint: parallel_allowed    # Can use seed execution_mode (sequential or parallel)
-  mode: ${execution_mode}         # From seed file
+  constraint: sequential_only     # Memory-optimized sequential execution
+  mode: sequential                # Always sequential
   timeout: 8 minutes
   
 output:
@@ -145,6 +156,157 @@ def build_context(session, phase, round_num):
         # Add all round data for convergence check
         context['current_round'] = session.get_round_data(round_num)
         context['history'] = session.get_all_rounds()
+    
+    return context
+```
+
+## User Checkpoint System
+
+### Round Brief and Correction Request
+```python
+def present_round_brief_and_ask_corrections(session, round_num):
+    """
+    Present concise round summary and ask for corrections.
+    No menu - just open-ended correction opportunity.
+    """
+    # Generate brief summary
+    brief = generate_round_brief(session, round_num)
+    
+    print(f"""
+🏛️ Round {round_num} Brief
+{'=' * 20}
+
+**Key Decisions:**
+{brief.key_decisions}
+
+**Technical Direction:**
+{brief.technical_direction}
+
+**Business Approach:**
+{brief.business_approach}
+
+**UX Strategy:**
+{brief.ux_strategy}
+
+**Infrastructure Plan:**
+{brief.infrastructure_plan}
+
+**Consensus Level:** {brief.consensus_score}/10
+    """)
+    
+    # Ask for corrections in natural language
+    correction = input("""
+💭 Want to correct something? Express yourself naturally:
+- Speak as CTO for technical decisions
+- Speak as client for business requirements  
+- Give general feedback as stakeholder
+- Or just press Enter to continue
+
+(AI detects your intent and responds in your language)
+
+> """)
+    
+    if correction.strip():
+        return parse_user_intervention(correction)
+    return None
+
+def parse_user_intervention(correction_text):
+    """
+    Parse user correction to determine perspective and content.
+    Uses AI natural language understanding to detect intent.
+    """
+    # Use AI to analyze the user's intent and perspective
+    # This is more flexible than keyword matching and works in any language
+    
+    analysis_prompt = f"""
+    Analyze this user feedback to determine their perspective:
+    "{correction_text}"
+    
+    Determine if the user is speaking:
+    - As a CTO/technical leader (technical decisions, architecture, etc.)
+    - As a client/business stakeholder (business requirements, preferences, etc.) 
+    - As a general stakeholder (general feedback, corrections, etc.)
+    
+    Return only: 'cto', 'client', or 'general'
+    """
+    
+    # In actual implementation, this would call an AI service
+    # For now, use simple heuristics as fallback
+    text = correction_text.lower()
+    
+    if 'cto' in text or 'technical' in text or 'architecture' in text:
+        perspective = 'cto'
+        authority = 'technical_executive'
+    elif 'client' in text or 'business' in text or 'prefer' in text:
+        perspective = 'client'
+        authority = 'business_stakeholder'
+    else:
+        perspective = 'general'
+        authority = 'stakeholder'
+    
+    return {
+        'perspective': perspective,
+        'content': correction_text,
+        'authority': authority
+    }
+
+def apply_user_intervention(session, round_num, intervention):
+    """
+    Apply user intervention to influence next round.
+    """
+    guidance = {
+        'type': 'user_intervention',
+        'round_source': round_num,
+        'perspective': intervention['perspective'],
+        'authority': intervention['authority'],
+        'content': intervention['content'],
+        'timestamp': datetime.now(),
+        'for_next_round': round_num + 1
+    }
+    
+    # Store guidance for next round
+    session.add_guidance(guidance)
+    
+    # Show confirmation based on perspective
+    if intervention['perspective'] == 'cto':
+        print(f"🎯 CTO guidance stored for Round {round_num + 1}")
+    elif intervention['perspective'] == 'client':
+        print(f"💼 Client requirements updated for Round {round_num + 1}")
+    else:
+        print(f"📝 Corrections stored for Round {round_num + 1}")
+```
+
+### Context Enhancement for Next Round
+```python
+def build_context(session, phase, round_num):
+    """
+    Enhanced context builder that includes user interventions.
+    """
+    context = {
+        'shared': session.seed.context,
+        'round': round_num,
+        'phase': phase.name
+    }
+    
+    # Include user interventions from previous round
+    user_guidance = session.get_guidance_for_round(round_num)
+    if user_guidance:
+        context['user_guidance'] = user_guidance
+        
+        # Format guidance based on perspective for agents
+        if user_guidance['perspective'] == 'cto':
+            context['cto_directive'] = f"CTO Decision: {user_guidance['content']}"
+        elif user_guidance['perspective'] == 'client': 
+            context['client_requirements'] = f"Client Update: {user_guidance['content']}"
+        else:
+            context['stakeholder_feedback'] = f"Stakeholder Input: {user_guidance['content']}"
+    
+    # Rest of existing context building logic...
+    if phase.name == 'draft':
+        if round_num > 1:
+            context['previous_draft'] = session.get_draft(round_num - 1)
+            context['feedback'] = session.get_feedback(round_num - 1)
+            context['guidance'] = session.get_analysis(round_num - 1)
     
     return context
 ```

@@ -4,22 +4,21 @@ allowed-tools: Bash, Read, Write, LS, Task, Agent
 
 # PRD Evolution Command
 
-Create a comprehensive Product Requirements Document (PRD) using an advanced multi-agent committee workflow. This command leverages 4 specialized AI agents (DevOps Architect, Lead Developer, UX Designer, Product Owner) plus CTO arbitration to produce high-quality, consensus-driven PRDs through a structured 2-round collaborative process.
+Create a comprehensive Product Requirements Document (PRD) using an advanced multi-agent committee workflow with user intervention points. This command leverages 4 specialized AI agents (DevOps Architect, Lead Developer, UX Designer, Product Owner) plus CTO arbitration to produce high-quality, consensus-driven PRDs through a structured collaborative process with mandatory user checkpoints after each round.
 
 ## Usage
 ```
-/doh:prd-evo <natural language description> [--parallel]
+/doh:prd-evo <natural language description>
 ```
 
 ## Examples
 - `/doh:prd-evo gitlab support`
 - `/doh:prd-evo add OAuth2 authentication to the API`
-- `/doh:prd-evo version 2.0 database migration --parallel`  # Force parallel execution
+- `/doh:prd-evo version 2.0 database migration`
 - `/doh:prd-evo user-notifications`
 
 ## Execution Mode
-- **Default**: Sequential agent execution (memory efficient)
-- **--parallel**: Parallel agent execution (faster but uses more memory)
+- **Sequential only**: Memory-optimized agent execution with context reduction
 
 ## Agents
 - **Committee Orchestrator**: `.claude/agents/committee-orchestrator.md`
@@ -39,29 +38,23 @@ From `$ARGUMENTS`, extract feature request and execution mode:
 # Validate arguments exist
 if [[ -z "$ARGUMENTS" ]] || [[ "$ARGUMENTS" =~ ^[[:space:]]*$ ]]; then
     echo "❌ Error: Feature request cannot be empty"
-    echo "Usage: /doh:prd-evo <natural language description> [--parallel]"
+    echo "Usage: /doh:prd-evo <natural language description>"
     echo "Examples:"
     echo "  /doh:prd-evo gitlab support"  
-    echo "  /doh:prd-evo user authentication system --parallel"
+    echo "  /doh:prd-evo user authentication system"
     exit 1
 fi
 
-# Validate unknown flags
-if [[ "$ARGUMENTS" =~ --[^p] ]] || [[ "$ARGUMENTS" =~ --parallel[^[:space:]]*[^[:space:]] ]]; then
-    echo "❌ Error: Unknown flag detected"
-    echo "Supported flags: --parallel"
-    echo "Usage: /doh:prd-evo <description> [--parallel]"
+# No flags supported - sequential only
+if [[ "$ARGUMENTS" =~ -- ]]; then
+    echo "❌ Error: Flags not supported"
+    echo "Usage: /doh:prd-evo <description>"
     exit 1
 fi
 
-# Parse execution mode
-if [[ "$ARGUMENTS" == *"--parallel"* ]]; then
-    EXECUTION_MODE="parallel"
-    FEATURE_REQUEST="${ARGUMENTS/--parallel/}"  # Remove flag from description
-else
-    EXECUTION_MODE="sequential"  # Default
-    FEATURE_REQUEST="$ARGUMENTS"
-fi
+# Sequential execution only
+EXECUTION_MODE="sequential"
+FEATURE_REQUEST="$ARGUMENTS"
 
 # Clean up feature request
 FEATURE_REQUEST=$(echo "$FEATURE_REQUEST" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
@@ -427,12 +420,13 @@ ${SUMMARIZE_PROBLEM_AND_SOLUTION}
    Target version: ${TARGET_VERSION} (to be validated/assigned by version system)
 
 **Committee Configuration:**
-   - Execution mode: ${EXECUTION_MODE} (memory ${EXECUTION_MODE == "sequential" ? "efficient" : "intensive"})
+   - Execution mode: Sequential (memory optimized)
+   - User checkpoints: Enabled (mandatory confirmation after each round)
    - Complexity: ${HIGH/MEDIUM/LOW}
    - User impact: ${DESCRIPTION}
    - Breaking changes: ${YES/NO}
    - Dependencies: ${LIST_OR_NONE}
-   - Estimated duration: ~${EXECUTION_MODE == "sequential" ? "12-15" : "8-12"} minutes
+   - Estimated duration: ~15-20 minutes (including user interactions)
 
 **Agent Focus Areas:**
    - 🏗️ DevOps: Infrastructure, security, scalability concerns
@@ -676,11 +670,14 @@ Launching committee orchestrator...
 The committee-orchestrator agent will:
 1. Read seed file directly: .doh/committees/${FEATURE_NAME}/seed.md
 2. Session structure will be initialized automatically by seed_create
-3. Execute Round 1: Use Task tool to launch 4 parallel agents (devops-architect, lead-developer, ux-designer, product-owner) 
-4. Use committee.sh functions to collect ratings and manage feedback
-5. Execute Round 2: Use Task tool again for agent revisions based on feedback
-6. Perform convergence analysis and create final PRD
-7. Use ./.claude/scripts/doh/helper.sh to save final PRD to .doh/prds/${FEATURE_NAME}.md
+3. Execute Round 1: Use Task tool to launch 4 sequential agents (devops-architect, lead-developer, ux-designer, product-owner)
+4. **USER CHECKPOINT**: Present round 1 brief and ask for corrections/guidance
+5. Use committee.sh functions to collect ratings and manage feedback
+6. Execute Round 2: Use Task tool again for agent revisions based on user feedback and agent reviews
+7. **USER CHECKPOINT**: Present round 2 brief and ask for corrections/guidance  
+8. Continue rounds as needed (max 3) with user checkpoints after each
+9. Perform convergence analysis and create final PRD
+10. Use ./.claude/scripts/doh/helper.sh to save final PRD to .doh/prds/${FEATURE_NAME}.md
 
 **Task invocation with error handling:**
 ```
@@ -697,15 +694,27 @@ The committee acts as consultants who can discover context during analysis:
 - Agents should analyze existing project to discover technical debt, constraints, dependencies
 - Business context should be refined through cross-functional analysis
 
-**EXECUTION MODE: ${EXECUTION_MODE}**
-- If "sequential": Launch agents one by one (memory efficient)
-- If "parallel": Launch agents simultaneously (faster but memory intensive)
+**EXECUTION MODE: Sequential with User Checkpoints**
+- Launch agents one by one with memory optimization and context reduction
+- Present brief summary after each round
+- Wait for mandatory user confirmation/corrections before continuing
+- Apply user interventions (CTO decisions, client requirements, general corrections) to influence next round
 
 **DISCOVERY EMPHASIS:**
 - DevOps: Analyze existing infrastructure, discover deployment patterns and security context
 - Lead Developer: Examine current codebase for technical debt, architecture patterns, integration points  
 - UX Designer: Evaluate existing design systems, user flows, accessibility considerations
 - Product Owner: Refine business requirements, develop success criteria, assess market positioning
+
+**USER INTERVENTION APPROACH:**
+- Express yourself naturally in any language
+- AI automatically detects if you're speaking as CTO, client, or general stakeholder
+- Technical feedback → Overrides agent technical decisions
+- Business feedback → Updates requirements and priorities
+- General feedback → Provides guidance and corrections
+- Empty input → Continue with current direction
+
+*AI-powered intent recognition, responds in user's language*
 
 **ERROR HANDLING:**
 If committee session fails:

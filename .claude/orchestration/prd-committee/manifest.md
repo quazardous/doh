@@ -44,6 +44,7 @@ agents:
 ## Configuration Reference
 ```yaml
 configuration: ./config.md      # Human-editable settings
+user_checkpoints: ./checkpoints.md  # User intervention configuration
 ```
 
 ### Workflow Structure
@@ -52,7 +53,7 @@ phases_per_round:
   - phase: draft
     description: Agents create/revise PRD sections
     duration_source: config.timeouts.draft_minutes
-    execution_constraint: parallel_allowed  # Can use seed execution_mode
+    execution_constraint: sequential_only  # Memory-optimized sequential execution
     
   - phase: feedback
     description: Agents review each other's work
@@ -63,6 +64,11 @@ phases_per_round:
     description: CTO analyzes convergence
     duration_source: config.timeouts.analysis_minutes
     execution_constraint: single_agent      # Only arbitrator agent runs
+    
+  - phase: user_checkpoint
+    description: Present round brief and collect user corrections
+    enabled_source: config.user_checkpoints.enabled
+    execution_constraint: user_interaction  # Requires user input
 ```
 
 ## Output Configuration
@@ -117,7 +123,7 @@ The manifest expects seed files with this structure:
 feature_name: string        # Kebab-case identifier
 description: string         # Feature summary
 target_version: string      # Semantic version
-execution_mode: string      # sequential|parallel
+execution_mode: string      # sequential only (parallel removed)
 
 # Context Fields (used by agents)
 context:
@@ -186,6 +192,10 @@ Agents receive:
 - Shared context from seed
 - Round number and phase
 - Previous round results (if applicable)
+- User guidance/corrections from previous checkpoints (if any)
+  - CTO directives (technical authority)
+  - Client requirements (business authority)
+  - General stakeholder feedback
 
 ### Backward Compatibility
 Seeds may contain legacy orchestration references - these are ignored.
@@ -199,9 +209,7 @@ execution_modes:
     description: Memory-efficient, agents run one at a time
     default: true
     
-  parallel:
-    description: Faster execution, agents run simultaneously
-    requires_flag: --parallel
+  # parallel mode removed - sequential only for memory optimization
 ```
 
 ## Quality Assurance

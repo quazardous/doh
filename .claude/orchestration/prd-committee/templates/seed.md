@@ -3,31 +3,23 @@
 feature_name: {{FEATURE_NAME}}
 description: {{DESCRIPTION}}
 target_version: {{TARGET_VERSION}}
-execution_mode: {{EXECUTION_MODE}}
+execution_mode: sequential
 created: {{TIMESTAMP}}
 
 # Orchestration Manifest Reference
 orchestration:
   manifest: .claude/orchestration/prd-committee/manifest.md
 
-# Shared Context for All Agents
-context:
+# Minimal Context (Role-specific context added per agent)
+core_context:
+  feature_name: {{FEATURE_NAME}}
+  description: {{DESCRIPTION}}
+  target_version: {{TARGET_VERSION}}
   problem_statement: {{PROBLEM_STATEMENT}}
-  business_context: {{BUSINESS_CONTEXT}}
-  technical_context: {{TECHNICAL_CONTEXT}}
-  current_stack: {{CURRENT_STACK}}
-  requirements: {{REQUIREMENTS_SUMMARY}}
-  constraints: {{CONSTRAINTS}}
-  success_criteria: {{SUCCESS_CRITERIA}}
   
-  # Additional Context Variables
-  complexity: {{COMPLEXITY}}
-  user_impact: {{USER_IMPACT}}
-  breaking_changes: {{BREAKING_CHANGES}}
-  dependencies: {{DEPENDENCIES}}
-  user_scale: {{USER_SCALE}}
-  site_count: {{SITE_COUNT}}
-  current_version: {{CURRENT_VERSION}}
+# Full context available but not embedded (agents discover as needed)
+extended_context_reference:
+  file: .doh/committees/{{FEATURE_NAME}}/context.md
 ---
 
 # Committee Session Seed: {{FEATURE_NAME}}
