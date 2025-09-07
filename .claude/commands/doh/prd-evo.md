@@ -34,9 +34,27 @@ Create a comprehensive Product Requirements Document (PRD) using an advanced mul
 
 From `$ARGUMENTS`, extract feature request and execution mode:
 
-**Parse execution mode:**
+**Input Validation & Parsing:**
 ```bash
-# Check for --parallel flag
+# Validate arguments exist
+if [[ -z "$ARGUMENTS" ]] || [[ "$ARGUMENTS" =~ ^[[:space:]]*$ ]]; then
+    echo "❌ Error: Feature request cannot be empty"
+    echo "Usage: /doh:prd-evo <natural language description> [--parallel]"
+    echo "Examples:"
+    echo "  /doh:prd-evo gitlab support"  
+    echo "  /doh:prd-evo user authentication system --parallel"
+    exit 1
+fi
+
+# Validate unknown flags
+if [[ "$ARGUMENTS" =~ --[^p] ]] || [[ "$ARGUMENTS" =~ --parallel[^[:space:]]*[^[:space:]] ]]; then
+    echo "❌ Error: Unknown flag detected"
+    echo "Supported flags: --parallel"
+    echo "Usage: /doh:prd-evo <description> [--parallel]"
+    exit 1
+fi
+
+# Parse execution mode
 if [[ "$ARGUMENTS" == *"--parallel"* ]]; then
     EXECUTION_MODE="parallel"
     FEATURE_REQUEST="${ARGUMENTS/--parallel/}"  # Remove flag from description
@@ -44,25 +62,201 @@ else
     EXECUTION_MODE="sequential"  # Default
     FEATURE_REQUEST="$ARGUMENTS"
 fi
+
+# Clean up feature request
+FEATURE_REQUEST=$(echo "$FEATURE_REQUEST" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
 ```
 
 ### 2. Initial Context Gathering
 
-From cleaned `$FEATURE_REQUEST`, begin understanding the feature request, but first gather project context:
+From cleaned `$FEATURE_REQUEST`, gather project context:
 
-**Silently check (don't announce these checks):**
-1. Read `VERSION` file to understand current version
-2. Check `.doh/versions/` for planned versions and roadmap
-3. List `.doh/prds/` to see existing PRDs and avoid duplication
+**Pre-flight Checks (Critical):**
+```bash
+# Validate DOH project is initialized
+if [[ ! -d ".doh" ]]; then
+    echo "❌ Error: Not a DOH project (missing .doh directory)"
+    echo "Initialize with: /doh:init"
+    exit 1
+fi
+
+# Check committee infrastructure exists
+if [[ ! -f ".claude/agents/committee-orchestrator.md" ]]; then
+    echo "❌ Error: Committee infrastructure missing"
+    echo "Required file: .claude/agents/committee-orchestrator.md"
+    exit 1
+fi
+
+# Check version system exists  
+CURRENT_VERSION=$(cat VERSION 2>/dev/null || echo "0.1.0")
+if [[ ! -f "VERSION" ]]; then
+    echo "⚠️ Warning: VERSION file missing, using default: 0.1.0"
+fi
+```
+
+**Context Gathering (Silently check):**
+1. Read VERSION file or use default
+2. Check `.doh/versions/` for planned versions and roadmap  
+3. List `.doh/prds/` to see existing PRDs
 4. Check `.doh/epics/` for related work in progress
-5. **Check for existing seed file**: `./.claude/scripts/doh/helper.sh committee seed_exists "${FEATURE_NAME}"`
+5. Validate committee seed template exists
 
-**If seed file exists:**
+**Note**: Seed file check will happen after feature concept clarification creates the feature name/slug.
+
+### 3. Initial Feature Concept Clarification (MANDATORY)
+
+**GOAL: Create feature name/slug from concept understanding**
+
+Focus on core concept understanding to generate meaningful feature name before detailed discovery:
+
+```
+🏛️ Committee PRD Creation for: "$FEATURE_REQUEST"
+=============================================
+
+Before diving deep with our 4-agent committee, let me understand the main feature concept:
+
+**Core Concept Questions:**
+1. **What is the main thing this feature does?**
+   - In one sentence, what would users say this feature is for?
+   - What's the primary action or capability it provides?
+
+2. **Who is this primarily for?**
+   - What type of users would use this most?
+   - Are they internal users, external customers, or administrators?
+
+3. **How does this fit into the bigger picture?**
+   - Is this a completely new feature area or enhancing something existing?
+   - Does this replace something, add to something, or create something new?
+
+4. **What's the rough scope?**
+   - Is this more like: a new page/screen, a workflow improvement, system integration, or major platform addition?
+
+This helps me propose a focused feature name and scope before our committee session.
+(The committee will then dive deep into requirements, technical feasibility, and implementation details)
+```
+
+### 4. Synthesize Initial Feature Understanding
+
+Based on concept clarification, create initial understanding:
+
+**Determine Preliminary Feature Concept:**
+- Focus on the **core value proposition** and **main user benefit**
+- Don't commit to technical implementation yet
+- Capture the **"what"** before the **"how"**
+- Examples:
+  - "tennis asso site web de gestion des adherents" → Member management platform concept
+  - "gitlab support" → Development workflow integration concept  
+  - "user notifications" → Communication system concept
+
+**Generate Feature Name/Slug:**
+Based on user answers, create kebab-case feature name:
+```bash
+# Algorithm for feature name generation:
+# 1. Extract key nouns from main capability (user answers to question 1)
+# 2. Add context from primary users (question 2) if relevant
+# 3. Include scope indication (question 4) if it clarifies purpose
+# 4. Convert to kebab-case, validate uniqueness
+
+# Examples:
+# "Tennis association member management" → "tennis-member-management"  
+# "GitLab integration for deployments" → "gitlab-deployment-integration"
+# "User notification system" → "user-notification-system"
+# "OAuth2 authentication for API" → "oauth2-api-authentication"
+```
+
+**Feature Name Rules:**
+- Must start with letter, contain only lowercase letters, numbers, hyphens
+- Should be 2-4 words that capture the essence
+- Must be unique (not exist in .doh/prds/)
+- Should be self-documenting (readable without context)
+- Avoid generic words like "feature", "improvement", "enhancement"
+
+**Present Initial Understanding:**
+```
+🎯 Feature Concept Summary
+==========================
+
+Based on your input, I understand this as:
+
+**Core Feature:** ${MAIN_CAPABILITY_DESCRIPTION}
+**Primary Users:** ${USER_TYPE_IDENTIFIED}  
+**Scope Category:** ${SCOPE_CLASSIFICATION}
+**Integration Level:** ${NEW_VS_ENHANCEMENT}
+
+**Preliminary Feature Focus Areas:**
+${BULLET_LIST_OF_MAIN_AREAS}
+
+Does this capture the main idea correctly?
+1. ✅ Yes, let's proceed to detailed discovery
+2. 🔄 Let me clarify the concept
+3. ✏️ Adjust the focus/scope
+```
+
+### 5. Check for Existing Seed and PRD Files
+
+**After feature name is determined, check if work already exists:**
+
+**Feature Name Validation (Critical):**
+```bash
+# Validate feature name format
+if [[ ! "$FEATURE_NAME" =~ ^[a-z][a-z0-9-]*[a-z0-9]$ ]] || [[ "$FEATURE_NAME" =~ -- ]]; then
+    echo "❌ Error: Invalid feature name '${FEATURE_NAME}'"
+    echo "Rules: Must start with letter, contain only lowercase letters/numbers/hyphens"
+    echo "       Cannot have consecutive hyphens, must end with letter/number"
+    echo "Examples: 'user-auth', 'gitlab-integration', 'member-management'"
+    exit 1
+fi
+
+# Validate feature name length
+if [[ ${#FEATURE_NAME} -lt 3 ]] || [[ ${#FEATURE_NAME} -gt 50 ]]; then
+    echo "❌ Error: Feature name '${FEATURE_NAME}' must be 3-50 characters"
+    exit 1
+fi
+```
+
+**Critical Check - PRD exists = ABORT:**
+```bash
+# First check if PRD already exists (abort if true)
+if [ -f ".doh/prds/${FEATURE_NAME}.md" ]; then
+    echo "⚠️ PRD '${FEATURE_NAME}' already exists!"
+    echo "   File: .doh/prds/${FEATURE_NAME}.md"
+    echo ""
+    echo "Options:"
+    echo "1. ✏️ Edit existing PRD: /doh:prd-edit ${FEATURE_NAME}"
+    echo "2. 🔄 Choose a different feature name"
+    echo "3. ❌ Cancel PRD creation"
+    exit 1
+fi
+```
+
+**If PRD exists, present options and ABORT committee creation:**
+```
+⚠️ PRD Already Exists: ${FEATURE_NAME}
+====================================
+
+A PRD already exists for this feature at: .doh/prds/${FEATURE_NAME}.md
+
+Committee PRD creation cannot proceed. Choose an option:
+1. ✏️ Edit existing PRD: /doh:prd-edit ${FEATURE_NAME}
+2. 🔄 Use a different feature name and restart
+3. 👁️ View existing PRD content first
+4. ❌ Cancel
+
+Committee evolution is for NEW PRDs only.
+```
+
+**Secondary Check - Seed file exists (if PRD doesn't exist):**
+```bash
+# Only if PRD doesn't exist, check for seed file
+./.claude/scripts/doh/helper.sh committee seed_exists "${FEATURE_NAME}"
+```
+
+**If seed file exists (but no PRD):**
 ```
 📋 Found existing context for: ${FEATURE_NAME}
 =====================================
 
-A seed file already exists for this feature from a previous discovery session.
+A seed file exists from a previous discovery session, but no PRD was created yet.
 
 Options:
 1. ✅ Use existing context and proceed to committee
@@ -71,26 +265,18 @@ Options:
 4. 👁️ View existing seed content
 ```
 
-If user chooses to use existing context:
-- Skip to step 7 (Committee Session Execution)
-- Read seed file directly: `.doh/committees/${FEATURE_NAME}/seed.md`
-- Proceed directly to launching committee orchestrator
+**Handle existing seed:**
+- **Use existing**: Skip to Committee Session Execution, read seed file directly
+- **Review/update**: Display seed content, allow modifications through discovery questions
+- **Start fresh**: Delete seed, continue with normal discovery flow
+- **View content**: Show seed, then ask for choice again
 
-If user chooses to review/update:
-- Display seed content: Read `.doh/committees/${FEATURE_NAME}/seed.md`
-- Allow modifications through discovery questions
-- Update seed: `./.claude/scripts/doh/helper.sh committee seed_update "${FEATURE_NAME}" "$new_content"`
-
-If user chooses to start fresh:
-- Delete seed: `./.claude/scripts/doh/helper.sh committee seed_delete "${FEATURE_NAME}"`
-- Continue with normal discovery flow
-
-### 3. Comprehensive Discovery Phase (MANDATORY)
+### 6. Comprehensive Discovery Phase (After Concept Confirmation)
 
 **Act as Project Management Consultant - Audience-Aware Discovery:**
 
 ```
-🏛️ Let's create a collaborative PRD for: "$FEATURE_REQUEST"
+🏛️ Great! Now for detailed discovery with our committee approach.
 
 As your Project Management Consultant, I'll tailor our discovery session to your expertise level.
 The Committee Evolution process uses 4 specialized agents as expert consultants.
@@ -186,9 +372,9 @@ This helps me ask the right questions and leverage your knowledge effectively.
 
 I'll match my questions to your expertise level and let the expert committee handle the gaps.
 
-### 4. Intelligent Parameter Synthesis
+### 7. Intelligent Parameter Synthesis
 
-After gathering context, synthesize the information using the same logic as `/doh:prd-new`:
+After gathering detailed context, synthesize the information into concrete parameters:
 
 **Determine Feature Name:**
 - **MUST capture the main idea/purpose** (not just literal conversion)
@@ -206,21 +392,25 @@ After gathering context, synthesize the information using the same logic as `/do
 - Captures the business value and outcome
 - Complements the feature name with additional context
 
-**Analyze Version Impact:**
-Based on discovery answers, determine:
-- **Patch (x.y.Z+1)**: Bug fixes, minor improvements
-- **Minor (x.Y+1.0)**: New features, backwards compatible
-- **Major (X+1.0.0)**: Breaking changes, major features
+**Determine Version Alignment:**
+- **DELEGATE to version system**: Let `/doh:version` handle version analysis and assignment
+- Based on discovery answers, the version system will:
+  - Analyze feature scope and impact (patch/minor/major)
+  - Check existing versions for suitable placement
+  - Create new version if needed
+  - Update existing version if appropriate
+- **Do not manually analyze version impact** - let the version command handle this expertise
 
-**Check existing versions:**
+**Version Delegation Process:**
 ```bash
-# Check if suitable version exists
-ls -la .doh/versions/
+# This will be handled automatically during validation if needed
+# /doh:version will determine:
+# - Whether feature fits in existing planned versions
+# - If new version is needed based on scope
+# - Appropriate version number based on impact analysis
 ```
 
-If no suitable version exists, suggest creating one first.
-
-### 5. Present Comprehensive Understanding (MANDATORY)
+### 8. Present Comprehensive Understanding (MANDATORY)
 
 **Show full context before starting committee session:**
 
@@ -234,7 +424,7 @@ ${SUMMARIZE_PROBLEM_AND_SOLUTION}
 **Proposed PRD Parameters:**
    Feature name: ${FEATURE_NAME}
    Description: ${DESCRIPTION}
-   Target version: ${TARGET_VERSION} (${VERSION_REASONING})
+   Target version: ${TARGET_VERSION} (to be validated/assigned by version system)
 
 **Committee Configuration:**
    - Execution mode: ${EXECUTION_MODE} (memory ${EXECUTION_MODE == "sequential" ? "efficient" : "intensive"})
@@ -264,10 +454,9 @@ Is this understanding correct? Should I proceed with committee session?
 2. 📝 Let me provide more context
 3. ✏️ Adjust the parameters
 4. 📋 Create a new version first
-5. ⚡ Use solo mode instead (faster, simpler)
 ```
 
-### 6. Handle User Response
+### 9. Handle User Response
 
 Based on user choice:
 
@@ -296,11 +485,7 @@ Please provide the corrections.
 - After version creation completes, return to PRD creation with the created version
 - DO NOT manually create version files or specify version numbers
 
-**Option 5 (Solo mode fallback):**
-- **DELEGATE to prd-new command**: Execute `/doh:prd-new ${ARGUMENTS}`
-- Present option with reasoning: "Committee mode provides more comprehensive analysis but takes longer. Solo mode is faster for simple features."
-
-### 7. Pre-Committee Validation
+### 10. Pre-Committee Validation
 
 **After confirmation, validate gate check requirements:**
 
@@ -384,13 +569,13 @@ Please provide the corrections.
    3. ❌ Cancel PRD creation
    ```
    
-   If user agrees, **DELEGATE**: `/doh:version for ${FEATURE_NAME} - ${DESCRIPTION}`
+   If user agrees, **DELEGATE**: `/doh:version-new for ${FEATURE_NAME} - ${DESCRIPTION}`
 
-### 8. Committee Session Execution
+### 11. Committee Session Execution
 
 **After user confirmation, create seed file and launch committee:**
 
-#### 8a. Create Seed File with Initial Context
+#### 11a. Create Seed File with Initial Context
 
 **First, save the gathered context to a seed file:**
 
@@ -414,37 +599,65 @@ if [[ ! -f "$template_file" ]]; then
     return 1
 fi
 
-# Generate seed file with discovered and provided context
-# Use discovered values with fallbacks, allowing committee to refine during analysis
-sed \
-    -e "s/{{FEATURE_NAME}}/${FEATURE_NAME}/g" \
-    -e "s/{{DESCRIPTION}}/${DESCRIPTION}/g" \
-    -e "s/{{TARGET_VERSION}}/${TARGET_VERSION}/g" \
-    -e "s/{{EXECUTION_MODE}}/${EXECUTION_MODE}/g" \
-    -e "s/{{TIMESTAMP}}/$(date -u +"%Y-%m-%dT%H:%M:%SZ")/g" \
-    -e "s/{{PROBLEM_STATEMENT}}/${PROBLEM_SUMMARY:-Committee to refine based on feature description}/g" \
-    -e "s/{{BUSINESS_CONTEXT}}/${BUSINESS_CONTEXT:-Committee to develop through analysis}/g" \
-    -e "s/{{TECHNICAL_CONTEXT}}/${TECHNICAL_CONTEXT:-Auto-discovered from project}/g" \
-    -e "s/{{CURRENT_STACK}}/${CURRENT_STACK:-Auto-discovered from project files}/g" \
-    -e "s/{{REQUIREMENTS_SUMMARY}}/${REQUIREMENTS_LIST:-Committee to define during draft phase}/g" \
-    -e "s/{{CONSTRAINTS}}/${CONSTRAINTS:-Committee to identify through technical debt analysis}/g" \
-    -e "s/{{SUCCESS_CRITERIA}}/${SUCCESS_CRITERIA:-Committee to establish measurable outcomes}/g" \
-    -e "s/{{COMPLEXITY}}/${COMPLEXITY_LEVEL:-Committee to assess}/g" \
-    -e "s/{{USER_IMPACT}}/${USER_IMPACT:-Committee to evaluate}/g" \
-    -e "s/{{BREAKING_CHANGES}}/${BREAKING_CHANGES:-Committee to determine}/g" \
-    -e "s/{{DEPENDENCIES}}/${DEPENDENCIES:-Committee to discover through project analysis}/g" \
-    -e "s/{{USER_SCALE}}/${USER_SCALE:-Committee to analyze}/g" \
-    -e "s/{{SITE_COUNT}}/${SITE_COUNT:-Committee to determine}/g" \
-    -e "s/{{CURRENT_VERSION}}/${CURRENT_VERSION}/g" \
-    "$template_file" > "$seed_file" || {
-    echo "❌ Failed to generate seed file" >&2
+# Generate seed file with discovered and provided context - SAFE substitution
+# Use temporary file approach to handle special characters safely
+temp_file=$(mktemp) || {
+    echo "❌ Failed to create temporary file" >&2
+    return 1
+}
+
+# Copy template and substitute variables safely
+cp "$template_file" "$temp_file" || {
+    echo "❌ Failed to copy template file" >&2
+    rm -f "$temp_file"
+    return 1
+}
+
+# Use printf to safely escape special characters in variables
+printf -v ESCAPED_FEATURE_NAME '%q' "${FEATURE_NAME}"
+printf -v ESCAPED_DESCRIPTION '%q' "${DESCRIPTION:-}"
+printf -v ESCAPED_TARGET_VERSION '%q' "${TARGET_VERSION:-}" 
+printf -v ESCAPED_EXECUTION_MODE '%q' "${EXECUTION_MODE}"
+printf -v ESCAPED_TIMESTAMP '%q' "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+
+# Perform safe substitutions using perl instead of sed for better special char handling
+perl -pi -e "
+    s/\{\{FEATURE_NAME\}\}/${FEATURE_NAME}/g;
+    s/\{\{DESCRIPTION\}\}/${DESCRIPTION:-}/g;
+    s/\{\{TARGET_VERSION\}\}/${TARGET_VERSION:-}/g;
+    s/\{\{EXECUTION_MODE\}\}/${EXECUTION_MODE}/g;
+    s/\{\{TIMESTAMP\}\}/$(date -u +"%Y-%m-%dT%H:%M:%SZ")/g;
+    s/\{\{PROBLEM_STATEMENT\}\}/${PROBLEM_SUMMARY:-Committee to refine based on feature description}/g;
+    s/\{\{BUSINESS_CONTEXT\}\}/${BUSINESS_CONTEXT:-Committee to develop through analysis}/g;
+    s/\{\{TECHNICAL_CONTEXT\}\}/${TECHNICAL_CONTEXT:-Auto-discovered from project}/g;
+    s/\{\{CURRENT_STACK\}\}/${CURRENT_STACK:-Auto-discovered from project files}/g;
+    s/\{\{REQUIREMENTS_SUMMARY\}\}/${REQUIREMENTS_LIST:-Committee to define during draft phase}/g;
+    s/\{\{CONSTRAINTS\}\}/${CONSTRAINTS:-Committee to identify through technical debt analysis}/g;
+    s/\{\{SUCCESS_CRITERIA\}\}/${SUCCESS_CRITERIA:-Committee to establish measurable outcomes}/g;
+    s/\{\{COMPLEXITY\}\}/${COMPLEXITY_LEVEL:-Committee to assess}/g;
+    s/\{\{USER_IMPACT\}\}/${USER_IMPACT:-Committee to evaluate}/g;
+    s/\{\{BREAKING_CHANGES\}\}/${BREAKING_CHANGES:-Committee to determine}/g;
+    s/\{\{DEPENDENCIES\}\}/${DEPENDENCIES:-Committee to discover through project analysis}/g;
+    s/\{\{USER_SCALE\}\}/${USER_SCALE:-Committee to analyze}/g;
+    s/\{\{SITE_COUNT\}\}/${SITE_COUNT:-Committee to determine}/g;
+    s/\{\{CURRENT_VERSION\}\}/${CURRENT_VERSION}/g;
+" "$temp_file" || {
+    echo "❌ Failed to process template substitutions" >&2
+    rm -f "$temp_file"
+    return 1
+}
+
+# Move processed file to final location
+mv "$temp_file" "$seed_file" || {
+    echo "❌ Failed to create seed file" >&2
+    rm -f "$temp_file"
     return 1
 }
 
 echo "✅ Committee seed created: $seed_file"
 ```
 
-#### 8b. Launch Committee Session
+#### 11b. Launch Committee Session
 
 ```
 🏛️ Starting Committee PRD Session...
@@ -469,7 +682,7 @@ The committee-orchestrator agent will:
 6. Perform convergence analysis and create final PRD
 7. Use ./.claude/scripts/doh/helper.sh to save final PRD to .doh/prds/${FEATURE_NAME}.md
 
-**Task invocation:**
+**Task invocation with error handling:**
 ```
 subagent_type: committee-orchestrator
 prompt: Execute complete committee PRD workflow for "${FEATURE_NAME}" using Project Management Consultant approach.
@@ -494,6 +707,12 @@ The committee acts as consultants who can discover context during analysis:
 - UX Designer: Evaluate existing design systems, user flows, accessibility considerations
 - Product Owner: Refine business requirements, develop success criteria, assess market positioning
 
+**ERROR HANDLING:**
+If committee session fails:
+1. Save session state to .doh/committees/${FEATURE_NAME}/session_failed.md
+2. Provide recovery options to user
+3. Offer manual PRD creation as fallback
+
 Use existing DOH committee infrastructure:
 - helper.sh committee commands for session management and seed access
 - committee.sh library for workflow coordination  
@@ -503,7 +722,24 @@ Use existing DOH committee infrastructure:
 IMPORTANT: Respect the execution mode specified in the seed file frontmatter.
 ```
 
-### 9. Post-Committee Processing
+**Handle committee orchestrator failure:**
+```bash
+# Check if Task tool execution succeeded
+if [[ $? -ne 0 ]]; then
+    echo "❌ Committee session failed"
+    echo ""
+    echo "Recovery options:"
+    echo "1. 🔄 Retry committee session"
+    echo "2. 📝 Create manual PRD: /doh:prd-new ${FEATURE_NAME} \"${DESCRIPTION}\""
+    echo "3. 👁️ View session logs: .doh/committees/${FEATURE_NAME}/"
+    echo "4. 🧹 Clean up and start fresh"
+    echo ""
+    echo "Committee session details saved for debugging."
+    exit 1
+fi
+```
+
+### 12. Post-Committee Processing
 
 After committee session completes, validate and enhance results:
 
@@ -536,7 +772,7 @@ After committee session completes, validate and enhance results:
 The PRD incorporates multi-perspective analysis and cross-functional alignment.
 ```
 
-### 10. Final Summary
+### 13. Final Summary
 
 ```
 ✅ Committee PRD Creation Complete
