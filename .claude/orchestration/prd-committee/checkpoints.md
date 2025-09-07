@@ -3,6 +3,8 @@
 ## Overview
 Configuration for user intervention points during PRD committee workflow.
 
+**Core Principle**: Committee analyzes for professional development teams by default. Resource limitations should not drive architectural decisions unless explicitly requested by client intervention.
+
 ## Checkpoint Settings
 
 ```yaml
@@ -54,6 +56,10 @@ The system presents this format after each round:
 
 **Infrastructure Plan:**
 {devops_strategy_summary}
+
+**Critical Questions Addressed:** {critical_questions_checklist}
+**Industry Research Completed:** {domain_research_summary}
+**Potential Blind Spots:** {identified_gaps_or_assumptions}
 
 **Consensus Level:** {score}/10
 
@@ -133,6 +139,9 @@ context:
 5. **Authority Respect**: Agents understand different authority levels
 6. **Persistence**: All interventions saved in session for audit trail
 7. **Response Language**: System responds in user's detected language
+8. **Critical Questions Tracking**: Round 1 briefs show whether mandatory exploration questions were addressed
+9. **Research Validation**: Show what industry research was completed and key findings
+10. **Blind Spot Detection**: Highlight potential gaps in business discovery for user review
 
 ## Error Handling
 

@@ -137,7 +137,7 @@ Based on concept clarification, create initial understanding:
 - Don't commit to technical implementation yet
 - Capture the **"what"** before the **"how"**
 - Examples:
-  - "tennis asso site web de gestion des adherents" → Member management platform concept
+  - "member management system" → Organization member management platform concept
   - "gitlab support" → Development workflow integration concept  
   - "user notifications" → Communication system concept
 
@@ -151,7 +151,7 @@ Based on user answers, create kebab-case feature name:
 # 4. Convert to kebab-case, validate uniqueness
 
 # Examples:
-# "Tennis association member management" → "tennis-member-management"  
+# "Organization member management" → "member-management-system"  
 # "GitLab integration for deployments" → "gitlab-deployment-integration"
 # "User notification system" → "user-notification-system"
 # "OAuth2 authentication for API" → "oauth2-api-authentication"
@@ -185,7 +185,186 @@ Does this capture the main idea correctly?
 3. ✏️ Adjust the focus/scope
 ```
 
-### 5. Check for Existing Seed and PRD Files
+### 5. Industry Research Phase (WebSearch)
+
+**After concept confirmation, conduct industry research to inform committee:**
+
+```
+🔍 Industry Research for Committee Context
+========================================
+
+Before our expert committee analyzes your feature, let me gather industry context that will inform their analysis.
+
+This research will be provided to the committee agents to enhance their domain expertise.
+```
+
+**Step 1: Business Domain Identification**
+
+Based on the feature concept and user responses, identify the specific business domain/industry:
+
+**Domain Identification Process:**
+```
+🏢 Business Domain Analysis
+==========================
+
+Analyzing feature request: "$FEATURE_REQUEST"
+
+Based on your feature description, I need to understand the business domain to conduct relevant industry research.
+
+What type of business/organization is this for?
+
+Examples by domain:
+• Sports/Recreation: clubs, gyms, sports leagues, fitness centers
+• Healthcare: hospitals, clinics, medical practices, pharmacies  
+• Education: schools, universities, training centers, e-learning
+• Retail/E-commerce: stores, online shops, marketplaces, suppliers
+• Financial Services: banks, insurance, accounting, fintech
+• Manufacturing: factories, warehouses, supply chain, logistics
+• Professional Services: consultancy, legal, real estate, agencies
+• Government/Public: municipalities, agencies, non-profits
+• Technology: SaaS, software companies, IT services, startups
+
+Which category best describes your business?
+```
+
+**Interactive Domain Selection:**
+```bash
+# Present domain options based on feature analysis
+echo "🏢 Business Domain Identification"
+echo "Feature: $FEATURE_REQUEST"
+echo ""
+echo "Select the primary business domain:"
+echo "1. Sports/Recreation Management"
+echo "2. Healthcare/Medical Services"  
+echo "3. Education/Training"
+echo "4. Retail/E-commerce"
+echo "5. Financial Services"
+echo "6. Manufacturing/Logistics"
+echo "7. Professional Services"
+echo "8. Government/Public Sector"
+echo "9. Technology/Software"
+echo "10. Other (specify)"
+echo ""
+read -p "Domain selection (1-10): " domain_choice
+
+case $domain_choice in
+    1) PRIMARY_DOMAIN="Sports/Recreation Management" ;;
+    2) PRIMARY_DOMAIN="Healthcare/Medical Services" ;;
+    3) PRIMARY_DOMAIN="Education/Training" ;;
+    4) PRIMARY_DOMAIN="Retail/E-commerce" ;;
+    5) PRIMARY_DOMAIN="Financial Services" ;;
+    6) PRIMARY_DOMAIN="Manufacturing/Logistics" ;;
+    7) PRIMARY_DOMAIN="Professional Services" ;;
+    8) PRIMARY_DOMAIN="Government/Public Sector" ;;
+    9) PRIMARY_DOMAIN="Technology/Software" ;;
+    10) 
+        read -p "Specify your business domain: " PRIMARY_DOMAIN
+        ;;
+    *)
+        echo "Invalid selection. Using 'General Business'"
+        PRIMARY_DOMAIN="General Business"
+        ;;
+esac
+
+# Get sub-domain specifics
+echo ""
+read -p "More specific area within $PRIMARY_DOMAIN: " SUB_DOMAIN
+SUB_DOMAIN=${SUB_DOMAIN:-$PRIMARY_DOMAIN}
+
+# Set industry context for research
+INDUSTRY_CONTEXT="$PRIMARY_DOMAIN"
+BUSINESS_DOMAIN="$PRIMARY_DOMAIN/$SUB_DOMAIN"
+FEATURE_TYPE=$(echo "$FEATURE_REQUEST" | grep -oE "(system|platform|tool|integration|management|service)" | head -1)
+FEATURE_TYPE=${FEATURE_TYPE:-"solution"}
+
+echo ""
+echo "✅ Domain identified: $BUSINESS_DOMAIN"
+echo "   Research context: $INDUSTRY_CONTEXT"
+echo "   Feature type: $FEATURE_TYPE"
+```
+
+**Present Domain Identification:**
+```
+🏢 Business Domain Identified
+============================
+
+Based on your feature concept, I've identified the business domain as:
+**Primary Domain:** ${PRIMARY_DOMAIN}
+**Sub-Domain:** ${SUB_DOMAIN}
+**Industry Context:** ${INDUSTRY_CONTEXT}
+
+This will guide our industry research to find relevant standards, regulations, and best practices.
+
+Is this domain identification correct?
+1. ✅ Yes, proceed with research
+2. 🔄 Let me clarify the business domain
+3. ✏️ Adjust the domain focus
+```
+
+**Step 2: Client Business Understanding Research (executed by prd-evo command):**
+
+Focus: Le comité connaît le software, pas le métier du client.
+
+```bash
+echo "🔍 Researching client business domain to educate committee..."
+
+# 1. What does this business actually DO day-to-day?
+echo "  → Understanding daily operations..."
+DAILY_OPERATIONS=$(WebSearch "${PRIMARY_DOMAIN} daily operations typical day workflow" 2>/dev/null || echo "Operations research unavailable")
+
+# 2. Who are the key people and what are their roles?
+echo "  → Identifying key stakeholders..."
+KEY_STAKEHOLDERS=$(WebSearch "${SUB_DOMAIN} key roles responsibilities who does what" 2>/dev/null || echo "Stakeholder research unavailable")
+
+# 3. How does this business actually make money?
+echo "  → Understanding business model..."
+BUSINESS_MODEL=$(WebSearch "${PRIMARY_DOMAIN} business model revenue how they make money" 2>/dev/null || echo "Business model research unavailable")
+
+# 4. What are the main pain points in this industry?
+echo "  → Identifying common challenges..."
+BUSINESS_CHALLENGES=$(WebSearch "${SUB_DOMAIN} common problems challenges pain points" 2>/dev/null || echo "Challenges research unavailable")
+
+# 5. What does success look like in this business?
+echo "  → Understanding success metrics..."
+SUCCESS_METRICS=$(WebSearch "${PRIMARY_DOMAIN} success metrics KPIs what good looks like" 2>/dev/null || echo "Success metrics research unavailable")
+
+echo "✅ Business understanding research complete"
+```
+
+**Research Context Capture:**
+```
+✅ Client Business Understanding Research Complete
+================================================
+
+**Business Domain:** ${PRIMARY_DOMAIN} / ${SUB_DOMAIN}
+
+**📋 What the Committee Now Understands About Client's Business:**
+
+**Daily Operations:**
+${DAILY_OPERATIONS}
+
+**Key People & Roles:**
+${KEY_STAKEHOLDERS}
+
+**Business Model (How They Make Money):**
+${BUSINESS_MODEL}
+
+**Common Challenges in This Business:**
+${BUSINESS_CHALLENGES}
+
+**Success Metrics & Goals:**
+${SUCCESS_METRICS}
+
+**Context for Committee:**
+This business understanding will be provided to the software committee so they can:
+- Design solutions that fit the client's actual day-to-day operations
+- Understand who will use the software and how
+- Identify the real business value and ROI opportunities
+- Anticipate operational challenges specific to this business type
+- Create software that makes sense in the client's world, not just technically
+```
+
+### 6. Check for Existing Seed and PRD Files
 
 **After feature name is determined, check if work already exists:**
 
@@ -264,7 +443,7 @@ Options:
 - **Start fresh**: Delete seed, continue with normal discovery flow
 - **View content**: Show seed, then ask for choice again
 
-### 6. Comprehensive Discovery Phase (After Concept Confirmation)
+### 7. Comprehensive Discovery Phase (After Concept Confirmation)
 
 **Act as Project Management Consultant - Audience-Aware Discovery:**
 
@@ -279,6 +458,13 @@ What's your role/expertise? (e.g., Lead Developer, Product Manager, Sales, CEO, 
 
 This helps me ask the right questions and leverage your knowledge effectively.
 ```
+
+**IMPORTANT - Context Capture Rules:**
+- **Team Constraints**: Never let temporary resources (interns, junior developers) drive technical architecture decisions
+- **Default Assumption**: Committee analyzes for experienced development team unless explicitly specified otherwise
+- **Resource Mentions**: If client mentions limited resources, capture as "some [technology] knowledge available" not as primary constraint
+- **Quality First**: Technical choices should prioritize scalability, maintainability, and best practices
+- **Accommodation**: Resource limitations can be accommodated through training, documentation, or phased implementation
 
 **Based on user's role, adapt the discovery questions:**
 
@@ -365,7 +551,7 @@ This helps me ask the right questions and leverage your knowledge effectively.
 
 I'll match my questions to your expertise level and let the expert committee handle the gaps.
 
-### 7. Intelligent Parameter Synthesis
+### 8. Intelligent Parameter Synthesis
 
 After gathering detailed context, synthesize the information into concrete parameters:
 
@@ -403,7 +589,7 @@ After gathering detailed context, synthesize the information into concrete param
 # - Appropriate version number based on impact analysis
 ```
 
-### 8. Present Comprehensive Understanding (MANDATORY)
+### 9. Present Comprehensive Understanding (MANDATORY)
 
 **Show full context before starting committee session:**
 
@@ -450,7 +636,7 @@ Is this understanding correct? Should I proceed with committee session?
 4. 📋 Create a new version first
 ```
 
-### 9. Handle User Response
+### 10. Handle User Response
 
 Based on user choice:
 
@@ -479,7 +665,7 @@ Please provide the corrections.
 - After version creation completes, return to PRD creation with the created version
 - DO NOT manually create version files or specify version numbers
 
-### 10. Pre-Committee Validation
+### 11. Pre-Committee Validation
 
 **After confirmation, validate gate check requirements:**
 
@@ -565,11 +751,11 @@ Please provide the corrections.
    
    If user agrees, **DELEGATE**: `/doh:version-new for ${FEATURE_NAME} - ${DESCRIPTION}`
 
-### 11. Committee Session Execution
+### 12. Committee Session Execution
 
 **After user confirmation, create seed file and launch committee:**
 
-#### 11a. Create Seed File with Initial Context
+#### 12a. Create Seed File with Initial Context
 
 **First, save the gathered context to a seed file:**
 
@@ -635,6 +821,13 @@ perl -pi -e "
     s/\{\{USER_SCALE\}\}/${USER_SCALE:-Committee to analyze}/g;
     s/\{\{SITE_COUNT\}\}/${SITE_COUNT:-Committee to determine}/g;
     s/\{\{CURRENT_VERSION\}\}/${CURRENT_VERSION}/g;
+    s/\{\{PRIMARY_DOMAIN\}\}/${PRIMARY_DOMAIN:-Business domain identified during research}/g;
+    s/\{\{SUB_DOMAIN\}\}/${SUB_DOMAIN:-Sub-domain context from research}/g;
+    s/\{\{DAILY_OPERATIONS\}\}/${DAILY_OPERATIONS:-Daily operations from business research}/g;
+    s/\{\{KEY_STAKEHOLDERS\}\}/${KEY_STAKEHOLDERS:-Key stakeholders from business research}/g;
+    s/\{\{BUSINESS_MODEL\}\}/${BUSINESS_MODEL:-Business model from research}/g;
+    s/\{\{BUSINESS_CHALLENGES\}\}/${BUSINESS_CHALLENGES:-Business challenges from research}/g;
+    s/\{\{SUCCESS_METRICS\}\}/${SUCCESS_METRICS:-Success metrics from research}/g;
 " "$temp_file" || {
     echo "❌ Failed to process template substitutions" >&2
     rm -f "$temp_file"
@@ -651,7 +844,7 @@ mv "$temp_file" "$seed_file" || {
 echo "✅ Committee seed created: $seed_file"
 ```
 
-#### 11b. Launch Committee Session
+#### 12b. Launch Committee Session
 
 ```
 🏛️ Starting Committee PRD Session...
@@ -748,7 +941,7 @@ if [[ $? -ne 0 ]]; then
 fi
 ```
 
-### 12. Post-Committee Processing
+### 13. Post-Committee Processing
 
 After committee session completes, validate and enhance results:
 
@@ -781,7 +974,7 @@ After committee session completes, validate and enhance results:
 The PRD incorporates multi-perspective analysis and cross-functional alignment.
 ```
 
-### 13. Final Summary
+### 14. Final Summary
 
 ```
 ✅ Committee PRD Creation Complete

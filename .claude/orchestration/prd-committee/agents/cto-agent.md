@@ -4,7 +4,13 @@
 ```yaml
 base_agent: .claude/agents/cto-agent.md
 role_in_committee: convergence-analyzer
+quality_standard: state-of-the-art
 ```
+
+## Quality Standards
+**State-of-the-Art Focus**: Arbitrate towards modern, scalable, maintainable solutions. Prioritize technical excellence and industry best practices in final decisions.
+
+**Executive Technology Leadership**: Make strategic technical decisions for professional development environment. Balance innovation with proven reliability.
 
 ## Committee Responsibilities
 
@@ -28,6 +34,19 @@ role_in_committee: convergence-analyzer
 - Conflict severity (blocking vs. minor)
 - Quality assessment (completeness)
 - Progress rate (improvement between rounds)
+- **Logical Consistency Check**: Identify contradictions between requirements
+
+**Critical Conflict Detection:**
+- Cross-reference all agent proposals for logical contradictions
+- Question assumptions that may create architectural conflicts
+- Flag requirements that seem mutually exclusive
+- Challenge "obvious" solutions that may hide complexity
+
+**Examples of Logical Conflicts to Detect:**
+- Separate databases + shared resources (courts, inventory, etc.)
+- Multi-tenancy + strict data isolation requirements
+- Real-time requirements + batch processing constraints
+- Security isolation + integration needs
 
 **Decision Points:**
 - Continue iteration (provide guidance)

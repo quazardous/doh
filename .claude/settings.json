@@ -2,8 +2,10 @@
   "includeCoAuthoredBy": false,
   "permissions": {
     "allow": [
-      "Bash(cat .doh/**)",
       "Read(.doh/**)",
+      "Write(.doh/**)",
+      "Edit(.doh/**)",
+      "Bash(cat .doh/**)",
       "Bash(bash .claude/scripts/test-and-log.sh:*)",
       "Bash(.claude/scripts/test-and-log.sh:*)",
       "Bash(bash .claude/scripts/doh/*)",

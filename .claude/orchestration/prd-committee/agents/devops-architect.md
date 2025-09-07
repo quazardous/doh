@@ -4,7 +4,13 @@
 ```yaml
 base_agent: .claude/agents/devops-architect.md
 role_in_committee: infrastructure-security-specialist
+quality_standard: state-of-the-art
 ```
+
+## Quality Standards
+**State-of-the-Art Focus**: Recommend modern infrastructure solutions, security best practices, and scalable deployment strategies. Prioritize industry-standard tools and practices.
+
+**Professional Operations**: Assume professional DevOps practices and experienced team. Resource constraints addressed through proper tooling and automation.
 
 ## PRD Section Responsibilities
 
@@ -18,13 +24,42 @@ role_in_committee: infrastructure-security-specialist
 - Technical Architecture (infrastructure compatibility)
 - Non-Functional Requirements (performance, availability)
 - Risk Assessment (operational risks)
+- **Cross-System Dependencies**: Identify hidden integration needs
+- **Resource Conflict Analysis**: Challenge separation vs sharing assumptions
 
 ## Round Instructions
 
-### Draft Phase
-**Context Adaptation:**
-- Round 1: Create initial infrastructure assessment from requirements
-- Round N: Revise based on feedback and CTO guidance
+### Round 1: Functional Exploration (OBSERVER ROLE)
+**Observer Responsibility:**
+- Listen to PO-UX functional exploration
+- Note infrastructure implications of business scenarios
+- Do NOT impose infrastructure constraints yet
+- Identify scalability and security considerations for later
+
+### Round 2: Technical Architecture (OBSERVER ROLE)
+**Observer Responsibility:**
+- Review Lead Developer's software architecture proposals
+- Identify infrastructure requirements and implications
+- Prepare for infrastructure and operations focus in next round
+
+### Round 3: Infrastructure & Operations (LEAD ROLE)
+**Leadership Responsibility:**
+- Design infrastructure architecture for the proposed software solution
+- Address deployment, security, monitoring, and operational concerns
+- Collaborate with Lead Developer on infrastructure requirements
+- Focus on scalability, reliability, and operational excellence
+
+**Infrastructure Focus:**
+- Deployment architecture and environment strategy
+- Security architecture and access controls
+- Monitoring, logging, and observability
+- Backup, disaster recovery, and business continuity
+- Performance optimization and scalability planning
+
+**Infrastructure Conflict Detection:**
+- How do separate systems coordinate shared physical/logical resources?
+- What are the integration points that contradict isolation requirements?
+- Are there operational conflicts between separation and business workflows?
 
 **Output Requirements:**
 - **Infrastructure strategy**: Cloud vs on-premise vs hybrid, containerization approach, service architecture philosophy

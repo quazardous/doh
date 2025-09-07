@@ -1,5 +1,17 @@
 # PRD Committee Workflow
 
+## Context Quality Guidelines
+
+**Professional Team Assumption**: Committee analyzes assuming experienced development team by default.
+
+**Resource Constraint Handling**:
+- Intern/junior developer mentions → Capture as "some [technology] knowledge available"
+- Never let resource limitations drive architectural decisions
+- Technical choices prioritize scalability, maintainability, best practices
+- Resource constraints become implementation considerations, not design constraints
+
+**If client explicitly wants resource accommodation**: They can intervene during checkpoints.
+
 ## Generic Workflow Algorithm
 
 This workflow is designed to work with any number of rounds without modification.
@@ -22,13 +34,21 @@ def execute_committee_workflow(seed, manifest):
     while round_num < config.rounds.max and not converged:
         round_num += 1
         
-        # Execute round phases
+        # Get round orientation and adjust agent priorities
+        round_orientation = config.get_round_orientation(round_num)
+        
+        # Execute round phases with orientation-specific agent ordering
         for phase in config.rounds.phases_per_round:
+            agents = get_agents_for_phase_with_orientation(
+                phase=phase, 
+                orientation=round_orientation,
+                config=config
+            )
             execute_phase(
                 phase=phase,
                 round=round_num,
-                agents=get_agents_for_phase(phase, config),
-                context=build_context(session, phase, round_num)
+                agents=agents,
+                context=build_context_with_orientation(session, phase, round_num, round_orientation)
             )
         
         # Store round results
@@ -276,7 +296,102 @@ def apply_user_intervention(session, round_num, intervention):
         print(f"📝 Corrections stored for Round {round_num + 1}")
 ```
 
-### Context Enhancement for Next Round
+#### Agent Ordering by Round Orientation
+```python
+def get_agents_for_phase_with_orientation(phase, orientation, config):
+    """
+    Order agents based on round orientation and leadership.
+    """
+    base_agents = config.get_agents_for_phase(phase)
+    
+    if phase.name == 'draft':
+        if orientation.name == 'functional_exploration':
+            # Round 1: PO leads, UX supports, others observe
+            return order_agents_by_priority([
+                ('product-owner', 'lead'),
+                ('ux-designer', 'support'),
+                ('lead-developer', 'observer'),
+                ('devops-architect', 'observer')
+            ])
+        elif orientation.name == 'technical_architecture':
+            # Round 2: Lead Dev leads, others support
+            return order_agents_by_priority([
+                ('lead-developer', 'lead'),
+                ('ux-designer', 'support'),
+                ('product-owner', 'support'),
+                ('devops-architect', 'observer')
+            ])
+        elif orientation.name == 'infrastructure_operations':
+            # Round 3: DevOps leads, Lead Dev supports
+            return order_agents_by_priority([
+                ('devops-architect', 'lead'),
+                ('lead-developer', 'support'),
+                ('product-owner', 'observer'),
+                ('ux-designer', 'observer')
+            ])
+    
+    # Default ordering for other phases
+    return base_agents
+
+def build_context_with_orientation(session, phase, round_num, orientation):
+    """
+    Enhanced context builder that includes round orientation guidance.
+    """
+    context = build_context(session, phase, round_num)
+    
+    # Add orientation-specific guidance
+    context['round_orientation'] = {
+        'name': orientation.name,
+        'focus': orientation.focus,
+        'objective': orientation.objective,
+        'approach': orientation.approach
+    }
+    
+    # Add role-specific instructions based on orientation
+    if orientation.name == 'functional_exploration':
+        context['exploration_guidelines'] = {
+            'lead_responsibility': 'Drive comprehensive functional exploration without technical constraints',
+            'support_responsibility': 'Focus on user experience implications of business scenarios',
+            'observer_responsibility': 'Listen and take notes for later technical analysis'
+        }
+        
+        # CRITICAL: Add mandatory exploration checklist
+        context['mandatory_exploration_checklist'] = [
+            'How do separated entities coordinate shared resources?',
+            'What information visibility exists between entities?', 
+            'How are real-time conflicts detected and resolved?',
+            'What happens when Entity A needs Entity B information?',
+            'How do users know resource status across entity boundaries?',
+            'What are the permission and access patterns between entities?',
+            'How do shared workflows actually work in practice?'
+        ]
+        
+        # Business discovery requirements (research done in prd-evo preparation)
+        context['business_analysis_focus'] = [
+            'Analyze provided industry context and standards',
+            'Consider organizational models relevant to the domain',
+            'Apply regulatory requirements and compliance frameworks from research', 
+            'Reference case studies and best practices from preparation phase',
+            'Validate business model assumptions against provided industry context',
+            'Address challenges and solutions identified during prd-evo discovery'
+        ]
+    elif orientation.name == 'technical_architecture':
+        context['architecture_guidelines'] = {
+            'lead_responsibility': 'Transform functional requirements into concrete software architecture',
+            'support_responsibility': 'Ensure architecture serves user and business needs',
+            'observer_responsibility': 'Prepare infrastructure requirements for next round'
+        }
+    elif orientation.name == 'infrastructure_operations':
+        context['infrastructure_guidelines'] = {
+            'lead_responsibility': 'Design infrastructure for proposed software architecture',
+            'support_responsibility': 'Provide software architecture context and requirements',
+            'observer_responsibility': 'Review infrastructure impact on user and business requirements'
+        }
+    
+    return context
+```
+
+## Context Enhancement for Next Round
 ```python
 def build_context(session, phase, round_num):
     """
@@ -325,12 +440,15 @@ def check_convergence(session, round_num, config):
     consensus = analysis.get('consensus_score', 0)
     quality = analysis.get('quality_score', 0)
     conflicts = analysis.get('unresolved_conflicts', [])
+    logical_conflicts = analysis.get('logical_contradictions', [])
     
     # Apply convergence rules
     if consensus >= config.convergence.consensus_threshold:
         if quality >= config.convergence.quality_threshold:
-            if len(conflicts) == 0:
+            if len(conflicts) == 0 and len(logical_conflicts) == 0:
                 return True  # Full convergence
+            elif len(logical_conflicts) > 0:
+                return False  # Force another round for logical conflict resolution
     
     # Force convergence at max rounds
     if round_num >= config.rounds.max:
