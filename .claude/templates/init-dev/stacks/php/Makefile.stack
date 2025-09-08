@@ -1,3 +1,27 @@
+# PHP/Laravel specific dependency management
+
+dev-setup: ## Install PHP dependencies (Composer + NPM)
+	@echo "📦 Installing Composer dependencies in container..."
+	$(RUN_APP) composer install --no-dev
+	@echo "📦 Installing Node.js dependencies for frontend..."
+	$(RUN_APP) npm install
+	@echo "🔄 Running Laravel migrations..."
+	$(RUN_APP) php artisan migrate
+	@echo "✅ PHP/Laravel dependencies installed"
+
+update-deps: ## Update dependencies without rebuild
+	@echo "🔄 Updating PHP dependencies in container..."
+	$(RUN_APP) composer update
+	$(RUN_APP) npm update
+	@echo "✅ Dependencies updated"
+
+clean-deps: ## Clean dependency caches (in container)
+	@echo "🧹 Cleaning PHP dependency caches..."
+	$(RUN_APP) rm -rf vendor node_modules
+	$(RUN_APP) composer clear-cache
+	$(RUN_APP) npm cache clean --force
+	@echo "✅ Dependency caches cleaned"
+
 # PHP/Laravel specific linting targets
 
 lint-check: ## Check code style (no fixes)

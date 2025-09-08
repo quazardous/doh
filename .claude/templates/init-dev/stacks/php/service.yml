@@ -1,24 +1,26 @@
   app:
     build: 
       context: .
+      dockerfile: ./docker/app/Dockerfile
       args:
         UID: ${UID:-1000}
         GID: ${GID:-1000}
-    volumes:
-      - .:/app
     user: ${UID:-1000}:${GID:-1000}
     environment:
-      - APP_ENV=development
-      - PROJECT_NAME=${PROJECT_NAME}
+      # PHP specific environment (Symfony/Laravel)
+      - APP_ENV=${APP_ENV:-development}
+      - DATABASE_URL=${DATABASE_URL}
+    volumes:
+      - .:/app                                    # ALL application code (logs auto-visible in ./var/log/)
+      #- ./docker/supervisord.conf:/etc/supervisor/supervisord.conf:ro  # Process config (if workers needed)
     networks:
       - default
 
   nginx:
     image: nginx:1.25-alpine
     volumes:
-      - .:/app
-      - ./docker-dev/nginx/app.conf.template:/etc/nginx/templates/app.conf.template:ro
-      - ./docker-dev/logs/nginx:/var/log/nginx
+      - .:/app                                    # ALL application code (nginx logs auto-visible in ./var/log/)
+      #- ./docker/nginx/app.conf.template:/etc/nginx/templates/app.conf.template:ro  # Optional: nginx config
     environment:
       - PROJECT_NAME=${PROJECT_NAME}
       - SITE_BASE_DOMAIN=${PROJECT_NAME}.localhost
@@ -26,8 +28,8 @@
       - app
     labels:
       - "traefik.enable=true"
-      - "dev.project={{PROJECT_NAME}}"
-      - "traefik.http.routers.app.rule=Host(`app.{{PROJECT_NAME}}.localhost`)"
+      - "dev.project=${PROJECT_NAME}"
+      - "traefik.http.routers.app.rule=Host(`app.${PROJECT_NAME}.localhost`)"
       - "traefik.http.routers.app.entrypoints=websecure"
       - "traefik.http.routers.app.tls=true"
     networks:

@@ -6,6 +6,13 @@ export UID := $(shell id -u)
 export GID := $(shell id -g)
 export PROJECT_NAME := $(shell basename $(PWD) | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g')
 
+# Docker commands configuration
+DOCKER_COMPOSE ?= docker compose --env-file ./docker-compose.env
+RUN_APP = $(DOCKER_COMPOSE) run --entrypoint '' --rm app
+EXEC_APP = $(DOCKER_COMPOSE) exec app
+RUN_LINTER = $(DOCKER_COMPOSE) run --entrypoint '' --rm linter
+EXEC_LINTER = $(DOCKER_COMPOSE) exec linter
+
 help: ## Show this help message
 	@echo "🔧 Development Environment Commands"
 	@echo "=================================="
@@ -13,7 +20,34 @@ help: ## Show this help message
 
 # === Environment Management ===
 
-dev: ## Start development environment
+dev-setup: ## Install framework dependencies (in container)
+	@echo "📦 Installing dependencies in container..."
+	@echo "⚠️  PSEUDO-TEMPLATE: AI must adapt these commands based on detected framework"
+	$(RUN_APP) pip install -r requirements.txt 2>/dev/null || echo "⚠️ No requirements.txt (not Python)"
+	$(RUN_APP) npm install 2>/dev/null || echo "⚠️ No package.json (not Node.js)"
+	$(RUN_APP) composer install --no-dev 2>/dev/null || echo "⚠️ No composer.json (not PHP)"
+	$(RUN_APP) python manage.py migrate 2>/dev/null || echo "⚠️ No Django detected"
+	$(RUN_APP) php artisan migrate 2>/dev/null || echo "⚠️ No Laravel detected"
+	@echo "✅ Dependencies installed (AI should replace with framework-specific commands)"
+
+update-deps: ## Update dependencies without rebuild
+	@echo "🔄 Updating dependencies in container..."
+	@echo "⚠️  PSEUDO-TEMPLATE: AI must adapt these commands based on detected framework"
+	$(RUN_APP) pip install --upgrade -r requirements.txt 2>/dev/null || true
+	$(RUN_APP) npm update 2>/dev/null || true
+	$(RUN_APP) composer update 2>/dev/null || true
+	@echo "✅ Dependencies updated (AI should replace with framework-specific commands)"
+
+clean-deps: ## Clean dependency caches (in container)
+	@echo "🧹 Cleaning dependency caches in container..."
+	@echo "⚠️  PSEUDO-TEMPLATE: AI must adapt these commands based on detected framework"
+	$(RUN_APP) rm -rf node_modules __pycache__ .pytest_cache .coverage vendor 2>/dev/null || true
+	$(RUN_APP) find . -name "*.pyc" -delete 2>/dev/null || true
+	$(RUN_APP) npm cache clean --force 2>/dev/null || true
+	$(RUN_APP) composer clear-cache 2>/dev/null || true
+	@echo "✅ Dependency caches cleaned (AI should replace with framework-specific commands)"
+
+dev: dev-setup ## Start development environment
 	docker compose up -d
 
 stop: ## Stop all containers (preserve data)
@@ -51,10 +85,10 @@ rebuild-%: ## 🔄 Rebuild specific container (e.g. make rebuild-redis)
 # === Shell Access ===
 
 sh: ## Quick access to main application container shell (web service)
-	docker compose exec ${APP_CONTAINER:-app} sh
+	$(EXEC_APP) sh
 
 shell: ## Access main application container shell (alias for sh)
-	docker compose exec ${APP_CONTAINER:-app} sh
+	$(EXEC_APP) sh
 
 # === Linting & Code Quality ===
 
@@ -95,25 +129,25 @@ format: ## Format code (prettify/beautify)
 
 # Stack-specific linting targets (to be customized per project)
 lint-check: ## Check code style (no fixes)
-	@echo "📋 Add stack-specific lint check commands here"
-	@echo "Examples:"
-	@echo "  Node.js: docker compose exec linter eslint src/"
-	@echo "  PHP:     docker compose exec linter phpstan analyze"
-	@echo "  Python:  docker compose exec linter flake8 src/"
+	@echo "🔍 Running code quality checks..."
+	@echo "⚠️  PSEUDO-TEMPLATE: AI must adapt these commands based on detected framework"
+	$(EXEC_LINTER) flake8 src/ 2>/dev/null || echo "⚠️ No Python linting"
+	$(EXEC_LINTER) eslint src/ 2>/dev/null || echo "⚠️ No Node.js linting"  
+	$(EXEC_LINTER) phpstan analyse src/ --level=5 2>/dev/null || echo "⚠️ No PHP linting"
 
 lint-autofix: ## Auto-fix code style issues
-	@echo "🔧 Add stack-specific lint fix commands here"
-	@echo "Examples:"
-	@echo "  Node.js: docker compose exec linter eslint src/ --fix"
-	@echo "  PHP:     docker compose exec linter php-cs-fixer fix src/"
-	@echo "  Python:  docker compose exec linter autopep8 --in-place --recursive src/"
+	@echo "🔧 Running code linting with auto-fixes..."
+	@echo "⚠️  PSEUDO-TEMPLATE: AI must adapt these commands based on detected framework"
+	$(EXEC_LINTER) black src/ 2>/dev/null || echo "⚠️ No Python auto-fix"
+	$(EXEC_LINTER) eslint src/ --fix 2>/dev/null || echo "⚠️ No Node.js auto-fix"
+	$(EXEC_LINTER) php-cs-fixer fix src/ --rules=@PSR12 2>/dev/null || echo "⚠️ No PHP auto-fix"
 
 format-code: ## Format/prettify code
-	@echo "✨ Add stack-specific formatting commands here"
-	@echo "Examples:"
-	@echo "  Node.js: docker compose exec linter prettier --write src/"
-	@echo "  PHP:     docker compose exec linter php-cs-fixer fix src/ --rules=@PSR12"
-	@echo "  Python:  docker compose exec linter black src/"
+	@echo "✨ Formatting code..."
+	@echo "⚠️  PSEUDO-TEMPLATE: AI must adapt these commands based on detected framework"
+	$(EXEC_LINTER) black src/ 2>/dev/null || echo "⚠️ No Python formatting"
+	$(EXEC_LINTER) prettier --write src/ 2>/dev/null || echo "⚠️ No Node.js formatting"
+	$(EXEC_LINTER) php-cs-fixer fix src/ --rules=@PSR12 2>/dev/null || echo "⚠️ No PHP formatting"
 
 # === Database Management ===
 
@@ -189,7 +223,7 @@ hello-world: ## 🌍 Validate entire stack is working
 	@docker compose ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}"
 	@echo ""
 	@echo "🔗 Testing connectivity..."
-	@echo "• Traefik Dashboard: http://localhost:8080"
+	@echo "• Traefik Dashboard: https://traefik.$(PROJECT_NAME).localhost"
 	@curl -s -o /dev/null -w "• App HTTPS: %%{http_code} - https://app.$(PROJECT_NAME).localhost\n" -k https://app.$(PROJECT_NAME).localhost || echo "• App HTTPS: ❌ Not responding"
 	@curl -s -o /dev/null -w "• App HTTP: %%{http_code} - http://app.$(PROJECT_NAME).localhost\n" http://app.$(PROJECT_NAME).localhost || echo "• App HTTP: ❌ Not responding"
 	@echo ""
@@ -203,7 +237,7 @@ hello-world: ## 🌍 Validate entire stack is working
 	@echo ""
 	@echo "🚀 Quick access URLs:"
 	@echo "   • App: https://app.$(PROJECT_NAME).localhost"
-	@echo "   • Traefik: http://localhost:8080"
+	@echo "   • Traefik: https://traefik.$(PROJECT_NAME).localhost"
 	@if docker compose ps | grep -q phpmyadmin; then echo "   • phpMyAdmin: https://phpmyadmin.$(PROJECT_NAME).localhost"; fi
 	@if docker compose ps | grep -q adminer; then echo "   • Adminer: https://adminer.$(PROJECT_NAME).localhost"; fi
 	@if docker compose ps | grep -q mongo-express; then echo "   • Mongo Express: https://mongo-express.$(PROJECT_NAME).localhost"; fi

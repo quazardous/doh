@@ -243,7 +243,8 @@ Règle PHP: Toujours php:X.X-fpm comme image finale (simplicité)
 - **Conditional Stages:** Créer stages seulement pour outils détectés
 - **Cherry-Pick Pattern:** COPY --from= pour éviter bloat des base images  
 - **Version Detection:** Utiliser versions officielles actuelles des images
-- **System Tools:** git, supervisor, sudo installés dans main stage
+- **System Tools:** git, sudo installés dans main stage
+- **🚨 COPY Rules:** Only for system daemon configs (mysql, postgresql), NEVER for app code or user-level configs
 
 **Worker/Daemon Detection & Integration:**
 - **Single Container Philosophy:** Web server + workers + daemons in one container via supervisord
@@ -263,11 +264,127 @@ Règle PHP: Toujours php:X.X-fpm comme image finale (simplicité)
 
 ## Core Philosophy
 
+### COPY vs Volume Mount Rules (STRICT)
+
+**🚨 COPY FORBIDDEN for:**
+- Application code (`/app/*` directory)
+- User-level configs (supervisord, workers, app configs)
+- Frontend assets (CSS, JS, HTML)
+- Environment files (`.env`, `settings.py`)
+- Anything owned by non-root users in container
+
+### Build vs Dependencies Rules (DEV OPTIMIZATION)
+
+**🚨 Dependencies NOT in Dockerfile build for development:**
+```dockerfile
+# ❌ FORBIDDEN in dev Dockerfile
+COPY package.json ./
+RUN yarn install             # ❌ Slow rebuild on every dependency change
+
+COPY composer.json ./
+RUN composer install        # ❌ Slow rebuild on every dependency change
+
+COPY requirements.txt ./
+RUN pip install -r requirements.txt  # ❌ Slow rebuild on every dependency change
+```
+
+**✅ Dependencies managed post-build via Makefile:**
+```dockerfile
+# ✅ Dockerfile - Runtime + system tools only
+FROM python:3.12-slim
+RUN apt-get update && apt-get install -y build-essential git nodejs npm
+# No dependency installation in build!
+```
+
+```makefile
+# ✅ Makefile - Dependencies post-build examples by stack
+
+# Python/Django Stack
+dev-setup:
+	@echo "Installing Python dependencies..."
+	docker compose run --rm app pip install -r requirements.txt
+	@echo "Installing Node.js dependencies for frontend..."
+	docker compose run --rm app npm install
+	@echo "Running Django migrations..."
+	docker compose run --rm app python manage.py migrate
+
+# PHP/Laravel Stack
+dev-setup:
+	@echo "Installing Composer dependencies..."
+	docker compose run --rm app composer install --no-dev
+	@echo "Installing NPM dependencies..."
+	docker compose run --rm app npm install
+	@echo "Running Laravel migrations..."
+	docker compose run --rm app php artisan migrate
+
+# Node.js Stack
+dev-setup:
+	@echo "Installing NPM dependencies..."
+	docker compose run --rm app npm install
+	@echo "Running database migrations..."
+	docker compose run --rm app npm run migrate
+
+# Common targets
+dev: dev-setup
+	docker compose up
+
+update-deps:
+	@echo "Updating dependencies without rebuild..."
+	docker compose run --rm app pip install -r requirements.txt
+	docker compose run --rm app npm install
+
+clean-deps:
+	@echo "Cleaning dependency caches..."
+	docker compose run --rm app rm -rf node_modules __pycache__ .pytest_cache
+	
+rebuild: clean-deps dev-setup
+	@echo "Force rebuilding containers..."
+	docker compose build --no-cache
+```
+
+**Benefits:**
+- **Fast Docker builds** - Only runtime changes trigger rebuild (seconds vs minutes)
+- **Fast dependency updates** - `make update-deps` without container rebuild
+- **Instant code changes** - Volume mounts for immediate feedback
+- **Better caching** - System tools vs application dependencies separation  
+- **Flexible workflows** - `make dev`, `make update-deps`, `make clean-deps`
+
+**✅ COPY ACCEPTABLE ONLY for:**
+- System daemon configs (`/etc/mysql/`, `/etc/postgresql/`)
+- Root-owned system files that NEVER change
+- Binary installations from build stages
+
+**📋 Examples:**
+```dockerfile
+# ❌ FORBIDDEN
+COPY ./docker/supervisord.conf /etc/supervisor/supervisord.conf  # runs under 'app' user
+COPY --chown=${UID}:${GID} . .                                  # application code
+COPY ./src /app/src                                             # application code
+
+# ✅ ACCEPTABLE  
+COPY ./docker/mysql-custom.cnf /etc/mysql/conf.d/              # system daemon config
+COPY --from=node-tools /usr/local/bin/node /usr/local/bin/     # binary installation
+```
+
+**📦 Volume Mount Strategy:**
+```yaml
+# ✅ MANDATORY for all application code
+volumes:
+  - ..:/app                                                     # ALL application code
+  - ./docker/supervisord.conf:/etc/supervisor/supervisord.conf:ro  # user-level configs
+  - ./docker/data/mariadb:/var/lib/mysql                      # data in user-specified directory
+  
+  # Optional: Nginx configs (can be commented for flexibility)
+  # - ./docker/nginx/myapp.conf.template:/etc/nginx/templates/myapp.conf.template:ro
+```
+
 ### Docker-Focused & Pragmatic
 - **Docker as standard** unless explicitly contraindicated
-- **Realistic containers** - avoid over-containerization
-- **Multi-project friendly** - `{service}.{project}.local` domains
-- **Linting containers** - Separate linter containers to avoid version conflicts
+- **Volume mounts mandatory** - COPY forbidden for application code and user-level configs
+- **Single app container** - Embed frontend build in backend container, avoid over-containerization
+- **Multi-project friendly** - `{service}.{project}.localhost` domains with `dev.project={PROJECT_NAME}` labels
+- **Data in user directory** - Database volumes in user-specified folder (./docker/data/ or ./docker-dev/data/)
+- **Linting containers** - Separate linter containers to avoid version conflicts (profile-based)
 
 ### Template-Based Generation
 - Uses templates from `.claude/templates/init-dev/`
@@ -408,18 +525,23 @@ Template Pattern → Generated Reality
 4. **File Generation Process (with Worker Support):**
    ```text
    AI Creates:
-   • ./docker/docker-compose.yml → Django + PostgreSQL + Linter services (single app container)
-   • ./docker/docker-compose.env-docker → Project config with APP_CONTAINER variable
-   • ./docker/Dockerfile → Python 3.12-slim with Django + supervisord
+   • ./docker/docker-compose.yml → Single app container + services (NO separate vue container)
+   • ./docker/docker-compose.env-docker → Project config with proper volume mounts
+   • ./docker/Dockerfile → Python 3.12-slim with Node.js (NO COPY of app code)
    • ./docker/Dockerfile.linter → Separate container with black/flake8/mypy/isort
-   • ./docker/supervisord.conf → Web server + Celery workers configuration
-   • ./docker/Makefile → Enhanced with Django + worker commands + hello-world target
-   • ./requirements.txt → Django 5.0 + psycopg2 + celery + pytest-django + linters
+   • ./docker/supervisord.conf → Web server + Celery workers configuration (volume mounted)
+   • ./docker/Makefile → Enhanced with Django + Vue + worker commands + hello-world target
+   • ./requirements.txt → Django 5.2 + mysqlclient + celery + pytest-django + linters
    • ./docker/traefik.yml-docker → HTTPS routing configuration
    • ./src/hello_world.py → Django Hello World view + management command
    • ./manage.py hello → Console Hello World command + Celery status check
-   • ./INSTADEV.md → Quick start guide with isolated test environment
+   • ./INSTADEV.md → Quick start guide with volume mount architecture
    • ./.env.test → Test configuration (SQLite, in-memory cache, sync queues)
+   
+   Volume Strategy:
+   • ..:/app → ALL application code (Django + Vue.js)
+   • ./docker/data/mariadb:/var/lib/mysql → Data in user-specified directory
+   • ./docker/supervisord.conf:/etc/supervisor/supervisord.conf:ro → Config volume
    ```
 
 **Worker Integration Examples (with Process Groups):**
@@ -464,15 +586,27 @@ Rails + Sidekiq detected → supervisord.conf with:
    📁 Directory: ./docker/
    🌐 Domain: https://app.{project}.localhost
    
+   ❓ CONFIRMATION REQUIRED:
    ✅ Proceed with this configuration? (y/N)
+   
+   Options:
+   - y: Continue with proposed stack
+   - N: Abort operation (default)
+   - PostgreSQL: Change to PostgreSQL instead
+   - React: Change to React instead of Vue  
+   - custom: Specify your modifications
    ```
+   
+   **🚨 CRITICAL: The AI must STOP and WAIT for user response. Never proceed without explicit confirmation!**
 
 ## Command Options
 
 ### Interactive Mode (Default)
 ```bash
 /doh:init-dev "Python Django with PostgreSQL in ./docker directory"
-# → Shows brainstormed configuration and waits for user confirmation
+# → Shows brainstormed configuration and WAITS for user confirmation
+# → User MUST respond: y/N, custom modifications, or abort
+# → NEVER proceeds without explicit user approval
 ```
 
 ### Non-Interactive Mode (For Agents)
@@ -480,6 +614,7 @@ Rails + Sidekiq detected → supervisord.conf with:
 /doh:init-dev --non-interactive "Python Django with PostgreSQL in ./docker directory"
 # → Proceeds immediately without confirmation prompts
 # → Perfect for automated workflows and agent execution
+# → ONLY use when user explicitly requests non-interactive mode
 ```
 
 ### Detection Mode (Auto-Analyze Existing Project)
@@ -505,8 +640,15 @@ Rails + Sidekiq detected → supervisord.conf with:
 - **Each technology has different official sources** (php.net, python.org, nodejs.org, etc.)
 
 **Mode-Specific Behavior:**
-- **Interactive Mode:** WebSearch + user confirmation for ambiguities
+- **Interactive Mode:** WebSearch + user confirmation for ambiguities + **MANDATORY WAIT for user approval**
 - **Non-Interactive Mode:** Explicit specifications required, abort with explanation if unclear
+
+**🚨 CRITICAL INTERACTIVE MODE RULES:**
+1. **ALWAYS STOP** after showing brainstormed configuration
+2. **NEVER PROCEED** without explicit user confirmation (y/yes)
+3. **DEFAULT TO ABORT** if user doesn't explicitly approve (N is default)
+4. **SUPPORT MODIFICATIONS** - user can request changes to proposed stack
+5. **HANDLE CONFLICTS** - ask user about existing files before overwriting
 
 **AI Advantages:**
 - 🔍 Real-time web research for current best practices
@@ -662,14 +804,21 @@ make hello-world
 
 **Conflict Handling:**
 - **Interactive Mode:** 
-  - Existing docker-compose.yml → Ask user: backup/override/merge/abort
-  - Ambiguous choices → Present brainstormed stack for confirmation
-  - Multiple framework options → Ask user preference
+  - Existing docker-compose.yml → **STOP** and ask user: backup/override/merge/abort
+  - Ambiguous choices → Present brainstormed stack for confirmation and **WAIT**
+  - Multiple framework options → Ask user preference and **WAIT FOR RESPONSE**
+  - **NEVER overwrite** without explicit permission
   
 - **Non-Interactive Mode:**
   - Existing files → Abort with explanation file (./DOH_CONFLICT_REPORT.md)
   - Missing specifications → Abort with requirements file (./DOH_REQUIREMENTS.md)
   - No internet access → Abort with offline instructions
+
+**🚨 IMPLEMENTATION ENFORCEMENT:**
+```text
+WRONG: Show config → Continue immediately → Generate files
+RIGHT: Show config → WAIT for user input → Process response → Then continue
+```
 
 ### 3. Installation Documentation (INITDEV.md)
 
@@ -936,9 +1085,9 @@ make hello-world
 - **Profiles support** - start linters only when needed
 
 ### Multi-Project Support
-- **Domain isolation** via `{service}.{project}.local`
+- **Domain isolation** via `{service}.{project}.localhost`
 - **SSL certificates** with mkcert wildcards
-- **No port conflicts** - everything through Traefik
+- **Configurable ports** - Traefik ports via environment variables to avoid dev machine conflicts
 - **Project namespacing** in all configurations
 
 ### Developer Experience

@@ -1,3 +1,26 @@
+# Python/Django specific dependency management
+
+dev-setup: ## Install Python dependencies (Django + frontend)
+	@echo "📦 Installing Python dependencies in container..."
+	$(RUN_APP) pip install -r requirements.txt
+	@echo "📦 Installing Node.js dependencies for frontend..."
+	$(RUN_APP) npm install
+	@echo "🔄 Running Django migrations..."
+	$(RUN_APP) python manage.py migrate
+	@echo "✅ Python/Django dependencies installed"
+
+update-deps: ## Update dependencies without rebuild
+	@echo "🔄 Updating Python dependencies in container..."
+	$(RUN_APP) pip install --upgrade -r requirements.txt
+	$(RUN_APP) npm update
+	@echo "✅ Dependencies updated"
+
+clean-deps: ## Clean dependency caches (in container)
+	@echo "🧹 Cleaning Python dependency caches..."
+	$(RUN_APP) rm -rf node_modules __pycache__ .pytest_cache .coverage
+	$(RUN_APP) find . -name "*.pyc" -delete
+	@echo "✅ Dependency caches cleaned"
+
 # Python specific linting targets
 
 lint-check: ## Check code style (no fixes)

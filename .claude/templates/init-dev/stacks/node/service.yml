@@ -1,19 +1,22 @@
   app:
     build: 
       context: .
+      dockerfile: ./docker/app/Dockerfile
       args:
         UID: ${UID:-1000}
         GID: ${GID:-1000}
-    volumes:
-      - .:/app
     user: ${UID:-1000}:${GID:-1000}
     environment:
-      - NODE_ENV=development
-      - PROJECT_NAME=${PROJECT_NAME}
+      # Node.js specific environment
+      - NODE_ENV=${NODE_ENV:-development}
+      - DATABASE_URL=${DATABASE_URL}
+    volumes:
+      - .:/app                                    # ALL application code (logs auto-visible in ./var/log/)
+      #- ./docker/supervisord.conf:/etc/supervisor/supervisord.conf:ro  # Process config (if workers needed)
     labels:
       - "traefik.enable=true"
-      - "dev.project={{PROJECT_NAME}}"
-      - "traefik.http.routers.app.rule=Host(`app.{{PROJECT_NAME}}.localhost`)"
+      - "dev.project=${PROJECT_NAME}"
+      - "traefik.http.routers.app.rule=Host(`app.${PROJECT_NAME}.localhost`)"
       - "traefik.http.routers.app.entrypoints=websecure"
       - "traefik.http.routers.app.tls=true"
       - "traefik.http.services.app.loadbalancer.server.port=3000"

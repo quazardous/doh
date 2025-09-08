@@ -1,3 +1,23 @@
+# Node.js specific dependency management
+
+dev-setup: ## Install Node.js dependencies
+	@echo "📦 Installing Node.js dependencies in container..."
+	$(RUN_APP) npm install
+	@echo "🔄 Running database migrations..."
+	$(RUN_APP) npm run migrate
+	@echo "✅ Node.js dependencies installed"
+
+update-deps: ## Update dependencies without rebuild
+	@echo "🔄 Updating Node.js dependencies in container..."
+	$(RUN_APP) npm update
+	@echo "✅ Dependencies updated"
+
+clean-deps: ## Clean dependency caches (in container)
+	@echo "🧹 Cleaning Node.js dependency caches..."
+	$(RUN_APP) rm -rf node_modules .npm _cacache
+	$(RUN_APP) npm cache clean --force
+	@echo "✅ Dependency caches cleaned"
+
 # Node.js specific linting targets
 
 lint-check: ## Check code style (no fixes)
