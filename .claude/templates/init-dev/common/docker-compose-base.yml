@@ -1,0 +1,21 @@
+services:
+  traefik:
+    image: traefik:v3.1
+    command:
+      - "--configFile=/etc/traefik/traefik.yml"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./dynamic.yaml:/etc/traefik/dynamic.yaml:ro
+      - ./docker-dev/certs:/certs:ro
+      - ./docker-dev/logs/traefik:/logs
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080" # dashboard
+    networks:
+      - default
+
+networks:
+  default:
+    driver: bridge

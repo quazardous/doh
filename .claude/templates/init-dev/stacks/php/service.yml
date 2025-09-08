@@ -1,0 +1,34 @@
+  app:
+    build: 
+      context: .
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+    volumes:
+      - .:/app
+    user: ${UID:-1000}:${GID:-1000}
+    environment:
+      - APP_ENV=development
+      - PROJECT_NAME=${PROJECT_NAME}
+    networks:
+      - default
+
+  nginx:
+    image: nginx:1.25-alpine
+    volumes:
+      - .:/app
+      - ./docker-dev/nginx/app.conf.template:/etc/nginx/templates/app.conf.template:ro
+      - ./docker-dev/logs/nginx:/var/log/nginx
+    environment:
+      - PROJECT_NAME=${PROJECT_NAME}
+      - SITE_BASE_DOMAIN=${PROJECT_NAME}.localhost
+    depends_on: 
+      - app
+    labels:
+      - "traefik.enable=true"
+      - "dev.project={{PROJECT_NAME}}"
+      - "traefik.http.routers.app.rule=Host(`app.{{PROJECT_NAME}}.localhost`)"
+      - "traefik.http.routers.app.entrypoints=websecure"
+      - "traefik.http.routers.app.tls=true"
+    networks:
+      - default

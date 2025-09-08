@@ -1,0 +1,44 @@
+# Python specific linting targets
+
+lint-check: ## Check code style (no fixes)
+	@echo "🔍 Python linting checks..."
+	docker compose exec linter flake8 src/
+	docker compose exec linter pylint src/
+	docker compose exec linter mypy src/
+	docker compose exec linter bandit -r src/
+
+lint-autofix: ## Auto-fix code style issues
+	@echo "🔧 Python auto-fixes..."
+	docker compose exec linter autopep8 --in-place --recursive src/
+	docker compose exec linter isort src/
+	docker compose exec linter black src/
+
+format-code: ## Format/prettify code  
+	@echo "✨ Python formatting..."
+	docker compose exec linter black src/
+	docker compose exec linter isort src/
+
+# Python specific targets
+pip-install: ## Install pip dependencies in linter container
+	docker compose exec linter pip install -r requirements.txt
+
+pip-outdated: ## Check for outdated packages
+	docker compose exec linter pip list --outdated
+
+pip-upgrade: ## Upgrade packages (use with caution)
+	docker compose exec linter pip install --upgrade -r requirements.txt
+
+type-check: ## Run mypy type checking
+	docker compose exec linter mypy src/
+
+security-check: ## Run security audit
+	docker compose exec linter bandit -r src/
+	docker compose exec linter safety check
+
+pytest: ## Run pytest tests
+	docker compose exec linter pytest tests/
+
+coverage: ## Generate code coverage report
+	docker compose exec linter coverage run -m pytest tests/
+	docker compose exec linter coverage report
+	docker compose exec linter coverage html

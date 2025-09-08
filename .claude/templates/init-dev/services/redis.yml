@@ -1,0 +1,6 @@
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - ./docker-dev/data/redis:/data
+    networks:
+      - default

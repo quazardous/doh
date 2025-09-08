@@ -1,0 +1,22 @@
+  app:
+    build: 
+      context: .
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+    volumes:
+      - .:/app
+    user: ${UID:-1000}:${GID:-1000}
+    environment:
+      - DJANGO_ENV=development
+      - PROJECT_NAME=${PROJECT_NAME}
+      - PYTHONPATH=/app
+    labels:
+      - "traefik.enable=true"
+      - "dev.project={{PROJECT_NAME}}"
+      - "traefik.http.routers.app.rule=Host(`app.{{PROJECT_NAME}}.localhost`)"
+      - "traefik.http.routers.app.entrypoints=websecure"
+      - "traefik.http.routers.app.tls=true"
+      - "traefik.http.services.app.loadbalancer.server.port=8000"
+    networks:
+      - default

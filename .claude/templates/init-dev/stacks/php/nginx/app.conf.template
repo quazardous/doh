@@ -1,0 +1,38 @@
+server {
+    listen 80;
+    server_name ${SITE_BASE_DOMAIN};
+    
+    root /app/public;
+    index index.php index.html;
+    client_max_body_size 100M;
+
+    # Static files
+    location ~* \.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        try_files $uri =404;
+    }
+
+    # PHP applications
+    location / {
+        try_files $uri /index.php$is_args$args;
+    }
+
+    location ~ ^/index\.php(/|$) {
+        fastcgi_split_path_info ^(.+\.php)(/.*)$;
+        include fastcgi_params;
+        fastcgi_pass app:9000;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        fastcgi_param DOCUMENT_ROOT $realpath_root;
+        internal;
+    }
+
+    # Deny access to .htaccess files
+    location ~ /\.ht {
+        deny all;
+    }
+
+    # Logs with project-specific naming
+    access_log /var/log/nginx/${PROJECT_NAME}_access.log;
+    error_log /var/log/nginx/${PROJECT_NAME}_error.log;
+}

@@ -1,0 +1,28 @@
+FROM node:20-alpine
+
+# Install common linting tools globally
+RUN npm install -g \
+    eslint \
+    prettier \
+    @typescript-eslint/parser \
+    @typescript-eslint/eslint-plugin \
+    eslint-plugin-react \
+    eslint-plugin-vue \
+    stylelint \
+    stylelint-config-standard \
+    jshint \
+    typescript
+
+ARG UID=1000
+ARG GID=1000
+
+# Create user matching host UID/GID
+RUN deluser --remove-home node \
+    && addgroup -g ${GID} linter \
+    && adduser -u ${UID} -G linter -s /bin/bash -D linter
+
+WORKDIR /app
+USER linter
+
+# Keep container running
+CMD ["tail", "-f", "/dev/null"]

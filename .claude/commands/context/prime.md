@@ -70,7 +70,7 @@ For each file loaded:
 After loading context files:
 - Run: `git ls-files --others --exclude-standard | head -20` to see untracked files
 - Read `README.md` if it exists for additional project information
-- Check for `.env.example` or similar for environment setup needs
+- Check for `docker-compose.env` or similar for environment setup needs
 
 ### 4. Error Recovery
 

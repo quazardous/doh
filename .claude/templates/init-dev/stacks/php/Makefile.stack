@@ -1,0 +1,36 @@
+# PHP specific linting targets
+
+lint-check: ## Check code style (no fixes)
+	@echo "🔍 PHP linting checks..."
+	docker compose exec linter phpstan analyze src/ --level=7
+	docker compose exec linter phpcs src/ --standard=PSR12
+	docker compose exec linter phpmd src/ text cleancode,codesize,controversial,design,naming,unusedcode
+
+lint-autofix: ## Auto-fix code style issues  
+	@echo "🔧 PHP auto-fixes..."
+	docker compose exec linter phpcbf src/ --standard=PSR12
+	docker compose exec linter php-cs-fixer fix src/ --rules=@PSR12
+
+format-code: ## Format/prettify code
+	@echo "✨ PHP formatting..."
+	docker compose exec linter php-cs-fixer fix src/ --rules=@PSR12,@Symfony
+	docker compose exec linter phpcbf src/ --standard=PSR12
+
+# PHP specific targets
+composer-install: ## Install composer dependencies in linter container
+	docker compose exec linter composer install
+
+composer-update: ## Update composer packages
+	docker compose exec linter composer update
+
+composer-validate: ## Validate composer.json
+	docker compose exec linter composer validate --strict
+
+security-check: ## Run security audit
+	docker compose exec linter composer audit
+
+phpunit: ## Run PHPUnit tests
+	docker compose exec linter phpunit tests/
+
+coverage: ## Generate code coverage report
+	docker compose exec linter phpunit --coverage-html coverage/

@@ -1,0 +1,33 @@
+# Node.js specific linting targets
+
+lint-check: ## Check code style (no fixes)
+	@echo "🔍 Node.js linting checks..."
+	docker compose exec linter eslint src/
+	docker compose exec linter npm audit --audit-level=moderate
+
+lint-autofix: ## Auto-fix code style issues
+	@echo "🔧 Node.js auto-fixes..."
+	docker compose exec linter eslint src/ --fix
+	docker compose exec linter npm audit fix
+
+format-code: ## Format/prettify code
+	@echo "✨ Node.js formatting..."
+	docker compose exec linter prettier --write src/
+	docker compose exec linter prettier --write package.json
+
+# Node.js specific targets
+npm-install: ## Install npm dependencies in linter container
+	docker compose exec linter npm install
+
+npm-outdated: ## Check for outdated packages
+	docker compose exec linter npm outdated
+
+npm-update: ## Update packages (interactive)
+	docker compose exec linter npm update
+
+type-check: ## Run TypeScript type checking (if using TypeScript)
+	docker compose exec linter npx tsc --noEmit
+
+security-check: ## Run security audit
+	docker compose exec linter npm audit
+	docker compose exec linter npx audit-ci --moderate

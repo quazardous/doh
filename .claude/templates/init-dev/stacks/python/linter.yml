@@ -1,0 +1,16 @@
+  linter:
+    build:
+      context: .
+      dockerfile: Dockerfile.linter
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+    volumes:
+      - .:/app
+    user: ${UID:-1000}:${GID:-1000}
+    command: tail -f /dev/null  # Keep container running
+    profiles: ["tools"]  # Only start when specifically requested
+    environment:
+      - PYTHONPATH=/app
+    networks:
+      - default

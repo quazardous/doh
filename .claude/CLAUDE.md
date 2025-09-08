@@ -25,6 +25,23 @@ Using the test-runner agent ensures:
 
 Use `api.sh` for DOH library functions and `helper.sh` for user commands when needed. See [CLAUDE.md](CLAUDE.md) for complete usage patterns and examples.
 
+## Docker Commands
+
+**CRITICAL**: Always export UID/GID before Docker commands to avoid permission issues:
+
+```bash
+# Single command (UID is already defined in bash)
+export UID && export GID=$(id -g) && docker compose up -d
+
+# Multiple commands  
+export UID
+export GID=$(id -g)
+docker compose build
+docker compose up -d
+```
+
+See [.claude/rules/docker-permissions.md](.claude/rules/docker-permissions.md) for complete Docker usage patterns.
+
 ## Philosophy
 
 ### Error Handling

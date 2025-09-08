@@ -1,0 +1,42 @@
+FROM php:8.2-cli
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    wget \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install PHP extensions needed for linting tools
+RUN docker-php-ext-install pdo_mysql mbstring
+
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Install global linting tools
+RUN composer global require \
+    squizlabs/php_codesniffer \
+    phpmd/phpmd \
+    phpstan/phpstan \
+    friendsofphp/php-cs-fixer \
+    overtrue/phplint \
+    && echo 'export PATH="$PATH:$HOME/.composer/vendor/bin"' >> ~/.bashrc
+
+ARG UID=1000
+ARG GID=1000
+
+# Create user matching host UID/GID
+RUN groupadd -g ${GID} linter \
+    && useradd -u ${UID} -g ${GID} -m -s /bin/bash linter
+
+# Copy composer config to new user
+RUN cp -r /root/.composer /home/linter/ \
+    && chown -R linter:linter /home/linter/.composer \
+    && echo 'export PATH="$PATH:$HOME/.composer/vendor/bin"' >> /home/linter/.bashrc
+
+WORKDIR /app
+USER linter
+
+# Keep container running
+CMD ["tail", "-f", "/dev/null"]

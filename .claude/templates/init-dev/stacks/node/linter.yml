@@ -1,0 +1,12 @@
+  linter:
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - .:/app
+    user: ${UID:-1000}:${GID:-1000}
+    command: tail -f /dev/null  # Keep container running
+    profiles: ["tools"]  # Only start when specifically requested
+    environment:
+      - NODE_ENV=development
+    networks:
+      - default
