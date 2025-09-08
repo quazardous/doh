@@ -2,13 +2,104 @@
 allowed-tools: Bash, Glob, Grep, LS, Read, Write, Edit, MultiEdit, WebFetch
 ---
 
-# Initialize Development Stack - HOWTO Amélioré pour Dev Docker Efficace
+# Initialize Development Stack - Enhanced Docker Development Guide
 
-Guide AI-assisté pour créer rapidement un environnement Docker de développement moderne et pragmatique. Combine analyse de stack intelligente + templates DOH + recherche web des best practices actuelles + validation complète.
+AI-assisted guide to rapidly create modern and pragmatic Docker development environments. Combines intelligent stack analysis + DOH components + real-time best practices research + comprehensive validation.
 
-> **🎯 OBJECTIF:** Aller plus vite vers une dev Docker efficace avec de bons patterns architecturaux
+> **🎯 OBJECTIVE:** Accelerate efficient Docker development with solid architectural patterns
 > 
-> **🧠 PHILOSOPHIE:** Templates "kitchen" + hints de debug + AI auto-corrective pour réussir même si l'IA ne fait pas parfait du premier coup
+> **🧠 PHILOSOPHY:** Component "kitchen" + debug hints + AI self-correction to succeed even when AI doesn't get it perfect on first try
+
+## Host Prerequisites
+
+**Required on host machine:**
+- **Docker** (Docker Desktop or Docker Engine) - All application dependencies run in containers
+- **Docker Compose** v2+ (usually included with Docker Desktop)
+  - Uses `docker compose` command (not old `docker-compose`)
+  - Version check: `docker compose version`
+- **mkcert** - For local SSL certificates generation
+  - Installation check: `mkcert -version`
+  - First time setup: `mkcert -install`
+- **make** - For running Makefile commands (optional but recommended)
+  - Can manually run docker commands if make unavailable
+- **curl** - For downloading dependencies (usually pre-installed)
+- **git** - For version control
+
+**System requirements:**
+- **Linux/macOS**: Native Docker support
+- **Windows**: 
+  - Windows 10 version 2004+ or Windows 11
+  - WSL2 required (not WSL1)
+  - Docker Desktop with WSL2 backend
+  - Work inside WSL2 terminal, not PowerShell/CMD
+  - File performance best when project files are in WSL2 filesystem (~/projects)
+- **File permissions:** UID/GID must be exported for proper volume permissions
+  - Linux/macOS/WSL2: `export UID && export GID=$(id -g)` before Docker commands
+
+**NOT required on host (handled by Docker containers):**
+- ❌ Python, pip, virtualenv - Runs in Python container
+- ❌ Node.js, npm, yarn - Runs in Node container or app container
+- ❌ PHP, Composer - Runs in PHP container
+- ❌ Database clients - Runs in database containers
+- ❌ Redis, Memcached - Runs in service containers
+- ❌ Any language-specific tools - All in containers
+
+### Automated Installation
+
+A helper script is available to install all host dependencies:
+
+```bash
+# Check available installation script (stable kitchen template)
+.claude/templates/init-dev/common/scripts/install-deps.sh
+```
+
+This script handles:
+- Docker installation using official distribution packages:
+  - Ubuntu/Debian: Official Docker CE repository
+  - Fedora/RHEL/CentOS: Official Docker CE repository  
+  - Arch/Manjaro: Native pacman packages
+  - openSUSE: Native zypper packages
+  - macOS: Homebrew cask
+- mkcert installation with platform-specific methods
+- make and build-essential tools
+- curl installation if missing
+- Automatic Docker service enablement and user group configuration
+
+### Manual Installation
+
+💡 **Docker:**
+- **macOS**: `brew install --cask docker` or Docker Desktop from docker.com
+- **Ubuntu/Debian**: Official Docker repository via apt with docker-ce package
+- **Fedora**: Official Docker repository via dnf with docker-ce package
+- **RHEL/CentOS/Rocky/AlmaLinux**: Official Docker repository via yum
+- **Arch/Manjaro**: `sudo pacman -S docker docker-compose`
+- **openSUSE**: `sudo zypper install docker docker-compose`
+- **Windows** (requires WSL2):
+  1. Enable WSL2: PowerShell as Admin → `wsl --install` → Restart
+  2. Install Docker Desktop with WSL2 engine enabled
+  3. Configure WSL integration in Docker Desktop settings
+  4. Use WSL2 terminal (Ubuntu) for all Docker commands
+
+💡 **mkcert:**
+- **macOS**: `brew install mkcert`
+- **Linux with Homebrew**: `brew install mkcert` (if Linuxbrew installed)
+- **Linux Ubuntu/Debian**: `sudo apt install libnss3-tools` + download from https://dl.filippo.io/mkcert/latest?for=linux/amd64
+- **Linux Arch/Manjaro**: `sudo pacman -S mkcert`
+- **Linux RHEL/Fedora**: `sudo yum install nss-tools` + download binary
+- **Linux openSUSE**: `sudo zypper install mozilla-nss-tools` + download binary
+- **Windows in WSL2**: Use Linux instructions above (Ubuntu recommended)
+- **Windows native** (if needed): `choco install mkcert` or download from GitHub releases
+  - Note: Prefer installing mkcert inside WSL2 for consistency
+
+💡 **make:**
+- **macOS**: `brew install make` or `xcode-select --install`
+- **Linux with Homebrew**: `brew install make` (if Linuxbrew installed)
+- **Linux Ubuntu/Debian**: `sudo apt install build-essential`
+- **Linux Arch/Manjaro**: `sudo pacman -S base-devel`
+- **Linux RHEL/Fedora**: `sudo yum groupinstall "Development Tools"`
+- **Linux openSUSE**: `sudo zypper install make gcc`
+- **Windows in WSL2**: Use Linux instructions above
+- **Windows Git Bash**: Usually included with Git for Windows
 
 ## Usage
 ```
@@ -19,39 +110,39 @@ Guide AI-assisté pour créer rapidement un environnement Docker de développeme
 /doh:init-dev "Python FastAPI microservice with MongoDB"
 ```
 
-## Approche AI + Hints de Debug
+## AI Approach + Debug Hints
 
-⚡ **Command AI-piloté** avec système de hints intégrés pour réussir même si l'IA échoue au premier coup:
+⚡ **AI-driven command** with integrated hint system to succeed even when AI fails on first attempt:
 
-### 🗯 Système de Debug Hints (Nouveauté)
+### 🗯 Debug Hints System (New Feature)
 
-**Philosophy:** Le développeur va **FORCÉMENT** devoir débugger/ajuster, donc on anticipe les problèmes courants:
+**Philosophy:** Developers will **INEVITABLY** need to debug/adjust, so we anticipate common problems:
 
 ```bash
-# Hints automatiquement ajoutés dans les fichiers générés:
+# Hints automatically added to generated files:
 # HINT: If permission denied -> check UID/GID in docker-compose.yml
 # HINT: If build fails -> try 'make clean && make rebuild'
 # HINT: If database connection fails -> check .env DATABASE_URL format
 # HINT: Alternative stack configs at https://github.com/laradock/laradock
 ```
 
-**Types de Hints Intégrés:**
-- 🔧 **Hints de Dépannage:** Problèmes Docker courants (permissions, ports, SSL)
-- 🔄 **Hints d'Alternatives:** Liens vers autres approches si pattern DOH ne convient pas
-- 📚 **Hints de Ressources:** Documentation officielle, exemples communautaires
-- 🚀 **Hints d'Optimisation:** Améliorations performance, sécurité, workflows
+**Types of Integrated Hints:**
+- 🔧 **Troubleshooting Hints:** Common Docker issues (permissions, ports, SSL)
+- 🔄 **Alternative Hints:** Links to other approaches if DOH patterns don't fit
+- 📚 **Resource Hints:** Official documentation, community examples
+- 🚀 **Optimization Hints:** Performance, security, workflow improvements
 
-### 🎯 AI Auto-Correctif
+### 🎯 AI Self-Correction
 
-L'IA teste ses propres générations et se corrige automatiquement:
+AI tests its own generations and self-corrects automatically:
 
-### 1. Stack Analysis avec Debug Hints
+### 1. Stack Analysis with Debug Hints
 
 **Manual Mode** (`/doh:init-dev "Python Django..."`):
 - Parse natural language description  
 - Identify components from user input
-- 💡 **HINT:** Si description ambiguë → WebSearch "{{framework}} development setup 2024" pour clarifier
-- 💡 **HINT ALTERNATIVE:** Si pas satisfait → essayer Detection Mode: `/doh:init-dev --detect`
+- 💡 **HINT:** If description ambiguous → WebSearch "{{framework}} development setup 2024" to clarify
+- 💡 **HINT ALTERNATIVE:** If unsatisfied → try Detection Mode: `/doh:init-dev --detect`
 
 **Detection Mode** (`/doh:init-dev --detect`):
 - **File Analysis:** Examine existing project files for technology indicators
@@ -62,7 +153,7 @@ L'IA teste ses propres générations et se corrige automatiquement:
   Cargo.toml → Rust stack
   go.mod → Go stack
   ```
-  💡 **HINT:** Si détection échoue → vérifier extensions: `.py`, `.js`, `.php` dans `/src` ou `/app`
+  💡 **HINT:** If detection fails → check extensions: `.py`, `.js`, `.php` in `/src` or `/app`
   💡 **HINT RESSOURCE:** Documentation patterns https://12factor.net/config
   
 - **Dependency Analysis:** Parse dependency files for framework detection
@@ -71,74 +162,168 @@ L'IA teste ses propres générations et se corrige automatiquement:
   express in package.json → Express.js framework
   laravel/framework in composer.json → Laravel framework
   ```
-  💡 **HINT DEBUG:** Si framework pas détecté → check versions dans requirements.txt/package.json
-  💡 **HINT ALTERNATIVE:** Override manuel: `/doh:init-dev "Force Django avec PostgreSQL"`
+  💡 **HINT DEBUG:** If framework not detected → check versions in requirements.txt/package.json
+  💡 **HINT ALTERNATIVE:** Manual override: `/doh:init-dev "Force Django avec PostgreSQL"`
   
 - **README Analysis:** Extract technology mentions and setup instructions
 - **Existing Docker Analysis:** Check current docker-compose.yml for services
 - **Database Detection:** Look for database connection configs and migrations
-  💡 **HINT:** Si DB pas détectée → regarder dans `settings.py`, `config/database.php`, `.env.example`
+  💡 **HINT:** If DB not detected → look in `settings.py`, `config/database.php`, `.env.example`
 
 ### 2. Cherry-Pick Templates avec Fallback Hints
 - Analyze `.claude/templates/init-dev/` for relevant inspiration
 - Select appropriate base templates (common/, stacks/, services/)
 - Adapt template patterns to detected/requested stack
 
-💡 **HINT ARCHITECTURE:** Templates = "kitchen" de départ, PAS solution finale
-💡 **HINT DEBUG:** Si template inadapté → check `.claude/templates/init-dev/stacks/{{your-framework}}/` pour alternatives
-💡 **HINT RESSOURCE:** Inspiration externe: https://github.com/laradock/laradock, https://github.com/dunglas/symfony-docker
-💡 **HINT CUSTOM:** Créer son template dans `.claude/templates/init-dev/stacks/custom/` si besoin récurrent
+💡 **HINT ARCHITECTURE:** Templates = starting kitchen, NOT final solution
+💡 **HINT DEBUG:** If template inadequate → check `.claude/templates/init-dev/stacks/{{your-framework}}/` for alternatives
+💡 **HINT RESOURCE:** External inspiration: https://github.com/laradock/laradock, https://github.com/dunglas/symfony-docker
+💡 **HINT CUSTOM:** Create your template in `.claude/templates/init-dev/stacks/custom/` for recurring needs
 
 ### 3. Research + Hints Ressources (Tech-Adaptive)
 - **Mode Interactif:** WebSearch with tech-specific sources for latest recommendations
 - **Mode Non-Interactif:** Use explicitly specified versions and tools only
 - **Tech-Specific Sources:** Adapt research to technology ecosystem
 
-💡 **HINT PERFORMANCE:** Si WebSearch lent → utiliser cache local ou versions template par défaut
-💡 **HINT OFFLINE:** Si pas d'internet → utiliser `.claude/templates/init-dev/offline-defaults.json`
-💡 **HINT OVERRIDE:** Forcer version spécifique: `"Python 3.11 Django 4.2 avec PostgreSQL 14"`
+💡 **HINT PERFORMANCE:** If WebSearch slow → use local cache or template default versions
+💡 **HINT OFFLINE:** If no internet → use `.claude/templates/init-dev/offline-defaults.json`
+💡 **HINT OVERRIDE:** Force specific version: `"Python 3.11 Django 4.2 with PostgreSQL 14"`
 
-**Source Selection by Technology:**
+### Docker Hub API Version Detection (Primary Source)
+
+**API Endpoint Pattern:**
 ```text
-PHP → WebSearch "PHP 8.3 latest site:php.net" + Docker Hub php:8.3-fpm
-Python → WebSearch "Python 3.12 site:python.org" + PyPI trends + Docker Hub python:3.12-slim  
-Node.js → WebSearch "Node.js LTS site:nodejs.org" + npm registry + Docker Hub node:18-alpine
-Java → WebSearch "OpenJDK latest site:openjdk.org" + Maven Central + Docker Hub openjdk:21
-.NET → WebSearch "dotnet latest site:dotnet.microsoft.com" + NuGet + Docker Hub mcr.microsoft.com/dotnet
-Go → WebSearch "Go latest site:golang.org" + pkg.go.dev + Docker Hub golang:1.21-alpine
-Rust → WebSearch "Rust stable site:rust-lang.org" + crates.io + Docker Hub rust:1.72
-C++ → WebSearch "GCC latest" + vcpkg/Conan + Docker Hub gcc:latest
-Ruby → WebSearch "Ruby stable site:ruby-lang.org" + rubygems.org + Docker Hub ruby:3.2
+Repository search: https://hub.docker.com/v2/search/repositories/?query={image_name}
+Tags retrieval: https://hub.docker.com/v2/repositories/{namespace}/{image_name}/tags/?page_size=50
+Official images: https://hub.docker.com/v2/repositories/library/{image_name}/tags/?page_size=50
 ```
 
-**Framework-Specific Research:**
+**Version Extraction Logic:**
+1. **Fetch latest tags**: Sort by `last_updated` timestamp (most recent first)
+2. **Filter semantic versions**: Prioritize tags matching `vX.Y.Z` or `X.Y.Z` patterns  
+3. **Exclude pre-releases**: Skip `alpha`, `beta`, `rc`, `dev` tags for stable versions
+4. **LTS detection**: For Node.js, prefer `lts-*` variants when available
+5. **Slim variants**: Prefer `-slim`, `-alpine` for smaller image sizes where appropriate
+
+**Implementation Example with Error Handling:**
+```javascript
+// AI extracts version from Docker Hub API response with error handling
+async function getLatestDockerVersion(namespace = 'library', image, retries = 3) {
+  const url = `https://hub.docker.com/v2/repositories/${namespace}/${image}/tags/?page_size=50`;
+  
+  try {
+    const response = await fetch(url);
+    
+    // Handle rate limiting
+    if (response.status === 429) {
+      const retryAfter = response.headers.get('Retry-After') || 60;
+      throw new Error(`Rate limited. Retry after ${retryAfter} seconds`);
+    }
+    
+    if (!response.ok) {
+      throw new Error(`Docker Hub API error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    const versions = data.results
+      .filter(tag => /^v?\d+\.\d+(\.\d+)?(-slim|-alpine)?$/.test(tag.name))
+      .filter(tag => !/(alpha|beta|rc|dev|test)/i.test(tag.name))
+      .sort((a, b) => new Date(b.last_updated) - new Date(a.last_updated))
+      .map(tag => ({
+        version: tag.name,
+        updated: tag.last_updated,
+        size: tag.full_size
+      }));
+
+    return versions[0] || null; // Most recent stable version
+    
+  } catch (error) {
+    if (retries > 0) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return getLatestDockerVersion(namespace, image, retries - 1);
+    }
+    
+    // Fallback to template defaults
+    console.warn(`Docker Hub API failed for ${image}, using fallback`);
+    return getTemplateDefault(image);
+  }
+}
+```
+
+**Fallback Strategy:**
+- **Primary**: Docker Hub API (always up-to-date, official)
+- **Secondary**: WebSearch for best practices refinement only  
+- **Tertiary**: Template defaults from `.claude/templates/init-dev/offline-defaults.json`
+
+**Source Selection by Technology (Docker Hub API Priority):**
+```text
+PHP → Docker Hub API https://hub.docker.com/v2/repositories/library/php/tags/?page_size=50 (primary)
+     → WebSearch "PHP 8.3 best practices site:php.net" (fallback for best practices only)
+Python → Docker Hub API https://hub.docker.com/v2/repositories/library/python/tags/?page_size=50 (primary)
+       → WebSearch "Python development best practices site:python.org" + PyPI trends (fallback for best practices)
+Node.js → Docker Hub API https://hub.docker.com/v2/repositories/library/node/tags/?page_size=50 (primary)  
+        → WebSearch "Node.js development best practices site:nodejs.org" + npm registry (fallback for best practices)
+Java → Docker Hub API https://hub.docker.com/v2/repositories/library/openjdk/tags/?page_size=50 (primary)
+     → WebSearch "OpenJDK best practices site:openjdk.org" + Maven Central (fallback for best practices)
+.NET → Docker Hub API https://hub.docker.com/v2/repositories/microsoft/dotnet/tags/?page_size=50 (primary)
+     → WebSearch "dotnet best practices site:dotnet.microsoft.com" + NuGet (fallback for best practices)
+Go → Docker Hub API https://hub.docker.com/v2/repositories/library/golang/tags/?page_size=50 (primary)
+   → WebSearch "Go development best practices site:golang.org" + pkg.go.dev (fallback for best practices)
+Rust → Docker Hub API https://hub.docker.com/v2/repositories/library/rust/tags/?page_size=50 (primary)
+     → WebSearch "Rust development best practices site:rust-lang.org" + crates.io (fallback for best practices)
+C++ → Docker Hub API https://hub.docker.com/v2/repositories/library/gcc/tags/?page_size=50 (primary)
+    → WebSearch "GCC development best practices" + vcpkg/Conan (fallback for best practices)
+Ruby → Docker Hub API https://hub.docker.com/v2/repositories/library/ruby/tags/?page_size=50 (primary)
+     → WebSearch "Ruby development best practices site:ruby-lang.org" + rubygems.org (fallback for best practices)
+```
+
+**Framework-Specific Research (Best Practices Focus - NO Version Detection):**
 ```text  
-Laravel → WebSearch "Laravel requirements site:laravel.com" + Packagist trends + Queue workers detection
+Laravel → WebSearch "Laravel development best practices site:laravel.com" + Queue workers patterns
          + "Laravel testing best practices APP_ENV" + "Laravel Mix dotenv frontend"
-Django → WebSearch "Django LTS site:djangoproject.com" + PyPI analysis + Celery workers detection
+         + Packagist trends for popular packages only
+Django → WebSearch "Django development best practices site:djangoproject.com" + Celery workers patterns  
          + "Django testing pytest settings" + "Django webpack dotenv integration"
-Rails → WebSearch "Rails current site:rubyonrails.org" + RubyGems trends + Sidekiq workers detection
+         + PyPI trends for popular packages only
+Rails → WebSearch "Rails development best practices site:rubyonrails.org" + Sidekiq workers patterns
         + "Rails test environment configuration" + "Rails webpacker dotenv"
-Spring Boot → WebSearch "Spring Boot latest site:spring.io" + Maven Central + async processing detection
+        + RubyGems trends for popular gems only
+Spring Boot → WebSearch "Spring Boot development best practices site:spring.io" + async processing patterns
               + "Spring Boot test profiles" + "Spring Boot frontend environment variables"
-Express → WebSearch "Express.js best practices" + npm registry trends + worker processes detection
+              + Maven Central trends for popular libraries only
+Express → WebSearch "Express.js development best practices" + worker processes patterns
           + "Node.js testing with dotenv" + "webpack dotenv plugin configuration"
+          + npm registry trends for popular packages only
+
+🚨 IMPORTANT: WebSearch is NO LONGER used for version detection - only for:
+- Development best practices and patterns
+- Framework-specific configuration recommendations  
+- Popular package/library trend analysis
+- Testing and debugging strategies
+- Architectural pattern recommendations
 ```
 
-**Testing Patterns Research:**
+**Testing Patterns Research (Best Practices Only):**
 ```text
 WebSearch "{{framework}} test environment isolation best practices"
-WebSearch "{{framework}} test database configuration in-memory"
-WebSearch "{{framework}} dotenv test environment setup"
-WebSearch "{{framework}} coverage reports configuration"
+WebSearch "{{framework}} test database configuration patterns"  
+WebSearch "{{framework}} dotenv test environment best practices"
+WebSearch "{{framework}} test coverage configuration patterns"
+
+🚨 NOTE: These searches focus on configuration patterns and best practices, 
+         NOT on version detection or dependency resolution.
 ```
 
-**Frontend Dotenv Integration Research:**
+**Frontend Dotenv Integration Research (Best Practices Only):**
 ```text
-WebSearch "webpack dotenv plugin {{framework}}"
-WebSearch "vite environment variables {{framework}}"
-WebSearch "{{framework}} frontend backend environment sync"
-WebSearch "process.env frontend build {{framework}}"
+WebSearch "webpack dotenv plugin best practices {{framework}}"
+WebSearch "vite environment variables best practices {{framework}}"
+WebSearch "{{framework}} frontend backend environment sync patterns"
+WebSearch "frontend build environment variables best practices {{framework}}"
+
+🚨 NOTE: These searches focus on integration patterns and configurations,
+         NOT on tool versions or dependency management.
 ```
 
 **Frontend Dotenv Implementation Patterns:**
@@ -231,59 +416,300 @@ plugins: [
 ]
 ```
 
-**AI Research Pattern:** 
+**AI Research Pattern (Best Practices & Patterns Only):** 
 ```text
-WebSearch "{{framework}} dotenv environment precedence order"
-WebSearch "{{framework}} .env file loading cascade hierarchy"
-WebSearch "{{framework}} production environment configuration"
-WebSearch "{{framework}} docker development setup requirements"
-WebSearch "{{framework}} required system tools dependencies"
+🚨 VERSION DETECTION: Use Docker Hub API exclusively for all versions:
+   - Base images: https://hub.docker.com/v2/repositories/library/{image}/tags/
+   - Service images: https://hub.docker.com/v2/repositories/{org}/{image}/tags/
+
+📚 BEST PRACTICES RESEARCH: Use WebSearch for configuration guidance:
+WebSearch "{{framework}} dotenv environment precedence best practices"
+WebSearch "{{framework}} .env file loading cascade patterns"
+WebSearch "{{framework}} production environment configuration patterns"
+WebSearch "{{framework}} docker development setup best practices"
+WebSearch "{{framework}} required system tools recommendations"
+
+🔧 IMPLEMENTATION PRIORITY:
+1. Docker Hub API → Latest stable versions (primary)
+2. WebSearch → Configuration patterns (secondary)  
+3. Template defaults → Offline fallback (tertiary)
 ```
 
-**Framework-Specific Tool Requirements (AI-Detected):**
+### Dynamic Technology Pairing Strategy
+
+**AI Runtime Association Logic:**
 ```text
-PHP/Laravel/Symfony → composer, git, unzip (for composer dependencies)
-Node.js/Express/Nest → npm/yarn, git, python3 (for native modules compilation)
-Python/Django/FastAPI → pip, git, build-essential, python3-dev (for compiled dependencies)  
-Ruby/Rails → bundler, git, build-essential, ruby-dev (for native gems)
-Go → git, ca-certificates (for module dependencies)
-Java/Spring → maven/gradle, git, openjdk (framework-specific)
-.NET → dotnet CLI, git (for NuGet packages)
+🧠 AI dynamically determines best practices research at execution time:
+
+1. Framework Detection → Statistical Database Pairing:
+   Django detected → PostgreSQL (statistical preference) 
+   → WebSearch "Django PostgreSQL best practices {current_year}"
+
+2. Frontend + Backend Detection → Integration Pattern Research:
+   React + Laravel detected → Inertia.js vs SPA decision
+   → WebSearch "Laravel React integration best practices {current_year}"
+
+3. Worker/Queue Detection → Broker Recommendation:
+   Celery detected → Redis broker (statistical preference)
+   → WebSearch "Django Celery Redis best practices {current_year}"
+
+🚨 KEY PRINCIPLE: Let AI make fresh associations at runtime based on:
+- Current ecosystem trends (via WebSearch)
+- Project-specific context (detected files/patterns)
+- Statistical preferences (hardcoded fallbacks only)
+- Community adoption metrics (real-time research)
+
+NO HARDCODED PAIRINGS - Let AI be smart and current!
 ```
+
+### Technology Association Logic & Best Practices vs Pitfalls
+
+**Multi-Technology Stack Best Practices:**
+```text
+🎯 GOOD PRACTICES (Statistical Winners):
+
+✅ Laravel + Vue.js + MySQL + Redis:
+   → WebSearch "Laravel Vue Inertia.js best practices full-stack development"
+   → WebSearch "Laravel Redis sessions cache queue best practices"
+   → Strong ecosystem integration, official support
+
+✅ Django + React + PostgreSQL + Celery:
+   → WebSearch "Django React DRF best practices API development"  
+   → WebSearch "Django Celery PostgreSQL best practices async tasks"
+   → Mature patterns, excellent documentation
+
+✅ Node.js + React + MongoDB + Redis:
+   → WebSearch "Node.js React Next.js best practices full-stack JavaScript"
+   → WebSearch "Node.js MongoDB Redis best practices session management"
+   → JavaScript ecosystem consistency
+
+✅ Spring Boot + Angular + PostgreSQL + RabbitMQ:
+   → WebSearch "Spring Boot Angular best practices enterprise development"
+   → WebSearch "Spring Boot RabbitMQ best practices message processing"
+   → Enterprise-grade stability
+
+⚠️ PITFALLS TO AVOID (Anti-Patterns):
+
+❌ Laravel + Angular (Framework Conflict):
+   → Problem: Laravel Blade vs Angular templating conflicts
+   → Better: Laravel API + Angular SPA OR Laravel + Vue.js
+
+❌ Django + PHP Frontend Tools:
+   → Problem: Python/PHP tooling conflicts, different ecosystems
+   → Better: Django + React/Vue OR PHP + Vue.js
+
+❌ Node.js + MySQL + Synchronous Operations:
+   → Problem: Blocking operations kill Node.js performance
+   → Better: Node.js + MongoDB OR Node.js + PostgreSQL with async/await
+
+❌ Spring Boot + MongoDB + Complex Joins:
+   → Problem: MongoDB lacks SQL joins, Spring Data limitations
+   → Better: Spring Boot + PostgreSQL OR Node.js + MongoDB
+
+❌ Multiple Frontend Frameworks (React + Vue + Angular):
+   → Problem: Bundle size explosion, maintenance hell
+   → Better: Pick ONE frontend framework per project
+
+❌ Multiple Databases Without Clear Purpose:
+   → Problem: Data consistency issues, complex migrations
+   → Better: Single primary DB + Redis for caching only
+```
+
+**Association Logic Guidelines:**
+```text
+🔍 DETECTION PRIORITY LOGIC:
+
+1. Framework Detection → Database Recommendation:
+   detect_framework() → statistical_db_pairing() → best_practices_research()
+   
+   Example:
+   Laravel detected → MySQL (60% default) → Laravel MySQL best practices
+   Django detected → PostgreSQL (70% default) → Django PostgreSQL best practices
+
+2. Frontend Detection + Backend → Integration Patterns:
+   detect_frontend() + detect_backend() → integration_research()
+   
+   Example:
+   React + Laravel → Inertia.js patterns research
+   Vue + Django → DRF + Vue SPA patterns research
+
+3. Worker/Queue Detection → Broker Recommendation:
+   detect_workers() → statistical_broker_pairing() → configuration_research()
+   
+   Example:
+   Celery detected → Redis broker (80% default) → Django Celery Redis best practices
+   Laravel Queue → Redis (70%) OR database (30%) → Laravel Queue best practices
+
+🚨 CONFLICT RESOLUTION LOGIC:
+
+When Multiple Technologies Detected:
+1. Check compatibility matrix
+2. Warn about known conflicts  
+3. Suggest alternative combinations
+4. Research integration patterns for chosen stack
+
+Example Conflict Resolution:
+```javascript
+if (framework === 'Laravel' && frontend === 'Angular') {
+  warn('Laravel + Angular has templating conflicts')
+  suggest('Consider: Laravel API + Angular SPA OR Laravel + Vue.js')
+  research('Laravel SPA API development best practices')
+}
+
+if (database === 'MongoDB' && framework === 'Spring Boot' && complex_queries) {
+  warn('MongoDB + Spring Boot not optimal for complex joins')
+  suggest('Consider: PostgreSQL + Spring Boot OR Node.js + MongoDB')
+  research('Spring Boot PostgreSQL JPA best practices')
+}
+```
+
+🎯 INTEGRATION PATTERN DETECTION:
+
+SPA (Single Page Application) Pattern:
+Backend detected + Frontend detected → API-first architecture
+→ WebSearch "{backend} REST API best practices {frontend} integration"
+
+Full-Stack Framework Pattern:  
+Laravel/Django/Rails detected → Server-rendered with frontend integration
+→ WebSearch "{framework} frontend integration best practices"
+
+Microservices Pattern:
+Multiple services detected → Container orchestration needed
+→ WebSearch "{framework} microservices Docker best practices"
+
+JAMstack Pattern:
+Static generator + API detected → CDN + serverless patterns  
+→ WebSearch "JAMstack best practices {detected_stack} deployment"
+```
+
+**Smart Default Selection Logic:**
+```text
+🧠 AI DECISION TREE:
+
+Language Detected → Framework → Database → Frontend → Tools
+     ↓                ↓          ↓          ↓         ↓
+   Python    →    Django   → PostgreSQL → React  → pytest + black
+     ↓                ↓          ↓          ↓         ↓
+Statistics:        70%        70%        40%       90%
+
+PHP       →    Laravel  →    MySQL   →   Vue    → PHPUnit + CS-Fixer  
+     ↓                ↓          ↓          ↓         ↓
+Statistics:        80%        60%        70%       85%
+
+Node.js   →    Express  → PostgreSQL → React  → Jest + ESLint
+     ↓                ↓          ↓          ↓         ↓  
+Statistics:        60%        40%        80%       90%
+
+Each decision includes:
+- Statistical confidence level
+- Community adoption metrics  
+- Best practices research triggers
+- Known pitfall warnings
+```
+
+**Framework-Specific Tool Requirements (AI-Detected via WebSearch):**
+
+**🔍 DISCOVERY VIA WEBSEARCH:**
+AI uses WebSearch to discover satellite tools specific to each technology:
+- `"Django development requirements tools 2024"` → Discovers pip, python3-dev, libpq-dev
+- `"Laravel development requirements tools 2024"` → Discovers composer, php-fpm, unzip
+- `"Go development requirements tools 2024"` → Discovers go mod, ca-certificates
+- `"Rust development requirements tools 2024"` → Discovers cargo, build-essential
+
+**📊 TOOL MATRIX BY TECHNOLOGY:**
+
+| Technology | Dependency Manager | Build Tools | Database Libs | System Tools |
+|-------------|------------------|-------------|---------------|---------------|
+| **PHP** (Laravel/Symfony) | `composer` | `git, unzip` | `php-mysql, php-pgsql` | `php-fpm, nginx` |
+| **Python** (Django/FastAPI) | `pip` | `build-essential, python3-dev` | `libpq-dev, libmysqlclient-dev` | `git, curl` |
+| **Node.js** (Express/Nest) | `npm/yarn` | `python3, build-essential` | `mysql2, pg` (via npm) | `git, curl` |
+| **Go** | `go mod` | `git, ca-certificates` | Drivers via go mod | `git, curl` |
+| **Rust** | `cargo` | `build-essential, gcc` | Crates via cargo | `git, curl` |
+| **Ruby** (Rails) | `bundler/gem` | `build-essential, ruby-dev` | `libpq-dev, libmysqlclient-dev` | `git, curl` |
+| **Java** (Spring) | `maven/gradle` | `openjdk, git` | JDBC via maven | `git, curl` |
+| **.NET** | `dotnet` | `git` | NuGet packages | `git, curl` |
+
+**🚨 CRITICAL RULE:** Each technology has its own tools - do not mix between technologies.
 
 **Framework Tool Cascade Installation (AI-Adaptive):**
 
 **Multi-Stage Pattern for Tool Cherry-Picking:**
 ```dockerfile
-# AI détecte stack → génère stages appropriés
-FROM node:20 AS node-tools         # Si frontend détecté  
-FROM composer:2 AS composer-tools   # Si PHP détecté
-FROM python:3.12 AS python-tools    # Si Python détecté
+# AI detects stack → generates appropriate stages according to technology
+FROM node:20 AS node-tools         # If frontend detected (Vue.js, React, Angular)
+FROM composer:2 AS composer-tools   # 🚨 UNIQUEMENT SI PHP DÉTECTÉ (Laravel, Symfony)
+FROM python:3.12 AS python-tools    # If Python detected (Django, FastAPI, Flask)
 
-FROM php:8.3-fpm  # PHP final image par défaut
+FROM php:8.3-fpm  # PHP final image (exemple pour stack PHP)
 
-# Cherry-pick Node.js tools (AI-conditionnel)
+# Cherry-pick Node.js tools (AI-conditionnel - frontend frameworks)
 COPY --from=node-tools /usr/local/lib/node_modules /usr/local/lib/node_modules
 COPY --from=node-tools /usr/local/bin/node /usr/local/bin/node
 RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm
 
-# Cherry-pick Composer (AI-conditionnel)
+# Cherry-pick Composer (🚨 UNIQUEMENT POUR PHP - Laravel/Symfony/etc.)
 COPY --from=composer-tools /usr/bin/composer /usr/bin/composer
 
-# Système dependencies (AI-détectées)
+# System dependencies (AI-detected according to framework)
 RUN apt-get update && apt-get install -y git sudo supervisor unzip
+```
+
+**Alternative Example for Python Stack:**
+```dockerfile
+# AI détecte stack Python → génère stages appropriés
+FROM node:20 AS node-tools         # If frontend detected (Vue.js with Django)
+FROM python:3.12 AS python-tools    # Pour Python/Django stack
+
+FROM python:3.12-slim  # Python final image pour Django
+
+# Cherry-pick Node.js tools (pour Vue.js frontend)
+COPY --from=node-tools /usr/local/lib/node_modules /usr/local/lib/node_modules
+COPY --from=node-tools /usr/local/bin/node /usr/local/bin/node
+RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm
+
+# 🚨 PAS DE COMPOSER - car Python n'utilise pas Composer (outil PHP)
+# Dependencies Python installées via pip APRÈS build (post-build pattern)
+
+# Système dependencies pour Python
+RUN apt-get update && apt-get install -y build-essential git python3-dev libpq-dev
 ```
 
 **AI Stack Detection → Base Image Strategy:**
 ```text
-Laravel/Symfony + frontend → FROM composer:2 + FROM node:20 → php:8.3-fpm
-Laravel/Symfony seul → FROM composer:2 → php:8.3-fpm
-Django + React → FROM python:3.12 + FROM node:20 → python:3.12-slim
-Django seul → FROM python:3.12-slim
-Rails + Webpack → FROM ruby:3.2 + FROM node:20 → ruby:3.2-slim
-Node.js pur → FROM node:20-alpine (pas de multi-stage)
+📊 STRATEGY BY DETECTED TECHNOLOGY:
 
-Règle PHP: Toujours php:X.X-fpm comme image finale (simplicité)
+PHP (Laravel/Symfony):
+├── Frontend détecté → FROM composer:2 + FROM node:20 → php:8.3-fpm
+└── Backend seul → FROM composer:2 → php:8.3-fpm
+
+Python (Django/FastAPI):  
+├── Frontend détecté → FROM node:20 → python:3.12-slim
+└── Backend seul → FROM python:3.12-slim
+
+Node.js (Express/Nest):
+└── Pur → FROM node:20-alpine (pas de multi-stage nécessaire)
+
+Go:
+├── Frontend détecté → FROM node:20 → golang:1.21-alpine  
+└── Backend seul → FROM golang:1.21-alpine
+
+Rust:
+├── Frontend détecté → FROM node:20 → rust:1.70-slim
+└── Backend seul → FROM rust:1.70-slim
+
+Ruby (Rails):
+├── Frontend détecté → FROM node:20 → ruby:3.2-slim
+└── Backend seul → FROM ruby:3.2-slim
+
+Java (Spring):
+├── Frontend détecté → FROM node:20 → openjdk:21-slim
+└── Backend seul → FROM openjdk:21-slim
+
+.NET:
+├── Frontend détecté → FROM node:20 → mcr.microsoft.com/dotnet/sdk:8.0
+└── Backend seul → FROM mcr.microsoft.com/dotnet/sdk:8.0
+
+🚨 RULE: AI selects tools according to detected technology matrix
 ```
 
 **Tool Installation Strategy (Non-Template):**
@@ -305,15 +731,49 @@ Règle PHP: Toujours php:X.X-fpm comme image finale (simplicité)
 - Create project-specific service selection
 - Generate working Hello World for validation
 
-💡 **HINT PERMISSIONS:** Si erreurs 403/permisions → export UID && export GID=$(id -g) avant docker compose
-💡 **HINT PORTS:** Si conflit ports → modifier EXTERNAL_HTTP_PORT/EXTERNAL_HTTPS_PORT dans docker-compose.env
-💡 **HINT SSL:** Si certificats invalides → rm -rf docker/certs/* && make ssl-setup
-💡 **HINT TROUBLESHOOT:** Logs complets: make logs ou docker compose logs -f {{service}}
+💡 **HINT PERMISSIONS:** If 403/permission errors → export UID && export GID=$(id -g) before docker compose
+💡 **HINT PORTS:** If port conflicts → modify EXTERNAL_HTTP_PORT/EXTERNAL_HTTPS_PORT in docker-compose.env  
+💡 **HINT SSL:** If certificates invalid → rm -rf docker/certs/* && make ssl-setup
+💡 **HINT TROUBLESHOOT:** Complete logs: make logs or docker compose logs -f {{service}}
 
-### Directory Customization
-- User can specify directory: "in ./docker" → creates files in `./docker/`
-- Default: `./docker-dev/` (DOH standard)
-- Respects user preference while maintaining DOH patterns
+### Directory Customization & Container Organization
+
+**🚨 IMPÉRATIF**: Docker Compose files at project root + container-organized structure:
+
+- **docker-compose.yml**: ALWAYS at project root (context: . works correctly)
+- **docker-compose.env**: ALWAYS at project root (same level as docker-compose.yml)
+- User can specify container directory: "in ./docker" → creates structure in `./docker/app/`, `./docker/traefik/`
+- Default: `./docker-dev/` (DOH standard) → creates structure in `./docker-dev/app/`, `./docker-dev/traefik/`
+- **MANDATORY structure**: Each container gets its own sub-folder with proper build context
+
+**Generated Structure (Container-Organized with docker-compose at root)**:
+```
+project-root/                   # Racine du projet
+├── docker-compose.yml          # 🚨 OBLIGATOIRE À LA RACINE - Main orchestration  
+├── docker-compose.env          # 🚨 OBLIGATOIRE À LA RACINE - Environment config
+├── Makefile                    # 🚨 OPTIONNEL À LA RACINE - Development commands
+├── var/                        # 🚨 OPTIONNEL À LA RACINE - Shared runtime data (gitignored)
+│   ├── data/                   # Persistent data volumes
+│   │   └── mariadb/            # Database data persistence
+│   └── log/                    # Runtime logs from all containers
+│       ├── app/                # Application logs
+│       ├── traefik/            # Traefik logs
+│       ├── mariadb/            # Database logs
+│       └── supervisor/         # Process management logs
+└── {user-specified-directory}/ # e.g., docker/, infra/, containers/
+    ├── app/                    # ⭐ MANDATORY - Main application container
+    │   ├── Dockerfile          # Multi-stage build (context: . dockerfile: ./docker/app/Dockerfile)
+    │   ├── supervisord.conf    # Process management
+    │   └── scripts/            # App-specific scripts
+    ├── linter/                 # Code quality container (profile-based)
+    │   └── Dockerfile          # Linting tools (context: . dockerfile: ./docker/linter/Dockerfile)
+    ├── traefik/                # Reverse proxy container
+    │   ├── traefik.yml         # Configuration
+    │   └── certs/              # SSL certificates
+    └── {database}/             # Database container (mariadb/, postgres/, etc.)
+        ├── init/               # Initialization scripts
+        └── conf.d/             # Custom configuration
+```
 
 ## Core Philosophy + Patterns de Debug
 
@@ -326,9 +786,9 @@ Règle PHP: Toujours php:X.X-fpm comme image finale (simplicité)
 - Environment files (`.env`, `settings.py`)
 - Anything owned by non-root users in container
 
-💡 **HINT DEBUG COPY:** Si changements code pas visibles → vérifier volumes dans docker-compose.yml
-💡 **HINT ALTERNATIVE:** Si volume mount problématique → essayer bind mounts ou named volumes
-💡 **HINT PERFORMANCE:** Si volumes lents sur Windows → essayer Docker Desktop WSL2
+💡 **HINT DEBUG COPY:** If code changes not visible → check volumes in docker-compose.yml
+💡 **HINT ALTERNATIVE:** If volume mount problematic → try bind mounts or named volumes
+💡 **HINT PERFORMANCE:** If volumes slow on Windows → try Docker Desktop WSL2
 
 ### Build vs Dependencies Rules + Troubleshooting (DEV OPTIMIZATION)
 
@@ -401,14 +861,14 @@ rebuild: clean-deps dev-setup
 
 **Benefits + Debug Hints:**
 - **Fast Docker builds** - Only runtime changes trigger rebuild (seconds vs minutes)
-  💡 **HINT:** Si build lent → check .dockerignore pour exclure node_modules, .git, var/
+  💡 **HINT:** If build slow → check .dockerignore to exclude node_modules, .git, var/
 - **Fast dependency updates** - `make update-deps` without container rebuild
-  💡 **HINT:** Si update échoue → essayer `make clean-deps` puis `make dev-setup`
+  💡 **HINT:** If update fails → try `make clean-deps` then `make dev-setup`
 - **Instant code changes** - Volume mounts for immediate feedback
-  💡 **HINT:** Si pas de hot-reload → check que le framework supporte (webpack-dev-server, etc.)
+  💡 **HINT:** If no hot-reload → check that framework supports it (webpack-dev-server, etc.)
 - **Better caching** - System tools vs application dependencies separation  
 - **Flexible workflows** - `make dev`, `make update-deps`, `make clean-deps`
-  💡 **HINT:** Si commandes échouent → check que containers sont démarrés: `docker compose ps`
+  💡 **HINT:** If commands fail → check that containers are started: `docker compose ps`
 
 **✅ COPY ACCEPTABLE ONLY for:**
 - System daemon configs (`/etc/mysql/`, `/etc/postgresql/`)
@@ -427,31 +887,63 @@ COPY ./docker/mysql-custom.cnf /etc/mysql/conf.d/              # system daemon c
 COPY --from=node-tools /usr/local/bin/node /usr/local/bin/     # binary installation
 ```
 
-**📦 Volume Mount Strategy:**
+**📦 Volume Mount Strategy (docker-compose.yml à la racine):**
 ```yaml
-# ✅ MANDATORY for all application code
-volumes:
-  - ..:/app                                                     # ALL application code
-  - ./docker/supervisord.conf:/etc/supervisor/supervisord.conf:ro  # user-level configs
-  - ./docker/data/mariadb:/var/lib/mysql                      # data in user-specified directory
-  
-  # Optional: Nginx configs (can be commented for flexibility)
-  # - ./docker/nginx/myapp.conf.template:/etc/nginx/templates/myapp.conf.template:ro
+# 🚨 CRITICAL: docker-compose.yml DOIT être à la racine du projet
+# Context de build: TOUJOURS "." (répertoire courant = racine projet)
+
+services:
+  app:
+    build:
+      context: .                                                     # 🚨 TOUJOURS "." (racine projet)
+      dockerfile: ./docker/app/Dockerfile                           # Chemin depuis racine
+    volumes:
+      - .:/app                                                       # 🚨 Application code (racine → container)
+      - ./docker/app/supervisord.conf:/etc/supervisor/supervisord.conf:ro  # App container configs
+      - ./docker/scripts:/app/scripts:ro                             # Shared container scripts
+      - ./var/log/app:/app/var/log                                  # App logs (racine/var/)
+      - ./var/log/supervisor:/var/log/supervisor                    # Supervisor logs (racine/var/)
+      
+  linter:
+    build:
+      context: .                                                     # 🚨 TOUJOURS "." (racine projet)
+      dockerfile: ./docker/linter/Dockerfile                        # Chemin depuis racine
+    volumes:
+      - .:/app                                                       # Application code for linting
+      
+  traefik:
+    volumes:
+      - ./docker/traefik/traefik.yml:/etc/traefik/dynamic/traefik.yml:ro   # Traefik container configs
+      - ./docker/traefik/certs:/etc/ssl/certs:ro                    # SSL certificates
+      - ./var/log/traefik:/var/log/traefik                          # Traefik logs (racine/var/)
+      
+  mariadb:
+    volumes:
+      - ./var/data/mariadb:/var/lib/mysql                          # Data persistence (racine/var/)
+      - ./docker/mariadb/init:/docker-entrypoint-initdb.d:ro      # MariaDB init scripts
+      - ./docker/mariadb/conf.d:/etc/mysql/conf.d:ro              # MariaDB container configs
+      - ./var/log/mariadb:/var/log/mysql                          # MariaDB logs (racine/var/)
+
+# 🚨 RÈGLES ORGANISATION:
+# ✅ docker-compose.yml           → RACINE PROJET (context: . fonctionne)
+# ✅ Container configs/builds     → ./docker/app/, ./docker/linter/, ./docker/traefik/
+# ✅ Persistent data/logs         → ./var/data/, ./var/log/ (RACINE PROJET)
+# ✅ Application code mount       → . (racine projet → /app dans container)
 ```
 
 ### Docker-Focused & Pragmatic + Debugging
 - **Docker as standard** unless explicitly contraindicated
-  💡 **HINT:** Si Docker pose problème → alternatives: Vagrant, lima, podman, colima
+  💡 **HINT:** If Docker problematic → alternatives: Vagrant, lima, podman, colima
 - **Volume mounts mandatory** - COPY forbidden for application code and user-level configs
-  💡 **HINT:** Si volumes ne marchent pas → check Docker Desktop file sharing settings
+  💡 **HINT:** If volumes don't work → check Docker Desktop file sharing settings
 - **Single app container** - Embed frontend build in backend container, avoid over-containerization
-  💡 **HINT:** Si trop complexe → exemple containers séparés: https://github.com/laradock/laradock
+  💡 **HINT:** If too complex → separate containers example: https://github.com/laradock/laradock
 - **Multi-project friendly** - `{service}.{project}.localhost` domains with `dev.project={PROJECT_NAME}` labels
-  💡 **HINT:** Si domaines marchent pas → check /etc/hosts ou utiliser http://localhost:8080
-- **Data in user directory** - Database volumes in user-specified folder (./docker/data/ ou ./docker-dev/data/)
-  💡 **HINT:** Si data perdue → check que volumes pointent vers bonne directory dans docker-compose.yml
+  💡 **HINT:** If domains don't work → check /etc/hosts or use http://localhost:8080
+- **Data in user directory** - Database volumes in user-specified folder (./var/data/)
+  💡 **HINT:** If data lost → check volumes point to correct directory in docker-compose.yml
 - **Linting containers** - Separate linter containers to avoid version conflicts (profile-based)
-  💡 **HINT:** Si linter échoue → démarrer avec: `docker compose --profile tools up -d linter`
+  💡 **HINT:** If linter fails → start with: `docker compose --profile tools up -d linter`
 
 ### Template-Based Generation
 - Uses templates from `.claude/templates/init-dev/`
@@ -474,20 +966,20 @@ Input: "Python Django with PostgreSQL in ./docker directory"
 
 **AI-Driven Research (Tech-Adaptive Sources) + Fallback Hints:**
 - WebSearch: "Django 2024 best practices development setup site:djangoproject.com"
-  💡 **HINT OFFLINE:** Si WebSearch échoue → utiliser versions dans `.claude/templates/init-dev/defaults/django.json`
+  💡 **HINT OFFLINE:** If WebSearch fails → use versions in `.claude/templates/init-dev/defaults/django.json`
 - WebSearch: "Python Django recommended linters 2024" + PyPI trends analysis
-  💡 **HINT ALTERNATIVE:** Si incertain → utiliser stack standard: black + flake8 + mypy
+  💡 **HINT ALTERNATIVE:** If uncertain → use standard stack: black + flake8 + mypy
 - WebSearch: "Django testing tools pytest vs unittest"
   💡 **HINT RESSOURCE:** Benchmark comparatif: https://pytest-benchmark.readthedocs.io/
 - Tech-specific version detection: python.org + PyPI + Docker Hub python:x.x-slim
-  💡 **HINT DEBUG:** Si versions incompatibles → check compatibility matrix sur docs officielles
+  💡 **HINT DEBUG:** If versions incompatible → check compatibility matrix on official docs
 
 **Template Cherry-Picking + Hints:**
 - Select from `.claude/templates/init-dev/stacks/python/`
 - Check `.claude/templates/init-dev/services/postgres.yml`
 - Adapt `.claude/templates/init-dev/common/Makefile` for Django-specific commands
 
-💡 **HINT DEBUG:** Si template manque → créer depuis `.claude/templates/init-dev/stacks/_generic/`
+💡 **HINT DEBUG:** If template missing → create from `.claude/templates/init-dev/stacks/_generic/`
 💡 **HINT INSPIRATION:** Templates communautaires: awesome-compose, docker-library samples
 
 ### 2. Generate Stack-Specific Configuration + Debug Checkpoints
@@ -496,11 +988,11 @@ Input: "Python Django with PostgreSQL in ./docker directory"
 - Based on research, select optimal linters: `black`, `flake8`, `mypy`, `isort`
   💡 **HINT:** Si linters posent problème → désactiver dans .flake8, mypy.ini temporairement
 - Choose testing framework: `pytest` (most popular in 2024)
-  💡 **HINT ALTERNATIVE:** Si pytest complexe → unittest native Django aussi valide
+  💡 **HINT ALTERNATIVE:** If pytest complex → native Django unittest also valid
 - Determine Django version compatibility with Python version
   💡 **HINT COMPATIBILITY:** Check matrix: https://docs.djangoproject.com/en/stable/releases/
 - Select appropriate database client and ORM migrations strategy
-  💡 **HINT:** Si migration échoue → vérifier DATABASE_URL format dans .env
+  💡 **HINT:** If migration fails → check DATABASE_URL format in .env
 - **Create Framework-Native Console Commands:**
   - Symfony → `src/Command/HelloWorldCommand.php` using Symfony Console Component
   - Laravel → `app/Console/Commands/DohHelloWorld.php` using Artisan
@@ -522,51 +1014,62 @@ Template Pattern → Generated Reality
 
 **Essential Components (Always) + Debug Hints:**
 - ✅ Docker Compose with Traefik routing
-  💡 **HINT:** Si Traefik pas accessible → check ports 8080/443 libres + firewall
+  💡 **HINT:** If Traefik not accessible → check ports 8080/443 free + firewall
   💡 **HINT LOGS:** Logs Traefik dans `./var/log/traefik/` pour debugging routing
 - ✅ SSL certificates via mkcert 
-  💡 **HINT:** Si certificats invalides → `mkcert -install` puis `make ssl-setup`
+  💡 **HINT:** If certificates invalid → `mkcert -install` then `make ssl-setup`
 - ✅ UID/GID permission matching
-  💡 **HINT:** Si permission denied → export UID && export GID=$(id -g) avant commandes
+  💡 **HINT:** If permission denied → export UID && export GID=$(id -g) before commands
 - ✅ Multi-project domain pattern: `app.{project}.localhost`
-  💡 **HINT:** Si domaines marchent pas → utiliser http://localhost direct + ports
+  💡 **HINT:** If domains don't work → use direct http://localhost + ports
 - ✅ Makefile with `dev`, `sh`, `hello-world` targets
-  💡 **HINT:** Si make échoue → installer make: apt install make ou brew install make
+  💡 **HINT:** If make fails → install make: apt install make or brew install make
 - ✅ Working Hello World endpoint + console command
-  💡 **HINT:** Si Hello World échoue → logs détaillés: make logs ou docker compose logs app
-  💡 **HINT LOGS:** Check aussi `./var/log/app/` et `./var/log/traefik/` pour routing
+  💡 **HINT:** If Hello World fails → detailed logs: make logs or docker compose logs app
+  💡 **HINT LOGS:** Also check `./var/log/app/` and `./var/log/traefik/` for routing
 
 **Stack-Specific Components + Debug Hints:**
 - ✅ Linter container with discovered best-practice tools
-  💡 **HINT:** Si linter fail → start container: `docker compose --profile tools up -d linter`
+  💡 **HINT:** If linter fails → start container: `docker compose --profile tools up -d linter`
 - ✅ Testing framework setup with sample test
-  💡 **HINT:** Si tests échouent → check test DB config dans .env.test
+  💡 **HINT:** If tests fail → check test DB config in .env.test
 - ✅ Framework-specific dependencies (requirements.txt, package.json, etc.)
-  💡 **HINT:** Si dépendances cassées → `make clean-deps && make dev-setup`
+  💡 **HINT:** If dependencies broken → `make clean-deps && make dev-setup`
 - ✅ Database service with persistent volumes
-  💡 **HINT:** Si DB connection fail → check `./var/log/mysql/` ou `./var/log/postgres/`
+  💡 **HINT:** If DB connection fails → check `./var/log/mysql/` or `./var/log/postgres/`
 - ✅ Dotenv configuration with security practices
-  💡 **HINT:** Si env vars pas prises → restart containers après changement .env
+  💡 **HINT:** If env vars not loaded → restart containers after .env changes
 - ✅ **Hello World Console Command** - CLI validation tool
-  💡 **HINT:** Si commande fail → `make sh` puis tester manuellement dans container
+  💡 **HINT:** If command fails → `make sh` then test manually in container
 - ✅ **Hello World Web Endpoint** - HTTP server validation
-  💡 **HINT:** Si 404/500 → check routing + logs dans `./var/log/app/`
+  💡 **HINT:** If 404/500 → check routing + logs in `./var/log/app/`
 - ✅ **Supervisord Integration** - Single container for web + workers + daemons
-  💡 **HINT:** Si process crash → `supervisorctl status` + logs dans `./var/log/supervisor/`
+  💡 **HINT:** If process crashes → `supervisorctl status` + logs in `./var/log/supervisor/`
 
-**Directory Structure Created:**
+**Directory Structure Created (Container-Organized):**
 ```
-./docker/                    # User-specified directory
-├── docker-compose.yml       # Main orchestration
-├── docker-compose.env-docker # Template config 
-├── traefik.yml-docker       # Traefik config template
-├── dynamic.yaml-docker      # TLS config template
-├── Makefile                 # Development commands
-├── certs/                   # SSL certificates (gitignored)
-├── data/                    # Database persistence (gitignored)  
-├── logs/                    # Application logs (gitignored)
-└── scripts/
-    └── install-deps.sh      # Dependency installer
+Project Root:
+├── docker-compose.yml       # Main orchestration (ALWAYS at root)
+├── docker-compose.env       # Environment config (ALWAYS at root)
+├── Makefile                 # Development commands (at root)
+├── ./docker/                # User-specified container configs directory
+│   ├── scripts/             # Shared scripts for all containers
+│   │   └── install-deps.sh  # Dependency installer (shared)
+│   ├── app/                 # Main application container (MANDATORY)
+│   │   ├── Dockerfile       # App container definition
+│   │   └── supervisord.conf # Process management config
+│   ├── linter/              # Linter container (profile-based)
+│   │   └── Dockerfile       # Linter tools container
+│   ├── traefik/             # Reverse proxy container
+│   │   ├── traefik.yml      # Traefik configuration
+│   │   └── certs/           # SSL certificates (gitignored)
+│   └── mariadb/             # Database container (when applicable)
+│       ├── init/            # Initialization scripts
+│       └── conf.d/          # Custom configuration
+└── var/                     # Runtime data at root (gitignored)
+    ├── data/                # Persistent data volumes
+    │   └── mariadb/         # Database data
+    └── log/                 # Application logs
 ### 4. AI-Driven Stack Implementation
 
 **This is where the magic happens** - the AI analyzes the specific request, researches best practices, and creates a tailored development environment:
@@ -616,26 +1119,30 @@ Template Pattern → Generated Reality
    - Customize `.claude/templates/init-dev/common/Makefile` with Django commands
    - Generate requirements.txt with researched optimal dependencies
 
-4. **File Generation Process (with Worker Support):**
+4. **File Generation Process (Container-Organized Structure):**
    ```text
    AI Creates:
-   • ./docker/docker-compose.yml → Single app container + services (NO separate vue container)
-   • ./docker/docker-compose.env-docker → Project config with proper volume mounts
-   • ./docker/Dockerfile → Python 3.12-slim with Node.js (NO COPY of app code)
-   • ./docker/Dockerfile.linter → Separate container with black/flake8/mypy/isort
-   • ./docker/supervisord.conf → Web server + Celery workers configuration (volume mounted)
+   • ./docker-compose.yml → Single app container + services at project root (NO separate vue container)
+   • ./docker-compose.env → Project config at project root with proper volume mounts
+   • ./docker/app/Dockerfile → Python 3.12-slim with Node.js (NO COPY of app code)
+   • ./docker/app/supervisord.conf → Web server + Celery workers configuration (volume mounted)
+   • ./docker/linter/Dockerfile → Separate linter container with black/flake8/mypy/isort
+   • ./docker/scripts/install-deps.sh → Dependency installation script (shared)
+   • ./docker/traefik/traefik.yml → HTTPS routing configuration
+   • ./docker/mariadb/init/01-create-database.sql → Database initialization
    • ./docker/Makefile → Enhanced with Django + Vue + worker commands + hello-world target
    • ./requirements.txt → Django 5.2 + mysqlclient + celery + pytest-django + linters
-   • ./docker/traefik.yml-docker → HTTPS routing configuration
    • ./src/hello_world.py → Django Hello World view + management command
    • ./manage.py hello → Console Hello World command + Celery status check
-   • ./INSTADEV.md → Quick start guide with volume mount architecture
+   • ./INITDEV.md → Quick start guide with container-organized architecture
    • ./.env.test → Test configuration (SQLite, in-memory cache, sync queues)
    
-   Volume Strategy:
+   Volume Strategy (Container-Aware):
    • ..:/app → ALL application code (Django + Vue.js)
    • ./docker/data/mariadb:/var/lib/mysql → Data in user-specified directory
-   • ./docker/supervisord.conf:/etc/supervisor/supervisord.conf:ro → Config volume
+   • ./docker/app/supervisord.conf:/etc/supervisor/supervisord.conf:ro → Config volume
+   • ./docker/traefik/traefik.yml:/etc/traefik/dynamic/traefik.yml:ro → Traefik config volume
+   • ./docker/traefik/certs:/etc/ssl/certs:ro → SSL certificates volume
    ```
 
 **Worker Integration Examples (with Process Groups):**
@@ -727,17 +1234,17 @@ Rails + Sidekiq detected → supervisord.conf with:
 
 **Not Scriptable Because + Debug Reality:**
 - Stack-specific best practices evolve rapidly
-  💡 **HINT:** Si best practices obsolètes → check date des sources + force update
+  💡 **HINT:** If best practices outdated → check source dates + force update
 - Linting tools and versions change frequently  
   💡 **HINT:** Si linters incompatibles → pins version exactes dans requirements
 - Framework-specific patterns vary significantly
-  💡 **HINT:** Si pattern incohérent → priorité à la doc officielle du framework
+  💡 **HINT:** If pattern inconsistent → priority to official framework docs
 - User preferences (directory structure, tooling) need flexibility
-  💡 **HINT:** Si structure gêne → adapter avec ln -s ou refactor paths
+  💡 **HINT:** If structure problematic → adapt with ln -s or refactor paths
 - Current industry trends require real-time research
-  💡 **HINT OFFLINE:** Si pas d'internet → utiliser defaults.json + mise à jour manuelle
+  💡 **HINT OFFLINE:** If no internet → use defaults.json + manual update
 - **Each technology has different official sources** (php.net, python.org, nodejs.org, etc.)
-  💡 **HINT:** Si sources inaccessibles → utiliser alternatives: GitHub trends, Docker Hub
+  💡 **HINT:** If sources inaccessible → use alternatives: GitHub trends, Docker Hub
 
 **Mode-Specific Behavior:**
 - **Interactive Mode:** WebSearch + user confirmation for ambiguities + **MANDATORY WAIT for user approval**
@@ -752,17 +1259,17 @@ Rails + Sidekiq detected → supervisord.conf with:
 
 **AI Advantages + Debug Reality:**
 - 🔍 Real-time web research for current best practices
-  💡 **HINT:** Si recherche échoue → fallback sur cache local + versions stable
+  💡 **HINT:** If search fails → fallback to local cache + stable versions
 - 🧠 Context-aware decision making based on stack analysis
-  💡 **HINT:** Si décisions incohérentes → override manuel possible via options
+  💡 **HINT:** If decisions inconsistent → manual override possible via options
 - 🎯 Intelligent template cherry-picking and adaptation
-  💡 **HINT:** Si template inadapté → modifier dans `.claude/templates/` pour réutilisation
+  💡 **HINT:** If template inadequate → modify in `.claude/templates/` for reuse
 - 💡 Dynamic version detection and compatibility checking
-  💡 **HINT:** Si versions incompatibles → forcer versions spécifiques dans description
+  💡 **HINT:** If versions incompatible → force specific versions in description
 - 🛠️ Custom Makefile generation with stack-appropriate commands
-  💡 **HINT:** Si Makefile bug → comparer avec `.claude/templates/common/Makefile`
+  💡 **HINT:** If Makefile bug → compare with `.claude/templates/common/Makefile`
 - ✅ **Self-validation via Hello World testing** - never declares success until working
-  💡 **HINT:** Si validation échoue 3 fois → générer rapport d'erreur détaillé
+  💡 **HINT:** If validation fails 3 times → generate detailed error report
 
 ## Testing Strategy - Isolated Test Environment + Debug Patterns
 
@@ -770,11 +1277,11 @@ Rails + Sidekiq detected → supervisord.conf with:
 **The stack templates follow DOH testing principles + Debug Hints:**
 
 1. **Container Level** - Inject test environment variable to app container
-   💡 **HINT:** Si env var pas injectée → check `environment:` section dans docker-compose.yml
+   💡 **HINT:** If env var not injected → check `environment:` section in docker-compose.yml
 2. **Dotenv Level** - Application dotenv system handles environment routing  
-   💡 **HINT:** Si routing fail → vérifier cascade .env → .env.test dans app
+   💡 **HINT:** If routing fails → check cascade .env → .env.test in app
 3. **Makefile Level** - Provide convenient test commands with proper env vars
-   💡 **HINT:** Si tests fail → tester manuellement: `docker compose exec -e APP_ENV=testing app pytest`
+   💡 **HINT:** If tests fail → test manually: `docker compose exec -e APP_ENV=testing app pytest`
 
 **Stack-Specific Test Variables:**
 ```bash
@@ -787,13 +1294,13 @@ Node.js:        NODE_ENV=test            # Routes to test config
 
 **Generated Files + Debug Locations:**
 - **`.env.test`** template with test-optimized configuration
-  💡 **HINT:** Si config test bizarre → comparer avec .env pour comprendre overrides
+  💡 **HINT:** If test config weird → compare with .env to understand overrides
 - **Makefile** test commands with environment injection
-  💡 **HINT:** Si commande test échoue → run manuellement pour voir erreur exacte
+  💡 **HINT:** If test command fails → run manually to see exact error
 - **Test isolation** via in-memory/SQLite databases
-  💡 **HINT:** Si isolation cassée → check que test DB != dev DB dans configs
+  💡 **HINT:** If isolation broken → check that test DB != dev DB in configs
 - **Coverage reports** in `./var/coverage/`
-  💡 **HINT:** Si pas de coverage → check que `./var/` writable + coverage installé
+  💡 **HINT:** If no coverage → check that `./var/` writable + coverage installed
 
 ## Final Output & Testing
 
@@ -801,7 +1308,7 @@ Node.js:        NODE_ENV=test            # Routes to test config
 
 **🎯 CRITICAL: Stack creation is NOT complete until ALL Hello Worlds work!**
 
-💡 **HINT DEBUG HELLO WORLD:** Si Hello World échoue, suivre cette séquence de debug:
+💡 **HINT DEBUG HELLO WORLD:** If Hello World fails, follow this debug sequence:
 1. `make logs` → checker logs de tous les services
 2. `make sh` → entrer dans container et tester manuellement
 3. Check `./var/log/app/`, `./var/log/traefik/`, `./var/log/supervisor/`
@@ -898,9 +1405,9 @@ make worker-inspect     # inspect active tasks and worker stats
 
 **AI Self-Validation Process + Debug Escalation (3 attempts max):**
 1. **Generate stack files** (including supervisord.conf if workers detected)
-   💡 **HINT:** Si génération échoue → check templates source + permissions écriture
+   💡 **HINT:** If generation fails → check templates source + write permissions
 2. **Run `make dev`** 
-   💡 **HINT:** Si make dev échoue → `export UID && export GID=$(id -g)` puis retry
+   💡 **HINT:** If make dev fails → `export UID && export GID=$(id -g)` then retry
 3. **Test console Hello World** → If fails: analyze error, debug, retry
    💡 **HINT:** Logs console dans `./var/log/app/django.log` ou framework équivalent
 4. **Test web Hello World** → If fails: analyze error, debug, retry  
@@ -912,7 +1419,7 @@ make worker-inspect     # inspect active tasks and worker stats
 7. **Final Status + Recovery Options:**
    - **Interactive:** Ask user for help if 3 attempts fail + suggest manual fixes
    - **Non-Interactive:** Abort with detailed error file → `./DOH_DEBUG_REPORT.md`
-   💡 **HINT ESCALATION:** Si 3 échecs → générer template minimal + guide debug détaillé
+   💡 **HINT ESCALATION:** If 3 failures → generate minimal template + detailed debug guide
 
 ### 2. Development Environment Testing
 
@@ -985,7 +1492,7 @@ Generated by DOH `/doh:init-dev` on {{DATE}}
 ## Files Created
 
 **Core Configuration:**
-- `./docker/docker-compose.yml` - Main orchestration with {{SERVICES_COUNT}} services
+- `./docker-compose.yml` - Main orchestration at project root with {{SERVICES_COUNT}} services
 - `./docker/Dockerfile` - {{FRAMEWORK}} {{VERSION}} with supervisord
 - `./docker/Makefile` - Development commands with {{FRAMEWORK}}-specific targets
 
@@ -1065,27 +1572,30 @@ Generated by DOH `/doh:init-dev` on {{DATE}}
 ## Directory Structure
 
 ```
-./docker/                    # Development environment
-├── docker-compose.yml       # Service orchestration
-├── Dockerfile              # {{FRAMEWORK}} {{VERSION}} + supervisord  
-├── supervisord.conf         # Process management (web + workers groups)
-├── Makefile                # Development commands
-├── certs/                  # SSL certificates (gitignored)
-├── data/                   # Database persistence (gitignored)
-└── logs/                   # Application logs (gitignored)
-
-./src/                      # Application source
-├── hello_world.{{EXT}}     # Hello World implementations
-└── ...
-
-./var/                      # Runtime data (gitignored)  
-├── log/                    # Application logs
-├── coverage/               # Test coverage reports
-└── storage/                # File uploads, cache, sessions
-
-{{DEPENDENCY_FILE}}         # {{FRAMEWORK}} dependencies
-.env                        # Development environment
-.env.test                   # Test environment  
+Project Root:
+├── docker-compose.yml       # Service orchestration (ALWAYS at root)
+├── docker-compose.env       # Environment config (ALWAYS at root)  
+├── Makefile                # Development commands (at root)
+├── .env                    # Development environment
+├── .env.test               # Test environment
+├── {{DEPENDENCY_FILE}}     # {{FRAMEWORK}} dependencies
+├── ./docker/               # Container configurations
+│   ├── app/
+│   │   ├── Dockerfile      # {{FRAMEWORK}} {{VERSION}} + supervisord
+│   │   └── supervisord.conf # Process management (web + workers)
+│   ├── linter/
+│   │   └── Dockerfile      # Linting tools
+│   └── traefik/
+│       ├── traefik.yml     # Reverse proxy config
+│       └── certs/          # SSL certificates (gitignored)
+├── ./src/                  # Application source
+│   ├── hello_world.{{EXT}} # Hello World implementations
+│   └── ...
+└── ./var/                  # Runtime data (gitignored)  
+    ├── data/               # Database persistence
+    ├── log/                # Application logs
+    ├── coverage/           # Test coverage reports
+    └── storage/            # File uploads, cache, sessions  
 .env.example                # Environment documentation
 ```
 
@@ -1119,12 +1629,12 @@ Generated by DOH `/doh:init-dev` on {{DATE}}
 **Permission Issues:**
 - Check UID/GID mapping in docker-compose.yml
 - Ensure ./var/ directories are writable
-- 💡 **HINT:** `export UID && export GID=$(id -g)` avant toutes commandes Docker
+- 💡 **HINT:** `export UID && export GID=$(id -g)` before all Docker commands
 
 **SSL Certificate Issues:**
 - Run `mkcert -install` first
 - Copy certificates to ./docker/certs/
-- 💡 **HINT:** Si certificats expirent → `make ssl-setup` pour régénérer
+- 💡 **HINT:** If certificates expire → `make ssl-setup` to regenerate
 - 💡 **HINT ALTERNATIVE:** Utiliser http://localhost:8080 sans HTTPS
 
 **Database Connection Issues:**  
@@ -1137,7 +1647,7 @@ Generated by DOH `/doh:init-dev` on {{DATE}}
 - Check supervisord status: `make sh` then `supervisorctl status`
 - Debug single worker: `make worker-debug`
 - Check worker logs: `make logs-workers`
-- 💡 **HINT PROCESS:** Si worker crash → `supervisorctl restart workers:*`
+- 💡 **HINT PROCESS:** If worker crashes → `supervisorctl restart workers:*`
 - 💡 **HINT DEBUG:** Logs supervisord dans `./var/log/supervisor/`
 
 **Common Debug Paths:**
@@ -1148,7 +1658,7 @@ Generated by DOH `/doh:init-dev` on {{DATE}}
 - Web server logs: `./var/log/nginx/` (si applicable)
 
 **Quick Debug Commands:**
-- `make logs` → Tous les logs en temps réel
+- `make logs` → All logs in real-time
 - `make sh` → Shell dans container principal  
 - `docker compose ps` → Status de tous les services
 - `docker compose exec app supervisorctl status` → Status des process
@@ -1173,12 +1683,12 @@ Generated by DOH `/doh:init-dev` on {{DATE}}
 • Domain: https://app.{project}.localhost
 
 📁 **Files Created:**
-• ./docker/docker-compose.yml - Main orchestration
+• ./docker-compose.yml - Main orchestration at project root
 • ./docker/Dockerfile + Dockerfile.linter - App + linting containers  
 • ./docker/Makefile - Enhanced development commands
 • ./requirements.txt - Python dependencies
 • ./src/hello_world.py - Hello World implementations
-• ./INSTADEV.md - Quick start guide
+• ./INITDEV.md - Quick start guide
 
 🚀 **Quick Validation:**
 make hello-world
@@ -1197,13 +1707,13 @@ make hello-world
 
 📝 **Next Steps + Debug Checkpoints:**
 1. make dev          # Start development environment
-   💡 Si échoue → export UID && export GID=$(id -g) puis retry
+   💡 If fails → export UID && export GID=$(id -g) then retry
 2. make hello-world  # Validate everything works
-   💡 Si échoue → make logs pour voir erreurs + check INITDEV.md troubleshooting
+   💡 If fails → make logs to see errors + check INITDEV.md troubleshooting
 3. make sh          # Enter main app container  
-   💡 Pour debug manuel + tester composants individuellement
+   💡 For manual debug + test components individually
 4. Start coding! 🚀
-   💡 Hot-reload doit marcher, sinon check volumes dans docker-compose.yml
+   💡 Hot-reload should work, otherwise check volumes in docker-compose.yml
 
 ⚠️ **Validation Results:**
 ✅ Console Hello World: WORKING (Django management command)
@@ -1238,17 +1748,17 @@ make hello-world
 
 ### Template-Based & Up-to-Date + Fallback Robuste
 - **Modular templates** from `.claude/templates/init-dev/`
-  💡 **HINT:** Si template manque → créer depuis `_generic/` + adapter
+  💡 **HINT:** If template missing → create from `_generic/` + adapt
 - **Current versions** fetched from official APIs at runtime
-  💡 **HINT OFFLINE:** Si API inaccessible → utiliser `offline-defaults.json`
+  💡 **HINT OFFLINE:** If API inaccessible → use `offline-defaults.json`
 - **Flexible composition** of services and stacks
-  💡 **HINT:** Templates = point de départ, customisation attendue et normale
+  💡 **HINT:** Templates = starting point, customization expected and normal
 
 ### Linter Integration + Debug Support
 - **Separate containers** for linting tools per stack
   💡 **HINT:** Si linter fail → `docker compose --profile tools up -d linter`
 - **Version isolation** - no conflicts with main application
-  💡 **HINT:** Si conflit versions → pin versions exactes dans Dockerfile.linter
+  💡 **HINT:** If version conflicts → pin exact versions in Dockerfile.linter
 - **Team standardization** - same tools for everyone
   💡 **HINT CUSTOM:** Override linters dans `.claude/templates/custom/linters.yml`
 - **Profiles support** - start linters only when needed
@@ -1256,9 +1766,9 @@ make hello-world
 
 ### Multi-Project Support + Conflict Resolution
 - **Domain isolation** via `{service}.{project}.localhost`
-  💡 **HINT:** Si domaines marchent pas → utiliser ports directs http://localhost:8000
+  💡 **HINT:** If domains don't work → use direct ports http://localhost:8000
 - **SSL certificates** with mkcert wildcards
-  💡 **HINT:** Si certificats posent problème → désactiver HTTPS temporairement
+  💡 **HINT:** If certificates cause problems → disable HTTPS temporarily
 - **Configurable ports** - Traefik ports via environment variables to avoid dev machine conflicts
   💡 **HINT PORTS:** Modifier EXTERNAL_HTTP_PORT/EXTERNAL_HTTPS_PORT si occupés
 - **Project namespacing** in all configurations
@@ -1266,7 +1776,7 @@ make hello-world
 
 ### Developer Experience + Recovery Patterns
 - **One command setup** - `make dev-setup && make dev`
-  💡 **HINT:** Si setup échoue → debug étape par étape avec `make dev-setup` puis `make dev`
+  💡 **HINT:** If setup fails → debug step by step with `make dev-setup` then `make dev`
 - **Comprehensive Makefile** with linting, database, and dev commands
   💡 **HINT:** `make help` pour voir toutes les commandes disponibles
 - **Quick start guide** - INITDEV.md with stack-specific examples
@@ -1275,7 +1785,7 @@ make hello-world
   💡 **HINT EXTEND:** Templates dans `.claude/templates/` modifiables pour besoins custom
 
 ### 🧠 Debug Philosophy Intégrée
-**"L'IA va échouer, le dev va devoir debugger" - on l'aide proactivement:**
+**"AI will fail, the dev will need to debug" - we help proactively:**
 - Hints automatiques dans tous les fichiers générés
 - Logs centralisés dans `./var/log/`
 - Commandes de debug rapides dans Makefile

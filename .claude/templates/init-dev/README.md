@@ -1,184 +1,484 @@
 # Init-Dev Templates
 
-## ⚠️ Templates d'illustration
+## 🍳 Component "Kitchen" - Not Traditional Templates!
 
-**IMPORTANT**: Ces templates sont fournis à titre d'**illustration** et ne sont **pas exhaustifs**. Ils servent de base de départ pour comprendre la structure et peuvent nécessiter des adaptations selon vos besoins spécifiques.
+**IMPORTANT**: These files are **NOT traditional templates** but rather a **"kitchen"** of modular components that the AI combines intelligently.
 
-## Structure
+### Why "Kitchen" instead of "Templates"?
+
+🚫 **Traditional templates** = Static files with a few `{{VAR}}` variables  
+✅ **DOH Kitchen** = Modular components that AI assembles dynamically
+
+**The key difference:**
+- AI **doesn't copy** these files as-is
+- AI **takes inspiration** from patterns and structures  
+- AI **combines** multiple components based on detected stack
+- AI **researches** current versions via Docker Hub API
+- AI **adapts** configurations to current best practices
+
+### How AI uses this "Kitchen":
+
+1. **Stack detection** → AI examines the project
+2. **Cherry-picking** → AI selects relevant components  
+3. **Real-time research** → Docker Hub API + WebSearch best practices
+4. **Intelligent assembly** → AI generates custom files
+5. **Validation** → AI tests that everything works
+
+**Concrete example:**
+```
+Django project detected → AI takes inspiration from stacks/python/ + services/mysql.yml  
+→ Research Django latest via Docker Hub API
+→ Search "Django MariaDB best practices 2024"  
+→ Generate container-organized structure in ./docker/
+   ├── docker-compose.yml (custom with current versions)
+   ├── app/Dockerfile (adapted from stacks/python/Dockerfile)
+   ├── linter/Dockerfile (adapted from stacks/python/Dockerfile.linter)
+   ├── app/supervisord.conf (web + worker processes)
+   ├── traefik/traefik.yml (HTTPS configuration)
+   └── mariadb/init/01-create-database.sql
+```
+
+## Structure (Container-Organized)
+
+**🔍 STRUCTURE ACTUELLE (Templates "Kitchen"):**
 
 ```
 .claude/templates/init-dev/
-├── common/                     # Templates communs à tous les stacks
-│   ├── docker-compose.env-docker   # Variables d'environnement
-│   ├── docker-compose-base.yml     # Base docker-compose
-│   ├── traefik.yml-docker          # Configuration Traefik
-│   ├── dynamic.yaml-docker         # Configuration TLS
-│   ├── Makefile                    # Commandes de développement
-│   └── scripts/
-│       └── install-deps.sh         # Installation des dépendances
-├── stacks/                     # Templates spécifiques par stack
-│   ├── node/                   # Stack Node.js
-│   ├── php/                    # Stack PHP
-│   └── python/                 # Stack Python
-└── services/                   # Services Docker modulaires
-    ├── postgres.yml           # PostgreSQL + Adminer
-    ├── mysql.yml              # MySQL + phpMyAdmin
-    ├── redis.yml              # Redis
-    └── mailhog.yml            # MailHog
+├── common/                          # Common components for all stacks
+│   ├── docker-compose-base.yml        # Base docker-compose structure
+│   ├── Dockerfile.multi-stage.template # Multi-stage Dockerfile template
+│   └── Makefile                        # Development commands template
+├── stacks/                          # Stack-specific patterns
+│   ├── node/                        # Node.js stack templates
+│   │   ├── Dockerfile                  # Node.js main container
+│   │   ├── Dockerfile.linter           # Node.js linting container
+│   │   ├── service.yml                 # Docker compose service definition
+│   │   └── linter.yml                  # Linter configuration
+│   ├── php/                         # PHP stack templates  
+│   │   ├── Dockerfile                  # PHP main container (with composer)
+│   │   ├── Dockerfile.linter           # PHP linting container
+│   │   ├── service.yml                 # Docker compose service definition
+│   │   └── linter.yml                  # Linter configuration
+│   └── python/                      # Python stack templates
+│       ├── Dockerfile                  # Python main container
+│       ├── Dockerfile.linter           # Python linting container  
+│       ├── service.yml                 # Docker compose service definition
+│       └── linter.yml                  # Linter configuration
+└── services/                        # Modular Docker services
+    ├── postgres.yml                 # PostgreSQL + Adminer
+    ├── mysql.yml                    # MySQL + phpMyAdmin
+    ├── redis.yml                    # Redis
+    └── mailhog.yml                  # MailHog
+
+🚨 NOTE: This structure serves as INSPIRATION for AI, which then generates 
+         the final container-organized structure in ./docker/app/, ./docker/linter/, etc.
 ```
 
-## Utilisation
+## How AI Uses This Kitchen
 
-Ces templates sont utilisés par la commande `/doh:init-dev` pour générer des environnements de développement. Ils peuvent être personnalisés selon vos besoins :
+The `/doh:init-dev` command uses this "kitchen" to generate custom development environments. AI does **NOT** simply copy/replace variables:
 
-### Personnalisation des templates
+### Extending the "Kitchen"
 
-1. **Stacks supplémentaires** : Ajoutez de nouveaux dossiers dans `stacks/`
-2. **Services additionnels** : Créez de nouveaux fichiers `.yml` dans `services/`
-3. **Outils de linting** : Adaptez les `Dockerfile.linter` selon vos standards
-4. **Configuration** : Modifiez les templates de configuration selon vos conventions
+To enrich components available to AI, add to the **existing structure**:
 
-### Variables de substitution
+1. **New stacks**: Add directories in `stacks/` (Go, Rust, etc.)
+   - `stacks/go/Dockerfile`, `stacks/go/Dockerfile.linter`
+   - `stacks/rust/Dockerfile`, `stacks/rust/Dockerfile.linter`
 
-Les templates utilisent des variables de substitution :
-- `{{PROJECT_NAME}}` - Nom du projet (détecté depuis le nom du répertoire)
-- Ajoutez d'autres variables selon vos besoins
+2. **New services**: Create patterns in `services/` (Elasticsearch, etc.)
+   - `services/elasticsearch.yml`
+   - `services/prometheus.yml`
 
-### Gestion des permissions (UID/GID)
+3. **New linters**: Add stack-specific `Dockerfile.linter` in each `stacks/` directory
+   - `stacks/go/Dockerfile.linter` (golangci-lint, gofmt)
+   - `stacks/rust/Dockerfile.linter` (clippy, rustfmt)
 
-**⚠️ UID/GID ne sont PAS dans les templates**
+4. **New patterns**: Enhance existing `service.yml` and `linter.yml` files
 
-Les permissions sont gérées automatiquement par :
+**Important**: AI adapts these templates to generate container-organized final structure!
 
-**Option 1 - Via Makefile** :
+### Dynamic Variables and Substitution
+
+AI generates variables **on-the-fly** based on context:
+- `PROJECT_NAME` → Detected from directory name
+- `FRAMEWORK_VERSION` → Researched via Docker Hub API  
+- `DB_TYPE` → Inferred from stack or user specification
+- And many others based on detected needs...
+
+**No hardcoded variables** - AI adapts to context!
+
+### Permission Management (UID/GID)
+
+**⚠️ UID/GID are NOT in the templates**
+
+Permissions are handled automatically by:
+
+**Option 1 - Via Makefile**:
 ```make
 export UID := $(shell id -u)  # Makefile syntax
 export GID := $(shell id -g)
 ```
 
-**Option 2 - Via script bash** :
+**Option 2 - Via bash script**:
 ```bash
-export UID     # UID est déjà défini en bash
+export UID     # UID is already defined in bash
 export GID=$(id -g)
 ```
 
-**Flux commun** :
+**Common flow**:
 ```
-Détection (make/script) → docker-compose.yml (args:) → Dockerfile (application)
+Detection (make/script) → docker-compose.yml (args:) → Dockerfile (application)
 ```
 
-Dans tous les cas :
-- **docker-compose.yml** transmet via `args:` aux Dockerfiles lors du build
-- **Dockerfiles** créent/modifient l'utilisateur interne avec les UID/GID du host
+In all cases:
+- **docker-compose.yml** passes via `args:` to Dockerfiles during build
+- **Dockerfiles** create/modify internal user with host UID/GID
 
-Aucune configuration manuelle d'UID/GID n'est nécessaire.
+No manual UID/GID configuration needed.
 
-### Versions des dépendances
+### Dependency Versions - ALWAYS Current
 
-⚠️ **Les numéros de versions dans les templates sont à titre d'illustration**
+🚨 **Versions in this "kitchen" are ignored** - AI ALWAYS uses current versions!
 
-La commande `/doh:init-dev` doit :
-- Rechercher les versions les plus récentes au moment de l'initialisation
-- Remplacer les versions d'exemple par les versions actuelles
-- Utiliser des API ou des sources fiables pour obtenir les dernières versions stables
+**AI process for versions:**
+1. **Docker Hub API Priority** → `https://hub.docker.com/v2/repositories/library/{image}/tags/`
+2. **Intelligent filtering** → Stable versions only (skip alpha/beta/rc)
+3. **LTS preferences** → Node.js LTS, Python stable, etc.
+4. **Optimal variants** → `-slim`, `-alpine` when appropriate
 
-**Exemples de sources pour versions à jour** :
-- Node.js : npm registry API, Docker Hub
-- PHP : Packagist API, Docker Hub  
-- Python : PyPI API, Docker Hub
-- Images Docker : Docker Hub API
+**Sources used by AI:**
+- **Docker images**: Docker Hub API (always priority)
+- **Best practices**: Real-time WebSearch for configurations
+- **Offline fallback**: Only if APIs unavailable
 
-### Containers de linting
+**Result**: Generated stack = Latest stable versions of the moment!
 
-Chaque stack inclut un container de linting séparé (`linter.yml` + `Dockerfile.linter`) pour :
-- ✅ Éviter les conflits de versions d'outils
-- ✅ Standardiser les outils pour l'équipe
-- ✅ Permettre des environnements de linting reproductibles
+### Single Container Architecture with Multi-Stage Builds
 
-**Usage des linters** :
+**Core DOH Principle**: One unified container that combines multiple technologies using Docker multi-stage builds.
+
+**Multi-Stage FROM/COPY Cascade Pattern:**
+```dockerfile
+# AI detects stack → generates appropriate stages
+FROM node:20 AS node-tools         # If frontend detected  
+FROM composer:2 AS composer-tools   # 🚨 ONLY IF PHP DETECTED (Laravel, Symfony)
+FROM python:3.12 AS python-tools    # If Python detected
+
+FROM php:8.3-fpm  # Backend framework as final image
+
+# Cherry-pick Node.js tools (AI-conditional)
+COPY --from=node-tools /usr/local/lib/node_modules /usr/local/lib/node_modules
+COPY --from=node-tools /usr/local/bin/node /usr/local/bin/node
+RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm
+
+# Cherry-pick Composer (🚨 ONLY FOR PHP - Laravel/Symfony/etc.)
+COPY --from=composer-tools /usr/bin/composer /usr/bin/composer
+
+# System dependencies (AI-detected)
+RUN apt-get update && apt-get install -y git sudo supervisor unzip
+```
+
+**AI Stack Detection → Base Image Strategy:**
+```text
+Laravel/Symfony + frontend → FROM composer:2 + FROM node:20 → php:8.3-fpm
+Laravel/Symfony alone → FROM composer:2 → php:8.3-fpm
+Django + React → FROM python:3.12 + FROM node:20 → python:3.12-slim
+Django alone → FROM python:3.12-slim
+Rails + Webpack → FROM ruby:3.2 + FROM node:20 → ruby:3.2-slim
+Node.js pure → FROM node:20-alpine (no multi-stage needed)
+
+Rule: Backend framework technology ALWAYS as final image (simplicity)
+```
+
+**Benefits of Single Container + Multi-Stage:**
+- ✅ **Unified access**: `make sh` enters container with all tools available
+- ✅ **No namespace pollution**: No multiple app containers cluttering docker ps
+- ✅ **Simplified development**: All tools in one place for debugging
+- ✅ **Process management**: Supervisord manages web + workers + schedulers together  
+- ✅ **Efficient builds**: Only copy what's needed from each stage
+- ✅ **Tool isolation**: Build stages isolated, final image optimized
+
+**What AI copies between stages:**
+- ✅ **System binaries**: `/usr/bin/composer`, `/usr/local/bin/node`
+- ✅ **Tool installations**: Globally installed packages and executables
+- ✅ **System daemon configs**: `/etc/mysql/`, `/etc/postgresql/` (when applicable)
+
+**What AI NEVER copies (uses volume mounts instead):**
+- ❌ **Application code**: Always volume mounted from host for hot-reload
+- ❌ **User-level configs**: Always volume mounted for easy editing
+- ❌ **Library dependencies**: Always installed post-build via Makefile for speed
+- ❌ **Data**: Always volume mounted for persistence
+
+### Library Dependencies: Post-Build Installation Strategy
+
+**🚨 CRITICAL**: Dependencies (composer, npm, pip) are installed AFTER Docker build, not during build!
+
+**Why post-build dependency installation:**
+```dockerfile
+# ❌ FORBIDDEN in DOH Dockerfile
+COPY package.json ./
+RUN npm install             # ❌ Slow rebuild on every dependency change
+
+COPY composer.json ./
+RUN composer install        # ❌ Slow rebuild on every dependency change
+
+COPY requirements.txt ./
+RUN pip install -r requirements.txt  # ❌ Slow rebuild on every dependency change
+```
+
+**✅ DOH Approach - Dockerfile only system tools:**
+```dockerfile
+# ✅ Dockerfile - Runtime + system tools only
+FROM python:3.12-slim
+RUN apt-get update && apt-get install -y build-essential git nodejs npm
+# No dependency installation in build!
+```
+
+**✅ Dependencies managed post-build via Makefile:**
+```makefile
+# ✅ Makefile - Dependencies post-build by stack
+dev-setup:
+	@echo "Installing Python dependencies..."
+	docker compose run --rm app pip install -r requirements.txt
+	@echo "Installing Node.js dependencies for frontend..."
+	docker compose run --rm app npm install
+	@echo "Running database migrations..."
+	docker compose run --rm app python manage.py migrate
+
+# Fast dependency updates without container rebuild
+update-deps:
+	docker compose run --rm app pip install -r requirements.txt
+	docker compose run --rm app npm install
+```
+
+**Benefits of post-build dependencies:**
+- ✅ **Fast Docker builds** - Only runtime changes trigger rebuild (seconds vs minutes)
+- ✅ **Fast dependency updates** - `make update-deps` without container rebuild  
+- ✅ **Instant code changes** - Volume mounts for immediate feedback
+- ✅ **Better caching** - System tools vs application dependencies separation
+- ✅ **Flexible workflows** - `make dev`, `make update-deps`, `make clean-deps`
+
+### Linting Containers
+
+Each stack includes a separate linting container (`linter.yml` + `Dockerfile.linter`) to:
+- ✅ Avoid tool version conflicts
+- ✅ Standardize tools for the team
+- ✅ Enable reproducible linting environments
+
+**Linter usage**:
 ```bash
-# Démarrer le container de linting
+# Start the linting container
 docker compose --profile tools up -d linter
 
-# Utiliser les outils de linting
+# Use linting tools
 docker compose exec linter eslint src/        # Node.js
 docker compose exec linter phpstan analyze   # PHP  
 docker compose exec linter black .           # Python
 ```
 
-### Support dotenv (.env)
+### Dotenv Support (.env)
 
-Tous les stacks incluent le support dotenv pour la gestion des variables d'environnement :
+All stacks include dotenv support for environment variable management:
 
-**Node.js** : Package `dotenv` avec `require('dotenv').config()`
-**PHP** : Package `vlucas/phpdotenv` avec `Dotenv::createImmutable()`  
-**Python** : Package `python-dotenv` avec `load_dotenv()`
+**Node.js**: `dotenv` package with `require('dotenv').config()`
+**PHP**: `vlucas/phpdotenv` package with `Dotenv::createImmutable()`  
+**Python**: `python-dotenv` package with `load_dotenv()`
 
-**Flux d'usage** :
+**Usage flow**:
 ```bash
-# 1. Copier le template d'environnement
+# 1. Copy environment template
 cp docker-compose.env .env
 
-# 2. Éditer les variables locales
-# .env est git-ignoré pour la sécurité
+# 2. Edit local variables
+# .env git handling is YOUR choice
 
-# 3. L'application charge automatiquement .env
-# Variables disponibles dans process.env / $_ENV / os.getenv()
+# 3. Application automatically loads .env
+# Variables available in process.env / $_ENV / os.getenv()
 ```
 
-**Sécurité** :
-- `.env` est git-ignoré par défaut
-- `docker-compose.env-docker` est versionné comme template
-- Variables sensibles maskées dans les logs de debug
+**Security**:
+- `.env` - YOU decide whether to git-ignore it or not
+- `docker-compose.env-docker` is versioned as example template
+- Sensitive variables to mask in debug logs per your needs
 
-### Accès au container principal
+### Container Organization
 
-Le service `app` est **toujours le container qui exécute l'application web principale** :
+The AI generates a **container-organized structure** where each service has its own dedicated folder:
 
-**Node.js** : Container avec Express/Next.js/etc. qui sert l'API/site web  
-**PHP** : Container PHP-FPM qui traite les requêtes web (+ nginx séparé)  
-**Python** : Container Django/FastAPI qui sert l'application web
+**Main Application Container (`./docker/app/`)**:
+- **Dockerfile**: Multi-stage build combining all needed tools (Python + Node.js, PHP + Composer, etc.)
+- **supervisord.conf**: Process management (web server + workers + background tasks)
+- **scripts/**: Container-specific installation and management scripts
 
-**Workflow de développement typique** :
+**Linter Container (`./docker/linter/`)**:
+- **Dockerfile**: Separate linting container to avoid version conflicts with main app
+- Contains all code quality tools (Black, ESLint, PHPStan, etc.) for the detected stack
+
+**Reverse Proxy Container (`./docker/traefik/`)**:
+- **traefik.yml**: Dynamic routing configuration
+- **certs/**: SSL certificates directory (auto-generated)
+
+**Database Container (`./docker/mariadb/` or `./docker/postgres/`)**:
+- **init/**: Database initialization scripts
+- **conf.d/**: Custom database configuration files
+
+**Shared Data Directory (`./docker/var/`)** 🚨 **EXCEPTION**:
+- **data/**: Persistent data volumes (database, cache, etc.)
+- **log/**: Runtime logs from all containers (app, traefik, mariadb, supervisor)
+
+**Typical development workflow**:
 ```bash
-make dev         # Lance ton application web
-make sh          # Entre dans le container pour voir ce qui s'y passe
-                 # - Consulter les logs
-                 # - Déboguer ton code
-                 # - Installer des packages
-                 # - Lancer des commandes
+cd docker/       # Enter the container-organized directory
+make dev         # Start entire development stack
+make sh          # Enter the main app container
+                 # - All tools available (Django + Node.js + linters)
+                 # - Debug your code
+                 # - Install packages
+                 # - Run framework commands
                  
-make shell-mysql # Entre dans la base de données si besoin
-make shell-redis # Entre dans le cache si besoin
+make db-shell    # Enter database container if needed
 ```
 
-**Différence importante** :
-- `app` = Container qui **exécute** ton application web/API
-- `linter` = Container qui ne fait que les **outils de développement**
+**Container Responsibilities**:
+- `app` = **Main development container** with all frameworks and tools
+- `linter` = **Code quality tools** (ESLint, Black, PHPStan, etc.) - separate to avoid conflicts
+- `traefik` = **Reverse proxy** with automatic HTTPS and routing
+- `mariadb/postgres` = **Database** with persistent data in `./data/`
 
-## Limitations et Extensions
+**Container-Specific Benefits**:
+- ✅ **Clear separation**: Each container has its dedicated sub-folder for configs/builds
+- ✅ **Easy debugging**: Container issues isolated to their specific folder
+- ✅ **Better maintenance**: Update container configs without affecting others
+- ✅ **Team collaboration**: Developers can focus on specific container responsibilities
+- ✅ **Data exceptions**: Shared data (`./var/data/`) and logs (`./var/log/`) centralized for easy access
 
-### Ces templates sont des bases minimales
+## Limitations and Extensions
 
-- **Node.js** : Configuration ESLint/Prettier basique
-- **PHP** : Setup Laravel/Symfony générique
-- **Python** : Configuration Django/FastAPI simple
+### These components are minimal bases
 
-### Extensions suggérées
+- **Node.js**: Basic ESLint/Prettier configuration
+- **PHP**: Generic Laravel/Symfony setup
+- **Python**: Simple Django/FastAPI configuration
 
-- Tests unitaires et d'intégration
+### Suggested extensions
+
+- Unit and integration tests
 - CI/CD pipelines
-- Monitoring et observabilité
-- Configuration de sécurité avancée
-- Optimisations de performance
+- Monitoring and observability
+- Advanced security configuration
+- Performance optimizations
 
 ## Contribution
 
-Pour étendre ou améliorer ces templates :
+To extend or improve these components:
 
-1. Suivez la structure existante
-2. Documentez les nouvelles variables de substitution
-3. Testez avec différents projets
-4. Maintenez la simplicité pour faciliter l'adoption
+1. Follow the existing structure
+2. Document new substitution variables
+3. Test with different projects
+4. Maintain simplicity for easier adoption
 
-**Principe** : Ces templates doivent rester des **points de départ** simples et adaptables, non des solutions complètes clé-en-main.
+**Principle**: This "kitchen" should remain a simple **source of inspiration** for AI, not frozen solutions.
+
+## 🎯 Summary: Kitchen vs Templates
+
+| Aspect | Traditional Templates | DOH Kitchen |
+|--------|---------------------|-------------|
+| **Usage** | Copy + variable replacement | Inspiration + intelligent assembly |
+| **Versions** | Frozen in files | Real-time research (Docker Hub API) |
+| **Adaptability** | Limited to planned variables | AI adapts to detected context |
+| **Maintenance** | Versions become obsolete quickly | Always up-to-date automatically |
+| **Complexity** | Simple but rigid | Intelligent and flexible |
+
+**The DOH advantage**: AI combines the best components with the latest versions and current best practices!
+
+## 🗂️ Container-Organized Architecture (New)
+
+### Why Container Organization?
+
+The new container-organized approach provides better **separation of concerns** and **maintainability**:
+
+✅ **Clear responsibilities**: Each container has its own folder with specific configs  
+✅ **Easy debugging**: Find container-specific issues faster  
+✅ **Better scaling**: Add new containers without cluttering the main directory  
+✅ **Team collaboration**: Developers can focus on specific container configurations  
+✅ **Production alignment**: Mirror production multi-container setups in development
+
+### Generated Structure Example
+
+```
+./docker/                           # User-specified directory (e.g., ./docker, ./infra, ./containers)
+├── docker-compose.yml              # Main orchestration
+├── docker-compose.env              # Environment variables
+├── Makefile                        # Development commands
+├── app/                            # Main application container ⭐ MANDATORY
+│   ├── Dockerfile                  # Multi-stage: Python + Node.js + System tools
+│   ├── supervisord.conf            # Process management (web + workers + scheduler)
+│   └── scripts/                    # App-specific automation
+│       ├── install-deps.sh         # Dependencies installation
+│       └── setup-hooks.sh          # Git hooks or other setup
+├── linter/                         # Code quality container (profile-based)
+│   └── Dockerfile                  # Linting tools (Black, ESLint, PHPStan, etc.)
+├── traefik/                        # Reverse proxy container
+│   ├── traefik.yml                 # Dynamic routing + HTTPS configuration
+│   └── certs/                      # SSL certificates (mkcert generated)
+├── mariadb/                        # Database container (when applicable)
+│   ├── init/                       # Database initialization scripts
+│   │   └── 01-create-database.sql  # Initial database setup
+│   └── conf.d/                     # Custom database configuration
+│       └── custom.cnf              # Performance and charset settings
+├── shared/                         # Cross-container shared resources
+│   ├── scripts/                    # Scripts used by multiple containers
+│   └── configs/                    # Shared configuration templates
+└── var/                            # 🚨 EXCEPTION: Shared data/logs (gitignored)
+    ├── data/                       # Persistent data volumes
+    │   └── mariadb/                # Database data persistence
+    └── log/                        # Runtime logs from all containers
+        ├── app/                    # Application logs
+        ├── traefik/                # Traefik logs
+        ├── mariadb/                # Database logs
+        └── supervisor/             # Process management logs
+```
+
+### Container-Specific Benefits
+
+**Main App Container (`./docker/app/`)**:
+- 🎯 **Single entry point**: All development tools in one container (`make sh`)
+- 🔧 **Multi-technology**: Python + Node.js + database clients in unified environment
+- 🔄 **Process management**: Web server + background workers via supervisord
+- 📦 **Volume mounts**: Application code mounted for hot-reload development
+
+**Traefik Container (`./docker/traefik/`)**:
+- 🌐 **Auto HTTPS**: SSL certificates automatically managed with mkcert
+- 🔀 **Smart routing**: `https://app.project.localhost`, `https://adminer.project.localhost`
+- 📊 **Dashboard**: Available at `http://localhost:8080` for debugging routes
+
+**Database Container (`./docker/mariadb/` or `./docker/postgres/`)**:
+- 🗄️ **Data persistence**: Database data stored in `./var/data/mariadb/` (shared exception)
+- ⚙️ **Custom config**: Performance tuning in `./mariadb/conf.d/` (container-specific)
+- 🚀 **Auto initialization**: Database and users created via `./mariadb/init/` (container-specific)
+- 📝 **Logs**: Database logs in `./var/log/mariadb/` (shared exception)
+
+### Migration Path
+
+**From flat structure**:
+```bash
+# Old approach (still supported for backward compatibility)
+./docker/
+├── docker-compose.yml
+├── Dockerfile
+├── traefik.yml
+└── data/
+```
+
+**To container-organized structure** (new default):
+```bash
+# New approach (recommended for new projects)
+./docker/
+├── docker-compose.yml
+├── app/Dockerfile
+├── traefik/traefik.yml
+└── data/
+```
+
+The AI automatically detects existing structures and can adapt both approaches based on user preference or project context.
