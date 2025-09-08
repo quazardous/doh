@@ -50,8 +50,8 @@ graph LR
 ### See It In Action (60 seconds)
 
 ```bash
-# Create a comprehensive PRD through guided brainstorming
-/doh:prd-new memory-system
+# Create a comprehensive PRD through expert committee process
+/doh:prd-new "memory management system for user sessions"
 
 # Transform PRD into a technical epic with task breakdown
 /doh:prd-parse memory-system
@@ -143,10 +143,17 @@ No shortcuts. No assumptions. No regrets.
 
 ### 1. Product Planning Phase
 
+**Option A: Quick Solo PRD**
 ```bash
-/doh:prd-new feature-name
+/doh:prd-new "natural language feature description"
 ```
-Launches comprehensive brainstorming to create a Product Requirements Document capturing vision, user stories, success criteria, and constraints.
+Fast single-agent brainstorming to create a Product Requirements Document.
+
+**Option B: Expert Committee PRD**
+```bash
+/doh:prd-committee "natural language feature description"
+```
+Comprehensive 3-round process with 4 expert agents plus business research for complex features.
 
 **Output:** `.doh/prds/feature-name.md`
 
@@ -196,6 +203,7 @@ Specialized agents implement tasks while maintaining progress updates and an aud
 
 ### PRD Commands
 - `/doh:prd-new` - Launch brainstorming for new product requirement
+- `/doh:prd-committee` - Create comprehensive technical PRD using expert committee workflow
 - `/doh:prd-parse` - Convert PRD to implementation epic
 - `/doh:prd-list` - List all PRDs
 - `/doh:prd-edit` - Edit existing PRD
@@ -235,6 +243,30 @@ Specialized agents implement tasks while maintaining progress updates and an aud
 - `/doh:validate` - Check system integrity
 - `/doh:clean` - Archive completed work
 - `/doh:search` - Search across all content
+
+## PRD Committee: Expert Committee for Complex Features
+
+For complex features requiring business research and multi-expert analysis:
+
+```bash
+# Complex features - committee process with 4 expert agents
+/doh:prd-committee "club management system for tennis club with 300 members"
+
+# Sessions pause after each round - continue with:
+/doh:prd-committee --continue feature-name
+```
+
+**When to use:**
+- Complex business domains needing research  
+- Multi-stakeholder features
+- Architecture-heavy implementations
+
+**When to use `/doh:prd-new` instead:**
+- Simple feature additions
+- Well-understood domains  
+- Quick iterations needed
+
+> **Note for macOS/Linux users:** PRD Committee may require increasing Node.js memory limit due to multiple agent coordination. If you encounter memory issues, run: `export NODE_OPTIONS="--max-old-space-size=8192"`
 
 ## The Parallel Execution System
 

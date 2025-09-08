@@ -156,7 +156,7 @@ Sur la base des insights du round précédent, souhaitez-vous ajuster quelque ch
 
 1. ✅ Continuez avec le Round ${NEXT_ROUND} tel que prévu
 2. 📝 Ajoutez des précisions/corrections pour orienter le prochain round
-3. 🔍 Recherche supplémentaire sur un aspect spécifique  
+3. 🔍 Additional research on specific aspect  
 4. 🎯 Réorientez le focus du Round ${NEXT_ROUND}
 5. 📊 Affichez les détails complets du Round ${CURRENT_ROUND} avant de continuer
 6. ❌ Annulez la continuation
@@ -177,10 +177,10 @@ case "$user_choice" in
         echo "📝 Ajout de précisions pour le Round ${NEXT_ROUND}"
         ;;
     3)  # Additional research - Jump to section 1C
-        echo "🔍 Recherche supplémentaire demandée"
+        echo "🔍 Additional research requested"
         ;;
     4)  # Refocus round - Jump to section 1D
-        echo "🎯 Réorientation du focus demandée"
+        echo "🎯 Round focus redirection requested"
         ;;
     5)  # Show round details - Jump to section 1E
         echo "📊 Affichage des détails du Round ${CURRENT_ROUND}"
@@ -201,8 +201,8 @@ exit 0  # Exit and wait for user input
 **When user selects option 2 (📝 Ajoutez des précisions):**
 
 ```
-📝 Précisions pour le Round ${NEXT_ROUND}
-======================================
+📝 Round ${NEXT_ROUND} Clarifications
+====================================
 
 **Basé sur les insights du Round ${CURRENT_ROUND}, précisez :**
 
@@ -264,11 +264,11 @@ EOF
 
 ### 1C. Additional Research Phase  
 
-**When user selects option 3 (🔍 Recherche supplémentaire):**
+**When user selects option 3 (🔍 Additional research):**
 
 ```
-🔍 Recherche Supplémentaire
-==========================
+🔍 Additional Research
+====================
 
 **Spécifiez le domaine de recherche complémentaire:**
 
@@ -303,8 +303,8 @@ esac
 **When user selects option 4 (🎯 Réorientez le focus):**
 
 ```
-🎯 Réorientation du Focus Round ${NEXT_ROUND}
-===========================================
+🎯 Round ${NEXT_ROUND} Focus Redirection
+======================================
 
 **Focus actuel prévu pour Round ${NEXT_ROUND}:**
 [Display standard focus based on round number]
@@ -352,7 +352,7 @@ EOF
 
 ```bash
 # Display complete round details for user review
-echo "📊 Détails Complets du Round ${CURRENT_ROUND}"
+echo "📊 Complete Round ${CURRENT_ROUND} Details"
 echo "============================================="
 
 # Show round summary
@@ -615,8 +615,8 @@ This comprehensive research will be provided to the PRD Orchestrator for informe
 **MANDATORY VALIDATION**: Before creating the seed file and launching committee, present complete summary for user approval.
 
 ```
-🏛️ PRD Committee - Synthèse Complète pour Validation
-===================================================
+🏛️ PRD Committee - Complete Summary for Validation
+==================================================
 
 **Feature:** ${FEATURE_NAME}
 **Description:** ${DESCRIPTION}
@@ -626,7 +626,7 @@ This comprehensive research will be provided to the PRD Orchestrator for informe
 • **Sous-Domaine:** ${SUB_DOMAIN}
 • **Contexte Industrie:** ${INDUSTRY_CONTEXT}
 
-**📋 Recherche Métier Client (WebSearch):**
+**📋 Client Business Research (WebSearch):**
 
 **Opérations Quotidiennes:**
 ${DAILY_OPERATIONS}
@@ -647,19 +647,19 @@ ${SUCCESS_METRICS}
 • **Version Cible:** ${TARGET_VERSION}
 • **Rounds:** 3 rounds fixes (Assessment → Refinement → Convergence)
 • **Agents:** Product Owner, UX Designer, Lead Developer, DevOps Architect
-• **Durée Estimée:** 10-15 minutes
+• **Estimated Duration:** 10-15 minutes
 
-**⚠️ VALIDATION REQUISE AVANT LANCEMENT:**
+**⚠️ VALIDATION REQUIRED BEFORE LAUNCH:**
 
-Cette synthèse sera intégrée dans le seed file pour éduquer le committee sur votre métier.
+This summary will be integrated into the seed file to educate the committee about your business.
 
-Êtes-vous d'accord avec cette analyse pour lancer le committee ?
+Do you agree with this analysis to launch the committee?
 
-1. ✅ Parfait, lancez le committee PRD avec ces informations
-2. 📝 Je dois corriger/préciser certains éléments
-3. 🔄 Refaire la recherche métier avec d'autres termes
-4. ✏️ Ajuster le nom de feature ou la description
-5. ❌ Annuler la création de PRD
+1. ✅ Perfect, launch the PRD committee with this information
+2. 📝 I need to correct/clarify certain elements
+3. 🔄 Redo business research with different terms
+4. ✏️ Adjust feature name or description
+5. ❌ Cancel PRD creation
 ```
 
 **Implementation Requirements:**
@@ -676,6 +676,7 @@ exit 0  # Exit and wait for user input
 ### 6. Generate Feature Name Based on User Responses
 
 **REQUIREMENT**: This step only executes AFTER user has provided clarifications in step 3.
+**CRITICAL**: This step is MANDATORY and must wait for user selection - do NOT skip to seed file creation.
 
 **Feature Name Generation Algorithm:**
 ```bash
@@ -709,8 +710,19 @@ for i in "${!FEATURE_NAME_OPTIONS[@]}"; do
 done
 echo "$((${#FEATURE_NAME_OPTIONS[@]}+1)). ✏️ Proposer un autre nom"
 
-# Wait for user selection
-read -p "Choisissez le nom de feature (1-$((${#FEATURE_NAME_OPTIONS[@]}+1))): " choice
+# Present options and wait for user response in natural language
+echo "📝 Proposed feature names based on your responses:"
+for i in "${!FEATURE_NAME_OPTIONS[@]}"; do
+    echo "$((i+1)). ${FEATURE_NAME_OPTIONS[i]}"
+done
+echo "$((${#FEATURE_NAME_OPTIONS[@]}+1)). ✏️ Suggest another name"
+echo ""
+echo "Please respond with:"
+echo "- The number of your choice (1, 2, 3, etc.)"
+echo "- Or propose entirely new name: 'my-custom-feature-name'"
+
+# STOP and wait for user response - do NOT proceed to seed creation
+exit 0
 ```
 
 **Feature Name Validation:**
