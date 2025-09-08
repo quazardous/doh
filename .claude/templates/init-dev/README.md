@@ -302,6 +302,12 @@ cp docker-compose.env .env
 - `docker-compose.env-docker` is versioned as example template
 - Sensitive variables to mask in debug logs per your needs
 
+**DOH_HELLOWORLD Best Practice**:
+- `DOH_HELLOWORLD` MUST be in `.env` file (application environment)
+- `DOH_HELLOWORLD` should NOT be in `docker-compose.env` (Docker configuration)
+- Auto-generated per environment using `date +%s | md5sum | cut -d' ' -f1`
+- Used for Hello World validation and frontend/backend integration testing
+
 ### Container Organization
 
 The AI generates a **container-organized structure** where each service has its own dedicated folder:

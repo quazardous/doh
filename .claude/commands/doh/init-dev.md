@@ -607,29 +607,23 @@ Each decision includes:
 - Known pitfall warnings
 ```
 
-**Framework-Specific Tool Requirements (AI-Detected via WebSearch):**
+**Framework-Specific Tool Requirements:**
 
-**🔍 DISCOVERY VIA WEBSEARCH:**
-AI uses WebSearch to discover satellite tools specific to each technology:
-- `"Django development requirements tools 2024"` → Discovers pip, python3-dev, libpq-dev
-- `"Laravel development requirements tools 2024"` → Discovers composer, php-fpm, unzip
-- `"Go development requirements tools 2024"` → Discovers go mod, ca-certificates
-- `"Rust development requirements tools 2024"` → Discovers cargo, build-essential
+🚨 **CRITICAL**: All framework-specific tools, CLI commands, project structures, and implementation patterns are documented in `.claude/templates/init-dev/FRAMEWORK_SPECIFICS.md`. 
 
-**📊 TOOL MATRIX BY TECHNOLOGY:**
+**AI MUST read this file for:**
+- Official CLI tools for each framework (django-admin, symfony, artisan, rails, etc.)
+- Project structure conventions
+- Environment variable management patterns  
+- Hello-doh implementation specifics
+- Dotenv cascade logic per framework
 
-| Technology | Dependency Manager | Build Tools | Database Libs | System Tools |
-|-------------|------------------|-------------|---------------|---------------|
-| **PHP** (Laravel/Symfony) | `composer` | `git, unzip` | `php-mysql, php-pgsql` | `php-fpm, nginx` |
-| **Python** (Django/FastAPI) | `pip` | `build-essential, python3-dev` | `libpq-dev, libmysqlclient-dev` | `git, curl` |
-| **Node.js** (Express/Nest) | `npm/yarn` | `python3, build-essential` | `mysql2, pg` (via npm) | `git, curl` |
-| **Go** | `go mod` | `git, ca-certificates` | Drivers via go mod | `git, curl` |
-| **Rust** | `cargo` | `build-essential, gcc` | Crates via cargo | `git, curl` |
-| **Ruby** (Rails) | `bundler/gem` | `build-essential, ruby-dev` | `libpq-dev, libmysqlclient-dev` | `git, curl` |
-| **Java** (Spring) | `maven/gradle` | `openjdk, git` | JDBC via maven | `git, curl` |
-| **.NET** | `dotnet` | `git` | NuGet packages | `git, curl` |
-
-**🚨 CRITICAL RULE:** Each technology has its own tools - do not mix between technologies.
+**Key Reference Points:**
+- Framework CLI priority order and commands
+- hello-doh target implementation patterns
+- Environment variable naming conventions
+- Project structure and file organization
+- Dependency management approaches per framework
 
 **Framework Tool Cascade Installation (AI-Adaptive):**
 
@@ -955,6 +949,8 @@ services:
 
 ### 1. Analyze Request & Research Stack + Hints
 
+🚨 **CRITICAL**: AI MUST first read `.claude/templates/init-dev/FRAMEWORK_SPECIFICS.md` to understand framework-specific patterns, CLI tools, and implementation details before proceeding.
+
 **Natural Language Processing:**
 ```text
 Input: "Python Django with PostgreSQL in ./docker directory"
@@ -962,6 +958,7 @@ Input: "Python Django with PostgreSQL in ./docker directory"
 → Database: PostgreSQL
 → Directory: ./docker/
 → Inferred needs: Web framework + ORM + Database + Testing + Linting
+→ Check FRAMEWORK_SPECIFICS.md for Django-specific patterns
 ```
 
 **AI-Driven Research (Tech-Adaptive Sources) + Fallback Hints:**
@@ -993,12 +990,14 @@ Input: "Python Django with PostgreSQL in ./docker directory"
   💡 **HINT COMPATIBILITY:** Check matrix: https://docs.djangoproject.com/en/stable/releases/
 - Select appropriate database client and ORM migrations strategy
   💡 **HINT:** If migration fails → check DATABASE_URL format in .env
-- **Create Framework-Native Console Commands:**
-  - Symfony → `src/Command/HelloWorldCommand.php` using Symfony Console Component
-  - Laravel → `app/Console/Commands/DohHelloWorld.php` using Artisan
-  - Django → `management/commands/doh_hello_world.py` using Django Management
-  - Rails → `lib/tasks/doh.rake` using Rake tasks
-  - Node.js → `package.json` scripts + `scripts/doh-hello-world.js`
+- **Create Framework-Native Console Commands & Web Endpoints (hello-doh target):**
+  
+**🚨 CRITICAL: Every stack MUST include a working `hello-doh` target in Makefile. See `.claude/templates/init-dev/FRAMEWORK_SPECIFICS.md` for complete implementation details per framework including:**
+- Framework CLI commands to use (make:controller, startapp, generate, etc.)
+- Project structure conventions and file locations
+- Environment variable patterns and dotenv cascade logic
+- Hello-doh web + CLI implementation specifics
+- DOH_HELLOWORLD validation patterns
 
 **Dynamic Template Processing:**
 ```text
@@ -1404,36 +1403,46 @@ make worker-inspect     # inspect active tasks and worker stats
 - **Inspector tools:** Real-time task and worker monitoring
 
 **AI Self-Validation Process + Debug Escalation (3 attempts max):**
-1. **Generate stack files** (including supervisord.conf if workers detected)
+1. **Generate stack files** (including supervisord.conf if workers detected + hello-doh Makefile target)
    💡 **HINT:** If generation fails → check templates source + write permissions
-2. **Run `make dev`** 
+2. **Run `make dev`** → Start Docker containers 
    💡 **HINT:** If make dev fails → `export UID && export GID=$(id -g)` then retry
-3. **Test console Hello World** → If fails: analyze error, debug, retry
+3. **Run `make dev-setup`** → Install dependencies post-build (pip, composer, npm, etc.)
+   💡 **HINT:** Must complete BEFORE any hello world tests - dependencies required
+4. **Test framework hello** → Verify official framework hello world works (Django welcome, Symfony demo, etc.)
+   💡 **HINT:** This validates Docker + framework + dependencies are correctly installed
+5. **Run `make hello-doh`** → Creates framework structures + AI generates hello world files
+   💡 **HINT:** Must use framework CLI tools (make:controller, startapp, generate, etc.) then AI code generation
+6. **Test hello-doh console** → CLI command showing DOH_HELLOWORLD → If fails: analyze error, debug, retry
    💡 **HINT:** Logs console dans `./var/log/app/django.log` ou framework équivalent
-4. **Test web Hello World** → If fails: analyze error, debug, retry  
+7. **Test hello-doh web** → `/hello` endpoint showing DOH_HELLOWORLD → If fails: analyze error, debug, retry  
    💡 **HINT:** Check routing Traefik + certificats SSL + firewall ports 80/443
-5. **Test Hello-DB** (if database) → If fails: analyze error, debug, retry
+8. **Test Hello-DB** (if database) → If fails: analyze error, debug, retry
    💡 **HINT:** Connection string + user/password + database existence + network Docker
-6. **Test Hello-Workers** (if workers) → supervisorctl status, worker health checks
+9. **Test Hello-Workers** (if workers) → supervisorctl status, worker health checks
    💡 **HINT:** Process status + queue connectivity + worker logs dans `./var/log/supervisor/`
-7. **Final Status + Recovery Options:**
-   - **Interactive:** Ask user for help if 3 attempts fail + suggest manual fixes
-   - **Non-Interactive:** Abort with detailed error file → `./DOH_DEBUG_REPORT.md`
-   💡 **HINT ESCALATION:** If 3 failures → generate minimal template + detailed debug guide
+10. **Final Status + Recovery Options:**
+    - **Interactive:** Ask user for help if 3 attempts fail + suggest manual fixes
+    - **Non-Interactive:** Abort with detailed error file → `./DOH_DEBUG_REPORT.md`
+    💡 **HINT ESCALATION:** If 3 failures → generate minimal template + detailed debug guide
 
 ### 2. Development Environment Testing
 
 **Single Command Validation:**
 ```bash
-make hello-world
+make hello-doh
 # → Runs comprehensive stack validation:
-#   ✅ Starts all services
-#   ✅ Tests console command (backend priority)
-#   ✅ Tests web endpoint (backend + frontend if present)
+#   ✅ Creates framework structures (make:controller, startapp, generate, etc.)
+#   ✅ AI generates hello world web + CLI code with DOH_HELLOWORLD validation
+#   ✅ Tests console command showing DOH_HELLOWORLD value
+#   ✅ Tests web endpoint (/hello) showing DOH_HELLOWORLD value
 #   ✅ Tests Hello-DB (database connectivity)
 #   ✅ Tests Hello-Workers (supervisord process status)
 #   ✅ Checks linter container
 #   ✅ Displays all service URLs
+
+# Legacy compatibility (redirects to hello-doh):
+make hello-world  # → Same as hello-doh
 ```
 
 **Supervisord Group Integration Benefits:**

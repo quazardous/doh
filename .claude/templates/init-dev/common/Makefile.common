@@ -1,0 +1,211 @@
+# DOH Common Makefile Variables & Targets
+# To be included in framework-specific Makefiles
+# Usage: include ./docker/Makefile.common
+# =================================================================
+
+# Auto-detect user IDs and project name (SHARED ACROSS ALL FRAMEWORKS)
+export UID := $(shell id -u)
+export GID := $(shell id -g)
+export PROJECT_NAME := $(shell basename $(PWD) | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g')
+
+# Include environment variables from docker-compose.env (container names, etc.)
+-include ./docker-compose.env
+
+# Docker commands configuration - always use env-file (SHARED PATTERN)
+DOCKER_COMPOSE ?= docker compose --env-file ./docker-compose.env
+EXEC_CONTAINER = docker exec -it
+RUN_APP = $(DOCKER_COMPOSE) run --entrypoint '' --rm app
+
+# Common patterns for container commands (SHARED ACROSS ALL FRAMEWORKS)  
+# Use EXEC_CONTAINER for persistent containers (performance optimization)
+# Pattern: ${EXEC_CONTAINER} ${APP_CONTAINER} command
+# ⚠️ ATTENTION: L'IA doit adapter les commandes selon le gestionnaire de paquets:
+#    - Si yarn.lock existe → remplacer npm par yarn
+#    - Si pnpm-lock.yaml existe → remplacer npm par pnpm  
+#    - Si package-lock.json ou aucun → garder npm (défaut)
+#    - Si demande explicite utilisateur → respecter le choix
+
+
+# Colors for output (SHARED)
+GREEN := \033[32m
+YELLOW := \033[33m
+RED := \033[31m
+BLUE := \033[36m
+RESET := \033[0m
+
+# Common PHONY targets (SHARED)
+.PHONY: help dev dev-setup down sh logs ssl-setup ssl-cleanup
+.PHONY: frontend-dev frontend-build npm-install test lint-check status clean rebuild
+.DEFAULT_GOAL := help
+
+# =================================================================
+# COMMON TARGETS (SHARED ACROSS ALL FRAMEWORKS)
+# =================================================================
+
+dev: ## Start development environment
+	@echo "$(GREEN)Starting $(FRAMEWORK_NAME) + $(DATABASE_NAME) + $(FRONTEND_NAME) environment...$(RESET)"
+	@echo "$(YELLOW)Command: $(DOCKER_COMPOSE) up -d$(RESET)"
+	@$(DOCKER_COMPOSE) up -d
+	@echo "$(GREEN)Services started!$(RESET)"
+	@echo "   📱 App: https://app.$(PROJECT_NAME).localhost:$(HTTPS_PORT)"
+	@echo "   🗄️ Database: https://$(DB_ADMIN).$(PROJECT_NAME).localhost:$(HTTPS_PORT)"
+	@echo "   🔧 Traefik: http://localhost:$(TRAEFIK_PORT)"
+
+dev-setup: ## Install all post-build dependencies (after containers are up)
+	@echo "$(GREEN)Installing all dependencies for $(FRAMEWORK_NAME) + $(FRONTEND_NAME)...$(RESET)"
+	@echo "$(YELLOW)⚠️ AI should detect package manager: yarn.lock → yarn, pnpm-lock.yaml → pnpm, else → npm$(RESET)"
+	@echo "$(YELLOW)Installing Node.js dependencies...$(RESET)"
+	@echo "$(YELLOW)Command: ${EXEC_CONTAINER} ${APP_CONTAINER} npm install$(RESET)"
+	# ⚠️ Kitchen AI: Remove this line if no Node.js/webpack needed
+	# ⚠️ Kitchen AI: Replace npm with yarn/pnpm if detected or chosen
+	@${EXEC_CONTAINER} ${APP_CONTAINER} npm install
+	@echo "$(YELLOW)Framework-specific dependencies will be installed by framework targets$(RESET)"
+	@echo "$(GREEN)Dependencies installation completed!$(RESET)"
+
+down: ## Stop all services
+	@echo "$(YELLOW)Stopping all services...$(RESET)"
+	@echo "$(YELLOW)Command: $(DOCKER_COMPOSE) down$(RESET)"
+	@$(DOCKER_COMPOSE) down
+
+sh: ## Enter main application container
+	@echo "$(GREEN)Entering $(FRAMEWORK_NAME) app container...$(RESET)"
+	@echo "$(YELLOW)Command: ${EXEC_CONTAINER} ${APP_CONTAINER} /bin/bash$(RESET)"
+	@${EXEC_CONTAINER} ${APP_CONTAINER} /bin/bash
+
+logs: ## Show logs from all services
+	@echo "$(YELLOW)Command: $(DOCKER_COMPOSE) logs -f$(RESET)"
+	@$(DOCKER_COMPOSE) logs -f
+
+# =================================================================
+# SSL CERTIFICATE MANAGEMENT (SHARED)
+# =================================================================
+
+# SSL Certificate files as targets - make handles existence check automatically
+{{CONTAINER_DIR}}/traefik/certs/_wildcard.$(PROJECT_NAME).localhost.pem {{CONTAINER_DIR}}/traefik/certs/_wildcard.$(PROJECT_NAME).localhost-key.pem:
+	@if ! command -v mkcert > /dev/null 2>&1; then \
+		echo "$(RED)Error: mkcert not found. Install: https://github.com/FiloSottile/mkcert$(RESET)"; \
+		exit 1; \
+	fi
+	@echo "$(GREEN)Creating SSL certificates for *.$(PROJECT_NAME).localhost...$(RESET)"
+	@mkcert -install 2>/dev/null || true
+	@mkdir -p {{CONTAINER_DIR}}/traefik/certs
+	@mkcert "*.$(PROJECT_NAME).localhost" -cert-file {{CONTAINER_DIR}}/traefik/certs/_wildcard.$(PROJECT_NAME).localhost.pem -key-file {{CONTAINER_DIR}}/traefik/certs/_wildcard.$(PROJECT_NAME).localhost-key.pem
+	@echo "$(GREEN)SSL certificates created successfully!$(RESET)"
+
+ssl-setup: {{CONTAINER_DIR}}/traefik/certs/_wildcard.$(PROJECT_NAME).localhost.pem ## Setup SSL certificates with mkcert
+	@echo "$(GREEN)SSL certificates ready!$(RESET)"
+
+ssl-cleanup: ## Remove SSL certificates
+	@echo "$(YELLOW)Removing SSL certificates...$(RESET)"
+	@rm -f {{CONTAINER_DIR}}/traefik/certs/*
+	@echo "$(YELLOW)SSL certificates removed.$(RESET)"
+
+# =================================================================
+# FRONTEND MANAGEMENT (SHARED)
+# =================================================================
+
+frontend-dev: ## Start frontend development server
+	@echo "$(GREEN)Starting $(FRONTEND_NAME) development server...$(RESET)"
+	@echo "$(YELLOW)Command: ${EXEC_CONTAINER} ${APP_CONTAINER} supervisorctl start frontend:*$(RESET)"
+	@${EXEC_CONTAINER} ${APP_CONTAINER} supervisorctl start frontend:*
+
+frontend-build: ## Build frontend for production
+	@echo "$(GREEN)Building $(FRONTEND_NAME) for production...$(RESET)"
+	@echo "$(YELLOW)Command: ${EXEC_CONTAINER} ${APP_CONTAINER} npm run build$(RESET)"
+	# ⚠️ Kitchen AI: Replace npm with yarn/pnpm if detected or chosen
+	@${EXEC_CONTAINER} ${APP_CONTAINER} npm run build
+
+# =================================================================
+# PROCESS MANAGEMENT (SHARED)
+# =================================================================
+
+status: ## Show process status
+	@echo "$(YELLOW)Command: ${EXEC_CONTAINER} ${APP_CONTAINER} supervisorctl status$(RESET)"
+	@${EXEC_CONTAINER} ${APP_CONTAINER} supervisorctl status
+
+restart-web: ## Restart web server processes
+	@echo "$(YELLOW)Command: ${EXEC_CONTAINER} ${APP_CONTAINER} supervisorctl restart web:*$(RESET)"
+	@${EXEC_CONTAINER} ${APP_CONTAINER} supervisorctl restart web:*
+
+restart-workers: ## Restart worker processes
+	@echo "$(YELLOW)Command: ${EXEC_CONTAINER} ${APP_CONTAINER} supervisorctl restart workers:*$(RESET)"
+	@${EXEC_CONTAINER} ${APP_CONTAINER} supervisorctl restart workers:* 2>/dev/null || echo "$(YELLOW)No workers configured$(RESET)"
+
+restart-all: ## Restart all processes
+	@echo "$(YELLOW)Command: ${EXEC_CONTAINER} ${APP_CONTAINER} supervisorctl restart all$(RESET)"
+	@${EXEC_CONTAINER} ${APP_CONTAINER} supervisorctl restart all
+
+# =================================================================
+# MAINTENANCE (SHARED)
+# =================================================================
+
+clean: ## Clean up containers and volumes
+	@echo "$(YELLOW)Cleaning up Docker resources...$(RESET)"
+	@echo "$(YELLOW)Command: $(DOCKER_COMPOSE) down -v$(RESET)"
+	@$(DOCKER_COMPOSE) down -v
+	@echo "$(YELLOW)Command: docker system prune -f$(RESET)"
+	@docker system prune -f
+
+rebuild: ## Rebuild containers from scratch
+	@echo "$(YELLOW)Rebuilding all containers...$(RESET)"
+	@$(DOCKER_COMPOSE) down
+	@$(DOCKER_COMPOSE) build --no-cache
+
+# =================================================================
+# DEPENDENCIES (SHARED PATTERNS)
+# =================================================================
+
+npm-install: ## Install Node.js dependencies
+	@echo "$(GREEN)Installing Node.js dependencies...$(RESET)"
+	@echo "$(YELLOW)Command: ${EXEC_CONTAINER} ${APP_CONTAINER} npm install$(RESET)"
+	# ⚠️ Kitchen AI: Replace npm with yarn/pnpm if detected or chosen
+	@${EXEC_CONTAINER} ${APP_CONTAINER} npm install
+
+# =================================================================
+# TESTING & LINTING (SHARED INFRASTRUCTURE)
+# =================================================================
+
+lint-setup: ## Start linter container
+	@echo "$(GREEN)Starting linter container...$(RESET)"
+	@$(DOCKER_COMPOSE) --profile tools up -d linter
+
+# =================================================================
+# HELP INFRASTRUCTURE (SHARED)
+# =================================================================
+
+# Common help header function - framework Makefiles call this
+define help_header
+	@echo "$(BLUE)$(FRAMEWORK_EMOJI) $(FRAMEWORK_NAME) + $(DATABASE_NAME) + $(FRONTEND_NAME) Development$(RESET)"
+	@echo "$(BLUE)=================================================================$(RESET)"
+	@echo ""
+	@echo "$(YELLOW)📋 Docker Commands Used:$(RESET)"
+	@echo "   DOCKER_COMPOSE = $(DOCKER_COMPOSE)"
+	@echo "   RUN_APP = $(RUN_APP)"
+	@echo "   EXEC_APP = $(EXEC_APP)"
+	@echo ""
+	@echo "$(YELLOW)🚀 Quick Start:$(RESET)"
+	@echo "   make ssl-setup         - Setup SSL certificates"
+	@echo "   make $(FRAMEWORK_INIT) - Initialize $(FRAMEWORK_NAME) project"
+	@echo "   make dev-setup         - Install all dependencies"
+	@echo "   make dev               - Start development environment"
+	@echo ""
+	@echo "$(YELLOW)Available Commands:$(RESET)"
+endef
+
+# Common help footer
+define help_footer
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "   $(BLUE)%-20s$(RESET) %s\n", $$1, $$2}'
+endef
+
+# =================================================================
+# FRAMEWORK VARIABLES TO BE SET BY INCLUDING MAKEFILE
+# =================================================================
+# These should be defined in the framework-specific Makefile:
+# FRAMEWORK_NAME = Django | Symfony | Laravel | Rails
+# FRAMEWORK_EMOJI = 🐍 | 🎼 | 🎸 | 💎
+# DATABASE_NAME = MariaDB | PostgreSQL | SQLite
+# FRONTEND_NAME = Vue.js | React | Angular
+# FRAMEWORK_INIT = django-init | symfony-new | laravel-new | rails-new
+# HTTPS_PORT = 8443
+# TRAEFIK_PORT = 8080
+# DB_ADMIN = adminer | phpmyadmin
