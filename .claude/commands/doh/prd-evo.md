@@ -823,6 +823,7 @@ perl -pi -e "
     s/\{\{CURRENT_VERSION\}\}/${CURRENT_VERSION}/g;
     s/\{\{PRIMARY_DOMAIN\}\}/${PRIMARY_DOMAIN:-Business domain identified during research}/g;
     s/\{\{SUB_DOMAIN\}\}/${SUB_DOMAIN:-Sub-domain context from research}/g;
+    s/\{\{BUSINESS_DOMAIN\}\}/${BUSINESS_DOMAIN:-Business domain from research}/g;
     s/\{\{DAILY_OPERATIONS\}\}/${DAILY_OPERATIONS:-Daily operations from business research}/g;
     s/\{\{KEY_STAKEHOLDERS\}\}/${KEY_STAKEHOLDERS:-Key stakeholders from business research}/g;
     s/\{\{BUSINESS_MODEL\}\}/${BUSINESS_MODEL:-Business model from research}/g;

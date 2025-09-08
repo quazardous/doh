@@ -40,7 +40,12 @@ extended_context_reference:
 {{TECHNICAL_CONTEXT}}
 
 ## Business Context
-{{BUSINESS_CONTEXT}}
+**Domaine :** {{BUSINESS_DOMAIN}}
+**Opérations quotidiennes :** {{DAILY_OPERATIONS}}
+**Utilisateurs clés :** {{KEY_STAKEHOLDERS}}
+**Modèle financier :** {{BUSINESS_MODEL}}
+**Défis business :** {{BUSINESS_CHALLENGES}}
+**Métriques succès :** {{SUCCESS_METRICS}}
 
 ## Constraints
 {{CONSTRAINTS}}

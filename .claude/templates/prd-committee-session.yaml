@@ -1,0 +1,55 @@
+# PRD Committee Session State Template
+# This file tracks the progress of a committee session
+
+feature_name: ${FEATURE_NAME}
+description: ${DESCRIPTION}
+created: ${TIMESTAMP}
+last_updated: ${TIMESTAMP}
+
+# Current state
+current_round: 1  # 1, 2, or 3
+current_phase: draft  # draft, feedback, cto-analysis, user-checkpoint, paused
+status: active  # active, paused, completed, failed
+
+# Round tracking
+rounds:
+  round1:
+    status: in-progress  # not-started, in-progress, completed
+    phases:
+      draft: not-started  # not-started, completed
+      feedback: not-started  
+      cto_analysis: not-started
+      user_checkpoint: not-started
+    started_at: null
+    completed_at: null
+    
+  round2:
+    status: not-started
+    phases:
+      draft: not-started
+      feedback: not-started
+      cto_analysis: not-started
+      user_checkpoint: not-started
+    started_at: null
+    completed_at: null
+    
+  round3:
+    status: not-started
+    phases:
+      draft: not-started
+      feedback: not-started
+      cto_analysis: not-started
+      user_checkpoint: not-started
+    started_at: null
+    completed_at: null
+
+# User feedback collected
+user_feedback:
+  round1: null
+  round2: null
+  round3: null
+
+# Final outputs
+final_report_generated: false
+prd_created: false
+prd_path: null

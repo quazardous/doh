@@ -462,21 +462,41 @@ def check_convergence(session, round_num, config):
 ```python
 def invoke_agent(agent_config, context):
     """
-    Generic agent invocation.
-    Works with any agent type.
+    Generic agent invocation with MANDATORY sequential execution.
+    CRITICAL: Only ONE agent at a time to prevent memory issues.
     """
-    # Build prompt from orchestration
+    # Build minimal prompt from orchestration (memory optimization)
     orchestration = load_orchestration(agent_config.orchestration)
-    prompt = build_prompt(orchestration, context)
+    prompt = build_minimal_prompt(orchestration, context)
     
-    # Invoke via Task tool
+    # SEQUENTIAL ONLY: Invoke ONE agent and WAIT for completion
     result = Task(
         subagent_type=agent_config.agent,
         prompt=prompt,
         description=f"{context['phase']} - Round {context['round']}"
     )
     
+    # MANDATORY: Verify agent completed before returning
+    if not validate_agent_completion(result):
+        raise AgentExecutionError(f"Agent {agent_config.agent} failed to complete")
+    
+    # Memory cleanup after each agent
+    cleanup_agent_memory()
+    
     return result
+
+def build_minimal_prompt(orchestration, context):
+    """
+    Build memory-optimized prompt with reduced context.
+    """
+    # Only include essential context, not full history
+    minimal_context = {
+        'core': context.get('shared', {}),
+        'round': context.get('round', 1),
+        'phase': context.get('phase', 'draft'),
+        'guidance': context.get('user_guidance', {})
+    }
+    return build_prompt(orchestration, minimal_context)
 ```
 
 ## Output Generation

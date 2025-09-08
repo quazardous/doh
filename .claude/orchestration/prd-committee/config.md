@@ -38,14 +38,14 @@ convergence:
   early_exit: true
 
 user_checkpoints:
-  enabled: true                    # Enable user intervention after each round
-  mandatory: true                  # Require user confirmation before continuing
-  timeout_seconds: 300             # 5 minutes max wait for user input
+  enabled: false                   # DISABLED temporarily to fix memory issues
+  mandatory: false                 # Require user confirmation before continuing
+  timeout_seconds: 60              # Reduced timeout
   brief_style: concise             # concise|detailed
 
 timeouts:
-  draft_minutes: 8
-  feedback_minutes: 4
+  draft_minutes: 5                 # Reduced from 8 to avoid memory buildup
+  feedback_minutes: 3              # Reduced from 4
   analysis_minutes: 2
-  checkpoint_minutes: 5            # Max time for user checkpoint
+  checkpoint_minutes: 2            # Reduced from 5
 ```

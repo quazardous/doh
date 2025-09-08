@@ -84,27 +84,40 @@ elif phase_constraint == "single_agent":
   run only arbitrator agent
 ```
 
-**Sequential Execution:**
+**Sequential Execution (ENFORCED):**
 ```
 For each agent in manifest order:
-  Task(
+  # CRITICAL: Only ONE agent at a time
+  result = Task(
     subagent_type: agent_config.agent,
-    prompt: build_prompt(orchestration, context, current_step),
+    prompt: build_minimal_prompt(orchestration, context, current_step),
     timeout: manifest.get_timeout(current_step)
   )
-  # Wait for completion before next agent
+  # MANDATORY: Wait for completion before next agent
+  validate_agent_completion(result)
+  cleanup_agent_memory()
 ```
 
 **Memory-Optimized Sequential Execution:**
 ```
 For each agent sequentially:
-  # Clean context before next agent
-  Task(
+  # Clean context before next agent  
+  context = build_minimal_context(current_step)
+  
+  # ONE AGENT ONLY - enforced synchronous execution
+  result = Task(
     subagent_type: agent_config.agent, 
     prompt: build_minimal_prompt(orchestration, context, current_step),
     timeout: manifest.get_timeout(current_step)
   )
+  
+  # MANDATORY: Verify completion before continuing
+  if not result.success:
+    handle_agent_failure(agent_config.agent)
+    
   # Memory cleanup between agents
+  cleanup_agent_memory()
+  reduce_context_size()
 ```
 
 **Execution Constraints:**
@@ -130,10 +143,25 @@ For each agent sequentially:
 
 1. Read seed DTO to get manifest path and context data
 2. Read manifest to understand workflow structure  
-3. Execute workflow as defined by manifest
-4. Use Task tool to invoke agents specified by manifest
-5. Generate outputs as specified by manifest
-6. Apply manifest's completion criteria
+3. Validate agent configuration and availability before starting
+4. Execute workflow as defined by manifest
+5. Use Task tool to invoke agents specified by manifest (with error handling)
+6. Generate outputs as specified by manifest
+7. Apply manifest's completion criteria
+
+## Error Handling Requirements
+
+**Before starting any agent execution:**
+1. Validate that all agents specified in manifest exist
+2. Verify session directory structure is correctly initialized
+3. Check that manifest configuration is complete and valid
+4. Log diagnostic information about session start
+
+**During agent execution:**
+1. Capture and log any Task tool failures
+2. Provide clear error messages when agents cannot be spawned
+3. Maintain session state consistency even on partial failures
+4. Allow manual recovery or continuation after errors
 
 ## User Checkpoint Integration
 
