@@ -17,10 +17,10 @@ providers:
 
 log:
   level: INFO
-  filePath: /logs/traefik.log
+  filePath: /app/var/log/traefik/traefik.log
 
 accessLog:
-  filePath: /logs/traefik_access.log
+  filePath: /app/var/log/traefik/traefik_access.log
 
 entryPoints:
   web:

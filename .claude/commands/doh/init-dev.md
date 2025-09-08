@@ -2,9 +2,13 @@
 allowed-tools: Bash, Glob, Grep, LS, Read, Write, Edit, MultiEdit, WebFetch
 ---
 
-# Initialize Development Stack - AI-Driven Stack Creation
+# Initialize Development Stack - HOWTO Amélioré pour Dev Docker Efficace
 
-Creates a modern, pragmatic development environment by analyzing requested stack and cherry-picking from DOH templates. Uses web research to discover current best practices for the specific stack and translates them into DOH-compliant Docker setup.
+Guide AI-assisté pour créer rapidement un environnement Docker de développement moderne et pragmatique. Combine analyse de stack intelligente + templates DOH + recherche web des best practices actuelles + validation complète.
+
+> **🎯 OBJECTIF:** Aller plus vite vers une dev Docker efficace avec de bons patterns architecturaux
+> 
+> **🧠 PHILOSOPHIE:** Templates "kitchen" + hints de debug + AI auto-corrective pour réussir même si l'IA ne fait pas parfait du premier coup
 
 ## Usage
 ```
@@ -15,15 +19,39 @@ Creates a modern, pragmatic development environment by analyzing requested stack
 /doh:init-dev "Python FastAPI microservice with MongoDB"
 ```
 
-## AI-Driven Approach
+## Approche AI + Hints de Debug
 
-This command is **AI-piloted**, not scripted, because each stack has unique requirements and evolving best practices:
+⚡ **Command AI-piloté** avec système de hints intégrés pour réussir même si l'IA échoue au premier coup:
 
-### 1. Stack Analysis (Detection vs Manual)
+### 🗯 Système de Debug Hints (Nouveauté)
+
+**Philosophy:** Le développeur va **FORCÉMENT** devoir débugger/ajuster, donc on anticipe les problèmes courants:
+
+```bash
+# Hints automatiquement ajoutés dans les fichiers générés:
+# HINT: If permission denied -> check UID/GID in docker-compose.yml
+# HINT: If build fails -> try 'make clean && make rebuild'
+# HINT: If database connection fails -> check .env DATABASE_URL format
+# HINT: Alternative stack configs at https://github.com/laradock/laradock
+```
+
+**Types de Hints Intégrés:**
+- 🔧 **Hints de Dépannage:** Problèmes Docker courants (permissions, ports, SSL)
+- 🔄 **Hints d'Alternatives:** Liens vers autres approches si pattern DOH ne convient pas
+- 📚 **Hints de Ressources:** Documentation officielle, exemples communautaires
+- 🚀 **Hints d'Optimisation:** Améliorations performance, sécurité, workflows
+
+### 🎯 AI Auto-Correctif
+
+L'IA teste ses propres générations et se corrige automatiquement:
+
+### 1. Stack Analysis avec Debug Hints
 
 **Manual Mode** (`/doh:init-dev "Python Django..."`):
 - Parse natural language description  
 - Identify components from user input
+- 💡 **HINT:** Si description ambiguë → WebSearch "{{framework}} development setup 2024" pour clarifier
+- 💡 **HINT ALTERNATIVE:** Si pas satisfait → essayer Detection Mode: `/doh:init-dev --detect`
 
 **Detection Mode** (`/doh:init-dev --detect`):
 - **File Analysis:** Examine existing project files for technology indicators
@@ -34,25 +62,41 @@ This command is **AI-piloted**, not scripted, because each stack has unique requ
   Cargo.toml → Rust stack
   go.mod → Go stack
   ```
+  💡 **HINT:** Si détection échoue → vérifier extensions: `.py`, `.js`, `.php` dans `/src` ou `/app`
+  💡 **HINT RESSOURCE:** Documentation patterns https://12factor.net/config
+  
 - **Dependency Analysis:** Parse dependency files for framework detection
   ```text
   Django in requirements.txt → Django framework
   express in package.json → Express.js framework
   laravel/framework in composer.json → Laravel framework
   ```
+  💡 **HINT DEBUG:** Si framework pas détecté → check versions dans requirements.txt/package.json
+  💡 **HINT ALTERNATIVE:** Override manuel: `/doh:init-dev "Force Django avec PostgreSQL"`
+  
 - **README Analysis:** Extract technology mentions and setup instructions
 - **Existing Docker Analysis:** Check current docker-compose.yml for services
 - **Database Detection:** Look for database connection configs and migrations
+  💡 **HINT:** Si DB pas détectée → regarder dans `settings.py`, `config/database.php`, `.env.example`
 
-### 2. Cherry-Pick from Templates
+### 2. Cherry-Pick Templates avec Fallback Hints
 - Analyze `.claude/templates/init-dev/` for relevant inspiration
 - Select appropriate base templates (common/, stacks/, services/)
 - Adapt template patterns to detected/requested stack
 
-### 3. Research Current Best Practices (Tech-Adaptive)
+💡 **HINT ARCHITECTURE:** Templates = "kitchen" de départ, PAS solution finale
+💡 **HINT DEBUG:** Si template inadapté → check `.claude/templates/init-dev/stacks/{{your-framework}}/` pour alternatives
+💡 **HINT RESSOURCE:** Inspiration externe: https://github.com/laradock/laradock, https://github.com/dunglas/symfony-docker
+💡 **HINT CUSTOM:** Créer son template dans `.claude/templates/init-dev/stacks/custom/` si besoin récurrent
+
+### 3. Research + Hints Ressources (Tech-Adaptive)
 - **Mode Interactif:** WebSearch with tech-specific sources for latest recommendations
 - **Mode Non-Interactif:** Use explicitly specified versions and tools only
 - **Tech-Specific Sources:** Adapt research to technology ecosystem
+
+💡 **HINT PERFORMANCE:** Si WebSearch lent → utiliser cache local ou versions template par défaut
+💡 **HINT OFFLINE:** Si pas d'internet → utiliser `.claude/templates/init-dev/offline-defaults.json`
+💡 **HINT OVERRIDE:** Forcer version spécifique: `"Python 3.11 Django 4.2 avec PostgreSQL 14"`
 
 **Source Selection by Technology:**
 ```text
@@ -138,15 +182,19 @@ NEXT_PUBLIC_API_URL=${API_URL}    # Next.js prefix
 **Generated Environment Files:**
 ```bash
 # Template-generated files with framework-specific adaptations:
-.env                    # Development: FRONTEND_API_URL=http://localhost:8000
+.env                    # Development: FRONTEND_API_URL=http://localhost:8000, DOH_SECRET=abc123...
 .env.test              # Testing: DATABASE_URL=sqlite:///var/test.db, QUEUE_DRIVER=sync
 .env.example           # Documentation: All variables with example values
 
 # Framework-specific frontend variable mapping:
 React:     REACT_APP_API_URL=${FRONTEND_API_URL}     # Exposed to window.process.env
+           REACT_APP_DOH_SECRET=${DOH_SECRET}        # Validation via frontend
 Vue:       VUE_APP_API_URL=${FRONTEND_API_URL}       # Exposed to process.env
+           VUE_APP_DOH_SECRET=${DOH_SECRET}          # Validation via frontend
 Vite:      VITE_API_URL=${FRONTEND_API_URL}          # Exposed to import.meta.env
+           VITE_DOH_SECRET=${DOH_SECRET}             # Validation via frontend
 Next.js:   NEXT_PUBLIC_API_URL=${FRONTEND_API_URL}   # Exposed to process.env
+           NEXT_PUBLIC_DOH_SECRET=${DOH_SECRET}      # Validation via frontend
 ```
 
 **Framework-Specific Dotenv Cascading (AI-Driven Detection):**
@@ -251,20 +299,25 @@ Règle PHP: Toujours php:X.X-fpm comme image finale (simplicité)
 - **Alternative Avoided:** Multiple app containers (pollutes namespace, complicates dev workflow)
 - **Supervisord Benefits:** Process management, log aggregation, unified container access via `make sh`
 
-### 4. Translate to DOH Patterns
+### 4. Translate to DOH Patterns avec Error Hints
 - Apply DOH principles (Docker + Traefik + mkcert + Hello World)
 - Ensure zero permission issues (UID/GID matching)
 - Create project-specific service selection
 - Generate working Hello World for validation
+
+💡 **HINT PERMISSIONS:** Si erreurs 403/permisions → export UID && export GID=$(id -g) avant docker compose
+💡 **HINT PORTS:** Si conflit ports → modifier EXTERNAL_HTTP_PORT/EXTERNAL_HTTPS_PORT dans docker-compose.env
+💡 **HINT SSL:** Si certificats invalides → rm -rf docker/certs/* && make ssl-setup
+💡 **HINT TROUBLESHOOT:** Logs complets: make logs ou docker compose logs -f {{service}}
 
 ### Directory Customization
 - User can specify directory: "in ./docker" → creates files in `./docker/`
 - Default: `./docker-dev/` (DOH standard)
 - Respects user preference while maintaining DOH patterns
 
-## Core Philosophy
+## Core Philosophy + Patterns de Debug
 
-### COPY vs Volume Mount Rules (STRICT)
+### COPY vs Volume Mount Rules + Debug Hints (STRICT)
 
 **🚨 COPY FORBIDDEN for:**
 - Application code (`/app/*` directory)
@@ -273,7 +326,11 @@ Règle PHP: Toujours php:X.X-fpm comme image finale (simplicité)
 - Environment files (`.env`, `settings.py`)
 - Anything owned by non-root users in container
 
-### Build vs Dependencies Rules (DEV OPTIMIZATION)
+💡 **HINT DEBUG COPY:** Si changements code pas visibles → vérifier volumes dans docker-compose.yml
+💡 **HINT ALTERNATIVE:** Si volume mount problématique → essayer bind mounts ou named volumes
+💡 **HINT PERFORMANCE:** Si volumes lents sur Windows → essayer Docker Desktop WSL2
+
+### Build vs Dependencies Rules + Troubleshooting (DEV OPTIMIZATION)
 
 **🚨 Dependencies NOT in Dockerfile build for development:**
 ```dockerfile
@@ -342,12 +399,16 @@ rebuild: clean-deps dev-setup
 	docker compose build --no-cache
 ```
 
-**Benefits:**
+**Benefits + Debug Hints:**
 - **Fast Docker builds** - Only runtime changes trigger rebuild (seconds vs minutes)
+  💡 **HINT:** Si build lent → check .dockerignore pour exclure node_modules, .git, var/
 - **Fast dependency updates** - `make update-deps` without container rebuild
+  💡 **HINT:** Si update échoue → essayer `make clean-deps` puis `make dev-setup`
 - **Instant code changes** - Volume mounts for immediate feedback
+  💡 **HINT:** Si pas de hot-reload → check que le framework supporte (webpack-dev-server, etc.)
 - **Better caching** - System tools vs application dependencies separation  
 - **Flexible workflows** - `make dev`, `make update-deps`, `make clean-deps`
+  💡 **HINT:** Si commandes échouent → check que containers sont démarrés: `docker compose ps`
 
 **✅ COPY ACCEPTABLE ONLY for:**
 - System daemon configs (`/etc/mysql/`, `/etc/postgresql/`)
@@ -378,13 +439,19 @@ volumes:
   # - ./docker/nginx/myapp.conf.template:/etc/nginx/templates/myapp.conf.template:ro
 ```
 
-### Docker-Focused & Pragmatic
+### Docker-Focused & Pragmatic + Debugging
 - **Docker as standard** unless explicitly contraindicated
+  💡 **HINT:** Si Docker pose problème → alternatives: Vagrant, lima, podman, colima
 - **Volume mounts mandatory** - COPY forbidden for application code and user-level configs
+  💡 **HINT:** Si volumes ne marchent pas → check Docker Desktop file sharing settings
 - **Single app container** - Embed frontend build in backend container, avoid over-containerization
+  💡 **HINT:** Si trop complexe → exemple containers séparés: https://github.com/laradock/laradock
 - **Multi-project friendly** - `{service}.{project}.localhost` domains with `dev.project={PROJECT_NAME}` labels
-- **Data in user directory** - Database volumes in user-specified folder (./docker/data/ or ./docker-dev/data/)
+  💡 **HINT:** Si domaines marchent pas → check /etc/hosts ou utiliser http://localhost:8080
+- **Data in user directory** - Database volumes in user-specified folder (./docker/data/ ou ./docker-dev/data/)
+  💡 **HINT:** Si data perdue → check que volumes pointent vers bonne directory dans docker-compose.yml
 - **Linting containers** - Separate linter containers to avoid version conflicts (profile-based)
+  💡 **HINT:** Si linter échoue → démarrer avec: `docker compose --profile tools up -d linter`
 
 ### Template-Based Generation
 - Uses templates from `.claude/templates/init-dev/`
@@ -392,9 +459,9 @@ volumes:
 - Fetches current versions from official APIs
 - Modular template system for stacks and services
 
-## Implementation Workflow
+## Implementation Workflow avec Debug Checkpoints
 
-### 1. Analyze Request & Research Stack
+### 1. Analyze Request & Research Stack + Hints
 
 **Natural Language Processing:**
 ```text
@@ -405,24 +472,35 @@ Input: "Python Django with PostgreSQL in ./docker directory"
 → Inferred needs: Web framework + ORM + Database + Testing + Linting
 ```
 
-**AI-Driven Research (Tech-Adaptive Sources):**
+**AI-Driven Research (Tech-Adaptive Sources) + Fallback Hints:**
 - WebSearch: "Django 2024 best practices development setup site:djangoproject.com"
+  💡 **HINT OFFLINE:** Si WebSearch échoue → utiliser versions dans `.claude/templates/init-dev/defaults/django.json`
 - WebSearch: "Python Django recommended linters 2024" + PyPI trends analysis
-- WebSearch: "Django testing tools pytest vs unittest" 
+  💡 **HINT ALTERNATIVE:** Si incertain → utiliser stack standard: black + flake8 + mypy
+- WebSearch: "Django testing tools pytest vs unittest"
+  💡 **HINT RESSOURCE:** Benchmark comparatif: https://pytest-benchmark.readthedocs.io/
 - Tech-specific version detection: python.org + PyPI + Docker Hub python:x.x-slim
+  💡 **HINT DEBUG:** Si versions incompatibles → check compatibility matrix sur docs officielles
 
-**Template Cherry-Picking:**
+**Template Cherry-Picking + Hints:**
 - Select from `.claude/templates/init-dev/stacks/python/`
 - Check `.claude/templates/init-dev/services/postgres.yml`
 - Adapt `.claude/templates/init-dev/common/Makefile` for Django-specific commands
 
-### 2. Generate Stack-Specific Configuration
+💡 **HINT DEBUG:** Si template manque → créer depuis `.claude/templates/init-dev/stacks/_generic/`
+💡 **HINT INSPIRATION:** Templates communautaires: awesome-compose, docker-library samples
 
-**AI Decision Making:**
+### 2. Generate Stack-Specific Configuration + Debug Checkpoints
+
+**AI Decision Making + Debug Verification:**
 - Based on research, select optimal linters: `black`, `flake8`, `mypy`, `isort`
+  💡 **HINT:** Si linters posent problème → désactiver dans .flake8, mypy.ini temporairement
 - Choose testing framework: `pytest` (most popular in 2024)
+  💡 **HINT ALTERNATIVE:** Si pytest complexe → unittest native Django aussi valide
 - Determine Django version compatibility with Python version
+  💡 **HINT COMPATIBILITY:** Check matrix: https://docs.djangoproject.com/en/stable/releases/
 - Select appropriate database client and ORM migrations strategy
+  💡 **HINT:** Si migration échoue → vérifier DATABASE_URL format dans .env
 - **Create Framework-Native Console Commands:**
   - Symfony → `src/Command/HelloWorldCommand.php` using Symfony Console Component
   - Laravel → `app/Console/Commands/DohHelloWorld.php` using Artisan
@@ -440,25 +518,41 @@ Template Pattern → Generated Reality
 {{DIRECTORY}} → ./docker/ (user specified)
 ```
 
-### 3. Create DOH-Compliant Stack
+### 3. Create DOH-Compliant Stack + Validation Checkpoints
 
-**Essential Components (Always):**
+**Essential Components (Always) + Debug Hints:**
 - ✅ Docker Compose with Traefik routing
+  💡 **HINT:** Si Traefik pas accessible → check ports 8080/443 libres + firewall
+  💡 **HINT LOGS:** Logs Traefik dans `./var/log/traefik/` pour debugging routing
 - ✅ SSL certificates via mkcert 
+  💡 **HINT:** Si certificats invalides → `mkcert -install` puis `make ssl-setup`
 - ✅ UID/GID permission matching
-- ✅ Multi-project domain pattern: `app.{project}.local`
+  💡 **HINT:** Si permission denied → export UID && export GID=$(id -g) avant commandes
+- ✅ Multi-project domain pattern: `app.{project}.localhost`
+  💡 **HINT:** Si domaines marchent pas → utiliser http://localhost direct + ports
 - ✅ Makefile with `dev`, `sh`, `hello-world` targets
+  💡 **HINT:** Si make échoue → installer make: apt install make ou brew install make
 - ✅ Working Hello World endpoint + console command
+  💡 **HINT:** Si Hello World échoue → logs détaillés: make logs ou docker compose logs app
+  💡 **HINT LOGS:** Check aussi `./var/log/app/` et `./var/log/traefik/` pour routing
 
-**Stack-Specific Components:**
+**Stack-Specific Components + Debug Hints:**
 - ✅ Linter container with discovered best-practice tools
+  💡 **HINT:** Si linter fail → start container: `docker compose --profile tools up -d linter`
 - ✅ Testing framework setup with sample test
+  💡 **HINT:** Si tests échouent → check test DB config dans .env.test
 - ✅ Framework-specific dependencies (requirements.txt, package.json, etc.)
+  💡 **HINT:** Si dépendances cassées → `make clean-deps && make dev-setup`
 - ✅ Database service with persistent volumes
+  💡 **HINT:** Si DB connection fail → check `./var/log/mysql/` ou `./var/log/postgres/`
 - ✅ Dotenv configuration with security practices
+  💡 **HINT:** Si env vars pas prises → restart containers après changement .env
 - ✅ **Hello World Console Command** - CLI validation tool
+  💡 **HINT:** Si commande fail → `make sh` puis tester manuellement dans container
 - ✅ **Hello World Web Endpoint** - HTTP server validation
+  💡 **HINT:** Si 404/500 → check routing + logs dans `./var/log/app/`
 - ✅ **Supervisord Integration** - Single container for web + workers + daemons
+  💡 **HINT:** Si process crash → `supervisorctl status` + logs dans `./var/log/supervisor/`
 
 **Directory Structure Created:**
 ```
@@ -629,15 +723,21 @@ Rails + Sidekiq detected → supervisord.conf with:
 # → Perfect for automated project setup
 ```
 
-## Why AI-Driven Approach?
+## Why AI-Driven Approach? + Hints Pour Comprendre les Échecs
 
-**Not Scriptable Because:**
+**Not Scriptable Because + Debug Reality:**
 - Stack-specific best practices evolve rapidly
+  💡 **HINT:** Si best practices obsolètes → check date des sources + force update
 - Linting tools and versions change frequently  
+  💡 **HINT:** Si linters incompatibles → pins version exactes dans requirements
 - Framework-specific patterns vary significantly
+  💡 **HINT:** Si pattern incohérent → priorité à la doc officielle du framework
 - User preferences (directory structure, tooling) need flexibility
+  💡 **HINT:** Si structure gêne → adapter avec ln -s ou refactor paths
 - Current industry trends require real-time research
+  💡 **HINT OFFLINE:** Si pas d'internet → utiliser defaults.json + mise à jour manuelle
 - **Each technology has different official sources** (php.net, python.org, nodejs.org, etc.)
+  💡 **HINT:** Si sources inaccessibles → utiliser alternatives: GitHub trends, Docker Hub
 
 **Mode-Specific Behavior:**
 - **Interactive Mode:** WebSearch + user confirmation for ambiguities + **MANDATORY WAIT for user approval**
@@ -650,22 +750,31 @@ Rails + Sidekiq detected → supervisord.conf with:
 4. **SUPPORT MODIFICATIONS** - user can request changes to proposed stack
 5. **HANDLE CONFLICTS** - ask user about existing files before overwriting
 
-**AI Advantages:**
+**AI Advantages + Debug Reality:**
 - 🔍 Real-time web research for current best practices
+  💡 **HINT:** Si recherche échoue → fallback sur cache local + versions stable
 - 🧠 Context-aware decision making based on stack analysis
+  💡 **HINT:** Si décisions incohérentes → override manuel possible via options
 - 🎯 Intelligent template cherry-picking and adaptation
+  💡 **HINT:** Si template inadapté → modifier dans `.claude/templates/` pour réutilisation
 - 💡 Dynamic version detection and compatibility checking
+  💡 **HINT:** Si versions incompatibles → forcer versions spécifiques dans description
 - 🛠️ Custom Makefile generation with stack-appropriate commands
+  💡 **HINT:** Si Makefile bug → comparer avec `.claude/templates/common/Makefile`
 - ✅ **Self-validation via Hello World testing** - never declares success until working
+  💡 **HINT:** Si validation échoue 3 fois → générer rapport d'erreur détaillé
 
-## Testing Strategy - Isolated Test Environment
+## Testing Strategy - Isolated Test Environment + Debug Patterns
 
 ### Environment Variable Injection Pattern
-**The stack templates follow DOH testing principles:**
+**The stack templates follow DOH testing principles + Debug Hints:**
 
 1. **Container Level** - Inject test environment variable to app container
+   💡 **HINT:** Si env var pas injectée → check `environment:` section dans docker-compose.yml
 2. **Dotenv Level** - Application dotenv system handles environment routing  
+   💡 **HINT:** Si routing fail → vérifier cascade .env → .env.test dans app
 3. **Makefile Level** - Provide convenient test commands with proper env vars
+   💡 **HINT:** Si tests fail → tester manuellement: `docker compose exec -e APP_ENV=testing app pytest`
 
 **Stack-Specific Test Variables:**
 ```bash
@@ -676,17 +785,27 @@ Rails/Ruby:     RAILS_ENV=test           # Routes to test environment
 Node.js:        NODE_ENV=test            # Routes to test config
 ```
 
-**Generated Files:**
+**Generated Files + Debug Locations:**
 - **`.env.test`** template with test-optimized configuration
+  💡 **HINT:** Si config test bizarre → comparer avec .env pour comprendre overrides
 - **Makefile** test commands with environment injection
+  💡 **HINT:** Si commande test échoue → run manuellement pour voir erreur exacte
 - **Test isolation** via in-memory/SQLite databases
+  💡 **HINT:** Si isolation cassée → check que test DB != dev DB dans configs
 - **Coverage reports** in `./var/coverage/`
+  💡 **HINT:** Si pas de coverage → check que `./var/` writable + coverage installé
 
 ## Final Output & Testing
 
 ### 1. Hello World Implementation (AI Success Criteria)
 
 **🎯 CRITICAL: Stack creation is NOT complete until ALL Hello Worlds work!**
+
+💡 **HINT DEBUG HELLO WORLD:** Si Hello World échoue, suivre cette séquence de debug:
+1. `make logs` → checker logs de tous les services
+2. `make sh` → entrer dans container et tester manuellement
+3. Check `./var/log/app/`, `./var/log/traefik/`, `./var/log/supervisor/`
+4. Tester composants un par un: DB connection, web server, routing Traefik
 
 **Multi-Techno Hello World Strategy:**
 - **Backend Priority:** Main framework that handles database connections
@@ -704,17 +823,28 @@ python manage.py doh_hello_world        # Django Management Command
 rails runner "puts 'Hello DOH!'"       # Rails Runner
 npm run doh:hello                       # Node.js (package.json script)
 bundle exec rake doh:hello              # Ruby/Rake task
+
+# Expected output:
+# Hello DOH! Stack: Django + MariaDB + Vue.js
+# DOH_SECRET: a1b2c3d4e5f67890abcdef1234567890
+# Timestamp: 2025-01-08T14:30:45Z
 ```
 
 **Web Endpoint (HTTP validation):**
 ```bash
 # Test backend web hello world endpoint (priority)
 curl -k https://app.{project}.localhost/hello
-# Expected: {"message": "Hello from Django on DOH!", "timestamp": "..."}
+# Expected: {
+#   "message": "Hello from Django on DOH!",
+#   "stack": "Django + MariaDB + Vue.js", 
+#   "doh_secret": "a1b2c3d4e5f67890abcdef1234567890",
+#   "timestamp": "2025-01-08T14:30:45Z"
+# }
 
-# Frontend Hello World (if applicable)
+# Frontend Hello World (if applicable)  
 curl -k https://app.{project}.localhost/
-# Expected: React/Vue app with "Hello DOH!" message
+# Expected: React/Vue app showing "Hello DOH!" + DOH_SECRET
+# This validates: .env → docker-compose.yml → frontend build → browser exposure
 ```
 
 **Database Hello World (Framework Native CLI):**
@@ -766,16 +896,23 @@ make worker-inspect     # inspect active tasks and worker stats
 - **Separate shells:** `docker compose run` for isolated debugging sessions
 - **Inspector tools:** Real-time task and worker monitoring
 
-**AI Self-Validation Process (3 attempts max):**
+**AI Self-Validation Process + Debug Escalation (3 attempts max):**
 1. **Generate stack files** (including supervisord.conf if workers detected)
+   💡 **HINT:** Si génération échoue → check templates source + permissions écriture
 2. **Run `make dev`** 
+   💡 **HINT:** Si make dev échoue → `export UID && export GID=$(id -g)` puis retry
 3. **Test console Hello World** → If fails: analyze error, debug, retry
+   💡 **HINT:** Logs console dans `./var/log/app/django.log` ou framework équivalent
 4. **Test web Hello World** → If fails: analyze error, debug, retry  
+   💡 **HINT:** Check routing Traefik + certificats SSL + firewall ports 80/443
 5. **Test Hello-DB** (if database) → If fails: analyze error, debug, retry
+   💡 **HINT:** Connection string + user/password + database existence + network Docker
 6. **Test Hello-Workers** (if workers) → supervisorctl status, worker health checks
-7. **Final Status:**
-   - **Interactive:** Ask user for help if 3 attempts fail
-   - **Non-Interactive:** Abort with detailed error file
+   💡 **HINT:** Process status + queue connectivity + worker logs dans `./var/log/supervisor/`
+7. **Final Status + Recovery Options:**
+   - **Interactive:** Ask user for help if 3 attempts fail + suggest manual fixes
+   - **Non-Interactive:** Abort with detailed error file → `./DOH_DEBUG_REPORT.md`
+   💡 **HINT ESCALATION:** Si 3 échecs → générer template minimal + guide debug détaillé
 
 ### 2. Development Environment Testing
 
@@ -820,9 +957,9 @@ WRONG: Show config → Continue immediately → Generate files
 RIGHT: Show config → WAIT for user input → Process response → Then continue
 ```
 
-### 3. Installation Documentation (INITDEV.md)
+### 3. Installation Documentation avec Debug Guide (INITDEV.md)
 
-**CRITICAL:** After successful stack creation, generate `./INITDEV.md` with complete installation recap:
+**CRITICAL:** After successful stack creation, generate `./INITDEV.md` with complete installation recap + debug hints:
 
 **Template Structure:**
 ```markdown
@@ -869,6 +1006,8 @@ Generated by DOH `/doh:init-dev` on {{DATE}}
 - `./package.json` scripts section - Node.js npm scripts (if Node.js)
 - Backend Hello World: {{BACKEND_ENDPOINT}}
 - Frontend Hello World: {{FRONTEND_ENDPOINT}} (if applicable)
+- **DOH_SECRET Generation:** `date +%s | md5sum | cut -d' ' -f1` (unique per environment)
+- **Frontend Dotenv Validation:** DOH_SECRET exposed via VITE_DOH_SECRET/REACT_APP_DOH_SECRET validates build-time env injection
 
 ## Quick Start
 
@@ -975,33 +1114,53 @@ Generated by DOH `/doh:init-dev` on {{DATE}}
 ✅ **Frontend Integration:** {{FRONTEND_RESULT}} (if applicable)
 ✅ **Linter Container:** {{LINTER_RESULT}}
 
-## Troubleshooting
+## Troubleshooting + Debug Hints Complets
 
 **Permission Issues:**
 - Check UID/GID mapping in docker-compose.yml
 - Ensure ./var/ directories are writable
+- 💡 **HINT:** `export UID && export GID=$(id -g)` avant toutes commandes Docker
 
 **SSL Certificate Issues:**
 - Run `mkcert -install` first
 - Copy certificates to ./docker/certs/
+- 💡 **HINT:** Si certificats expirent → `make ssl-setup` pour régénérer
+- 💡 **HINT ALTERNATIVE:** Utiliser http://localhost:8080 sans HTTPS
 
 **Database Connection Issues:**  
 - Check DATABASE_URL in .env
 - Ensure database container is running: `docker compose ps`
+- 💡 **HINT LOGS:** Check `./var/log/mysql/` ou `./var/log/postgres/` pour erreurs DB
+- 💡 **HINT CONNECTION:** Tester: `docker compose exec db mysql -u root -p` (MySQL)
 
 **Worker Process Issues:**
 - Check supervisord status: `make sh` then `supervisorctl status`
 - Debug single worker: `make worker-debug`
 - Check worker logs: `make logs-workers`
+- 💡 **HINT PROCESS:** Si worker crash → `supervisorctl restart workers:*`
+- 💡 **HINT DEBUG:** Logs supervisord dans `./var/log/supervisor/`
+
+**Common Debug Paths:**
+- App logs: `./var/log/app/`
+- Traefik logs: `./var/log/traefik/`
+- Database logs: `./var/log/mysql/` ou `./var/log/postgres/`
+- Worker logs: `./var/log/supervisor/`
+- Web server logs: `./var/log/nginx/` (si applicable)
+
+**Quick Debug Commands:**
+- `make logs` → Tous les logs en temps réel
+- `make sh` → Shell dans container principal  
+- `docker compose ps` → Status de tous les services
+- `docker compose exec app supervisorctl status` → Status des process
 
 ---
 *Generated by DOH init-dev on {{TIMESTAMP}}*
 *Framework: {{FRAMEWORK}} {{VERSION}} | Database: {{DATABASE}} {{VERSION}}*
 ```
 
-### 4. Final Synthesis Report
+### 4. Final Synthesis Report + Next Steps Debugging
 
-**After successful creation, display:**
+**After successful creation (ou échec avec debug guide), display:**
 ```text
 🎉 DOH Development Stack Created Successfully
 ============================================
@@ -1036,11 +1195,15 @@ make hello-world
 ✅ Web Hello World: WORKING  
 ✅ Stack creation: COMPLETE
 
-📝 **Next Steps:**
+📝 **Next Steps + Debug Checkpoints:**
 1. make dev          # Start development environment
+   💡 Si échoue → export UID && export GID=$(id -g) puis retry
 2. make hello-world  # Validate everything works
+   💡 Si échoue → make logs pour voir erreurs + check INITDEV.md troubleshooting
 3. make sh          # Enter main app container  
+   💡 Pour debug manuel + tester composants individuellement
 4. Start coding! 🚀
+   💡 Hot-reload doit marcher, sinon check volumes dans docker-compose.yml
 
 ⚠️ **Validation Results:**
 ✅ Console Hello World: WORKING (Django management command)
@@ -1071,29 +1234,53 @@ make hello-world
 /doh:init-dev --detect                           → uses ./docker-dev/ (default)
 ```
 
-## Key Features
+## Key Features + Debug Philosophy
 
-### Template-Based & Up-to-Date
+### Template-Based & Up-to-Date + Fallback Robuste
 - **Modular templates** from `.claude/templates/init-dev/`
+  💡 **HINT:** Si template manque → créer depuis `_generic/` + adapter
 - **Current versions** fetched from official APIs at runtime
+  💡 **HINT OFFLINE:** Si API inaccessible → utiliser `offline-defaults.json`
 - **Flexible composition** of services and stacks
+  💡 **HINT:** Templates = point de départ, customisation attendue et normale
 
-### Linter Integration  
+### Linter Integration + Debug Support
 - **Separate containers** for linting tools per stack
+  💡 **HINT:** Si linter fail → `docker compose --profile tools up -d linter`
 - **Version isolation** - no conflicts with main application
+  💡 **HINT:** Si conflit versions → pin versions exactes dans Dockerfile.linter
 - **Team standardization** - same tools for everyone
+  💡 **HINT CUSTOM:** Override linters dans `.claude/templates/custom/linters.yml`
 - **Profiles support** - start linters only when needed
+  💡 **HINT PERFORMANCE:** `make lint-start` seulement quand nécessaire
 
-### Multi-Project Support
+### Multi-Project Support + Conflict Resolution
 - **Domain isolation** via `{service}.{project}.localhost`
+  💡 **HINT:** Si domaines marchent pas → utiliser ports directs http://localhost:8000
 - **SSL certificates** with mkcert wildcards
+  💡 **HINT:** Si certificats posent problème → désactiver HTTPS temporairement
 - **Configurable ports** - Traefik ports via environment variables to avoid dev machine conflicts
+  💡 **HINT PORTS:** Modifier EXTERNAL_HTTP_PORT/EXTERNAL_HTTPS_PORT si occupés
 - **Project namespacing** in all configurations
+  💡 **HINT:** PROJECT_NAME auto-détecté depuis nom directory
 
-### Developer Experience
+### Developer Experience + Recovery Patterns
 - **One command setup** - `make dev-setup && make dev`
+  💡 **HINT:** Si setup échoue → debug étape par étape avec `make dev-setup` puis `make dev`
 - **Comprehensive Makefile** with linting, database, and dev commands
-- **Quick start guide** - INSTADEV.md with stack-specific examples
+  💡 **HINT:** `make help` pour voir toutes les commandes disponibles
+- **Quick start guide** - INITDEV.md with stack-specific examples
+  💡 **HINT:** INITDEV.md = reference complète pour troubleshooting
 - **Template documentation** - clear extension points
+  💡 **HINT EXTEND:** Templates dans `.claude/templates/` modifiables pour besoins custom
 
-This refactored approach makes the command much more maintainable and extensible while keeping the core logic focused on orchestration rather than template content.
+### 🧠 Debug Philosophy Intégrée
+**"L'IA va échouer, le dev va devoir debugger" - on l'aide proactivement:**
+- Hints automatiques dans tous les fichiers générés
+- Logs centralisés dans `./var/log/`
+- Commandes de debug rapides dans Makefile
+- Documentation troubleshooting complète
+- Escalation guidée si 3 tentatives AI échouent
+- Templates minimal + guide debug si tout échoue
+
+💡 **MÉTA-HINT:** Ce HOWTO lui-même évolue - contribuer améliorations dans `.claude/commands/doh/init-dev.md`
