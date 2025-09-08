@@ -1,0 +1,15 @@
+{
+  "scripts": {
+    "doh:hello": "node scripts/doh-hello-world.js",
+    "doh:hello-db": "node scripts/doh-hello-db.js",
+    "doh:hello-web": "curl -s http://localhost:3000/api/hello || echo 'Web server not ready'",
+    "dev": "nodemon app.js",
+    "start": "node app.js",
+    "test": "NODE_ENV=test jest",
+    "test:coverage": "NODE_ENV=test jest --coverage"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0",
+    "jest": "^29.0.0"
+  }
+}

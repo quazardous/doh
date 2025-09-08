@@ -1,0 +1,59 @@
+<?php
+
+namespace App\Command;
+
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
+use Doctrine\DBAL\Connection;
+
+#[AsCommand(
+    name: 'app:hello-world',
+    description: 'DOH Hello World validation command',
+)]
+class HelloWorldCommand extends Command
+{
+    public function __construct(
+        private Connection $connection
+    ) {
+        parent::__construct();
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        $io = new SymfonyStyle($input, $output);
+
+        $io->title('DOH Hello World - Symfony Console');
+        
+        // Basic Hello World
+        $io->success('✅ Console Hello World: Symfony Console Component working!');
+        
+        // Environment validation
+        $env = $_ENV['APP_ENV'] ?? 'unknown';
+        $io->info("Environment: {$env}");
+        
+        // Database connectivity test
+        try {
+            $result = $this->connection->fetchOne('SELECT 1');
+            $platform = $this->connection->getDatabasePlatform()->getName();
+            $io->success("✅ Database Hello World: {$platform} connectivity working!");
+        } catch (\Exception $e) {
+            $io->error("❌ Database connectivity failed: " . $e->getMessage());
+            return Command::FAILURE;
+        }
+
+        // Dotenv cascade validation
+        $dotenvFiles = ['.env', '.env.local', ".env.{$env}", ".env.{$env}.local"];
+        $io->section('Dotenv Cascade Status:');
+        foreach ($dotenvFiles as $file) {
+            $status = file_exists($file) ? '✅ Found' : '⚪ Optional';
+            $io->writeln("  {$file}: {$status}");
+        }
+
+        $io->success('🎉 Symfony DOH Hello World complete!');
+        
+        return Command::SUCCESS;
+    }
+}

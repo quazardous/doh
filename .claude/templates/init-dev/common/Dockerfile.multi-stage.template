@@ -1,0 +1,66 @@
+# Multi-stage Dockerfile for cherry-picking framework-specific tools
+# Adapted based on detected stack requirements
+
+# Stage 1: Node.js tools (if frontend detected)
+FROM node:20-alpine AS node-tools
+RUN npm install -g yarn
+# Tools are available at: /usr/local/bin/node, /usr/local/bin/npm, /usr/local/bin/yarn
+
+# Stage 2: PHP tools (if PHP detected)
+FROM composer:2 AS php-tools
+# Composer is available at: /usr/bin/composer
+
+# Stage 3: Python tools (if Python detected) 
+FROM python:3.12-slim AS python-tools
+RUN pip install --no-cache-dir pip-tools
+# pip, pip-tools available in /usr/local/bin/
+
+# Stage 4: Main application container
+FROM {{BASE_IMAGE}}
+
+# Install system dependencies (framework-specific)
+RUN apt-get update && apt-get install -y \
+    # Universal tools
+    git \
+    curl \
+    unzip \
+    zip \
+    supervisor \
+    sudo \
+    # Framework-specific dependencies (AI-detected)
+{{FRAMEWORK_DEPENDENCIES}} \
+    && rm -rf /var/lib/apt/lists/*
+
+# Cherry-pick tools from other stages (AI-determined based on stack)
+{{COPY_FROM_STAGES}}
+
+# Framework-specific extensions/configurations
+{{FRAMEWORK_EXTENSIONS}}
+
+# UID/GID Arguments (from docker-compose.yml)
+ARG UID=1000
+ARG GID=1000
+
+# Configure user with dynamic UID/GID (framework-specific user)
+{{USER_CONFIGURATION}}
+
+# Working directory
+WORKDIR /app
+
+# Framework-specific dependency installation
+{{DEPENDENCY_INSTALLATION}}
+
+# Copy application code
+COPY . .
+
+# Framework-specific permissions and setup
+{{FRAMEWORK_SETUP}}
+
+# Framework-specific runtime user
+{{RUNTIME_USER}}
+
+# Expose framework-specific ports
+{{EXPOSE_PORTS}}
+
+# Start command (supervisord with framework processes)
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]

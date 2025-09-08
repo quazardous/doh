@@ -1,0 +1,49 @@
+#!/usr/bin/env python3
+
+from django.core.management.base import BaseCommand
+from django.db import connection
+from django.conf import settings
+import os
+
+
+class Command(BaseCommand):
+    help = 'DOH Hello World validation command'
+
+    def handle(self, *args, **options):
+        self.stdout.write(self.style.HTTP_INFO('🚀 DOH Hello World - Django Management Command'))
+        
+        # Basic Hello World
+        self.stdout.write(self.style.SUCCESS('✅ Console Hello World: Django Management Command working!'))
+        
+        # Environment validation
+        settings_module = os.environ.get('DJANGO_SETTINGS_MODULE', 'unknown')
+        debug_mode = 'DEBUG=True' if settings.DEBUG else 'DEBUG=False'
+        self.stdout.write(f"Settings Module: {settings_module}")
+        self.stdout.write(f"Environment: {debug_mode}")
+        
+        # Database connectivity test
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute('SELECT 1')
+                vendor = connection.vendor
+                self.stdout.write(self.style.SUCCESS(f'✅ Database Hello World: {vendor} connectivity working!'))
+        except Exception as e:
+            self.stdout.write(self.style.ERROR(f'❌ Database connectivity failed: {e}'))
+            return
+
+        # Cache status
+        cache_backend = settings.CACHES['default']['BACKEND'].split('.')[-1]
+        self.stdout.write(f"Cache Backend: {cache_backend}")
+
+        # Dotenv files validation
+        self.stdout.write('')
+        self.stdout.write('Dotenv Files Status:')
+        
+        # Django typically uses single .env or .env.test files
+        dotenv_files = ['.env', '.env.test'] if 'test' in settings_module else ['.env']
+        for file in dotenv_files:
+            status = '✅ Found' if os.path.exists(file) else '⚪ Optional'
+            self.stdout.write(f'  {file}: {status}')
+
+        self.stdout.write('')
+        self.stdout.write(self.style.HTTP_INFO('🎉 Django DOH Hello World complete!'))

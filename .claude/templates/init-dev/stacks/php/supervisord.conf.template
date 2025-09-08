@@ -1,0 +1,43 @@
+[supervisord]
+nodaemon=true
+user=www-data
+logfile=/app/var/log/supervisor/supervisord.log
+pidfile=/app/var/run/supervisor/supervisord.pid
+
+[rpcinterface:supervisor]
+supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
+
+# Web Server Group
+[group:web]
+programs=php-fpm
+
+[program:php-fpm]
+command=php-fpm -F
+autostart=true
+autorestart=true
+user=www-data
+stdout_logfile=/app/var/log/supervisor/php-fpm.log
+stderr_logfile=/app/var/log/supervisor/php-fpm.log
+
+# Workers Group (only if Queue detected)
+[group:workers]
+programs=queue-worker,queue-scheduler
+
+[program:queue-worker]
+command=php /app/artisan queue:work --sleep=3 --tries=3 --max-time=3600
+directory=/app
+autostart=true
+autorestart=true
+user=www-data
+numprocs=2
+stdout_logfile=/app/var/log/supervisor/queue-worker.log
+stderr_logfile=/app/var/log/supervisor/queue-worker.log
+
+[program:queue-scheduler]
+command=php /app/artisan schedule:work
+directory=/app
+autostart=true
+autorestart=true
+user=www-data
+stdout_logfile=/app/var/log/supervisor/queue-scheduler.log
+stderr_logfile=/app/var/log/supervisor/queue-scheduler.log

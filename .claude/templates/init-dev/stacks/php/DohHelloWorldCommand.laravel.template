@@ -1,0 +1,62 @@
+<?php
+
+namespace App\Console\Commands;
+
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
+
+class DohHelloWorldCommand extends Command
+{
+    /**
+     * The name and signature of the console command.
+     */
+    protected $signature = 'doh:hello-world';
+
+    /**
+     * The console command description.
+     */
+    protected $description = 'DOH Hello World validation command';
+
+    /**
+     * Execute the console command.
+     */
+    public function handle(): int
+    {
+        $this->info('🚀 DOH Hello World - Laravel Artisan');
+        
+        // Basic Hello World
+        $this->line('✅ Console Hello World: Laravel Artisan working!');
+        
+        // Environment validation
+        $env = config('app.env');
+        $this->info("Environment: {$env}");
+        
+        // Database connectivity test
+        try {
+            DB::select('SELECT 1');
+            $driver = DB::getDriverName();
+            $this->line("✅ Database Hello World: {$driver} connectivity working!");
+        } catch (\Exception $e) {
+            $this->error("❌ Database connectivity failed: " . $e->getMessage());
+            return self::FAILURE;
+        }
+
+        // Queue status (if configured)
+        $queueDriver = config('queue.default');
+        $this->info("Queue Driver: {$queueDriver}");
+        
+        // Dotenv files validation
+        $this->newLine();
+        $this->line('Dotenv Files Status:');
+        $dotenvFiles = ['.env', ".env.{$env}"];
+        foreach ($dotenvFiles as $file) {
+            $status = file_exists(base_path($file)) ? '✅ Found' : '⚪ Optional';
+            $this->line("  {$file}: {$status}");
+        }
+
+        $this->newLine();
+        $this->info('🎉 Laravel DOH Hello World complete!');
+        
+        return self::SUCCESS;
+    }
+}

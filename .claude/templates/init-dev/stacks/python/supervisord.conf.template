@@ -1,0 +1,43 @@
+[supervisord]
+nodaemon=true
+user=app
+logfile=/app/var/log/supervisor/supervisord.log
+pidfile=/app/var/run/supervisor/supervisord.pid
+
+[rpcinterface:supervisor]
+supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
+
+# Web Server Group
+[group:web]
+programs=gunicorn
+
+[program:gunicorn]
+command=gunicorn --bind 0.0.0.0:8000 --workers 4 {{PROJECT_NAME}}.wsgi:application
+directory=/app
+autostart=true
+autorestart=true
+user=app
+stdout_logfile=/app/var/log/supervisor/gunicorn.log
+stderr_logfile=/app/var/log/supervisor/gunicorn.log
+
+# Workers Group (only if Celery detected)
+[group:workers]
+programs=celery-worker,celery-beat
+
+[program:celery-worker]
+command=celery -A {{PROJECT_NAME}} worker --loglevel=info
+directory=/app
+autostart=true
+autorestart=true
+user=app
+stdout_logfile=/app/var/log/supervisor/celery-worker.log
+stderr_logfile=/app/var/log/supervisor/celery-worker.log
+
+[program:celery-beat]
+command=celery -A {{PROJECT_NAME}} beat --loglevel=info
+directory=/app
+autostart=true
+autorestart=true
+user=app
+stdout_logfile=/app/var/log/supervisor/celery-beat.log
+stderr_logfile=/app/var/log/supervisor/celery-beat.log

@@ -1,0 +1,28 @@
+# DOH Development Environment
+/docker-dev/data/
+/docker-dev/logs/
+/docker-dev/certs/
+.env
+
+# Application logs and runtime files
+/var/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp

@@ -36,9 +36,46 @@ security-check: ## Run security audit
 	docker compose exec linter safety check
 
 pytest: ## Run pytest tests
-	docker compose exec linter pytest tests/
+	docker compose exec -e DJANGO_SETTINGS_MODULE={{PROJECT_NAME}}.settings.test ${APP_CONTAINER:-app} pytest tests/
 
-coverage: ## Generate code coverage report
-	docker compose exec linter coverage run -m pytest tests/
-	docker compose exec linter coverage report
-	docker compose exec linter coverage html
+test: ## Run all tests (alias for pytest)
+	docker compose exec -e DJANGO_SETTINGS_MODULE={{PROJECT_NAME}}.settings.test ${APP_CONTAINER:-app} pytest tests/
+
+test-filter: ## Run specific test (use: make test-filter FILTER="test_user")
+	docker compose exec -e DJANGO_SETTINGS_MODULE={{PROJECT_NAME}}.settings.test ${APP_CONTAINER:-app} pytest tests/ -k $(FILTER)
+
+test-coverage: ## Run tests with coverage report
+	docker compose exec -e DJANGO_SETTINGS_MODULE={{PROJECT_NAME}}.settings.test ${APP_CONTAINER:-app} coverage run -m pytest tests/
+	docker compose exec -e DJANGO_SETTINGS_MODULE={{PROJECT_NAME}}.settings.test ${APP_CONTAINER:-app} coverage html --directory=var/coverage
+
+# Note: coverage commands moved to test-coverage above
+
+# Supervisord Process Management
+status: ## Show supervisord process status
+	docker compose exec ${APP_CONTAINER:-app} supervisorctl status
+
+restart-web: ## Restart web server processes only
+	docker compose exec ${APP_CONTAINER:-app} supervisorctl restart web:*
+
+restart-workers: ## Restart worker processes only
+	docker compose exec ${APP_CONTAINER:-app} supervisorctl restart workers:*
+
+restart-all: ## Restart all processes
+	docker compose exec ${APP_CONTAINER:-app} supervisorctl restart all
+
+logs-web: ## Show web server logs
+	docker compose exec ${APP_CONTAINER:-app} supervisorctl tail web:*
+
+logs-workers: ## Show worker logs
+	docker compose exec ${APP_CONTAINER:-app} supervisorctl tail workers:*
+
+# Debug Workers (Alternative to supervisord)
+worker-debug: ## Run single worker in foreground for debugging
+	docker compose exec ${APP_CONTAINER:-app} celery -A {{PROJECT_NAME}} worker --loglevel=debug
+
+worker-shell: ## Open separate shell for manual worker debugging
+	docker compose run --rm ${APP_CONTAINER:-app} /bin/bash
+
+worker-inspect: ## Inspect active tasks and workers
+	docker compose exec ${APP_CONTAINER:-app} celery -A {{PROJECT_NAME}} inspect active
+	docker compose exec ${APP_CONTAINER:-app} celery -A {{PROJECT_NAME}} inspect stats
