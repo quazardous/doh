@@ -13,7 +13,6 @@
       - DATABASE_URL=${DATABASE_URL}
     volumes:
       - .:/app                                    # ALL application code (logs auto-visible in ./var/log/)
-      #- ./docker/supervisord.conf:/etc/supervisor/supervisord.conf:ro  # Process config (if workers needed)
     labels:
       - "traefik.enable=true"
       - "dev.project=${PROJECT_NAME}"

@@ -27,6 +27,10 @@ RUN apt-get update && apt-get install -y \
     zip \
     supervisor \
     sudo \
+    # Process and network debugging tools
+    procps \
+    net-tools \
+    iputils-ping \
     # Framework-specific dependencies (AI-detected)
 {{FRAMEWORK_DEPENDENCIES}} \
     && rm -rf /var/lib/apt/lists/*
@@ -68,4 +72,5 @@ WORKDIR /app
 {{EXPOSE_PORTS}}
 
 # Start command (supervisord with framework processes)
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
+# @AI-Kitchen: GENERATE the supervisord.conf file can be mounted elsewhere
+CMD ["/usr/bin/supervisord", "-c", "/app/{{CONTAINER_DIR}}/app/supervisor/supervisord.conf"]

@@ -225,6 +225,27 @@ make hello-doh  # Runs complete Kitchen validation suite
 ✅ SSL certificates functional  
 ✅ All services accessible via generated URLs
 
+**Manual Verification from inside container:**
+```bash
+# Enter the application container
+make sh
+
+# Test main application endpoint (replace with your project name)
+curl -k https://app.${PROJECT_NAME}.localhost:${EXTERNAL_HTTPS_PORT}
+# Example: curl -k https://app.myproject.localhost:4430
+
+# Test database admin interface  
+curl -k https://phpmyadmin.${PROJECT_NAME}.localhost:${EXTERNAL_HTTPS_PORT}
+# Example: curl -k https://phpmyadmin.myproject.localhost:4430
+
+# Check running processes
+ps aux
+
+# Test database connectivity
+mysql -h mariadb -u ${PROJECT_NAME} -p
+# Example: mysql -h mariadb -u myproject -p
+```
+
 ## Kitchen Technology Detection & Pairing
 
 ### Framework Detection Process
@@ -254,6 +275,12 @@ make logs           # View all Kitchen-generated service logs
 make sh             # Enter Kitchen-generated app container  
 make status         # Show Kitchen-managed process status
 make hello-doh      # Run Kitchen validation tests
+
+# Inside container debugging tools:
+ps aux              # Check running processes
+curl -k https://app.${PROJECT_NAME}.localhost:${EXTERNAL_HTTPS_PORT}  # Test HTTPS endpoint
+ping mariadb        # Test database connectivity
+netstat -tlnp       # Check listening ports
 ```
 
 ### Common Kitchen Issues

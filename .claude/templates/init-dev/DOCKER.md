@@ -124,14 +124,19 @@ RUN usermod -o -u ${UID} www-data && \
 ### Volume Mount Patterns
 **@AI-Kitchen: COPY vs VOLUME rules**
 
+**🚨 MANDATORY VOLUME MOUNT (never COPY):**
+- **Application source code: `./:/app`** - ALL main containers MUST mount project root to `/app`
+  - This includes ALL application code, configs, and user-level files
+  - Enables instant code changes without container rebuilds
+  - Dockerfile WORKDIR must be `/app` to match volume mount
+
 **Always VOLUME mount (never COPY):**
-- Application source code: `./:/app`
 - Data persistence: `./var/data/mariadb:/var/lib/mysql`
 - Log directories: `./var/log/traefik:/var/log/traefik`
 
 **Never COPY during build (handled post-build):**
 - Dependencies: `requirements.txt`, `package.json` - installed via `make dev-setup`
-- Supervisor config: `/app/etc/supervisor/supervisord.conf` - mounted with app code
+- Supervisor config: `/app/docker/app/supervisor/supervisord.conf` - mounted with app code
 - Application configs: Included in source code mount
 
 **Always COPY (never VOLUME):**
@@ -142,6 +147,12 @@ RUN usermod -o -u ${UID} www-data && \
 ```dockerfile
 # ✅ Correct - System daemon config
 COPY ./docker/mysql-custom.cnf /etc/mysql/conf.d/
+
+# ✅ Correct - WORKDIR must be /app to match volume mount
+WORKDIR /app
+
+# ❌ Wrong - Never COPY application code
+COPY . /app
 
 # ❌ Wrong - Dependencies should be installed post-build
 COPY requirements.txt /app/
@@ -246,7 +257,7 @@ RUN apt-get update && apt-get install -y build-essential git python3-dev libpq-d
 **Required:** Main app container must run a persistent process:
 ```dockerfile
 # ✅ Option 1: supervisord (recommended for multiple processes)
-CMD ["supervisord", "-c", "/app/etc/supervisor/supervisord.conf"]
+CMD ["supervisord", "-c", "/app/docker/app/supervisor/supervisord.conf"]
 
 # ✅ Option 2: Single long-running process
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
@@ -567,11 +578,17 @@ services:
   app:
     build: { context: ., dockerfile: ./docker/app/Dockerfile }
     volumes:
-      - .:/app                                      # Code mount
+      - .:/app                                      # 🚨 MANDATORY - Project root to /app
       - ./docker/app/configs:/etc/configs:ro       # Container configs
       - ./var/data/uploads:/app/uploads             # Data persistence
       - ./var/log/app:/var/log/app                  # Log collection
 ```
+
+**🚨 CRITICAL REQUIREMENT**: The main application container MUST have `- .:/app` volume mount:
+- **ALL containers** that run application code require this mount
+- **WORKDIR /app** in Dockerfile must match the volume mount path
+- **Supervisord configs, application configs, source code** all accessible at `/app/`
+- **Dependencies installed post-build** via `make dev-setup` within the `/app` context
 
 ## Build vs Dependencies Rules
 
@@ -645,7 +662,9 @@ clean-deps:
 
 ### Core Principles
 - **Docker as standard** unless explicitly contraindicated
+- **🚨 MANDATORY `/app` mount** - ALL main containers MUST mount project root as `- .:/app` volume
 - **Volume mounts mandatory** - COPY forbidden for application code and user-level configs
+- **WORKDIR /app required** - Dockerfile WORKDIR must match the `/app` volume mount path
 - **Single app container** - Embed frontend build in backend container, avoid over-containerization
 - **Multi-project friendly** - `{service}.{project}.localhost` domains with `dev.project={PROJECT_NAME}` labels
 - **Data in user directory** - Database volumes in user-specified folder (./var/data/)
@@ -654,6 +673,23 @@ clean-deps:
 ## Troubleshooting
 
 ### Common Issues
+
+**Application code not accessible in container:**
+```bash
+# Symptom: Container can't find application files
+# Fix: Ensure volume mount is present
+docker-compose.yml:
+  app:
+    volumes:
+      - .:/app  # ← This line is MANDATORY
+```
+
+**Supervisord config not found:**
+```bash
+# Symptom: supervisord: can't find config file
+# Fix: Config must be accessible via /app mount
+CMD ["supervisord", "-c", "/app/docker/app/supervisord.conf"]
+```
 
 **Permission denied on volumes:**
 ```bash

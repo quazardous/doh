@@ -12,7 +12,6 @@
       - DATABASE_URL=${DATABASE_URL}
     volumes:
       - .:/app                                    # ALL application code (logs auto-visible in ./var/log/)
-      #- ./docker/supervisord.conf:/etc/supervisor/supervisord.conf:ro  # Process config (if workers needed)
     networks:
       - default
 
@@ -20,7 +19,6 @@
     image: nginx:1.25-alpine
     volumes:
       - .:/app                                    # ALL application code (nginx logs auto-visible in ./var/log/)
-      #- ./docker/nginx/app.conf.template:/etc/nginx/templates/app.conf.template:ro  # Optional: nginx config
     environment:
       - PROJECT_NAME=${PROJECT_NAME}
       - SITE_BASE_DOMAIN=${PROJECT_NAME}.localhost

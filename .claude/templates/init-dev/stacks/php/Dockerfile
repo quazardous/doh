@@ -71,4 +71,5 @@ USER www-data
 EXPOSE 9000
 
 # Start supervisord with mounted config
-CMD ["/usr/bin/supervisord", "-c", "/app/docker/app/supervisor/supervisord.conf"]
+# @AI-Kitchen: SUBSTITUTE withe actual supervisord.conf path
+CMD ["/usr/bin/supervisord", "-c", "/app/{{CONTAINER_DIR}}/app/supervisor/supervisord.conf"]

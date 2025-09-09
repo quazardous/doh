@@ -46,4 +46,6 @@ RUN mkdir -p /app/var/log/supervisor /app/var/run/supervisor \
 USER appuser
 
 EXPOSE 8000
-CMD ["/usr/bin/supervisord", "-c", "/app/docker/app/supervisor/supervisord.conf"]
+# Start supervisord to manage processes
+# @AI-Kitchen: SUBSTITUTE withe actual supervisord.conf path
+CMD ["/usr/bin/supervisord", "-c", "/app/{{CONTAINER_DIR}}/app/supervisor/supervisord.conf"]
