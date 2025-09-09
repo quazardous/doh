@@ -110,84 +110,156 @@ This script handles:
 /doh:init-dev "Python FastAPI microservice with MongoDB"
 ```
 
-## AI Approach + Debug Hints
+## Kitchen Process Flow - Complete Workflow
 
-⚡ **AI-driven command** with integrated hint system to succeed even when AI fails on first attempt:
+**🚨 PROCESSUS OBLIGATOIRE : Langage Naturel → Stack Fonctionnelle**
 
-### 🗯 Debug Hints System (New Feature)
+### Phase 1: Détermination de la Stack
+1. **Read FRAMEWORK_SPECIFICS.md** - Patterns de détection & outils CLI
+2. **Analyze request** - Langage naturel OU fichiers existants (selon contexte)
 
-**Philosophy:** Developers will **INEVITABLY** need to debug/adjust, so we anticipate common problems:
+### Phase 2: Seed de la Stack
+3. **Prise en compte des fichiers core** - Devrait être dans `.claude/templates/init-dev/core/`
+4. **Read Makefile.seed** - Patterns de fondation à préserver
+5. **Prise en compte des autres fichiers core** - Base commune à toutes les stacks
 
+### Phase 3: Exploration des Kitchen Templates  
+6. **Arborescence par stack/techno** - Explorer les kitchen templates pour cherry-pick ceux qui correspondent
+7. **Recherche des tags @AI-Kitchen** - Et/ou des fichiers `ai-kitchen.md` pour chaque kitchen template de la stack composée
+
+### Phase 4: Kitchen des Templates vers Fichiers Finaux
+8. **Process @AI-Kitchen** - SUBSTITUTE/CONDITIONAL/CHOOSE/MERGE/GENERATE
+9. **Replace {{placeholders}}** - Tous les templates → vraies valeurs
+10. **Présomption template simple** - Si un fichier template n'a pas d'instruction @AI-Kitchen, il est présumé à prendre tel quel (modulo les placeholders)
+11. **Main file : Makefile** - Seed Makefile.seed + framework parts (diff parfait)
+12. **Generate all files needed** - Depuis templates (.env-docker, configurations)
+13. **Create docker configurations** - Pour chaque container (organisation par dossier, supervisord + traefik + database)
+14. **Generate Dockerfile** - Multi-stage pour la stack détectée. **IMPORTANT** : le container principal doit avoir un process daemon (supervisord ou sleep infinity)
+
+### Phase 5: Launch des Containers avec Tests Basiques
+15. **Copie des fichiers -docker** - Avec `make env-config` d'abord
+16. **Test containers basiques** - `--entrypoint '' ls` pour vérifier l'accès
+
+### Phase 6: Test HelloWorld / Hello-DOH
+17. **Create framework specific files** - En suivant les guidelines du framework (utiliser les outils dédiés si nécessaire)
+18. **Test official helloworld** - S'il existe pour le framework
+19. **Test hello-doh** - Avec vérification hash DOH_HELLOWORLD
+
+---
+
+## Detailed Process Explanations
+
+### Phase 1-2: Analysis & Foundation Setup (Steps 1-5)
+
+**Step 1: FRAMEWORK_SPECIFICS.md Analysis**
+- Parse complete detection matrices (file extensions, dependencies, config files)
+- Load framework-specific CLI tools and command patterns
+- Understand confidence scoring for technology detection
+- Map framework → database → frontend statistical pairings
+
+**Step 2: Makefile.seed Foundation**  
+- Read complete seed content that MUST be preserved exactly
+- Understand $(DOCKER_COMPOSE) variables and patterns
+- Learn env-config copy-dist-config functions
+- Identify extension points for framework additions
+
+**Step 3: @AI-Kitchen Instruction Discovery**
+- Search ALL template files for @AI-Kitchen comments
+- Map instruction types: SUBSTITUTE (replace placeholders), CONDITIONAL (include if detected), CHOOSE (intelligent decisions), MERGE (combine targets), GENERATE (create code)
+- Build complete instruction processing plan
+
+### Steps 4-7: Analysis & Template Processing
+
+**Step 4: Request Analysis**
+- **Manual Mode**: Parse "Django + MariaDB + Vue.js in ./docker" → extract framework, database, frontend, directory
+- **Detection Mode**: Apply FRAMEWORK_SPECIFICS.md patterns to existing files, score confidence, generate stack recommendation
+
+**Step 5: Kitchen Template Discovery**
+- Locate traefik.yaml-docker, dynamic.yaml-docker, docker-compose.env-docker
+- Read template structures with {{placeholders}} and @AI-Kitchen instructions
+- Plan template-to-generated-file mapping
+
+**Step 6: @AI-Kitchen Processing**
+- **SUBSTITUTE**: Replace {{PROJECT_NAME}} with actual name everywhere
+- **CONDITIONAL**: Include Node.js stages only if frontend detected  
+- **CHOOSE**: Select npm/yarn/pnpm based on lock file analysis
+- **MERGE**: Combine framework env-config with seed env-config
+- **GENERATE**: Create hello-world code using framework CLI patterns
+
+**Step 7: Placeholder Resolution**
+- Systematic replacement: {{PROJECT_NAME}} → "doh", {{EXTERNAL_TRAEFIK_PORT}} → "8081"
+- Validation: `grep "{{" *.docker` must return empty
+- Template transformation complete
+
+### Steps 8-13: File Generation Phase
+
+**Step 8: -docker File Generation**
+- traefik.yaml-docker: Real network "doh-network", real constraints
+- docker-compose.env-docker: Real container names, real ports
+- .env-docker: Real database URLs, real secrets
+- All files ready for immediate use
+
+**Step 9: Makefile Creation**
+- Start with complete Makefile.seed content (exact copy)
+- Add framework-specific targets AFTER seed content
+- Apply @AI-Kitchen: MERGE for combined targets
+- Result: `diff Makefile.seed Makefile` shows only clean additions
+
+**Step 10: docker-compose.yml Architecture**
+- Service definition based on detected stack (app + database + traefik + adminer)
+- Volume mounts: code (.), configs (:ro), data persistence, logs
+- Network setup with project-specific naming
+- UID/GID args for permission consistency
+
+**Step 11: Dockerfile Multi-stage Strategy**
+- Conditional stages: node-tools if frontend, composer-tools if PHP
+- Cherry-pick pattern: COPY --from= to avoid image bloat
+- System dependencies based on framework requirements
+- User setup with detected UID/GID
+
+**Step 12: Environment Configuration**
+- .env-docker: Framework-specific variables, database connections, secrets
+- .env.test-docker: Test isolation with SQLite, sync queues, disabled external services
+- Framework dotenv cascade support (Django settings, Symfony APP_ENV, etc.)
+
+**Step 13: Container Configuration**
+- supervisord.conf: Process groups (web + workers), framework-specific commands  
+- Traefik routing: SSL certificates, domain mapping, service discovery
+- Database init scripts: User creation, database setup, permissions
+
+### Steps 14-15: Validation & Testing
+
+**Step 14: Kitchen Process Testing**
+- `make env-config`: Test -docker → local file copying mechanism
+- `make dev-setup`: Validate dependency installation (pip, npm, etc.)  
+- `make dev`: Confirm all containers start successfully
+- Integration validation of complete kitchen workflow
+
+**Step 15: Hello-doh Functionality**
+- `make hello-doh`: Framework CLI creates structures + AI generates hello-world code
+- Console test: Framework-native command shows DOH_HELLOWORLD value
+- Web test: HTTPS endpoint returns JSON with DOH_HELLOWORLD value
+- Full stack validation: database connection, SSL certificates, routing functional
+
+## Command Options
+
+### Interactive Mode (Default)
 ```bash
-# Hints automatically added to generated files:
-# HINT: If permission denied -> check UID/GID in docker-compose.yml
-# HINT: If build fails -> try 'make clean && make rebuild'
-# HINT: If database connection fails -> check .env DATABASE_URL format
-# HINT: Alternative stack configs at https://github.com/laradock/laradock
+/doh:init-dev "Python Django with PostgreSQL in ./docker directory"
+# → Shows brainstormed configuration and WAITS for user confirmation
 ```
 
-**Types of Integrated Hints:**
-- 🔧 **Troubleshooting Hints:** Common Docker issues (permissions, ports, SSL)
-- 🔄 **Alternative Hints:** Links to other approaches if DOH patterns don't fit
-- 📚 **Resource Hints:** Official documentation, community examples
-- 🚀 **Optimization Hints:** Performance, security, workflow improvements
+### Non-Interactive Mode (For Agents)
+```bash
+/doh:init-dev --non-interactive "Python Django with PostgreSQL"
+# → Proceeds immediately without confirmation prompts
+```
 
-### 🎯 AI Self-Correction
-
-AI tests its own generations and self-corrects automatically:
-
-### 1. Stack Analysis with Debug Hints
-
-**Manual Mode** (`/doh:init-dev "Python Django..."`):
-- Parse natural language description  
-- Identify components from user input
-- 💡 **HINT:** If description ambiguous → WebSearch "{{framework}} development setup 2024" to clarify
-- 💡 **HINT ALTERNATIVE:** If unsatisfied → try Detection Mode: `/doh:init-dev --detect`
-
-**Detection Mode** (`/doh:init-dev --detect`):
-- **File Analysis:** Examine existing project files for technology indicators
-  ```text
-  package.json → Node.js/JavaScript stack
-  requirements.txt → Python stack  
-  composer.json → PHP stack
-  Cargo.toml → Rust stack
-  go.mod → Go stack
-  ```
-  💡 **HINT:** If detection fails → check extensions: `.py`, `.js`, `.php` in `/src` or `/app`
-  💡 **HINT RESSOURCE:** Documentation patterns https://12factor.net/config
-  
-- **Dependency Analysis:** Parse dependency files for framework detection
-  ```text
-  Django in requirements.txt → Django framework
-  express in package.json → Express.js framework
-  laravel/framework in composer.json → Laravel framework
-  ```
-  💡 **HINT DEBUG:** If framework not detected → check versions in requirements.txt/package.json
-  💡 **HINT ALTERNATIVE:** Manual override: `/doh:init-dev "Force Django avec PostgreSQL"`
-  
-- **README Analysis:** Extract technology mentions and setup instructions
-- **Existing Docker Analysis:** Check current docker-compose.yml for services
-- **Database Detection:** Look for database connection configs and migrations
-  💡 **HINT:** If DB not detected → look in `settings.py`, `config/database.php`, `.env.example`
-
-### 2. Cherry-Pick Templates avec Fallback Hints
-- Analyze `.claude/templates/init-dev/` for relevant inspiration
-- Select appropriate base templates (common/, stacks/, services/)
-- Adapt template patterns to detected/requested stack
-
-💡 **HINT ARCHITECTURE:** Templates = starting kitchen, NOT final solution
-💡 **HINT DEBUG:** If template inadequate → check `.claude/templates/init-dev/stacks/{{your-framework}}/` for alternatives
-💡 **HINT RESOURCE:** External inspiration: https://github.com/laradock/laradock, https://github.com/dunglas/symfony-docker
-💡 **HINT CUSTOM:** Create your template in `.claude/templates/init-dev/stacks/custom/` for recurring needs
-
-### 3. Research + Hints Ressources (Tech-Adaptive)
-- **Mode Interactif:** WebSearch with tech-specific sources for latest recommendations
-- **Mode Non-Interactif:** Use explicitly specified versions and tools only
-- **Tech-Specific Sources:** Adapt research to technology ecosystem
-
-💡 **HINT PERFORMANCE:** If WebSearch slow → use local cache or template default versions
-💡 **HINT OFFLINE:** If no internet → use `.claude/templates/init-dev/offline-defaults.json`
-💡 **HINT OVERRIDE:** Force specific version: `"Python 3.11 Django 4.2 with PostgreSQL 14"`
+### Detection Mode (Auto-Analyze Existing Project)
+```bash
+/doh:init-dev --detect
+# → Uses FRAMEWORK_SPECIFICS.md patterns to analyze existing codebase
+```
 
 ### Docker Hub API Version Detection
 
@@ -445,12 +517,12 @@ Each decision includes:
 - Hello-doh implementation specifics
 - Dotenv cascade logic per framework
 
-**Key Reference Points:**
+**Key Reference Points (all in FRAMEWORK_SPECIFICS.md):**
+- Complete framework detection patterns (file analysis, dependency analysis)  
 - Framework CLI priority order and commands
 - hello-doh target implementation patterns
 - Environment variable naming conventions
 - Project structure and file organization
-- Dependency management approaches per framework
 
 **Framework Tool Cascade Installation (AI-Adaptive):**
 
@@ -546,7 +618,34 @@ Java (Spring):
 - **Alternative Avoided:** Multiple app containers (pollutes namespace, complicates dev workflow)
 - **Supervisord Benefits:** Process management, log aggregation, unified container access via `make sh`
 
-### 4. Translate to DOH Patterns avec Error Hints
+### 4. Apply @AI-Kitchen Instructions Systematically + Error Hints
+
+**🚨 MANDATORY: Process ALL @AI-Kitchen Instructions Before Generation**
+
+#### Phase 1: Template Discovery & Mapping
+```bash
+# 1. Discover ALL kitchen templates
+find .claude/templates/init-dev -name "*-docker*" -type f
+
+# 2. Read and map ALL @AI-Kitchen instructions  
+grep -r "@AI-Kitchen" .claude/templates/init-dev/
+
+# 3. Create substitution map
+{{PROJECT_NAME}} → actual-project-name
+{{EXTERNAL_TRAEFIK_PORT}} → 8081
+{{EXTERNAL_HTTPS_PORT}} → 8443
+{{DATABASE_NAME}} → detected-database
+```
+
+#### Phase 2: @AI-Kitchen Instruction Processing
+**For EACH template file, process ALL @AI-Kitchen instructions found. Instructions are self-explanatory from their names and contexts.**
+
+#### Phase 3: Validation - Zero Placeholders
+- Scan ALL generated `-docker` files for remaining `{{placeholders}}`
+- **CRITICAL**: Any `{{}}` remaining = GENERATION FAILURE
+- Test substitution: `grep "{{" *.docker` must return EMPTY
+
+#### Phase 4: DOH Pattern Application
 - Apply DOH principles (Docker + Traefik + mkcert + Hello World)
 - Ensure zero permission issues (UID/GID matching)
 - Create project-specific service selection
@@ -791,22 +890,32 @@ NOT: {{PROJECT_NAME}} or {{PLACEHOLDERS}}                     ❌ FAILURE
 Local copies can be tweaked if defaults don't work (port conflicts, etc.)
 ```
 
-#### ✅ AI VALIDATION CHECKLIST
+#### ✅ AI VALIDATION CHECKLIST - MANDATORY @AI-Kitchen COMPLIANCE
 
-**PRE-GENERATION CHECKS:**
-- [ ] Read kitchen templates from `.claude/templates/init-dev/`
-- [ ] Read Makefile.seed foundation patterns
-- [ ] Identified all {{placeholders}} to substitute
+**STEP 1: MANDATORY READING REQUIREMENTS (CRITICAL)**
+- [ ] **MANDATORY**: Read `.claude/templates/init-dev/FRAMEWORK_SPECIFICS.md` for ALL framework detection and implementation patterns
+- [ ] **MANDATORY**: Read `.claude/templates/init-dev/common/Makefile.seed` foundation patterns COMPLETELY
+- [ ] Read ALL kitchen templates from `.claude/templates/init-dev/`
+- [ ] Identify ALL {{placeholders}} to substitute in templates
+- [ ] Search and map ALL @AI-Kitchen instructions: `grep -r "@AI-Kitchen" .claude/templates/init-dev/`
 
-**GENERATION VALIDATION:**
-- [ ] Generated `-docker` files with ALL placeholders substituted
-- [ ] `docker-compose.env-docker` has real values (my-project, port 8080, etc.)
-- [ ] `traefik.yaml-docker` has real project name, not {{PROJECT_NAME}}
-- [ ] `.env-docker` generated with working defaults
-- [ ] **CRITICAL: HIGH-QUALITY Makefile at root - the main testing tool**
+**STEP 2: @AI-Kitchen INSTRUCTION PROCESSING (CRITICAL)**
+- [ ] Search for ALL @AI-Kitchen instructions: `grep -r "@AI-Kitchen" .claude/templates/init-dev/`
+- [ ] Read and process EVERY @AI-Kitchen instruction found in templates
+- [ ] Apply ALL instructions (types are self-explanatory from names and contexts)
+
+**STEP 3: GENERATION VALIDATION (ZERO PLACEHOLDERS ALLOWED)**
+- [ ] Generated `-docker` files with ZERO `{{placeholders}}` remaining
+- [ ] `docker-compose.env-docker` has REAL values (doh, port 8080, etc.)
+- [ ] `traefik.yaml-docker` has REAL project name "doh", NOT {{PROJECT_NAME}}
+- [ ] `dynamic.yaml-docker` has REAL certificate names, NOT {{wildcards}}
+- [ ] `.env-docker` generated with working defaults, NO {{VARIABLES}}
+- [ ] ALL @AI-Kitchen instructions have been processed and removed
+
+**STEP 4: MAKEFILE QUALITY VALIDATION (THE MAIN TESTING TOOL)**
 - [ ] Makefile preserves complete Makefile.seed content EXACTLY
 - [ ] Framework additions are AFTER seed content (clean diff)
-- [ ] `diff Makefile.seed Makefile` shows only logical additions
+- [ ] `diff Makefile.seed Makefile` shows ONLY logical additions
 - [ ] `hello-doh` target works perfectly (creates + tests everything)
 - [ ] All targets use seed patterns ($(DOCKER_COMPOSE), etc.)
 - [ ] UID/GID handling in docker-compose.yml + Dockerfile
@@ -1005,73 +1114,16 @@ env-config: ## Initialize local config files from -docker templates (Django + co
 2. Add Django-part `env-config` content (Django-specific files)
 3. Result: Combined target with both common + framework files
 
-#### 🏷️ @AI-Kitchen: Pseudo Tag System
+#### 🏷️ @AI-Kitchen: Mandatory Instruction System
 
-**UNIVERSAL USAGE**: Kitchen templates use a standardized pseudo tag system in **ALL file types** to guide AI generation.
+**CRITICAL**: Kitchen templates contain `@AI-Kitchen` instructions that **MUST** be processed during generation.
 
-**@AI-Kitchen: ACTION_TYPE - DESCRIPTION**
+**🚨 MANDATORY PROCESS:**
+1. **Search**: `grep -r "@AI-Kitchen" .claude/templates/init-dev/`
+2. **Read**: Each template file for all `@AI-Kitchen` instructions  
+3. **Apply**: All instructions before generating final files
 
-**Action Types:**
-- `@AI-Kitchen: MERGE` - Combine this target with seed version (Makefiles)
-- `@AI-Kitchen: CHOOSE` - Make intelligent decision (package manager, database, versions)
-- `@AI-Kitchen: SUBSTITUTE` - Replace placeholders with real values (all files)
-- `@AI-Kitchen: CONDITIONAL` - Include/exclude based on stack requirements (all files)
-- `@AI-Kitchen: GENERATE` - Create additional code/config files (app code)
-
-**Examples by file type:**
-```makefile
-# Makefile comments
-# @AI-Kitchen: MERGE - Add to seed env-config target
-# @AI-Kitchen: CHOOSE - npm/yarn/pnpm based on lock files
-
-# @AI-Kitchen: CONDITIONAL - Include if frontend stack detected
-# Example: @${EXEC_CONTAINER} ${APP_CONTAINER} npm install
-```
-
-```yaml
-# Docker Compose comments  
-# @AI-Kitchen: SUBSTITUTE - Replace with actual database name
-database: postgresql  # @AI-Kitchen: CHOOSE - postgresql/mysql/mariadb
-```
-
-```dockerfile
-# Dockerfile comments
-# @AI-Kitchen: CONDITIONAL - Include if Python stack
-RUN pip install -r requirements.txt
-
-# @AI-Kitchen: SUBSTITUTE - Replace with detected Node version
-FROM node:18-alpine
-```
-
-```php
-<?php
-// @AI-Kitchen: GENERATE - Create controller with DOH_HELLOWORLD endpoint
-// @AI-Kitchen: SUBSTITUTE - Replace with actual project namespace
-```
-
-```json
-{
-  // @AI-Kitchen: SUBSTITUTE - Replace with detected project name
-  "name": "{{PROJECT_NAME}}",
-  // @AI-Kitchen: CHOOSE - npm/yarn/pnpm based on lock files detection
-  "scripts": {
-    "dev": "npm run dev"  
-  }
-}
-```
-
-```env
-# @AI-Kitchen: SUBSTITUTE - Replace with generated random value
-DOH_HELLOWORLD={{DOH_HELLOWORLD}}
-# @AI-Kitchen: CONDITIONAL - Include only if database detected
-DATABASE_URL={{DATABASE_URL}}
-```
-
-```nginx
-# @AI-Kitchen: SUBSTITUTE - Replace with actual project name
-server_name {{PROJECT_NAME}}.localhost;
-# @AI-Kitchen: CONDITIONAL - Include SSL config only if HTTPS enabled
-```
+The instruction types are self-explanatory from their names and contexts in templates.
 
 **Generated Help System:**
 All targets with `##` comments automatically appear in `make help`:
