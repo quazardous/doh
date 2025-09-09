@@ -144,7 +144,7 @@ To enrich components available to AI, add to the **existing structure**:
 ```makefile
 # @AI-Kitchen: CONDITIONAL - Include if Redis detected in stack
 # @AI-Kitchen: CHOOSE - Replace npm with yarn/pnpm if detected
-# @AI-Kitchen: MERGE - Add to seed env-config target
+# @AI-Kitchen: MERGE - Add to seed env-config target (concatenate commands, keep one target)
 # @AI-Kitchen: SUBSTITUTE - Replace {{PROJECT_NAME}} with real project name
 # @AI-Kitchen: GENERATE - Create framework-specific hello-world validation
 ```
@@ -156,6 +156,33 @@ AI generates variables **on-the-fly** based on context:
 - And many others based on detected needs...
 
 **Makefile Architecture**: AI combines `Makefile.seed` (foundation) + `Makefile.*-part` (framework extensions) → Final `Makefile`
+
+**⚠️ CRITICAL: MERGE Target Rule** - When the same target exists in both seed and framework parts:
+- Keep **ONE target definition** only (no duplicates)
+- **Concatenate commands** from both seed + framework parts
+- Framework commands are **added to** (not replacing) seed commands
+- Result: Single target with combined functionality, zero Make warnings
+
+**Example:**
+```makefile
+# Makefile.seed has:
+dev-setup: env-config
+	@echo "Installing generic dependencies..."
+	@npm install
+
+# Makefile.symfony-part has:
+dev-setup: env-config  
+	@echo "Installing Symfony dependencies..."
+	@composer install
+
+# ❌ WRONG: Creates two targets → "overriding recipe" warning
+# ✅ CORRECT: AI generates single merged target:
+dev-setup: env-config
+	@echo "Installing generic dependencies..."
+	@npm install
+	@echo "Installing Symfony dependencies..."
+	@composer install
+```
 
 **Distribution File Pattern**: `-docker` suffix files contain working defaults that copy to local customizable versions via `make env-config`
 

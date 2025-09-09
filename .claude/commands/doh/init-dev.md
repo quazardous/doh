@@ -76,7 +76,7 @@ Templates contain special processing instructions that guide the Kitchen:
 
 - **@AI-Kitchen: SUBSTITUTE** - Replace {{placeholders}} with real values
 - **@AI-Kitchen: CONDITIONAL** - Include/exclude based on detected technology
-- **@AI-Kitchen: MERGE** - Combine multiple templates intelligently  
+- **@AI-Kitchen: MERGE** - Combine multiple templates intelligently (for Makefile targets: merge commands, keep ONE target definition)  
 - **@AI-Kitchen: GENERATE** - Create framework-specific content dynamically
 
 ### Three-Stage File Processing
@@ -311,6 +311,33 @@ All seed/core files are located in `.claude/templates/init-dev/core/`:
 ### Makefile.seed - Foundation Rules
 
 **@AI-Kitchen: MERGE - Makefile composition rules**
+
+**⚠️ CRITICAL: MERGE Target Rule** - When the same target exists in both seed and framework parts:
+- Keep **ONE target definition** only (no duplicates)  
+- **Concatenate commands** from both seed + framework parts
+- Framework commands are **added to** (not replacing) seed commands
+- Result: Single target with combined functionality, zero Make warnings
+
+**Example:**
+```makefile
+# Makefile.seed has:
+dev-setup: env-config
+	@echo "Installing generic dependencies..."
+	@npm install
+
+# Makefile.symfony-part has:
+dev-setup: env-config  
+	@echo "Installing Symfony dependencies..."
+	@composer install
+
+# ❌ WRONG: Creates two targets → "overriding recipe" warning
+# ✅ CORRECT: AI generates single merged target:
+dev-setup: env-config
+	@echo "Installing generic dependencies..."
+	@npm install
+	@echo "Installing Symfony dependencies..."
+	@composer install
+```
 
 #### Mandatory Preservation Patterns
 The `Makefile.seed` is the **core foundation** that MUST be respected:

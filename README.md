@@ -50,6 +50,9 @@ graph LR
 ### See It In Action (60 seconds)
 
 ```bash
+# Optional: Set up Docker development environment
+/doh:init-dev "Django with PostgreSQL"
+
 # Create a comprehensive PRD through expert committee process
 /doh:prd-new "memory management system for user sessions"
 
@@ -141,6 +144,35 @@ No shortcuts. No assumptions. No regrets.
 
 ## Workflow Phases
 
+### 0. Development Environment Setup (Optional)
+
+Need a complete Docker development environment for your project? DOH includes a powerful **Kitchen system** that generates production-ready development environments.
+
+```bash
+# Generate Docker environment for your stack
+/doh:init-dev "Symfony with Vue.js and MariaDB"
+
+# Or let AI detect your existing project
+/doh:init-dev --detect
+
+# Quick start the generated environment
+make ssl-setup && make dev-setup && make dev
+```
+
+**What you get in 30 seconds:**
+- 🐳 **Multi-stage Docker** containers optimized for your stack
+- 🔐 **SSL certificates** with Traefik reverse proxy  
+- 📦 **Package managers** (npm/yarn/pnpm) automatically detected
+- 🗄️ **Database** with admin interface (phpMyAdmin, Adminer)
+- 🎨 **Frontend tooling** (Webpack, Vite) integrated
+- 🧪 **Code quality** tools in separate linter containers
+- 📋 **40+ make commands** for development workflow
+- 📚 **INITDEV.md** with complete setup guide
+
+**Supported stacks:** Python/Django, PHP/Symfony/Laravel, Node.js/React/Vue, Ruby/Rails + PostgreSQL, MariaDB, MySQL, Redis
+
+The Kitchen system intelligently combines templates, researches current versions via Docker Hub API, and generates a complete development environment with zero configuration.
+
 ### 1. Product Planning Phase
 
 **Option A: Quick Solo PRD**
@@ -200,6 +232,7 @@ Specialized agents implement tasks while maintaining progress updates and an aud
 
 ### Initial Setup
 - `/doh:init` - Install dependencies and configure GitHub
+- `/doh:init-dev` - Generate Docker development environment for your stack
 
 ### PRD Commands
 - `/doh:prd-new` - Launch brainstorming for new product requirement
