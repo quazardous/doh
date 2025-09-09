@@ -1,0 +1,95 @@
+# DOH Rails Extension for Makefile.seed
+# =================================================================
+# 
+# ⚠️ THIS FILE EXTENDS Makefile.seed - NOT A STANDALONE MAKEFILE
+# 
+# AI GENERATION PROCESS:
+# 1. Start with complete Makefile.seed content (foundation)
+# 2. Add these Rails-specific targets AFTER the seed
+# 3. Result: ONE Makefile with seed + these additions
+# 4. Remove redundant parts (help, common targets) - they're in seed
+# 
+# CRITICAL: These targets use variables from Makefile.seed:
+# - $(DOCKER_COMPOSE) - Docker command with env-file
+# - ${EXEC_CONTAINER} - For container execution
+# - ${APP_CONTAINER} - Main app container name
+# - All other patterns defined in seed
+# =================================================================
+
+# Rails-specific commands - Real Rails CLI
+RAILS_CLI = ${EXEC_CONTAINER} ${APP_CONTAINER} rails
+
+# Rails-specific PHONY targets (common ones are in Makefile.seed)
+.PHONY: rails-new rails-console rails-migrate rails-seed rails-generate hello-doh bundle-install
+
+# =================================================================
+# RAILS-SPECIFIC CONFIG INITIALIZATION (extends seed env-config)
+# =================================================================
+
+env-config: ## Initialize local config files from -docker templates (Rails + common)
+	@echo "$(GREEN)Initializing Rails configuration files...$(RESET)"
+	# @AI-Kitchen: MERGE - Add to seed env-config target
+	# This adds Rails-specific files to the common ones from seed
+	$(call copy-dist-config,./.env-docker,./.env)
+	$(call copy-dist-config,./Gemfile-docker,./Gemfile)
+	$(call copy-dist-config,./config/database.yml-docker,./config/database.yml)
+	$(call copy-dist-config,./.rspec-docker,./.rspec)
+	@echo "$(GREEN)Rails configuration files ready! Customize as needed.$(RESET)"
+	@echo "$(YELLOW)💡 Rails-specific: .env, Gemfile, database.yml, .rspec$(RESET)"
+
+# NOTE: help target is in Makefile.seed
+# NOTE: Common targets (dev, down, sh, logs) are in Makefile.seed
+
+# Rails Project Initialization
+rails-new: ## Create Rails project with Rails CLI
+	@echo "💎 Creating new Rails project..."
+	@echo "📋 Command: $(RAILS_CLI) new {{PROJECT_NAME}} --database={{DATABASE}} --skip-git"
+	@$(RAILS_CLI) new {{PROJECT_NAME}} --database={{DATABASE}} --skip-git
+	@echo "📋 Command: ${EXEC_CONTAINER} ${APP_CONTAINER} bundle install"
+	@${EXEC_CONTAINER} ${APP_CONTAINER} bundle install
+	@echo "✅ Rails project '{{PROJECT_NAME}}' created!"
+
+# Rails Commands
+rails-console: ## Open Rails console
+	@echo "📋 Command: $(RAILS_CLI) console"
+	@$(RAILS_CLI) console
+
+rails-migrate: ## Run Rails migrations
+	@echo "📋 Command: $(RAILS_CLI) db:migrate"
+	@$(RAILS_CLI) db:migrate
+
+rails-seed: ## Run Rails seeds
+	@echo "📋 Command: $(RAILS_CLI) db:seed"
+	@$(RAILS_CLI) db:seed
+
+# Rails Generators
+rails-generate: ## Run Rails generator (interactive)
+	@echo "📋 Command: $(RAILS_CLI) generate"
+	@$(RAILS_CLI) generate
+
+hello-doh: ## Rails Hello World + DOH validation + CLI task
+	@echo "💎 Creating Rails Hello World..."
+	@echo "📋 Command: $(RAILS_CLI) generate controller Hello index"
+	@$(RAILS_CLI) generate controller Hello index
+	@echo "📋 Command: $(RAILS_CLI) generate task hello greet"
+	@$(RAILS_CLI) generate task hello greet
+	@echo "🤖 AI will generate: HelloController and hello:greet rake task"
+	@echo "🎯 DOH_HELLOWORLD validation included in web view and rake task"
+
+# =================================================================
+# DEPENDENCY MANAGEMENT
+# =================================================================
+
+dev-setup: env-config ## Install all dependencies (Rails + Node.js if needed)
+	@echo "💎 Installing Rails dependencies..."
+	@echo "📋 Command: ${EXEC_CONTAINER} ${APP_CONTAINER} bundle install"
+	@${EXEC_CONTAINER} ${APP_CONTAINER} bundle install
+	# @AI-Kitchen: CONDITIONAL - Include if frontend stack detected
+	# @AI-Kitchen: CHOOSE - npm/yarn/pnpm based on lock files or user choice
+	# Example: @${EXEC_CONTAINER} ${APP_CONTAINER} npm install
+	@echo "✅ Rails dependencies installed!"
+
+bundle-install: ## Install Ruby/Rails dependencies
+	@echo "📦 Installing Ruby dependencies..."
+	@echo "📋 Command: ${EXEC_CONTAINER} ${APP_CONTAINER} bundle install"
+	@${EXEC_CONTAINER} ${APP_CONTAINER} bundle install

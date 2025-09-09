@@ -1,0 +1,113 @@
+# DOH Laravel Extension for Makefile.seed
+# =================================================================
+# 
+# ⚠️ THIS FILE EXTENDS Makefile.seed - NOT A STANDALONE MAKEFILE
+# 
+# AI GENERATION PROCESS:
+# 1. Start with complete Makefile.seed content (foundation)
+# 2. Add these Laravel-specific targets AFTER the seed
+# 3. Result: ONE Makefile with seed + these additions
+# 4. Remove redundant parts (help, common targets) - they're in seed
+# 
+# CRITICAL: These targets use variables from Makefile.seed:
+# - $(DOCKER_COMPOSE) - Docker command with env-file
+# - ${EXEC_CONTAINER} - For container execution
+# - ${APP_CONTAINER} - Main app container name
+# - All other patterns defined in seed
+# =================================================================
+
+# Laravel-specific commands - Real Laravel/Artisan CLI
+ARTISAN = ${EXEC_CONTAINER} ${APP_CONTAINER} php artisan
+
+# Laravel-specific PHONY targets (common ones are in Makefile.seed)
+.PHONY: laravel-new artisan laravel-migrate laravel-seed laravel-tinker
+.PHONY: make-controller make-model make-migration hello-doh composer-install
+
+# =================================================================
+# LARAVEL-SPECIFIC CONFIG INITIALIZATION (extends seed env-config)
+# =================================================================
+
+env-config: ## Initialize local config files from -docker templates (Laravel + common)
+	@echo "$(GREEN)Initializing Laravel configuration files...$(RESET)"
+	# @AI-Kitchen: MERGE - Add to seed env-config target
+	# This adds Laravel-specific files to the common ones from seed
+	$(call copy-dist-config,./.env-docker,./.env)
+	$(call copy-dist-config,./composer.json-docker,./composer.json)
+	$(call copy-dist-config,./package.json-docker,./package.json)
+	$(call copy-dist-config,./phpunit.xml-docker,./phpunit.xml)
+	@echo "$(GREEN)Laravel configuration files ready! Customize as needed.$(RESET)"
+	@echo "$(YELLOW)💡 Laravel-specific: .env, composer.json, package.json, phpunit.xml$(RESET)"
+
+# NOTE: help target is in Makefile.seed
+# NOTE: Common targets (dev, down, sh, logs) are in Makefile.seed
+
+# Laravel Project Initialization
+laravel-new: ## Create Laravel project with Composer
+	@echo "🎸 Creating new Laravel project..."
+	@echo "📋 Command: ${EXEC_CONTAINER} ${APP_CONTAINER} composer create-project laravel/laravel {{PROJECT_NAME}} ."
+	@${EXEC_CONTAINER} ${APP_CONTAINER} composer create-project laravel/laravel {{PROJECT_NAME}} .
+	@echo "📋 Command: $(ARTISAN) key:generate"
+	@$(ARTISAN) key:generate
+	@echo "✅ Laravel project '{{PROJECT_NAME}}' created!"
+
+# Laravel Artisan Commands  
+artisan: ## Run Laravel Artisan command (interactive)
+	@echo "📋 Command: $(ARTISAN)"
+	@$(ARTISAN)
+
+laravel-migrate: ## Run Laravel migrations
+	@echo "📋 Command: $(ARTISAN) migrate"
+	@$(ARTISAN) migrate
+
+laravel-seed: ## Run Laravel seeders
+	@echo "📋 Command: $(ARTISAN) db:seed"
+	@$(ARTISAN) db:seed
+
+laravel-tinker: ## Open Laravel Tinker (REPL)
+	@echo "📋 Command: $(ARTISAN) tinker"
+	@$(ARTISAN) tinker
+
+# Laravel Make Commands
+make-controller: ## Create Laravel controller
+	@echo "📋 Command: $(ARTISAN) make:controller"
+	@$(ARTISAN) make:controller
+
+make-model: ## Create Laravel model
+	@echo "📋 Command: $(ARTISAN) make:model"
+	@$(ARTISAN) make:model
+
+make-migration: ## Create Laravel migration
+	@echo "📋 Command: $(ARTISAN) make:migration"
+	@$(ARTISAN) make:migration
+
+hello-doh: ## Create Laravel Hello World controller and test complete stack
+	@echo "🎸 Creating Laravel Hello World..."
+	@echo "📋 Command: $(ARTISAN) make:controller HelloController"
+	@$(ARTISAN) make:controller HelloController
+	@echo "📋 Command: $(ARTISAN) make:command HelloCommand"
+	@$(ARTISAN) make:command HelloCommand
+	@echo "🤖 AI will generate: HelloController route and HelloCommand CLI"
+	@echo "🎯 DOH_HELLOWORLD validation included in web route and artisan command"
+
+# =================================================================
+# LARAVEL-SPECIFIC TARGETS (extend Makefile.seed)
+# =================================================================
+
+# dev-setup in Makefile.seed calls env-config first, then this extends it
+dev-setup: env-config ## Install all dependencies (Laravel + Node.js if needed)
+	@echo "🎸 Installing Laravel dependencies..."
+	@echo "📋 Command: ${EXEC_CONTAINER} ${APP_CONTAINER} composer install"
+	@${EXEC_CONTAINER} ${APP_CONTAINER} composer install
+	# @AI-Kitchen: CONDITIONAL - Include if frontend stack detected
+	# @AI-Kitchen: CHOOSE - npm/yarn/pnpm based on lock files or user choice
+	# Example: @${EXEC_CONTAINER} ${APP_CONTAINER} npm install
+	@echo "✅ Laravel dependencies installed!"
+
+composer-install: ## Install Composer dependencies
+	@echo "📦 Installing Composer dependencies..."
+	@echo "📋 Command: ${EXEC_CONTAINER} ${APP_CONTAINER} composer install"
+	@${EXEC_CONTAINER} ${APP_CONTAINER} composer install
+
+# NOTE: Common process management targets (status, restart-web, restart-all) are in Makefile.seed
+# NOTE: All variables and patterns are defined in Makefile.seed
+# NOTE: Always use $(DOCKER_COMPOSE) and other seed variables

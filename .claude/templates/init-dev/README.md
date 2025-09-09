@@ -35,7 +35,7 @@ Django project detected → AI takes inspiration from stacks/python/ + services/
    ├── linter/Dockerfile (adapted from stacks/python/Dockerfile.linter)
    ├── app/supervisord.conf (web + worker processes)
    ├── traefik/traefik.yml (HTTPS configuration)
-   └── mariadb/init/01-create-database.sql
+   └── mariadb/conf.d/custom.cnf
 ```
 
 ## Structure (Container-Organized)
@@ -47,7 +47,7 @@ Django project detected → AI takes inspiration from stacks/python/ + services/
 ├── common/                          # Common components for all stacks
 │   ├── docker-compose-base.yml        # Base docker-compose structure
 │   ├── Dockerfile.multi-stage.template # Multi-stage Dockerfile template
-│   └── Makefile                        # Development commands template
+│   └── Makefile.seed                   # Foundation Makefile extended by framework parts
 ├── stacks/                          # Stack-specific patterns
 │   ├── node/                        # Node.js stack templates
 │   │   ├── Dockerfile                  # Node.js main container
@@ -98,7 +98,17 @@ To enrich components available to AI, add to the **existing structure**:
 
 **Important**: AI adapts these templates to generate container-organized final structure!
 
-### Dynamic Variables and Substitution
+### AI Kitchen Pseudo-Tags and Dynamic Generation
+
+**@AI-Kitchen: Pseudo-Tag System** guides intelligent generation:
+
+```makefile
+# @AI-Kitchen: CONDITIONAL - Include if Redis detected in stack
+# @AI-Kitchen: CHOOSE - Replace npm with yarn/pnpm if detected
+# @AI-Kitchen: MERGE - Add to seed env-config target
+# @AI-Kitchen: SUBSTITUTE - Replace {{PROJECT_NAME}} with real project name
+# @AI-Kitchen: GENERATE - Create framework-specific hello-world validation
+```
 
 AI generates variables **on-the-fly** based on context:
 - `PROJECT_NAME` → Detected from directory name
@@ -106,7 +116,9 @@ AI generates variables **on-the-fly** based on context:
 - `DB_TYPE` → Inferred from stack or user specification
 - And many others based on detected needs...
 
-**No hardcoded variables** - AI adapts to context!
+**Makefile Architecture**: AI combines `Makefile.seed` (foundation) + `Makefile.*-part` (framework extensions) → Final `Makefile`
+
+**Distribution File Pattern**: `-docker` suffix files contain working defaults that copy to local customizable versions via `make env-config`
 
 ### Permission Management (UID/GID)
 
@@ -416,7 +428,7 @@ The new container-organized approach provides better **separation of concerns** 
 ./docker/                           # User-specified directory (e.g., ./docker, ./infra, ./containers)
 ├── docker-compose.yml              # Main orchestration
 ├── docker-compose.env              # Environment variables
-├── Makefile                        # Development commands
+├── Makefile                        # Development commands (generated from Makefile.seed + framework parts)
 ├── app/                            # Main application container ⭐ MANDATORY
 │   ├── Dockerfile                  # Multi-stage: Python + Node.js + System tools
 │   ├── supervisord.conf            # Process management (web + workers + scheduler)
@@ -430,7 +442,7 @@ The new container-organized approach provides better **separation of concerns** 
 │   └── certs/                      # SSL certificates (mkcert generated)
 ├── mariadb/                        # Database container (when applicable)
 │   ├── init/                       # Database initialization scripts
-│   │   └── 01-create-database.sql  # Initial database setup
+│   │   └── custom.cnf              # Database configuration
 │   └── conf.d/                     # Custom database configuration
 │       └── custom.cnf              # Performance and charset settings
 ├── shared/                         # Cross-container shared resources
@@ -462,7 +474,7 @@ The new container-organized approach provides better **separation of concerns** 
 **Database Container (`./docker/mariadb/` or `./docker/postgres/`)**:
 - 🗄️ **Data persistence**: Database data stored in `./var/data/mariadb/` (shared exception)
 - ⚙️ **Custom config**: Performance tuning in `./mariadb/conf.d/` (container-specific)
-- 🚀 **Auto initialization**: Database and users created via `./mariadb/init/` (container-specific)
+- 🚀 **Auto initialization**: Database and users created via environment variables (MARIADB_DATABASE, MARIADB_USER, etc.)
 - 📝 **Logs**: Database logs in `./var/log/mariadb/` (shared exception)
 
 ### Migration Path

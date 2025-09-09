@@ -1,0 +1,5 @@
+# Ignore generated traefik configuration
+traefik.yaml
+
+# Keep the template
+!traefik.yaml-docker

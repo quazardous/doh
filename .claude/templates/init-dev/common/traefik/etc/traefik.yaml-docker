@@ -1,0 +1,61 @@
+# Traefik main configuration for DOH development
+# Static configuration file - Kitchen template
+
+global:
+  sendAnonymousUsage: false
+  checkNewVersion: false
+
+# API Configuration
+api:
+  dashboard: true
+  insecure: true
+  debug: true
+
+# Entry Points
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entrypoint:
+          to: websecure
+          scheme: https
+          permanent: true
+  websecure:
+    address: ":443"
+
+# Providers
+providers:
+  # Docker provider for automatic service discovery
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+    watch: true
+    network: "{{PROJECT_NAME}}-network"
+    constraints: "Label(`dev.project`, `{{PROJECT_NAME}}`)"
+  
+  # File provider for dynamic configuration (SSL certificates)
+  file:
+    filename: "/etc/traefik/dynamic.yaml"
+    watch: true
+
+# Logging
+log:
+  level: INFO
+  filePath: "/var/log/traefik/traefik.log"
+
+# Access Logs
+accessLog:
+  filePath: "/var/log/traefik/access.log"
+  bufferingSize: 100
+
+# Metrics (optional)
+metrics:
+  prometheus:
+    addEntryPointsLabels: true
+    addServicesLabels: true
+
+# HINT: Dashboard available at http://localhost:{{EXTERNAL_TRAEFIK_PORT}}
+# HINT: Logs in ./var/log/traefik/ directory
+# HINT: Dynamic configuration in dynamic.yaml for SSL certificates
+# HINT: Network constraint filters containers to this project only

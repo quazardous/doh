@@ -44,7 +44,6 @@ module.exports = (env, argv) => {
       // Load environment variables from .env file
       new Dotenv({
         path: isTest ? './.env.test' : './.env',
-        safe: true, // Check against .env.example
         systemvars: true, // Load system environment variables
         silent: false, // Suppress errors
         defaults: true, // Load .env.defaults

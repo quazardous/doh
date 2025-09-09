@@ -14,8 +14,6 @@ services:
       - APP_ENV=${APP_ENV:-development}
       - NODE_ENV=${NODE_ENV:-development}
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE:-myapp.settings}
-      # Database and other service connections
-      - DATABASE_URL=${DATABASE_URL}
     user: ${UID:-1000}:${GID:-1000}
     volumes:
       - .:/app                                    # ALL application code (logs auto-visible in ./var/log/)
@@ -31,19 +29,23 @@ services:
       - default
 
   traefik:
-    image: traefik:v3.1
-    command:
-      - "--configFile=/etc/traefik/traefik.yml"
+    image: traefik:v3.0
+    # No command needed - configuration via files only
     volumes:
+      # Docker socket for service discovery
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./traefik.yml:/etc/traefik/traefik.yml:ro
-      - ./dynamic.yaml:/etc/traefik/dynamic.yaml:ro
-      - ./docker-dev/certs:/certs:ro
-      - ./docker-dev/logs/traefik:/logs
+      # Static configuration file (API, providers, entrypoints)
+      - ./docker/traefik/traefik.yaml:/etc/traefik/traefik.yaml:ro
+      # Dynamic configuration file (SSL certificates, additional routes)  
+      - ./docker/traefik/dynamic.yaml:/etc/traefik/dynamic.yaml:ro
+      # SSL certificates generated with mkcert
+      - ./docker/traefik/certs:/etc/ssl/certs:ro
+      # Traefik logs directory (access.log, traefik.log)
+      - ./var/log/traefik:/var/log/traefik
     ports:
-      - "${EXTERNAL_HTTP_PORT:-80}:80"
-      - "${EXTERNAL_HTTPS_PORT:-443}:443"
-      - "${TRAEFIK_DASHBOARD_PORT:-8080}:8080" # dashboard
+      - "${EXTERNAL_HTTP_PORT:-8080}:80"           # HTTP (redirects to HTTPS)
+      - "${EXTERNAL_HTTPS_PORT:-4430}:443"         # HTTPS (main traffic)
+      - "${EXTERNAL_TRAEFIK_PORT:-8081}:8080"      # Dashboard
     networks:
       - default
 

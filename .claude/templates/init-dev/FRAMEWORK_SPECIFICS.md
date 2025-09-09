@@ -22,88 +22,22 @@
 | **Go** | `go` CLI | `go mod init myproject` | `go run/build/test` | `go mod` | GORM/native SQL |
 | **Rust** | `cargo` | `cargo new myproject` | `cargo run/build/test` | `cargo` | Diesel/SQLx |
 
-## 🚨 MAKEFILE VARIABLES PAR FRAMEWORK
+## 🚨 FRAMEWORK COMMAND PATTERNS
 
-**IMPORTANT**: Utilisation d'EXEC au lieu de RUN pour optimiser les performances Docker.
-Les containers restent persistants (php-fpm/sleep infinity) et on exécute dans le contexte existant.
+**IMPORTANT**: Les variables Makefile sont définies dans les fichiers `Makefile.*-part` correspondants.
+Cette section documente les **patterns conceptuels** que l'IA doit suivre.
 
-### Django Kitchen Variables:
-```makefile
-DJANGO_CLI = $(EXEC_APP) django-admin
-DJANGO_MANAGE = $(EXEC_APP) python manage.py
-DJANGO_STARTPROJECT = $(DJANGO_CLI) startproject {{PROJECT_NAME}} .
-DJANGO_MIGRATE = $(DJANGO_MANAGE) migrate
-DJANGO_SHELL = $(DJANGO_MANAGE) shell
-DJANGO_TEST = $(DJANGO_MANAGE) test
-```
+### Pattern Docker Container Execution:
+**EXEC vs RUN Performance**: Les containers restent persistants et on utilise `${EXEC_CONTAINER} ${APP_CONTAINER}` pour optimiser les performances.
 
-### Symfony Kitchen Variables:
-```makefile  
-SYMFONY_CLI = $(EXEC_APP) symfony
-SYMFONY_NEW = $(SYMFONY_CLI) new {{PROJECT_NAME}} --version={{SYMFONY_VERSION}}
-SYMFONY_CONSOLE = $(EXEC_APP) php bin/console
-DOCTRINE_MIGRATE = $(SYMFONY_CONSOLE) doctrine:migrations:migrate
-MAKE_CONTROLLER = $(SYMFONY_CONSOLE) make:controller
-COMPOSER_INSTALL = $(EXEC_APP) composer install
-```
+### Node.js Package Manager Detection Logic:
+**Règle de détection automatique**:
+- Si `yarn.lock` existe → utiliser `yarn install/build/dev`
+- Si `pnpm-lock.yaml` existe → utiliser `pnpm install/build/dev`  
+- Si `package-lock.json` ou aucun → utiliser `npm install/build/dev`
+- Si demande explicite utilisateur → respecter le choix
 
-### Laravel Kitchen Variables:
-```makefile
-ARTISAN = $(EXEC_APP) php artisan
-COMPOSER_CREATE = $(EXEC_APP) composer create-project laravel/laravel {{PROJECT_NAME}} .
-LARAVEL_MIGRATE = $(ARTISAN) migrate
-LARAVEL_TINKER = $(ARTISAN) tinker
-LARAVEL_MAKE = $(ARTISAN) make:controller
-COMPOSER_INSTALL = $(EXEC_APP) composer install
-```
-
-### Rails Kitchen Variables:
-```makefile
-RAILS_CLI = $(EXEC_APP) rails
-RAILS_NEW = $(RAILS_CLI) new {{PROJECT_NAME}} --database={{DATABASE}}
-RAILS_CONSOLE = $(RAILS_CLI) console
-RAILS_MIGRATE = $(RAILS_CLI) db:migrate
-RAILS_GENERATE = $(RAILS_CLI) generate
-BUNDLE_INSTALL = $(EXEC_APP) bundle install
-```
-
-### Next.js Kitchen Variables:
-```makefile
-NEXTJS_CREATE = $(EXEC_APP) npx create-next-app@latest {{PROJECT_NAME}} --typescript --tailwind
-NEXTJS_DEV = $(EXEC_APP) npm run dev
-NEXTJS_BUILD = $(EXEC_APP) npm run build
-NPM_INSTALL = $(EXEC_APP) npm install
-```
-
-### Node.js Package Managers Support:
-```makefile
-# ⚠️ ATTENTION: Certains projets préfèrent yarn ou pnpm
-# L'IA doit détecter quel gestionnaire utiliser selon les fichiers lock existants
-
-# NPM (par défaut)
-NPM_INSTALL = $(EXEC_APP) npm install
-NPM_BUILD = $(EXEC_APP) npm run build  
-NPM_DEV = $(EXEC_APP) npm run dev
-
-# YARN (si yarn.lock détecté)
-YARN_INSTALL = $(EXEC_APP) yarn install
-YARN_BUILD = $(EXEC_APP) yarn build
-YARN_DEV = $(EXEC_APP) yarn dev
-
-# PNPM (si pnpm-lock.yaml détecté)
-PNPM_INSTALL = $(EXEC_APP) pnpm install
-PNPM_BUILD = $(EXEC_APP) pnpm build
-PNPM_DEV = $(EXEC_APP) pnpm dev
-```
-
-### Spring Boot Kitchen Variables:
-```makefile
-SPRING_CLI = $(RUN_APP) spring
-SPRING_INIT = $(SPRING_CLI) init --dependencies=web,data-jpa,{{DATABASE}} {{PROJECT_NAME}}
-MAVEN_RUN = $(RUN_APP) ./mvnw spring-boot:run
-MAVEN_TEST = $(RUN_APP) ./mvnw test
-MAVEN_INSTALL = $(RUN_APP) ./mvnw clean install
-```
+**@AI-Kitchen: CHOOSE** - L'IA doit adapter les commandes selon la détection du gestionnaire de paquets.
 
 ## 🎯 KITCHEN PRIORITY BY FRAMEWORK
 
@@ -191,11 +125,8 @@ DJANGO_MANAGE = $(EXEC_APP) python manage.py
    - Rails → `rails db:migrate/console`
 
 3. **TOUJOURS documenter la commande exacte avant exécution**
-   ```makefile
-   django-migrate: ## Run Django migrations
-   	@echo "📋 Command: $(DJANGO_MIGRATE)"
-   	@$(DJANGO_MIGRATE)
-   ```
+   - Chaque target Makefile doit afficher la commande avant exécution
+   - Pattern: `@echo "📋 Command: <actual_command>"` puis `@<actual_command>`
 
 4. **CHAQUE framework a sa propre kitchen**
    - Pas de mélange entre technologies

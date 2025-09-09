@@ -1,10 +1,16 @@
   mysql:
     image: mysql:8.0
+    # Auto-creation by official MySQL image:
+    # - MYSQL_DATABASE: automatically creates the database
+    # - MYSQL_USER: automatically creates the user
+    # - MYSQL_PASSWORD: sets the user password
+    # - MYSQL_ROOT_PASSWORD: sets the root password (required)
+    # The created user receives all privileges on the created database automatically
     environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-{{PROJECT_NAME}}_dev}
-      MYSQL_USER: ${MYSQL_USER:-dev}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-secret}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-secret}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-{{PROJECT_NAME}}}
+      MYSQL_USER: ${MYSQL_USER:-{{PROJECT_NAME}}}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-{{PROJECT_NAME}}}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-{{PROJECT_NAME}}}
     volumes:
       - ./docker-dev/data/mysql:/var/lib/mysql
       - ./docker-dev/mysql/init:/docker-entrypoint-initdb.d

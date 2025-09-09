@@ -1,0 +1,15 @@
+# Traefik dynamic configuration for DOH development
+# SSL certificates configuration - Kitchen template
+
+tls:
+  certificates:
+    - certFile: "/etc/ssl/certs/{{PROJECT_NAME}}.localhost.pem"
+      keyFile: "/etc/ssl/certs/{{PROJECT_NAME}}.localhost-key.pem"
+    - certFile: "/etc/ssl/certs/_wildcard.{{PROJECT_NAME}}.localhost.pem"
+      keyFile: "/etc/ssl/certs/_wildcard.{{PROJECT_NAME}}.localhost-key.pem"
+
+# HINT: If SSL certificates invalid → run 'make ssl-setup' to regenerate with mkcert
+# HINT: If domains don't resolve → add '127.0.0.1 app.{{PROJECT_NAME}}.localhost' to /etc/hosts
+# HINT: If Traefik not accessible → check ports {{EXTERNAL_TRAEFIK_PORT}}/{{EXTERNAL_HTTPS_PORT}} are free on host machine
+# HINT: Certificate files must be in ./docker/traefik/certs/ directory
+# HINT: Certificates generated with: mkcert "{{PROJECT_NAME}}.localhost" "*.{{PROJECT_NAME}}.localhost"

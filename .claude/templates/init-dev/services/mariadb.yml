@@ -1,0 +1,36 @@
+  mariadb:
+    image: mariadb:12.0.2
+    # Auto-création automatique par l'image officielle MariaDB (comme MySQL) :
+    # - MARIADB_DATABASE : crée automatiquement la base de données
+    # - MARIADB_USER : crée automatiquement l'utilisateur  
+    # - MARIADB_PASSWORD : définit le mot de passe de l'utilisateur
+    # - MARIADB_ROOT_PASSWORD : définit le mot de passe root (obligatoire)
+    # L'utilisateur créé reçoit tous les droits sur la base créée automatiquement
+    environment:
+      MARIADB_DATABASE: ${MARIADB_DATABASE:-{{PROJECT_NAME}}}
+      MARIADB_USER: ${MARIADB_USER:-{{PROJECT_NAME}}}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD:-{{PROJECT_NAME}}}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:-{{PROJECT_NAME}}}
+    volumes:
+      - ./var/data/mariadb:/var/lib/mysql
+      - ./docker/mariadb/conf.d:/etc/mysql/conf.d:ro
+      - ./var/log/mariadb:/var/log/mysql
+    labels:
+      - "dev.project={{PROJECT_NAME}}"
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:5.2.1
+    environment:
+      - PMA_HOST=mariadb
+      - PMA_PORT=3306
+      - PMA_USER={{PROJECT_NAME}}
+      - PMA_PASSWORD={{PROJECT_NAME}}
+    depends_on:
+      - mariadb
+    labels:
+      - "traefik.enable=true"
+      - "dev.project={{PROJECT_NAME}}"
+      - "traefik.http.routers.phpmyadmin-{{PROJECT_NAME}}.rule=Host(`phpmyadmin.{{PROJECT_NAME}}.localhost`)"
+      - "traefik.http.routers.phpmyadmin-{{PROJECT_NAME}}.entrypoints=websecure"
+      - "traefik.http.routers.phpmyadmin-{{PROJECT_NAME}}.tls=true"
+      - "traefik.http.services.phpmyadmin-{{PROJECT_NAME}}.loadbalancer.server.port=80"
