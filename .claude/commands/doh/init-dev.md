@@ -119,9 +119,9 @@ This script handles:
 2. **Analyze request** - Langage naturel OU fichiers existants (selon contexte)
 
 ### Phase 2: Seed de la Stack
-3. **Prise en compte des fichiers core** - Devrait être dans `.claude/templates/init-dev/core/`
-4. **Read Makefile.seed** - Patterns de fondation à préserver
-5. **Prise en compte des autres fichiers core** - Base commune à toutes les stacks
+3. **Read core templates** - `.claude/templates/init-dev/core/` (Makefile.seed, docker-compose-base, traefik, scripts)
+4. **Load @AI-Kitchen patterns** - Instructions de traitement des templates (voir section @AI-Kitchen)
+5. **Load foundation patterns** - Base commune à toutes les stacks
 
 ### Phase 3: Exploration des Kitchen Templates  
 6. **Arborescence par stack/techno** - Explorer les kitchen templates pour cherry-pick ceux qui correspondent
@@ -129,9 +129,9 @@ This script handles:
 
 ### Phase 4: Kitchen des Templates vers Fichiers Finaux
 8. **Process @AI-Kitchen** - SUBSTITUTE/CONDITIONAL/CHOOSE/MERGE/GENERATE
-9. **Replace {{placeholders}}** - Tous les templates → vraies valeurs
+9. **Replace {{placeholders}}** - Système de substitution complet (voir section Placeholders)
 10. **Présomption template simple** - Si un fichier template n'a pas d'instruction @AI-Kitchen, il est présumé à prendre tel quel (modulo les placeholders)
-11. **Main file : Makefile** - Seed Makefile.seed + framework parts (diff parfait)
+11. **Main file : Makefile** - Kitchen `.claude/templates/init-dev/core/Makefile.seed` + framework parts (diff clean, understandable)
 12. **Generate all files needed** - Depuis templates (.env-docker, configurations)
 13. **Create docker configurations** - Pour chaque container (organisation par dossier, supervisord + traefik + database)
 14. **Generate Dockerfile** - Multi-stage pour la stack détectée. **IMPORTANT** : le container principal doit avoir un process daemon (supervisord ou sleep infinity)
@@ -147,6 +147,102 @@ This script handles:
 
 ---
 
+## Placeholder Replacement System
+
+**🎯 Complete Placeholder Processing - All Templates → Real Values**
+
+### Standard Placeholders
+**@AI-Kitchen: SUBSTITUTE - Always replace these placeholders:**
+
+| Placeholder | Description | Example Value |
+|-------------|-------------|---------------|
+| `{{PROJECT_NAME}}` | Project name (from request or detection) | `my-app`, `blog-api` |
+| `{{EXTERNAL_HTTP_PORT}}` | HTTP port for Traefik | `8000`, `8080` |
+| `{{EXTERNAL_HTTPS_PORT}}` | HTTPS port for Traefik | `8443`, `4430` |
+| `{{EXTERNAL_TRAEFIK_PORT}}` | Traefik dashboard port | `8080`, `8081` |
+| `{{DATABASE_NAME}}` | Database name | `my_app_dev`, `blog_db` |
+| `{{DATABASE_USER}}` | Database user | `dev`, `app_user` |
+| `{{DATABASE_PASSWORD}}` | Database password | `secret`, `dev_pass` |
+| `{{FRAMEWORK_VERSION}}` | Framework version (Django 5.0, Laravel 10) | `5.0`, `10.x` |
+| `{{NODE_VERSION}}` | Node.js version for frontend | `20`, `22` |
+
+### Framework-Specific Placeholders
+**@AI-Kitchen: CONDITIONAL - Include based on detected stack:**
+
+**Django:**
+- `{{DJANGO_SECRET_KEY}}` → Generated secret key
+- `{{DJANGO_SETTINGS_MODULE}}` → `myapp.settings.dev`
+
+**Laravel:** 
+- `{{APP_KEY}}` → Generated Laravel key
+- `{{APP_URL}}` → `https://app.{{PROJECT_NAME}}.localhost`
+
+**Symfony:**
+- `{{APP_SECRET}}` → Generated Symfony secret
+- `{{DATABASE_URL}}` → Full database connection string
+
+**Vue.js/React:**
+- `{{API_BASE_URL}}` → Backend API URL
+- `{{DEV_SERVER_PORT}}` → Frontend dev server port
+
+### Processing Rules
+1. **Scan all templates** for `{{PLACEHOLDER}}` patterns
+2. **Replace systematically** - No placeholders should remain
+3. **Validate completion** - `grep "{{" *.docker` must return empty
+4. **Framework detection** - Include conditional placeholders based on detected technologies
+
+## @AI-Kitchen Instructions Reference
+
+### Core File References
+**@AI-Kitchen: MANDATORY - Core templates location**
+All core/common files are located in `.claude/templates/init-dev/core/`:
+- **Makefile.seed** - Foundation Makefile template (can be kitchened, but diff must show clean changes)
+- **docker-compose.env-docker** - Common environment variables template
+- **traefik configurations** - SSL and routing templates
+
+### Template Processing Rules
+
+**@AI-Kitchen: CONDITIONAL - Framework detection**
+Include/exclude sections based on detected technologies:
+- Frontend detected → Include Node.js stages in Dockerfile
+- Database detected → Include database service in docker-compose.yml
+- Background jobs → Include worker processes in supervisord
+
+**@AI-Kitchen: MERGE - Makefile composition**
+Final Makefile = Kitchened Makefile.seed template + framework-specific additions
+- Kitchen Makefile.seed with placeholders and @AI-Kitchen instructions
+- Add framework targets AFTER processed seed
+- Result: `diff Makefile.seed Makefile` shows clean, understandable changes (not garbage)
+
+**@AI-Kitchen: GENERATE - Directory structure**
+```
+docker/
+├── app/
+│   ├── Dockerfile
+│   └── supervisord.conf
+├── {database}/           # mariadb/, postgres/, etc.
+│   └── conf.d/
+└── traefik/
+    ├── certs/
+    └── etc/
+        ├── traefik.yaml
+        └── dynamic.yaml
+```
+
+**@AI-Kitchen: COPY - System vs User configs**
+- System daemon configs → COPY to containers (mysql, postgresql)
+- User app configs → Volume mount (never COPY app code)
+
+### AI-Kitchen File Instructions
+**@AI-Kitchen: ai-kitchen.md files**
+Some template directories contain `ai-kitchen.md` files with folder-specific instructions:
+- Same importance as @AI-Kitchen tags but for the whole folder/stack
+- Contains workflow instructions, framework-specific patterns, CLI commands
+- Must be read and processed for each detected technology stack
+- Examples: `stacks/python/django/ai-kitchen.md`, `services/mariadb/ai-kitchen.md`
+
+---
+
 ## Detailed Process Explanations
 
 ### Phase 1-2: Analysis & Foundation Setup (Steps 1-5)
@@ -157,10 +253,10 @@ This script handles:
 - Understand confidence scoring for technology detection
 - Map framework → database → frontend statistical pairings
 
-**Step 2: Makefile.seed Foundation**  
-- Read complete seed content that MUST be preserved exactly
-- Understand $(DOCKER_COMPOSE) variables and patterns
-- Learn env-config copy-dist-config functions
+**Step 3-4: Core Templates & Patterns**  
+- Read `.claude/templates/init-dev/core/Makefile.seed` - Foundation template (can be kitchened)
+- Load @AI-Kitchen processing rules (documented in this file)
+- Load $(DOCKER_COMPOSE) variables and env-config patterns
 - Identify extension points for framework additions
 
 **Step 3: @AI-Kitchen Instruction Discovery**
