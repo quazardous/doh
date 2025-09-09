@@ -36,14 +36,103 @@
 
 ## Docker Configuration Rules
 
+### Container Naming Convention
+**@AI-Kitchen: Docker Compose container naming pattern**
+
+Docker Compose automatically generates container names using the pattern:
+`{project_name}-{service_name}-{replica_number}`
+
+**Examples for project "doh":**
+- `doh-app-1` - Main application container (service: app)
+- `doh-frontend-1` - Frontend development server (service: frontend) 
+- `doh-mariadb-1` - MariaDB database (service: mariadb)
+- `doh-traefik-1` - Traefik reverse proxy (service: traefik)
+- `doh-phpmyadmin-1` - Database admin interface (service: phpmyadmin)
+
+**Environment Variable Reference:**
+The main application container name is available as `APP_CONTAINER` in docker-compose.env:
+```bash
+# In docker-compose.env-docker template:
+APP_CONTAINER={{PROJECT_NAME}}-app-1
+
+# After processing (example for project "doh"):
+APP_CONTAINER=doh-app-1
+```
+
+**Usage in commands:**
+```bash
+# Check container status
+docker compose --env-file docker-compose.env ps
+
+# Execute commands in specific containers
+docker compose exec app bash                    # Uses service name
+docker exec doh-app-1 bash                      # Uses container name
+docker exec $APP_CONTAINER bash                 # Uses environment variable
+
+# View logs
+docker compose logs app                         # Uses service name  
+docker logs doh-app-1                          # Uses container name
+docker logs $APP_CONTAINER                      # Uses environment variable
+```
+
+**Note:** Always use service names with `docker compose` commands and container names with `docker` commands.
+
+### Container User Naming Convention
+**@AI-Kitchen: Modify existing users OR create 'appuser'**
+
+**PRIORITY ORDER:**
+1. **If system user exists (www-data, nginx, node)** - Modify its UID/GID
+2. **If no suitable user exists** - Create 'appuser'
+
+**Pattern 1: Modify existing user (PREFERRED):**
+```dockerfile
+# ✅ CORRECT - Modify existing www-data user for PHP containers
+# UID and GID are set in the host/docker env
+ARG UID
+ARG GID
+RUN usermod -u ${UID} www-data && \
+    groupmod -g ${GID} www-data
+
+# ✅ CORRECT - Modify existing node user for Node containers
+RUN usermod -u ${UID} node && \
+    groupmod -g ${GID} node
+```
+
+**Pattern 2: Create new user only if needed:**
+```dockerfile
+# ✅ CORRECT - Create appuser only when no standard user exists
+RUN groupadd -g ${GID} appuser && \
+    useradd -u ${UID} -g ${GID} -m appuser
+```
+
+**Common system users to modify (not create):**
+- `www-data` - Apache/PHP containers
+- `nginx` - Nginx official images  
+- `node` - Node.js official images
+- `postgres` - PostgreSQL images
+
+**Rule:** Always prefer modifying existing users over creating new ones.
+
+**Handling UID/GID conflicts:**
+```dockerfile
+# Safe modification pattern - handles existing UID/GID
+RUN usermod -o -u ${UID} www-data && \
+    groupmod -o -g ${GID} www-data
+# -o flag allows non-unique UID/GID (prevents errors)
+```
+
 ### Volume Mount Patterns
 **@AI-Kitchen: COPY vs VOLUME rules**
 
 **Always VOLUME mount (never COPY):**
 - Application source code: `./:/app`
-- Development configuration files: `./docker/app/supervisord.conf:/etc/supervisor/supervisord.conf:ro`
 - Data persistence: `./var/data/mariadb:/var/lib/mysql`
 - Log directories: `./var/log/traefik:/var/log/traefik`
+
+**Never COPY during build (handled post-build):**
+- Dependencies: `requirements.txt`, `package.json` - installed via `make dev-setup`
+- Supervisor config: `/app/etc/supervisor/supervisord.conf` - mounted with app code
+- Application configs: Included in source code mount
 
 **Always COPY (never VOLUME):**
 - System daemon configs: `/etc/mysql/`, `/etc/postgresql/`, `/etc/nginx/`
@@ -54,12 +143,61 @@
 # ✅ Correct - System daemon config
 COPY ./docker/mysql-custom.cnf /etc/mysql/conf.d/
 
-# ❌ Wrong - Application code should be volume mounted, not copied
-COPY ./src /app/src
+# ❌ Wrong - Dependencies should be installed post-build
+COPY requirements.txt /app/
+RUN pip install -r requirements.txt
+
+# ✅ Correct - Dependencies installed after container running
+# Via make dev-setup or docker exec
 ```
 
 ### Multi-stage Dockerfile Strategy
 **@AI-Kitchen: CONDITIONAL stages based on detected technologies**
+
+#### CMD Instruction Rules
+**⚠️ IMPORTANT: Only ONE CMD per Dockerfile**
+- Multiple CMD instructions are useless - only the LAST one is executed
+- Each stage can have its own CMD, but only the final stage's CMD runs
+- Use ENTRYPOINT + CMD for more flexibility if needed
+
+```dockerfile
+# ❌ WRONG - Multiple CMDs (only last one runs)
+CMD ["python", "manage.py", "runserver"]
+CMD ["yarn", "dev"]
+CMD ["/usr/bin/supervisord"]  # Only this runs!
+
+# ✅ CORRECT - Single CMD with supervisor managing all processes
+CMD ["/usr/bin/supervisord", "-c", "/app/docker/app/supervisor/supervisord.conf"]
+```
+
+#### Multi-Stage Precedence Rules
+**@AI-Kitchen: CRITICAL - Last stage wins**
+
+Docker uses **REVERSE PRECEDENCE** in multi-stage builds:
+- **Last stage defined = Default stage** (when no --target specified)
+- Stages are processed **front-to-back** but **last stage becomes default**
+
+```dockerfile
+# ❌ WRONG - Frontend stage will be default (runs yarn dev)
+FROM python:3.11-slim
+RUN apt-get install supervisor
+CMD ["/usr/bin/supervisord"]
+
+FROM node:20-alpine AS frontend  # ← This becomes DEFAULT!
+CMD ["yarn", "dev"]              # ← This CMD runs for app service
+```
+
+```dockerfile
+# ✅ CORRECT - Main stage is default (runs supervisord)
+FROM node:20-alpine AS frontend
+CMD ["yarn", "dev"]
+
+FROM python:3.11-slim           # ← This becomes DEFAULT!
+RUN apt-get install supervisor
+CMD ["/usr/bin/supervisord"]    # ← This CMD runs for app service
+```
+
+**Rule:** Put the **main application stage LAST** to make it the default.
 
 #### Tool Detection & Selection Pattern
 ```dockerfile
@@ -108,7 +246,7 @@ RUN apt-get update && apt-get install -y build-essential git python3-dev libpq-d
 **Required:** Main app container must run a persistent process:
 ```dockerfile
 # ✅ Option 1: supervisord (recommended for multiple processes)
-CMD ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]
+CMD ["supervisord", "-c", "/app/etc/supervisor/supervisord.conf"]
 
 # ✅ Option 2: Single long-running process
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
@@ -143,14 +281,34 @@ providers:
 ```
 
 ### UID/GID Permission Handling
-**@AI-Kitchen: Critical permission setup**
+**@AI-Kitchen: Critical permission setup - modify existing or create appuser**
 
 ```dockerfile
-# Dockerfile
-ARG UID=1000
-ARG GID=1000
-RUN groupadd -g ${GID} app && useradd -u ${UID} -g ${GID} -m app
-USER app
+# Dockerfile Pattern 1: Modify existing user (PREFERRED)
+# UID and GID are set in the host/docker env
+ARG UID
+ARG GID
+
+# For PHP/Apache containers - modify www-data
+RUN usermod -u ${UID} www-data && \
+    groupmod -g ${GID} www-data && \
+    chown -R www-data:www-data /var/www
+USER www-data
+
+# For Node containers - modify node user
+RUN usermod -u ${UID} node && \
+    groupmod -g ${GID} node
+USER node
+
+# Dockerfile Pattern 2: Create appuser (only if no standard user)
+# UID and GID are set in the host/docker env
+ARG UID
+ARG GID
+
+# For Python/custom containers - create appuser
+RUN groupadd -g ${GID} appuser && \
+    useradd -u ${UID} -g ${GID} -m -s /bin/bash appuser
+USER appuser
 ```
 
 ```yaml
@@ -174,8 +332,9 @@ export UID && export GID=$(id -g) && docker compose build
 ```
 docker/
 ├── app/
-│   ├── Dockerfile              # Multi-stage with framework dependencies
-│   └── supervisord.conf        # Process management (web + workers)
+│   ├── Dockerfile              # Multi-stage build (no COPY of deps/configs)
+│   └── supervisor/
+│       └── supervisord.conf    # User-level supervisor config (in app mount)
 ├── {database}/                 # mariadb/, postgres/, etc.
 │   └── conf.d/                 # Database-specific configurations
 └── traefik/
@@ -189,8 +348,11 @@ var/
 │   └── {database}/            # Database data persistence
 ├── log/
 │   ├── app/                   # Application logs
+│   ├── supervisor/            # Supervisor process logs
 │   ├── {database}/            # Database logs
 │   └── traefik/               # Traefik access/error logs
+├── run/
+│   └── supervisor/            # Supervisor PID/socket files (optional)
 └── tmp/                       # Temporary files
 ```
 
@@ -218,6 +380,58 @@ mkcert "{{PROJECT_NAME}}.localhost" "*.{{PROJECT_NAME}}.localhost"
 EXTERNAL_HTTP_PORT=8000         # Host port for HTTP (redirects to HTTPS)
 EXTERNAL_HTTPS_PORT=8443        # Host port for HTTPS
 EXTERNAL_TRAEFIK_PORT=8081      # Traefik dashboard port
+```
+
+## Supervisord User-Level Integration
+**@AI-Kitchen: Process management without root privileges**
+
+### User-Level Supervisor Pattern
+Supervisor runs as the application user, not as a system service:
+
+```dockerfile
+# Dockerfile - NO supervisor config COPY
+CMD ["/usr/bin/supervisord", "-c", "/app/docker/app/supervisor/supervisord.conf"]
+```
+
+```yaml
+# docker-compose.yml - Config included in app mount
+volumes:
+  - .:/app  # Includes docker/app/supervisor/supervisord.conf
+```
+
+### Configuration Location
+```bash
+/app/
+├── docker/
+│   └── app/
+│       └── supervisor/
+│           └── supervisord.conf  # User-level config (version controlled)
+└── var/
+    ├── log/
+    │   └── supervisor/           # Process logs
+    └── run/
+        └── supervisor/           # Socket/PID files (optional)
+```
+
+### Benefits
+- **No root required** - Runs as app user
+- **Version controlled** - Config in project repository
+- **Dynamic reloads** - Change processes without rebuild
+- **Developer friendly** - Direct `supervisorctl` access
+
+### Usage Commands
+```bash
+# Check process status
+docker exec app supervisorctl status
+
+# Restart specific process
+docker exec app supervisorctl restart django
+
+# Start frontend dev server
+docker exec app supervisorctl start frontend:*
+
+# View process logs
+docker exec app tail -f /app/var/log/supervisor/django.log
 ```
 
 ## Database Auto-Provisioning

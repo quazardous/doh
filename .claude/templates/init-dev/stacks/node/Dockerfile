@@ -6,8 +6,8 @@ RUN apk add --no-cache \
     curl \
     bash
 
-ARG UID=1000
-ARG GID=1000
+ARG UID
+ARG GID
 
 # Modify existing node user instead of creating new one
 RUN deluser --remove-home node \
@@ -16,12 +16,15 @@ RUN deluser --remove-home node \
 
 WORKDIR /app
 
-# Install dependencies as root, then change ownership
-COPY --chown=${UID}:${GID} package*.json ./
-RUN npm ci
+# @AI-Kitchen: SKIP - Do NOT copy package*.json during build
+# Node.js dependencies are installed post-build via make dev-setup
+# This allows dynamic dependency management without rebuilding containers
+# npm install commands will be executed inside running container
 
-# Copy source code
-COPY --chown=${UID}:${GID} . .
+# @AI-Kitchen: SKIP - Do NOT copy application code during build
+# Application code is mounted at runtime via docker-compose volumes
+# This allows instant code changes without rebuilding containers
+# Volume mount: .:/app (defined in docker-compose.yml)
 
 # Switch to non-root user for running the app
 USER nodeuser

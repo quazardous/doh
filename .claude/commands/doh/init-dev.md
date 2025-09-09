@@ -113,9 +113,16 @@ project-root/
 ```bash
 # docker-compose.env (generated at root)
 PROJECT_NAME=actual-project-name        # Substituted, NOT {{PROJECT_NAME}}
-EXTERNAL_HTTP_PORT=8080                 # Working default
-EXTERNAL_HTTPS_PORT=8443                # Working default  
-EXTERNAL_TRAEFIK_PORT=8081             # Dashboard port
+
+# Container Naming (for multi-branch development)
+APP_CONTAINER=actual-project-name-app-1     # Main application container
+LINTER_CONTAINER=actual-project-name-linter-1  # Code quality container
+
+# Traefik Ports (modify if conflicts on dev machine)
+EXTERNAL_HTTP_PORT=8000                 # Working default
+EXTERNAL_HTTPS_PORT=4430                # Working default  
+TRAEFIK_DASHBOARD_PORT=8080             # Dashboard port
+
 DOH_HELLOWORLD=f4a7b2c8e9d1a6f3        # Generated validation hash
 ```
 
@@ -184,7 +191,7 @@ Kitchen analyzes existing codebase and processes appropriate templates:
 ### Host Requirements
 The Kitchen system requires these tools on the host machine:
 
-- **Docker & Docker Compose** - Container orchestration (see [DOCKER.md](DOCKER.md))
+- **Docker & Docker Compose** - Container orchestration (see [DOCKER.md](.claude/templates/init-dev/DOCKER.md))
 - **mkcert** - SSL certificate generation for local development  
 - **make** - Makefile execution for development commands
 

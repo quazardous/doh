@@ -38,8 +38,8 @@ RUN apt-get update && apt-get install -y \
 {{FRAMEWORK_EXTENSIONS}}
 
 # UID/GID Arguments (from docker-compose.yml)
-ARG UID=1000
-ARG GID=1000
+ARG UID
+ARG GID
 
 # Configure user with dynamic UID/GID (framework-specific user)
 {{USER_CONFIGURATION}}
@@ -47,13 +47,18 @@ ARG GID=1000
 # Working directory
 WORKDIR /app
 
-# Framework-specific dependency installation
+# @AI-Kitchen: SKIP - Framework-specific dependency installation handled post-build
+# Dependencies are installed via make dev-setup after container running
+# This allows dynamic dependency management without rebuilding containers
 {{DEPENDENCY_INSTALLATION}}
 
-# Copy application code
-COPY . .
+# @AI-Kitchen: SKIP - Do NOT copy application code during build
+# Application code is mounted at runtime via docker-compose volumes
+# This allows instant code changes without rebuilding containers
+# Volume mount: .:/app (defined in docker-compose.yml)
 
-# Framework-specific permissions and setup
+# @AI-Kitchen: SKIP - Framework-specific permissions handled at runtime
+# Volume mounted application will have proper permissions via UID/GID mapping
 {{FRAMEWORK_SETUP}}
 
 # Framework-specific runtime user

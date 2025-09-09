@@ -33,6 +33,7 @@ providers:
     exposedByDefault: false
     watch: true
     network: "{{PROJECT_NAME}}-network"
+    @AI-Kitchen: SUBSTITUE+KEEP the constraints
     constraints: "Label(`dev.project`, `{{PROJECT_NAME}}`)"
   
   # File provider for dynamic configuration (SSL certificates)

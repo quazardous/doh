@@ -36,7 +36,46 @@ Django project detected → AI takes inspiration from stacks/python/ + services/
    ├── app/supervisord.conf (web + worker processes)
    ├── traefik/traefik.yml (HTTPS configuration)
    └── mariadb/conf.d/custom.cnf
+→ Generate INITDEV.md documentation with proper setup instructions
 ```
+
+### INITDEV.md Generation (CRITICAL)
+
+**@AI-Kitchen: ALWAYS generate INITDEV.md with correct commands**
+
+The generated INITDEV.md MUST include:
+
+1. **Correct Quick Start sequence**:
+```bash
+# 1. Initialize environment config (creates docker-compose.env)
+make env-config
+
+# 2. Setup SSL certificates  
+make ssl-setup
+
+# 3. Build containers with proper UID/GID
+export UID && export GID=$(id -g) && docker compose build
+
+# 4. Start containers
+export UID && export GID=$(id -g) && docker compose up -d
+
+# 5. Install dependencies
+make dev-setup
+```
+
+2. **UID/GID export explanation**:
+- WHY it's needed (permission issues)
+- WHEN to use it (before every Docker command)
+- HOW it works (matches container user to host user)
+
+3. **docker-compose.env documentation**:
+- CONTAINER_DIR variable (critical for Makefile)
+- How it's created (make env-config)
+- Common troubleshooting (CONTAINER_DIR not found)
+
+4. **Complete configuration files section** showing both:
+- docker-compose.env (Docker/Makefile variables)
+- .env (application environment variables)
 
 ## Structure (Container-Organized)
 

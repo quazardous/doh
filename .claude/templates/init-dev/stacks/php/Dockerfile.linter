@@ -23,8 +23,8 @@ RUN composer global require \
     overtrue/phplint \
     && echo 'export PATH="$PATH:$HOME/.composer/vendor/bin"' >> ~/.bashrc
 
-ARG UID=1000
-ARG GID=1000
+ARG UID
+ARG GID
 
 # Create user matching host UID/GID
 RUN groupadd -g ${GID} linter \

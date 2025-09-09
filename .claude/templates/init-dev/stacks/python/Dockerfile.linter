@@ -18,8 +18,8 @@ RUN pip install --no-cache-dir \
     pytest \
     coverage
 
-ARG UID=1000
-ARG GID=1000
+ARG UID
+ARG GID
 
 # Create user matching host UID/GID
 RUN groupadd -g ${GID} linter \

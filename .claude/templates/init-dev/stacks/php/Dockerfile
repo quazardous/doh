@@ -23,8 +23,8 @@ COPY ./docker/php/98-misc.ini /usr/local/etc/php/conf.d/
 COPY ./docker/php/99-php-limits.ini /usr/local/etc/php/conf.d/
 
 # UID/GID Arguments (from docker-compose.yml)
-ARG UID=1000
-ARG GID=1000
+ARG UID
+ARG GID
 
 # Configure www-data user with dynamic UID/GID
 RUN groupmod -g ${GID} www-data && usermod -u ${UID} -g ${GID} -d /app www-data
@@ -33,8 +33,10 @@ RUN groupmod -g ${GID} www-data && usermod -u ${UID} -g ${GID} -d /app www-data
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 ENV COMPOSER_ALLOW_SUPERUSER 1
 
-# Supervisor Configuration (dev-friendly permissions)
-COPY ./docker/supervisord.conf /etc/supervisor/supervisord.conf
+# @AI-Kitchen: SKIP - Do NOT copy supervisord.conf during build
+# Supervisor config is mounted at runtime via docker-compose volumes
+# This allows dynamic process management without rebuilding containers
+# Config location: /app/docker/app/supervisor/supervisord.conf (via app mount)
 
 # Create project log directories
 RUN mkdir -p /app/var/log/supervisor /app/var/run/supervisor \
@@ -48,21 +50,19 @@ RUN echo 'www-data:docker' | chpasswd
 # Set working directory
 WORKDIR /app
 
-# Copy composer files
-COPY composer.json composer.lock ./
+# @AI-Kitchen: SKIP - Do NOT copy composer.json during build
+# PHP dependencies are installed post-build via make dev-setup
+# This allows dynamic dependency management without rebuilding containers
+# composer install commands will be executed inside running container
 
-# Install PHP dependencies as www-data
-USER www-data
-RUN composer install --no-dev --optimize-autoloader --no-scripts
+# @AI-Kitchen: SKIP - Do NOT copy application code during build
+# Application code is mounted at runtime via docker-compose volumes
+# This allows instant code changes without rebuilding containers
+# Volume mount: .:/app (defined in docker-compose.yml)
 
-# Copy application code (switch back to root for COPY)
-USER root
-COPY . .
-
-# Set permissions for Laravel
-RUN chown -R www-data:www-data /app \
-    && chmod -R 755 /app/storage \
-    && chmod -R 755 /app/bootstrap/cache
+# @AI-Kitchen: SKIP - Application permissions handled at runtime
+# Volume mounted application will have proper permissions via UID/GID mapping
+# Laravel-specific directories created and configured post-build
 
 # Switch to www-data user for runtime
 USER www-data
@@ -70,5 +70,5 @@ USER www-data
 # Expose port 9000 (PHP-FPM)
 EXPOSE 9000
 
-# Start supervisord as app user
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+# Start supervisord with mounted config
+CMD ["/usr/bin/supervisord", "-c", "/app/docker/app/supervisor/supervisord.conf"]
