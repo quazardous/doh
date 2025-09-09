@@ -1,4 +1,5 @@
 # Traefik main configuration for DOH development
+# @AI-Kitchen: SUBSTITUTE - Simple template with placeholder replacement only
 # Static configuration file - Kitchen template
 
 global:
@@ -42,11 +43,11 @@ providers:
 # Logging
 log:
   level: INFO
-  filePath: "/var/log/traefik/traefik.log"
+  filePath: "/app/var/log/traefik/traefik.log"
 
 # Access Logs
 accessLog:
-  filePath: "/var/log/traefik/access.log"
+  filePath: "/app/var/log/traefik/access.log"
   bufferingSize: 100
 
 # Metrics (optional)

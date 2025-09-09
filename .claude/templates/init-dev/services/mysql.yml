@@ -1,11 +1,13 @@
   mysql:
     image: mysql:8.0
-    # Auto-creation by official MySQL image:
-    # - MYSQL_DATABASE: automatically creates the database
-    # - MYSQL_USER: automatically creates the user
-    # - MYSQL_PASSWORD: sets the user password
-    # - MYSQL_ROOT_PASSWORD: sets the root password (required)
-    # The created user receives all privileges on the created database automatically
+    # @AI-Kitchen: IMPORTANT - MySQL Docker auto-provisioning
+    # Docker MySQL/MariaDB images handle database & user creation automatically:
+    # - MYSQL_DATABASE: creates database automatically on first run
+    # - MYSQL_USER: creates user automatically with full privileges on database
+    # - MYSQL_PASSWORD: sets user password
+    # - MYSQL_ROOT_PASSWORD: sets root password (required)
+    # NO MANUAL SCRIPTS NEEDED - Docker handles initialization completely
+    # Application can connect immediately with these credentials
     environment:
       MYSQL_DATABASE: ${MYSQL_DATABASE:-{{PROJECT_NAME}}}
       MYSQL_USER: ${MYSQL_USER:-{{PROJECT_NAME}}}

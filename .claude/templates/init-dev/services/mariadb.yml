@@ -1,11 +1,13 @@
   mariadb:
     image: mariadb:12.0.2
-    # Auto-création automatique par l'image officielle MariaDB (comme MySQL) :
-    # - MARIADB_DATABASE : crée automatiquement la base de données
-    # - MARIADB_USER : crée automatiquement l'utilisateur  
-    # - MARIADB_PASSWORD : définit le mot de passe de l'utilisateur
-    # - MARIADB_ROOT_PASSWORD : définit le mot de passe root (obligatoire)
-    # L'utilisateur créé reçoit tous les droits sur la base créée automatiquement
+    # @AI-Kitchen: IMPORTANT - MariaDB Docker auto-provisioning
+    # Docker MariaDB/MySQL images handle database & user creation automatically:
+    # - MARIADB_DATABASE : creates database automatically on first run
+    # - MARIADB_USER : creates user automatically with full privileges on database
+    # - MARIADB_PASSWORD : sets user password
+    # - MARIADB_ROOT_PASSWORD : sets root password (required)
+    # NO MANUAL SCRIPTS NEEDED - Docker handles initialization completely
+    # Application can connect immediately with these credentials
     environment:
       MARIADB_DATABASE: ${MARIADB_DATABASE:-{{PROJECT_NAME}}}
       MARIADB_USER: ${MARIADB_USER:-{{PROJECT_NAME}}}

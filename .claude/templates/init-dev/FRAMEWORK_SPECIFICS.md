@@ -1,9 +1,236 @@
 # Framework Specifics - Complete Reference for DOH init-dev
 # =================================================================
 # 
-# Ce fichier contient TOUTES les spécificités par framework pour /doh:init-dev
+# 🚨 MANDATORY READING: /doh:init-dev command MUST read this file for:
+# - Framework detection patterns (file analysis, dependency analysis)
+# - Technology-specific implementation details 
+# - CLI tools and command patterns per framework
+# - Hello-doh implementation requirements
+# 
 # L'IA DOIT consulter ce fichier avant de générer des stacks pour comprendre
 # les conventions, outils, et patterns spécifiques à chaque technologie
+
+# =================================================================
+# FRAMEWORK DETECTION PATTERNS - MANDATORY FOR --detect MODE
+# =================================================================
+
+## Base Image Strategy by Technology Stack
+
+**📊 STRATEGY BY DETECTED TECHNOLOGY:**
+
+### PHP (Laravel/Symfony)
+- Frontend détecté → `FROM composer:2 + FROM node:20 → php:8.3-fpm`
+- Backend seul → `FROM composer:2 → php:8.3-fpm`
+
+### Python (Django/FastAPI)  
+- Frontend détecté → `FROM node:20 → python:3.12-slim`
+- Backend seul → `FROM python:3.12-slim`
+
+### Node.js (Express/Nest)
+- Pur → `FROM node:20-alpine` (pas de multi-stage nécessaire)
+
+### Go
+- Frontend détecté → `FROM node:20 → golang:1.21-alpine`
+- Backend seul → `FROM golang:1.21-alpine`
+
+### Rust
+- Frontend détecté → `FROM node:20 → rust:1.70-slim`
+- Backend seul → `FROM rust:1.70-slim`
+
+### Ruby (Rails)
+- Frontend détecté → `FROM node:20 → ruby:3.2-slim`
+- Backend seul → `FROM ruby:3.2-slim`
+
+### Java (Spring)
+- Frontend détecté → `FROM node:20 → openjdk:21-slim`
+- Backend seul → `FROM openjdk:21-slim`
+
+### .NET
+- Frontend détecté → `FROM node:20 → mcr.microsoft.com/dotnet/sdk:8.0`
+- Backend seul → `FROM mcr.microsoft.com/dotnet/sdk:8.0`
+
+**🚨 RULE:** AI selects tools according to detected technology matrix
+
+### Multi-stage Strategy Rules
+- **AI Research:** WebSearch "{{framework}} docker development requirements"
+- **Conditional Stages:** Créer stages seulement pour outils détectés
+- **Cherry-Pick Pattern:** `COPY --from=` pour éviter bloat des base images  
+- **Version Detection:** Utiliser versions officielles actuelles des images
+- **System Tools:** git, sudo installés dans main stage
+
+## Framework-Specific Frontend Variable Mapping
+
+**Frontend Environment Variable Patterns:**
+
+### React
+- `REACT_APP_API_URL=${FRONTEND_API_URL}` - Exposed to window.process.env
+- `REACT_APP_DOH_SECRET=${DOH_SECRET}` - Validation via frontend
+
+### Vue.js
+- `VUE_APP_API_URL=${FRONTEND_API_URL}` - Exposed to process.env
+- `VUE_APP_DOH_SECRET=${DOH_SECRET}` - Validation via frontend
+
+### Vite (Vue 3, React, etc.)
+- `VITE_API_URL=${FRONTEND_API_URL}` - Exposed to import.meta.env
+- `VITE_DOH_SECRET=${DOH_SECRET}` - Validation via frontend
+
+### Next.js
+- `NEXT_PUBLIC_API_URL=${FRONTEND_API_URL}` - Exposed to process.env
+- `NEXT_PUBLIC_DOH_SECRET=${DOH_SECRET}` - Validation via frontend
+
+### Angular
+- Custom environment service injection pattern
+- Build-time variable replacement in environment files
+
+### Svelte/SvelteKit
+- `VITE_API_URL=${FRONTEND_API_URL}` - Via Vite integration
+- Public environment variable prefix handling
+
+## Frontend Dotenv Implementation Patterns
+
+### Webpack Integration
+```javascript
+// webpack.config.js with dotenv-webpack
+const Dotenv = require('dotenv-webpack');
+
+new Dotenv({
+  path: process.env.NODE_ENV === 'test' ? './.env.test' : './.env',
+  safe: false,    // Use .env.example for validation if true
+  systemvars: true // Include system environment variables
+})
+```
+
+### Vite Integration
+```javascript  
+// vite.config.js with native loadEnv
+const env = loadEnv(mode, process.cwd(), '');
+if (mode === 'test') {
+  Object.assign(process.env, loadEnv('test', process.cwd(), ''));
+}
+```
+
+### Environment Routing Strategy
+1. **Single Source:** Backend `.env` / `.env.test` files contain all variables
+2. **Frontend Exposure:** Build tools (webpack/vite) expose prefixed variables to browser
+3. **Test Isolation:** `.env.test` overrides for both backend and frontend during testing
+4. **Build-Time Injection:** Environment variables embedded during build process
+
+# =================================================================
+# FRAMEWORK DETECTION PATTERNS - MANDATORY FOR --detect MODE
+# =================================================================
+
+## File-Based Detection Patterns
+
+### Primary Detection Files (High Confidence)
+| File | Framework/Technology | Confidence |
+|------|---------------------|------------|
+| `package.json` | Node.js/JavaScript stack | 95% |
+| `requirements.txt` | Python stack | 95% |
+| `composer.json` | PHP stack | 95% |
+| `Cargo.toml` | Rust stack | 95% |
+| `go.mod` | Go stack | 95% |
+| `Gemfile` | Ruby stack | 95% |
+| `pom.xml` | Java (Maven) | 95% |
+| `build.gradle` | Java (Gradle) | 95% |
+| `*.csproj` / `*.sln` | .NET stack | 95% |
+
+### Secondary Detection Files (Medium Confidence)
+| File | Framework Hint | Confidence |
+|------|----------------|------------|
+| `manage.py` | Django (Python) | 85% |
+| `artisan` | Laravel (PHP) | 85% |
+| `bin/console` | Symfony (PHP) | 85% |
+| `Rakefile` | Rails (Ruby) | 80% |
+| `next.config.js` | Next.js (Node) | 80% |
+| `vite.config.js` | Vite-based (Vue/React) | 75% |
+| `nuxt.config.js` | Nuxt.js (Vue) | 80% |
+
+### Extension-Based Fallback Detection
+| Extensions | Technology | Confidence |
+|------------|------------|------------|
+| `.py` files | Python | 60% |
+| `.js` files | JavaScript/Node.js | 60% |
+| `.php` files | PHP | 70% |
+| `.go` files | Go | 70% |
+| `.rs` files | Rust | 80% |
+| `.rb` files | Ruby | 70% |
+| `.java` files | Java | 70% |
+| `.cs` files | C#/.NET | 70% |
+
+## Dependency-Based Framework Detection
+
+### Python (requirements.txt)
+| Package | Framework | Confidence |
+|---------|-----------|------------|
+| `Django>=` | Django | 90% |
+| `Flask>=` | Flask | 90% |
+| `FastAPI>=` | FastAPI | 90% |
+| `fastapi` | FastAPI | 90% |
+| `django-rest-framework` | Django REST | 85% |
+| `celery` | Task queue (Django/Flask) | 70% |
+
+### Node.js (package.json dependencies)
+| Package | Framework | Confidence |
+|---------|-----------|------------|
+| `"next"` | Next.js | 90% |
+| `"react"` | React | 85% |
+| `"vue"` | Vue.js | 85% |
+| `"@vue/cli"` | Vue.js | 90% |
+| `"express"` | Express.js | 85% |
+| `"@nestjs/core"` | NestJS | 90% |
+| `"nuxt"` | Nuxt.js | 90% |
+
+### PHP (composer.json)
+| Package | Framework | Confidence |
+|---------|-----------|------------|
+| `"laravel/framework"` | Laravel | 95% |
+| `"symfony/framework-bundle"` | Symfony | 95% |
+| `"cakephp/cakephp"` | CakePHP | 90% |
+| `"codeigniter4/framework"` | CodeIgniter | 90% |
+
+### Ruby (Gemfile)
+| Package | Framework | Confidence |
+|---------|-----------|------------|
+| `gem 'rails'` | Rails | 95% |
+| `gem 'sinatra'` | Sinatra | 90% |
+
+## Database Detection Patterns
+
+### Configuration File Analysis
+| File | Database Indicator | Confidence |
+|------|-------------------|------------|
+| `settings.py` (Django) | `DATABASES = {'ENGINE': 'django.db.backends.postgresql'}` | 90% |
+| `config/database.php` (Laravel) | `'default' => 'mysql'` | 85% |
+| `.env` | `DATABASE_URL=postgres://` | 80% |
+| `docker-compose.yml` | Service names: postgres, mysql, mariadb | 75% |
+
+### Dependency-Based Database Detection
+| Dependency | Database | Framework Context |
+|------------|----------|------------------|
+| `psycopg2` | PostgreSQL | Python |
+| `mysqlclient` | MySQL/MariaDB | Python |
+| `mysql2` | MySQL | Node.js |
+| `pg` | PostgreSQL | Node.js |
+| `doctrine/orm` | Multi (usually MySQL) | PHP |
+
+## Frontend Detection Patterns (for full-stack stacks)
+
+### Build Tool Detection
+| File | Frontend Stack | Build Tool |
+|------|----------------|------------|
+| `vite.config.js` | Vue.js/React | Vite |
+| `webpack.config.js` | React/Vue | Webpack |
+| `nuxt.config.js` | Vue.js | Nuxt |
+| `next.config.js` | React | Next.js |
+| `angular.json` | Angular | Angular CLI |
+
+### Package.json Frontend Clues
+| Script/Dependency | Frontend Framework |
+|------------------|-------------------|
+| `"dev": "vite"` | Vite (Vue/React) |
+| `"dev": "next dev"` | Next.js |
+| `"serve": "vue-cli-service serve"` | Vue CLI |
+| `"start": "react-scripts start"` | Create React App |
 
 ## 📊 TOOL MATRIX BY TECHNOLOGY (avec CLI spécifiques)
 

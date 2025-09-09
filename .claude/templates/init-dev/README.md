@@ -44,9 +44,9 @@ Django project detected → AI takes inspiration from stacks/python/ + services/
 
 ```
 .claude/templates/init-dev/
-├── common/                          # Common components for all stacks
+├── core/                            # Common components for all stacks
 │   ├── docker-compose-base.yml        # Base docker-compose structure
-│   ├── Dockerfile.multi-stage.template # Multi-stage Dockerfile template
+│   ├── Dockerfile.multi-stage # Multi-stage Dockerfile template
 │   └── Makefile.seed                   # Foundation Makefile extended by framework parts
 ├── stacks/                          # Stack-specific patterns
 │   ├── node/                        # Node.js stack templates

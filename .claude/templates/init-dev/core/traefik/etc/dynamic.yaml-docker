@@ -1,4 +1,5 @@
 # Traefik dynamic configuration for DOH development
+# @AI-Kitchen: SUBSTITUTE - Simple template with placeholder replacement only
 # SSL certificates configuration - Kitchen template
 
 tls:
