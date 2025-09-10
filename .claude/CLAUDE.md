@@ -165,6 +165,7 @@ When users make requests in natural language that correspond to DOH commands, au
 | "Check workspace" | `/doh:workspace` | Workspace status |
 | "Show me help" | `/doh:help` | Documentation |
 | "Initialize new project" | `/doh:init` | Project setup |
+| "Setup development environment" | `/doh:init-dev` | Create Docker dev environment in project root |
 | "Add version headers" | `/doh:add-file-headers` | File management |
 
 ### Command Detection Rules
@@ -228,4 +229,83 @@ When users make requests in natural language that correspond to DOH commands, au
 ```
 
 **Priority**: Always use DOH commands over manual implementation when natural language matches available command functionality.
+
+## `/doh:init-dev` Command Implementation
+
+**Purpose**: The `/doh:init-dev` command creates a complete Docker-based development environment in the project root directory, providing a working development stack with all necessary services and tools.
+
+### What this command does:
+
+1. **Detects the project's technology stack** by examining existing files:
+   - `package.json` → Node.js/JavaScript stack
+   - `composer.json` → PHP stack  
+   - `requirements.txt` or `pyproject.toml` → Python stack
+   - `Gemfile` → Ruby stack
+   - Framework-specific files (e.g., `artisan` for Laravel, `manage.py` for Django)
+
+2. **Researches current best practices** for the detected stack:
+   - Searches for latest stable versions via Docker Hub API
+   - Looks up current best practices (e.g., "Django PostgreSQL Docker best practices 2024")
+   - Identifies optimal container configurations for the specific framework
+   - Determines recommended security settings and performance optimizations
+
+3. **Creates a containerized development environment** with:
+   - Main application container with development tools
+   - Database container (MySQL/PostgreSQL/MongoDB based on stack)
+   - Cache container (Redis/Memcached if needed)
+   - Queue worker containers (if applicable)
+   - Traefik reverse proxy for local HTTPS with SSL certificates
+   - Linter/formatter containers for code quality
+   - Test runner containers for automated testing
+
+4. **Generates all necessary files**:
+   - `docker-compose.yml` - Main orchestration file with optimized settings
+   - `Makefile` - Common development commands
+   - `INITDEV.md` - Complete setup documentation
+   - `.env.example` - Application environment variables
+   - `docker-compose.env` - Docker-specific variables
+   - Container configurations (nginx.conf, supervisord.conf, etc.)
+
+5. **Organizes everything properly**:
+   ```
+   project-root/
+   ├── docker/                 # All Docker-related files
+   │   ├── app/               # Application container files
+   │   ├── database/          # Database configurations
+   │   ├── traefik/           # Reverse proxy configs
+   │   └── ...                # Other service containers
+   ├── docker-compose.yml     # Main compose file
+   ├── Makefile              # Development commands
+   └── INITDEV.md            # Setup documentation
+   ```
+
+### Implementation Guidelines:
+
+When executing `/doh:init-dev`:
+
+1. **Analyze the project**: Detect stack, frameworks, and existing configurations
+2. **Research best practices**: 
+   - Query Docker Hub API for latest stable versions of detected components
+   - Search for current best practices specific to the detected stack (e.g., "Laravel MySQL Docker optimization 2024")
+   - Look up security recommendations for the framework combination
+   - Find performance tuning guidelines for development environments
+3. **Use templates as a "kitchen"**: Files in `.claude/templates/init-dev/` are components to combine intelligently, not copy directly
+4. **Apply optimizations**: Incorporate researched best practices into the generated configuration
+5. **Adapt to project needs**: Customize based on detected frameworks and requirements
+6. **Ensure UID/GID handling**: Always include proper user permission handling for Linux
+7. **Test the generated stack**: Verify containers start and basic functionality works
+8. **Generate comprehensive docs**: INITDEV.md must include all setup steps with explanations
+
+### Example Usage:
+
+```bash
+# User says: "Setup a development environment"
+# Execute: /doh:init-dev
+
+# User says: "Create Docker stack for development" 
+# Execute: /doh:init-dev
+
+# User says: "Initialize dev containers"
+# Execute: /doh:init-dev
+```
 

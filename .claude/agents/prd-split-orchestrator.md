@@ -77,18 +77,22 @@ Each split must be:
 - **Technology Stack Detection**: Analyze master PRD and project context to determine technology needs
 - **Development Stack Analysis**: Identify development stack from natural language context in master PRD
 - **New Technology Components**: If PRD defines new components requiring different technology, requires new stack setup even if existing stack present
-- **Delegate Environment Setup**: Use `/doh:init-dev "{detected-stack-description}"` to generate complete development environment
+- **Full Development Environment Specification**: Define complete Docker-based development environment with:
+  - Docker Compose configuration for all services (app, database, cache, etc.)
+  - Makefile with common development commands
+  - Environment configuration files (.env, docker-compose.env)
+  - INITDEV.md documentation with setup instructions
+  - Proper UID/GID handling for Linux permissions
 - **Hello World Implementation Path**: Define specific Hello World components based on detected stack:
   - **HTTP endpoint**: /hello or / returning "Hello World" JSON/HTML
   - **Console command**: CLI script/command that outputs "Hello World"  
   - **Database check**: Simple DB connection test (if database is part of stack)
-  - Both prove the stack works end-to-end
+  - All components prove the stack works end-to-end
 - **Code Structure Foundation**: Project scaffolding, module structure, conventions
-- **Integration Validation**: Verify /doh:init-dev output meets all Split-S00 requirements
 
 **DevOps Architect Focus for Split-S00:**
 - **Environment Compatibility Check**: Verify existing dev setup - enhance, don't replace
-- **Development Stack Validation**: Ensure `/doh:init-dev` generated setup follows Docker best practices:
+- **Development Stack Validation**: Ensure proposed development environment follows Docker best practices:
   - Pragmatic containerization approach (avoid over-engineering)
   - UID/GID matching for zero permission issues
   - Traefik routing with only ports 80/443 exposed
@@ -96,7 +100,7 @@ Each split must be:
 - **Infrastructure Technology Choices**: DECIDE on cloud provider, deployment approach if not specified
 - **DevOps Roadmap**: Plan CI/CD pipeline stages, monitoring strategy, security approach
 - **Production POC Path**: Define minimal path to deploy a POC to production (Docker-based)
-- **Quality Assurance**: Verify generated docker-compose.yml, Makefile, and INSTADEV.md meet requirements
+- **Quality Assurance**: Specify docker-compose.yml, Makefile, and INITDEV.md requirements
 
 **Product Owner Role:**
 - **Validate No Business Logic**: Ensure Split-S00 is purely technical foundation
@@ -109,9 +113,10 @@ Each split must be:
 **Round 1 Deliverables:**
 - **Split-S00-development-foundation PRD**: Complete development foundation specification including:
   - Technology stack analysis and decisions
-  - `/doh:init-dev` command execution with detected stack description
+  - Full Docker-based development environment specification
   - Hello World implementation specification (HTTP + CLI + DB verification)
-  - Generated development environment validation (docker-compose.yml, Makefile, INSTADEV.md)
+  - Development environment requirements (docker-compose.yml, Makefile, INITDEV.md)
+  - All necessary tooling and infrastructure for development
 - **DevOps Milestones**: When CI/CD, monitoring, cloud deployment become necessary
 - Component dependency matrix for remaining splits
 - Critical path analysis with Split-S00 as prerequisite
@@ -156,6 +161,8 @@ Each split must be:
 
 **Process:**
 1. **All Agents Draft Each Split**: Each agent creates draft PRD for each identified split from their perspective
+   - **IMPORTANT**: Each agent MUST save their draft to `.doh/splits/{master-prd}/round3/drafts/{splitname}-{agentname}.md`
+   - Example: `.doh/splits/tennis-club/round3/drafts/S01-authentication-lead-developer.md`
 2. **Lead Developer Synthesizes**: Combines all agent drafts into coherent final PRDs
 3. **Master PRD Context Integration**: Ensures each split references master PRD appropriately
 4. **Parallelization Validation**: Confirms splits can be executed in parallel
@@ -255,8 +262,8 @@ Each split must be:
 
 ### Round 1 Quality Gates
 - ✅ Technology stack analysis completed from master PRD
-- ✅ `/doh:init-dev` command executed successfully with detected stack or specific defined stack (if PRD defines new component with new technology, requires new stack even if one already exists)
-- ✅ Generated development environment validated (docker-compose.yml, Makefile, INSTADEV.md)
+- ✅ Full development environment specified with all necessary services and tools
+- ✅ Development environment requirements documented (docker-compose.yml, Makefile, INITDEV.md)
 - ✅ Split-S00-development-foundation PRD complete
 - ✅ Hello World implementation path specified (HTTP + CLI + DB verification)
 - ✅ Component dependencies mapped for remaining splits
@@ -285,8 +292,8 @@ Each split must be:
 2. **Execute Round 1** (Development Readiness)
    - Launch all 4 agents with Round 1 focus
    - Lead Developer analyzes master PRD for technology stack requirements
-   - Execute `/doh:init-dev "{detected-stack-description}"` to generate development environment
-   - All agents validate generated setup meets Split-S00 requirements
+   - All agents collaborate to define complete development environment
+   - Ensure Split-S00 PRD specifies full development stack
    - Collect and synthesize analysis
    - Validate readiness gates
 
@@ -297,7 +304,8 @@ Each split must be:
 
 4. **Execute Round 3** (PRD Generation)
    - Each agent drafts each identified split
-   - Lead Developer synthesizes final PRDs
+   - **Verify all drafts created**: Check `.doh/splits/{master-prd}/round3/drafts/` for all expected files
+   - Lead Developer synthesizes final PRDs from verified drafts
    - Validate parallelization viability
 
 5. **Generate Final Outputs**
@@ -313,7 +321,7 @@ Each split must be:
 ## Success Metrics
 
 - **Split Count**: 3-6 splits including S00 (optimal for parallel execution)
-- **Split-S00 Completeness**: All tools and infrastructure defined via `/doh:init-dev` integration
+- **Split-S00 Completeness**: Full development environment with all tools and infrastructure specified
 - **Dependency Depth**: Maximum 2-level dependency chain after S00
 - **Business Value**: Each split (except S00) delivers meaningful user value
 - **Technical Coherence**: Clean API boundaries and integration points

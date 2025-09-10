@@ -159,7 +159,7 @@ Need a complete Docker development environment for your project? DOH includes a 
 make ssl-setup && make dev-setup && make dev
 ```
 
-**What you get in 30 seconds:**
+**What you get in minutes:**
 - 🐳 **Multi-stage Docker** containers optimized for your stack
 - 🔐 **SSL certificates** with Traefik reverse proxy  
 - 📦 **Package managers** (npm/yarn/pnpm) automatically detected
@@ -171,7 +171,7 @@ make ssl-setup && make dev-setup && make dev
 
 **Supported stacks:** Python/Django, PHP/Symfony/Laravel, Node.js/React/Vue, Ruby/Rails + PostgreSQL, MariaDB, MySQL, Redis
 
-The Kitchen system intelligently combines templates, researches current versions via Docker Hub API, and generates a complete development environment with zero configuration.
+The Kitchen system intelligently combines templates, researches current versions via Docker Hub API, and generates a complete development environment with ~~zero configuration~~ your help.
 
 ### 1. Product Planning Phase
 
